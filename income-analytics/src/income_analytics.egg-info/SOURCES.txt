@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+src/income_analytics/main.py
+src/income_analytics.egg-info/PKG-INFO
+src/income_analytics.egg-info/SOURCES.txt
+src/income_analytics.egg-info/dependency_links.txt
+src/income_analytics.egg-info/requires.txt
+src/income_analytics.egg-info/top_level.txt
+src/income_analytics/api/__init__.py
+src/income_analytics/application/__init__.py
+src/income_analytics/domain/__init__.py
+src/income_analytics/infrastructure/__init__.py
+src/income_analytics/shared/__init__.py

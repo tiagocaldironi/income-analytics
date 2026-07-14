@@ -1,0 +1,28 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Testes
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Banco local
+*.db
+
+# Variáveis de ambiente
+.env
+
+# macOS
+.DS_Store
