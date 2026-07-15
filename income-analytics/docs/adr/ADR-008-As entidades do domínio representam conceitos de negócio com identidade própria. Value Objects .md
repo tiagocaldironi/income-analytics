@@ -1,0 +1,1 @@
+As entidades do domínio representam conceitos de negócio com identidade própria. Value Objects representam apenas valores e são imutáveis.
