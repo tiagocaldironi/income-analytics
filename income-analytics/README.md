@@ -1,25 +1,20 @@
-# Income Analytics
+# Roadmap
 
-> Plataforma para consolidação de investimentos, patrimônio e renda passiva.
+## v0.1.0
+- Project bootstrap
+- FastAPI
+- CI
+- Initial architecture
 
-## Status
+## v0.2.0
+- Core Domain
+- Master Data
+- Unit tests
+- Static typing
+- Code quality
 
-🚧 Em desenvolvimento
-
-## Roadmap
-
-### Sprint 0 ✅
-
-- [x] Ambiente de desenvolvimento
-- [x] Git e GitHub
-- [x] Docker
-- [x] Python
-- [x] FastAPI
-- [x] Swagger
-- [x] Estrutura inicial do projeto
-
-### Próxima Sprint
-
-- [ ] Modelagem do domínio
-- [ ] Primeiras entidades
-- [ ] Casos de uso
+## v0.3.0 (Next)
+- Financial Event
+- Portfolio
+- Account
+- Event Engine foundation

@@ -1,7 +1,3 @@
-"""
-Base class for all domain entities.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -18,11 +14,12 @@ class Entity:
 
     id: UUID = field(default_factory=uuid4)
 
-    from typing import Self
-
+    def __post_init__(self) -> None:
+        """Hook for subclasses."""
+        pass
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, self.__class__):
+        if type(other) is not type(self):
             return NotImplemented
 
         return self.id == other.id
