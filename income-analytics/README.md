@@ -1,20 +1,25 @@
 # Income Analytics
 
-Sistema para consolidação de investimentos, renda passiva e análise financeira.
-
-## Objetivo
-
-Construir um software profissional utilizando Python, boas práticas de engenharia de software, testes automatizados, Docker, CI/CD e Inteligência Artificial.
-
-## Tecnologias
-
-- Python
-- FastAPI
-- Streamlit
-- SQLAlchemy
-- Docker
-- GitHub Actions
+> Plataforma para consolidação de investimentos, patrimônio e renda passiva.
 
 ## Status
 
 🚧 Em desenvolvimento
+
+## Roadmap
+
+### Sprint 0 ✅
+
+- [x] Ambiente de desenvolvimento
+- [x] Git e GitHub
+- [x] Docker
+- [x] Python
+- [x] FastAPI
+- [x] Swagger
+- [x] Estrutura inicial do projeto
+
+### Próxima Sprint
+
+- [ ] Modelagem do domínio
+- [ ] Primeiras entidades
+- [ ] Casos de uso
