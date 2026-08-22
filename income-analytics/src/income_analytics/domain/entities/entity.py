@@ -1,25 +1,17 @@
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 
 
 @dataclass(slots=True, eq=False, kw_only=True)
 class Entity:
-    """
-    Base class for domain entities.
-
-    Equality is based on the entity identifier.
-    """
-
     id: UUID = field(default_factory=uuid4)
 
     def __post_init__(self) -> None:
-        """Hook for subclasses."""
-        pass
+        if not isinstance(self.id, UUID):
+            raise TypeError("Entity id must be a UUID.")
 
     def __eq__(self, other: object) -> bool:
-        if type(other) is not type(self):
+        if not isinstance(other, Entity):
             return NotImplemented
 
         return self.id == other.id

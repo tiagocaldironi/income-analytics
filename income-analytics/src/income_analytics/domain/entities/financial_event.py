@@ -10,6 +10,7 @@ from types import MappingProxyType
 from typing import Any, Mapping
 from uuid import UUID
 
+from income_analytics.domain.entities.asset import Asset
 from income_analytics.domain.entities.entity import Entity
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.value_objects.money import Money
@@ -37,7 +38,7 @@ class FinancialEvent(Entity):
     event_type: FinancialEventType
     occurred_at: datetime
 
-    asset_id: UUID | None = None
+    asset: Asset | None = None
 
     quantity: Quantity | None = None
 
@@ -69,6 +70,11 @@ class FinancialEvent(Entity):
         if self.registered_at < self.occurred_at:
             raise ValueError(
                 "registered_at cannot be earlier than occurred_at."
+            )
+
+        if self.asset is not None and not isinstance(self.asset, Asset):
+            raise TypeError(
+                "asset must be an Asset instance when provided."
             )
 
         if not isinstance(self.metadata, Mapping):

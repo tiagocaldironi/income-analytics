@@ -1,19 +1,23 @@
+"""Read model representing a projected position for a single asset."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from income_analytics.domain.effects.financial_effect import FinancialEffect
 from income_analytics.domain.entities.asset import Asset
 from income_analytics.domain.value_objects.money import Money
 from income_analytics.domain.value_objects.quantity import Quantity
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class CostBasisEffect(FinancialEffect):
-    """
-    Represents the impact of a financial event on an asset's cost basis.
-    """
+class PositionProjection:
+    """Represents the projected position of a single asset."""
 
     asset: Asset
-    quantity_delta: Quantity
-    total_cost_delta: Money
+    quantity: Quantity
+    average_cost: Money
+    invested_amount: Money
+
+    @property
+    def is_empty(self) -> bool:
+        return self.quantity.is_zero

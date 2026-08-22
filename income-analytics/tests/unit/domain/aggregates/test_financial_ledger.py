@@ -15,6 +15,7 @@ from income_analytics.domain.events.financial_event_registered import (
 from income_analytics.domain.events.ledger_created import LedgerCreated
 from income_analytics.domain.value_objects.money import Money
 from income_analytics.domain.value_objects.quantity import Quantity
+from tests.unit.domain.builders import build_asset
 
 
 def create_event(
@@ -26,7 +27,7 @@ def create_event(
 
     return FinancialEvent(
         account_id=account_id,
-        asset_id=uuid4(),
+        asset=build_asset(),
         event_type=FinancialEventType.BUY,
         occurred_at=occurred_at
         or datetime(2026, 1, 10, tzinfo=UTC),
