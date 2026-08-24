@@ -5,10 +5,8 @@ Projects a PortfolioProjection from a stream of Financial Events.
 from __future__ import annotations
 
 from collections.abc import Iterable
-from decimal import Decimal
 from uuid import UUID
 
-from income_analytics.domain.effects.cost_basis_effect import CostBasisEffect
 from income_analytics.domain.effects.position_effect import PositionEffect
 from income_analytics.domain.entities.financial_event import FinancialEvent
 from income_analytics.domain.projectors._position_accumulator import (
@@ -44,41 +42,21 @@ class PortfolioProjector:
 
             effects = FinancialEffectFactory.from_event(event)
 
-            position_effect = next(
-                (
-                    effect
-                    for effect in effects
-                    if isinstance(effect, PositionEffect)
-                ),
-                None,
-            )
+            for effect in effects:
+                if not isinstance(effect, PositionEffect):
+                    continue
 
-            cost_effect = next(
-                (
-                    effect
-                    for effect in effects
-                    if isinstance(effect, CostBasisEffect)
-                ),
-                None,
-            )
+                accumulator = positions.get(effect.asset.id)
 
-            if position_effect is None or cost_effect is None:
-                continue
+                if accumulator is None:
+                    accumulator = PositionAccumulator(asset=effect.asset)
+                    positions[effect.asset.id] = accumulator
 
-            accumulator = positions.get(position_effect.asset.id)
-
-            if accumulator is None:
-                accumulator = PositionAccumulator(asset=position_effect.asset)
-                positions[position_effect.asset.id] = accumulator
-
-            accumulator.add_buy(
-                quantity=position_effect.quantity_delta,
-                invested=cost_effect.total_cost_delta.amount,
-            )
+                accumulator.apply(effect)
 
         projections: list[PositionProjection] = []
 
-        total = Decimal("0")
+        total = Money.zero()
 
         for accumulator in positions.values():
 
@@ -86,16 +64,16 @@ class PortfolioProjector:
                 PositionProjection(
                     asset=accumulator.asset,
                     quantity=Quantity(accumulator.quantity),
-                    average_cost=Money(accumulator.average_cost),
-                    invested_amount=accumulator.invested_amount,
+                cost=accumulator.cost,
+                average_price=accumulator.average_price,
                 )
             )
 
-            total += accumulator.invested
+            total += accumulator.cost
 
         projections.sort(key=lambda projection: str(projection.asset.ticker))
 
         return PortfolioProjection(
             positions=tuple(projections),
-            total_invested=Money(total),
+            total_cost=total,
         )

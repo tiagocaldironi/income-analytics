@@ -44,8 +44,6 @@ class FinancialEvent(Entity):
 
     unit_price: Money | None = None
 
-    total_amount: Money | None = None
-
     description: str | None = None
 
     metadata: Mapping[str, Any] = field(
@@ -77,6 +75,9 @@ class FinancialEvent(Entity):
                 "asset must be an Asset instance when provided."
             )
 
+        if self.event_type is FinancialEventType.BUY:
+            self._validate_buy()
+
         if not isinstance(self.metadata, Mapping):
             raise TypeError(
                 "metadata must implement Mapping."
@@ -88,4 +89,21 @@ class FinancialEvent(Entity):
             MappingProxyType(dict(self.metadata)),
         )
 
-  
+    def _validate_buy(self) -> None:
+        if self.asset is None:
+            raise ValueError("BUY event requires an asset.")
+
+        if self.quantity is None or not self.quantity.is_positive:
+            raise ValueError("BUY event requires a positive quantity.")
+
+        if self.unit_price is None or not self.unit_price.is_positive:
+            raise ValueError("BUY event requires a positive unit price.")
+
+    @property
+    def total_amount(self) -> Money:
+        """Return the financial total derived from quantity and unit price."""
+        if self.quantity is None or self.unit_price is None:
+            raise ValueError("Event does not have enough data to calculate its total.")
+
+        return Money(self.quantity.value * self.unit_price.amount)
+

@@ -33,7 +33,6 @@ def create_event(
         or datetime(2026, 1, 10, tzinfo=UTC),
         quantity=Quantity(Decimal("100")),
         unit_price=Money(Decimal("10")),
-        total_amount=Money(Decimal("1000")),
     )
 
 

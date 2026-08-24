@@ -19,25 +19,25 @@ def create_position() -> PositionProjection:
     return PositionProjection(
         asset=build_asset(),
         quantity=Quantity(Decimal("100")),
-        average_cost=Money(Decimal("30")),
-        invested_amount=Money(Decimal("3000")),
+        cost=Money(Decimal("3000")),
+        average_price=Money(Decimal("30")),
     )
 
 
 def test_should_create_portfolio_projection() -> None:
     portfolio = PortfolioProjection(
         positions=(create_position(),),
-        total_invested=Money(Decimal("3000")),
+        total_cost=Money(Decimal("3000")),
     )
 
     assert portfolio.position_count == 1
-    assert portfolio.total_invested == Money(Decimal("3000"))
+    assert portfolio.total_cost == Money(Decimal("3000"))
 
 
 def test_should_create_empty_portfolio() -> None:
     portfolio = PortfolioProjection(
         positions=(),
-        total_invested=Money.zero(),
+        total_cost=Money.zero(),
     )
 
     assert portfolio.is_empty
@@ -47,7 +47,7 @@ def test_should_create_empty_portfolio() -> None:
 def test_should_be_immutable() -> None:
     portfolio = PortfolioProjection(
         positions=(create_position(),),
-        total_invested=Money(Decimal("3000")),
+        total_cost=Money(Decimal("3000")),
     )
 
     with pytest.raises(Exception):

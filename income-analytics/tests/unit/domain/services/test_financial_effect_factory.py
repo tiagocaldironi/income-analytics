@@ -4,8 +4,6 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import uuid4
 
-from income_analytics.domain.effects.cash_effect import CashEffect
-from income_analytics.domain.effects.cost_basis_effect import CostBasisEffect
 from income_analytics.domain.effects.position_effect import PositionEffect
 from income_analytics.domain.entities.financial_event import FinancialEvent
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
@@ -25,16 +23,14 @@ def test_should_create_effects_for_buy() -> None:
         event_type=FinancialEventType.BUY,
         occurred_at=datetime(2026, 1, 10, tzinfo=UTC),
         quantity=Quantity(Decimal("100")),
-        unit_price=Money(Decimal("10")),
-        total_amount=Money(Decimal("1000")),
+        unit_price=Money(Decimal("30")),
     )
 
     effects = FinancialEffectFactory.from_event(event)
 
-    assert len(effects) == 3
+    assert len(effects) == 1
 
     assert isinstance(effects[0], PositionEffect)
-    assert isinstance(effects[1], CashEffect)
-    assert isinstance(effects[2], CostBasisEffect)
     assert effects[0].asset == asset
-    assert effects[2].asset == asset
+    assert effects[0].quantity_delta == Decimal("100")
+    assert effects[0].cost_delta == Money(Decimal("3000"))

@@ -15,8 +15,8 @@ class PositionProjection:
 
     asset: Asset
     quantity: Quantity
-    average_cost: Money
-    invested_amount: Money
+    cost: Money
+    average_price: Money
 
     @property
     def is_empty(self) -> bool:

@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from income_analytics.domain.effects.financial_effect import FinancialEffect
 from income_analytics.domain.entities.asset import Asset
+from income_analytics.domain.value_objects.money import Money
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -15,3 +16,4 @@ class PositionEffect(FinancialEffect):
 
     asset: Asset
     quantity_delta: Decimal
+    cost_delta: Money
