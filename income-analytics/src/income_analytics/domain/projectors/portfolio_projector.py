@@ -57,6 +57,7 @@ class PortfolioProjector:
         projections: list[PositionProjection] = []
 
         total = Money.zero()
+        total_realized_result = Money.zero()
 
         for accumulator in positions.values():
 
@@ -66,14 +67,17 @@ class PortfolioProjector:
                     quantity=Quantity(accumulator.quantity),
                 cost=accumulator.cost,
                 average_price=accumulator.average_price,
+                realized_result=accumulator.realized_result,
                 )
             )
 
             total += accumulator.cost
+            total_realized_result += accumulator.realized_result
 
         projections.sort(key=lambda projection: str(projection.asset.ticker))
 
         return PortfolioProjection(
             positions=tuple(projections),
             total_cost=total,
+            total_realized_result=total_realized_result,
         )

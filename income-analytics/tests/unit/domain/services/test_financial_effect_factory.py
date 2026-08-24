@@ -34,3 +34,24 @@ def test_should_create_effects_for_buy() -> None:
     assert effects[0].asset == asset
     assert effects[0].quantity_delta == Decimal("100")
     assert effects[0].cost_delta == Money(Decimal("3000"))
+
+
+def test_should_create_a_position_effect_for_sell() -> None:
+    asset = build_asset()
+    event = FinancialEvent(
+        account_id=uuid4(),
+        asset=asset,
+        event_type=FinancialEventType.SELL,
+        occurred_at=datetime(2026, 1, 10, tzinfo=UTC),
+        quantity=Quantity(Decimal("50")),
+        unit_price=Money(Decimal("50")),
+    )
+
+    effects = FinancialEffectFactory.from_event(event)
+
+    assert len(effects) == 1
+    assert isinstance(effects[0], PositionEffect)
+    assert effects[0].asset == asset
+    assert effects[0].quantity_delta == Decimal("-50")
+    assert effects[0].cost_delta is None
+    assert effects[0].sale_value == Money(Decimal("2500"))

@@ -32,6 +32,9 @@ class FinancialEffectFactory:
             case FinancialEventType.BUY:
                 return cls._buy(event)
 
+            case FinancialEventType.SELL:
+                return cls._sell(event)
+
             case _:
                 raise ValueError(
                     f"Unsupported financial event type: {event.event_type}"
@@ -51,5 +54,19 @@ class FinancialEffectFactory:
                 asset=event.asset,
                 quantity_delta=event.quantity.value,
                 cost_delta=event.total_amount,
+            ),
+        )
+
+    @staticmethod
+    def _sell(event: FinancialEvent) -> tuple[FinancialEffect, ...]:
+        if event.asset is None or event.quantity is None:
+            raise ValueError("SELL event must be valid before effects are created.")
+
+        return (
+            PositionEffect(
+                financial_event_id=event.id,
+                asset=event.asset,
+                quantity_delta=-event.quantity.value,
+                sale_value=event.total_amount,
             ),
         )

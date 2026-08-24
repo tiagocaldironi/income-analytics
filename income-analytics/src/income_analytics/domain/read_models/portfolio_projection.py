@@ -23,6 +23,7 @@ class PortfolioProjection:
 
     positions: tuple[PositionProjection, ...]
     total_cost: Money
+    total_realized_result: Money = Money.zero()
 
     @property
     def position_count(self) -> int:

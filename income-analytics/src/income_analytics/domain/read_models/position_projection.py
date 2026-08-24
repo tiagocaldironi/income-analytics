@@ -17,6 +17,7 @@ class PositionProjection:
     quantity: Quantity
     cost: Money
     average_price: Money
+    realized_result: Money = Money.zero()
 
     @property
     def is_empty(self) -> bool:

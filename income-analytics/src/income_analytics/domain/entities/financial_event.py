@@ -75,8 +75,8 @@ class FinancialEvent(Entity):
                 "asset must be an Asset instance when provided."
             )
 
-        if self.event_type is FinancialEventType.BUY:
-            self._validate_buy()
+        if self.event_type in (FinancialEventType.BUY, FinancialEventType.SELL):
+            self._validate_trade()
 
         if not isinstance(self.metadata, Mapping):
             raise TypeError(
@@ -89,15 +89,16 @@ class FinancialEvent(Entity):
             MappingProxyType(dict(self.metadata)),
         )
 
-    def _validate_buy(self) -> None:
+    def _validate_trade(self) -> None:
+        event_name = self.event_type.value
         if self.asset is None:
-            raise ValueError("BUY event requires an asset.")
+            raise ValueError(f"{event_name} event requires an asset.")
 
         if self.quantity is None or not self.quantity.is_positive:
-            raise ValueError("BUY event requires a positive quantity.")
+            raise ValueError(f"{event_name} event requires a positive quantity.")
 
         if self.unit_price is None or not self.unit_price.is_positive:
-            raise ValueError("BUY event requires a positive unit price.")
+            raise ValueError(f"{event_name} event requires a positive unit price.")
 
     @property
     def total_amount(self) -> Money:
