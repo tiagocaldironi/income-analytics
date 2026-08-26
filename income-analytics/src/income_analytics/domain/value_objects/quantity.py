@@ -56,25 +56,21 @@ class Quantity:
 
     def __str__(self) -> str:
         return str(self.value)
-    
-    
+
     @property
     def is_zero(self) -> bool:
         """Returns True when the quantity is zero."""
         return self.value == Decimal("0")
-
 
     @property
     def is_positive(self) -> bool:
         """Returns True when the quantity is greater than zero."""
         return self.value > Decimal("0")
 
-
     @property
     def is_negative(self) -> bool:
         """Returns True when the quantity is less than zero."""
         return self.value < Decimal("0")
-
 
     @classmethod
     def zero(cls) -> "Quantity":

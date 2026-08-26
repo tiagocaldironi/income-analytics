@@ -52,14 +52,10 @@ class FinancialLedger(AggregateRoot):
         """
 
         if event.account_id != self.account_id:
-            raise ValueError(
-                "Financial Event belongs to another account."
-            )
+            raise ValueError("Financial Event belongs to another account.")
 
         if self.contains(event.id):
-            raise ValueError(
-                "Financial Event already registered."
-            )
+            raise ValueError("Financial Event already registered.")
 
         self._events.append(event)
 

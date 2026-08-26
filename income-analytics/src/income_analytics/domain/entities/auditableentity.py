@@ -40,9 +40,7 @@ class AuditableEntity(Entity):
             raise ValueError("updated_at must be timezone-aware.")
 
         if self.updated_at < self.created_at:
-            raise ValueError(
-                "updated_at cannot be earlier than created_at."
-            )
+            raise ValueError("updated_at cannot be earlier than created_at.")
 
     def touch(self) -> None:
         """

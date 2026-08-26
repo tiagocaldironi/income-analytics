@@ -11,14 +11,16 @@ from pydantic import BaseModel, Field
 
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.allocation_policy import AllocationPolicy
+from income_analytics.domain.asset_allocation_policy import AssetAllocationPolicy
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.projectors.asset_rebalancing_projector import AssetAllocationStrategy
+from income_analytics.domain.read_models.diversification_projection import DiversificationDimension
 from income_analytics.domain.read_models.portfolio_projection import PortfolioProjection
 from income_analytics.domain.value_objects.money import Money
 
 router = APIRouter(prefix="/api", tags=["Portfolio"])
-session = PortfolioSession()
+session = PortfolioSession(persistent=True)
 
 
 class TradeInput(BaseModel):
@@ -28,6 +30,9 @@ class TradeInput(BaseModel):
     unit_price: Decimal = Field(gt=0)
     effective_date: date
     asset_class: AssetClass
+    country: str = Field(default="BR", min_length=1, max_length=16)
+    currency_code: str = Field(default="BRL", min_length=1, max_length=12)
+    sector: str | None = Field(default=None, max_length=80)
 
 
 class MarketPriceInput(BaseModel):
@@ -64,6 +69,10 @@ class AssetInput(BaseModel):
 
 class AllocationPolicyInput(BaseModel):
     targets: dict[AssetClass, Decimal]
+
+
+class AssetAllocationPolicyInput(BaseModel):
+    targets: dict[AssetClass, dict[str, Decimal]]
 
 
 class ContributionSimulationInput(BaseModel):
@@ -137,6 +146,9 @@ def create_trade(trade: TradeInput) -> dict[str, object]:
             event_type=FinancialEventType(trade.event_type),
             ticker=trade.ticker,
             asset_class=trade.asset_class,
+            country=trade.country,
+            currency_code=trade.currency_code,
+            sector=trade.sector,
             quantity=trade.quantity,
             unit_price=trade.unit_price,
             effective_date=trade.effective_date,
@@ -275,6 +287,27 @@ def get_portfolio_risk(start_date: date, end_date: date) -> dict[str, object]:
     }
 
 
+@router.get("/portfolio/risk-contribution")
+def get_portfolio_risk_contribution(as_of: date | None = None) -> dict[str, object]:
+    risk = session.risk_contribution(as_of=as_of)
+    return {
+        "portfolio_volatility": risk.portfolio_volatility,
+        "risk_coverage": risk.risk_coverage,
+        "covariance": risk.covariance,
+        "correlation": risk.correlation,
+        "assets": [
+            {
+                "ticker": item.ticker,
+                "weight": item.weight,
+                "volatility": item.volatility,
+                "risk_contribution": item.contribution,
+                "risk_contribution_share": item.contribution_share,
+            }
+            for item in risk.assets
+        ],
+    }
+
+
 @router.get("/portfolio/allocation")
 def get_portfolio_allocation(as_of: date | None = None) -> dict[str, object]:
     allocation = session.allocation(as_of=as_of)
@@ -338,10 +371,67 @@ def get_portfolio_class_allocation(as_of: date | None = None) -> dict[str, objec
     }
 
 
+@router.get("/portfolio/diversification")
+def get_portfolio_diversification(as_of: date | None = None) -> dict[str, object]:
+    projection = session.diversification(as_of=as_of)
+
+    def serialize(dimension: DiversificationDimension) -> dict[str, object]:
+        return {
+            "exposures": [{"key": item.key, "weight": item.weight} for item in dimension.exposures],
+            "hhi": dimension.hhi,
+            "coverage": dimension.coverage,
+            "unavailable_reason": dimension.unavailable_reason,
+        }
+
+    return {
+        "asset": serialize(projection.asset),
+        "asset_class": serialize(projection.asset_class),
+        "sector": serialize(projection.sector),
+        "country": serialize(projection.country),
+        "currency": serialize(projection.currency),
+    }
+
+
+@router.get("/portfolio/intelligence")
+def get_portfolio_intelligence(as_of: date | None = None) -> dict[str, object]:
+    intelligence = session.intelligence(as_of=as_of)
+    return {
+        "as_of": intelligence.as_of,
+        "counts": {
+            "info": intelligence.info_count,
+            "attention": intelligence.attention_count,
+            "high_attention": intelligence.high_attention_count,
+        },
+        "findings": [
+            {
+                "code": finding.code,
+                "category": finding.category,
+                "severity": finding.severity,
+                "title": finding.title,
+                "description": finding.description,
+                "evidence": finding.evidence,
+                "as_of": finding.as_of,
+            }
+            for finding in intelligence.findings
+        ],
+    }
+
+
 @router.put("/allocation-policy")
 def set_allocation_policy(policy: AllocationPolicyInput) -> dict[str, str]:
     try:
         session.set_allocation_policy(AllocationPolicy(targets=policy.targets))
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)
+        ) from error
+    return {"status": "updated"}
+
+
+@router.put("/asset-allocation-policy")
+def set_asset_allocation_policy(policy: AssetAllocationPolicyInput) -> dict[str, str]:
+    try:
+        session.set_asset_allocation_policy(AssetAllocationPolicy(targets=policy.targets))
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)

@@ -50,9 +50,7 @@ class FinancialEvent(Entity):
 
     description: str | None = None
 
-    metadata: Mapping[str, Any] = field(
-        default_factory=lambda: MappingProxyType({})
-    )
+    metadata: Mapping[str, Any] = field(default_factory=lambda: MappingProxyType({}))
 
     registered_at: datetime = field(default_factory=now_utc)
 
@@ -60,24 +58,16 @@ class FinancialEvent(Entity):
         super().__post_init__()
 
         if self.occurred_at.tzinfo is None:
-            raise ValueError(
-                "occurred_at must be timezone-aware."
-            )
+            raise ValueError("occurred_at must be timezone-aware.")
 
         if self.registered_at.tzinfo is None:
-            raise ValueError(
-                "registered_at must be timezone-aware."
-            )
+            raise ValueError("registered_at must be timezone-aware.")
 
         if self.registered_at < self.occurred_at:
-            raise ValueError(
-                "registered_at cannot be earlier than occurred_at."
-            )
+            raise ValueError("registered_at cannot be earlier than occurred_at.")
 
         if self.asset is not None and not isinstance(self.asset, Asset):
-            raise TypeError(
-                "asset must be an Asset instance when provided."
-            )
+            raise TypeError("asset must be an Asset instance when provided.")
 
         if not isinstance(self.effective_date, date):
             raise TypeError("effective_date must be a date instance.")
@@ -95,9 +85,7 @@ class FinancialEvent(Entity):
             self._validate_external_flow()
 
         if not isinstance(self.metadata, Mapping):
-            raise TypeError(
-                "metadata must implement Mapping."
-            )
+            raise TypeError("metadata must implement Mapping.")
 
         object.__setattr__(
             self,
@@ -145,4 +133,3 @@ class FinancialEvent(Entity):
             raise ValueError("Event does not have enough data to calculate its total.")
 
         return Money(self.quantity.value * self.unit_price.amount)
-

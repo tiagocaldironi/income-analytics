@@ -72,6 +72,5 @@ class PortfolioProjection:
     def has_complete_market_data(self) -> bool:
         """Indicate whether every open position has a manually informed market price."""
         return all(
-            position.is_empty or position.current_price is not None
-            for position in self.positions
+            position.is_empty or position.current_price is not None for position in self.positions
         )

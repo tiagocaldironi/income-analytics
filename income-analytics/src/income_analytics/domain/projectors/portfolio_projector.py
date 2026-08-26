@@ -49,18 +49,12 @@ class PortfolioProjector:
     ) -> PortfolioProjection:
         """Build a projection from the events and prices available as of a date."""
         ordered_events = sorted(
-            (
-                event
-                for event in events
-                if as_of is None or event.effective_date <= as_of
-            ),
+            (event for event in events if as_of is None or event.effective_date <= as_of),
             key=lambda event: (event.effective_date, event.registered_at, event.id),
         )
         market_price_stream = tuple(market_prices)
         available_prices = tuple(
-            price
-            for price in market_price_stream
-            if as_of is None or price.effective_date <= as_of
+            price for price in market_price_stream if as_of is None or price.effective_date <= as_of
         )
         current_prices = cls._current_prices(available_prices)
         has_market_data = bool(market_price_stream)
@@ -72,7 +66,6 @@ class PortfolioProjector:
         total_withdrawals = Money.zero()
 
         for event in ordered_events:
-
             if event.event_type is FinancialEventType.DEPOSIT:
                 total_contributions += event.total_amount
             elif event.event_type is FinancialEventType.WITHDRAWAL:
@@ -109,21 +102,20 @@ class PortfolioProjector:
         total_income_received = Money.zero()
 
         for accumulator in positions.values():
-
             projections.append(
                 PositionProjection(
                     asset=accumulator.asset,
                     quantity=Quantity(accumulator.quantity),
-                cost=accumulator.cost,
-                average_price=accumulator.average_price,
-                realized_result=accumulator.realized_result,
-                current_price=cls._current_price(
-                    accumulator.asset.id,
-                    current_prices,
-                    use_asset_price=not has_market_data,
-                    asset_price=accumulator.asset.current_price,
-                ),
-                income_received=income_by_asset.get(accumulator.asset.id, Money.zero()),
+                    cost=accumulator.cost,
+                    average_price=accumulator.average_price,
+                    realized_result=accumulator.realized_result,
+                    current_price=cls._current_price(
+                        accumulator.asset.id,
+                        current_prices,
+                        use_asset_price=not has_market_data,
+                        asset_price=accumulator.asset.current_price,
+                    ),
+                    income_received=income_by_asset.get(accumulator.asset.id, Money.zero()),
                 )
             )
 

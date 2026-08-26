@@ -22,6 +22,7 @@ dev = [
     "pytest-cov>=6.2",
     "ruff>=0.12",
     "mypy>=1.17",
+    "alembic>=1.19",
 ]
 
 [tool.setuptools]

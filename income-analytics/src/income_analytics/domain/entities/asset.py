@@ -31,6 +31,8 @@ class Asset(Entity):
     currency: Currency
     institution: Institution
     asset_class: AssetClass
+    country: str = "BR"
+    sector: str | None = None
     isin: str | None = None
     current_price: Money | None = None
     active: bool = True
@@ -61,6 +63,21 @@ class Asset(Entity):
 
         if not isinstance(self.asset_class, AssetClass):
             raise TypeError("Asset class must be an AssetClass.")
+
+        if not isinstance(self.country, str) or not self.country.strip():
+            raise ValueError("Asset country is required.")
+        country = self.country.strip().upper()
+        if len(country) > 16:
+            raise ValueError("Asset country cannot have more than 16 characters.")
+        object.__setattr__(self, "country", country)
+
+        if self.sector is not None:
+            if not isinstance(self.sector, str) or not self.sector.strip():
+                raise ValueError("Asset sector must be a non-empty string when provided.")
+            sector = self.sector.strip().upper()
+            if len(sector) > 80:
+                raise ValueError("Asset sector cannot have more than 80 characters.")
+            object.__setattr__(self, "sector", sector)
 
         if self.currency is None:
             raise ValueError("Asset currency is required.")
@@ -124,7 +141,6 @@ class Asset(Entity):
         self._validate_current_price(current_price)
         object.__setattr__(self, "current_price", current_price)
         object.__setattr__(self, "updated_at", _now_utc())
-
 
     @staticmethod
     def _validate_current_price(current_price: Money) -> None:

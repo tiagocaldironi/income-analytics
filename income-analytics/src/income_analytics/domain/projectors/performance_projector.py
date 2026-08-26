@@ -157,10 +157,12 @@ class PerformanceProjector:
         origin = min(flow_date for flow_date, _ in cashflows)
 
         def npv(rate: float) -> float:
-            return float(sum(
-                value / (1.0 + rate) ** ((flow_date - origin).days / 365.0)
-                for flow_date, value in cashflows
-            ))
+            return float(
+                sum(
+                    value / (1.0 + rate) ** ((flow_date - origin).days / 365.0)
+                    for flow_date, value in cashflows
+                )
+            )
 
         low, high = -0.999999, 1.0
         low_value, high_value = npv(low), npv(high)
