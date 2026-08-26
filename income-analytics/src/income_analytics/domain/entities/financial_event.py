@@ -5,7 +5,7 @@ Represents an immutable financial event.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from types import MappingProxyType
 from typing import Any, Mapping
 from uuid import UUID
@@ -38,11 +38,15 @@ class FinancialEvent(Entity):
     event_type: FinancialEventType
     occurred_at: datetime
 
+    effective_date: date = date(2026, 1, 1)
+
     asset: Asset | None = None
 
     quantity: Quantity | None = None
 
     unit_price: Money | None = None
+
+    amount: Money | None = None
 
     description: str | None = None
 
@@ -75,8 +79,20 @@ class FinancialEvent(Entity):
                 "asset must be an Asset instance when provided."
             )
 
+        if not isinstance(self.effective_date, date):
+            raise TypeError("effective_date must be a date instance.")
+
         if self.event_type in (FinancialEventType.BUY, FinancialEventType.SELL):
             self._validate_trade()
+
+        if self.event_type is FinancialEventType.DIVIDEND:
+            self._validate_dividend()
+
+        if self.event_type in (
+            FinancialEventType.DEPOSIT,
+            FinancialEventType.WITHDRAWAL,
+        ):
+            self._validate_external_flow()
 
         if not isinstance(self.metadata, Mapping):
             raise TypeError(
@@ -100,9 +116,31 @@ class FinancialEvent(Entity):
         if self.unit_price is None or not self.unit_price.is_positive:
             raise ValueError(f"{event_name} event requires a positive unit price.")
 
+    def _validate_dividend(self) -> None:
+        if self.asset is None:
+            raise ValueError("DIVIDEND event requires an asset.")
+        if self.amount is None or not self.amount.is_positive:
+            raise ValueError("O valor do provento deve ser maior que zero.")
+
+    def _validate_external_flow(self) -> None:
+        if self.asset is not None:
+            raise ValueError(f"{self.event_type.value} event must not have an asset.")
+        if self.amount is None or not self.amount.is_positive:
+            label = "aporte" if self.event_type is FinancialEventType.DEPOSIT else "retirada"
+            raise ValueError(f"O valor da {label} deve ser maior que zero.")
+
     @property
     def total_amount(self) -> Money:
         """Return the financial total derived from quantity and unit price."""
+        if self.event_type in (
+            FinancialEventType.DIVIDEND,
+            FinancialEventType.DEPOSIT,
+            FinancialEventType.WITHDRAWAL,
+        ):
+            if self.amount is None:
+                raise ValueError("Event does not have an amount.")
+            return self.amount
+
         if self.quantity is None or self.unit_price is None:
             raise ValueError("Event does not have enough data to calculate its total.")
 
