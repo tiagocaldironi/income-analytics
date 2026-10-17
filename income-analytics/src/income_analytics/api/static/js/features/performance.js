@@ -1,4 +1,4 @@
-import { portfolioApi } from "../api.js";
+import { portfolioApi } from "../api.js?v=20261017-performance-class-filters-v1";
 import { emptyState, errorState, money, percentage, table } from "../shared/ui.js";
 import { loadECharts } from "../shared/charts.js";
 
@@ -7,13 +7,19 @@ let performanceBound = false;
 let understandChart = null;
 let understandChartResizeObserver = null;
 let explanationRequestId = 0;
+let selectedComparisonPeriod = "ALL";
+let selectedComparisonAssetClass = "";
 
 export function bindPerformance() {
   if (performanceBound) return;
   const form = document.querySelector("#wealth-explanation-form");
   if (!form) return;
   performanceBound = true;
-  form.addEventListener("submit", event => { event.preventDefault(); loadExplanation(); });
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    selectedComparisonPeriod = "CUSTOM";
+    loadExplanation();
+  });
 }
 
 export async function loadExplanation() {
@@ -21,9 +27,30 @@ export async function loadExplanation() {
   const start = document.querySelector("#wealth-start-date").value;
   const end = document.querySelector("#wealth-end-date").value;
   const target = document.querySelector("#wealth-explanation");
-  target.innerHTML = '<div class="empty">Calculando explicação com o histórico persistidoâ€¦</div>';
+  target.innerHTML = '<div class="empty">Calculando explicação com o histórico persistido…</div>';
   try {
-    const [data, evolution, comparison] = await Promise.all([portfolioApi.wealthExplanation(start, end), loadWealthEvolution(start, end), portfolioApi.performanceComparison(start, end)]);
+    let resolvedStart = start;
+    if (selectedComparisonPeriod === "ALL") {
+      const range = await portfolioApi.performanceComparison(start, end, selectedComparisonAssetClass);
+      if (requestId !== explanationRequestId) return;
+      const starts = range.available_start_dates || {};
+      resolvedStart = starts[selectedComparisonAssetClass || "ALL"] || start;
+      if (resolvedStart !== start) {
+        document.querySelector("#wealth-start-date").value = resolvedStart;
+        return loadExplanation();
+      }
+    } else if (selectedComparisonPeriod === "12M") {
+      resolvedStart = dateMinusMonths(end, 12);
+      if (resolvedStart !== start) {
+        document.querySelector("#wealth-start-date").value = resolvedStart;
+        return loadExplanation();
+      }
+    }
+    const [data, evolution, comparison] = await Promise.all([
+      portfolioApi.wealthExplanation(resolvedStart, end),
+      loadWealthEvolution(resolvedStart, end),
+      portfolioApi.performanceComparison(resolvedStart, end, selectedComparisonAssetClass),
+    ]);
     if (requestId !== explanationRequestId) return;
     document.querySelector("#wealth-end-date").value = data.period.end_date;
     const domStarted = performance.now();
@@ -34,6 +61,15 @@ export async function loadExplanation() {
   } catch (error) {
     if (requestId === explanationRequestId) target.innerHTML = errorState(error.message);
   }
+}
+
+function dateMinusMonths(isoDate, months) {
+  if (!isoDate) return "";
+  const result = new Date(`${isoDate}T00:00:00`);
+  const originalDay = result.getDate();
+  result.setMonth(result.getMonth() - months);
+  if (result.getDate() !== originalDay) result.setDate(0);
+  return `${result.getFullYear()}-${String(result.getMonth() + 1).padStart(2, "0")}-${String(result.getDate()).padStart(2, "0")}`;
 }
 
 async function loadWealthEvolution(start, end) {
@@ -125,6 +161,7 @@ async function renderComparison(data, requestId) {
   const target = document.querySelector("#performance");
   const benchmark = Object.fromEntries(data.benchmarks.map(item => [item.code, item]));
   const portfolio = data.portfolio;
+  const portfolioLabel = data.asset_class ? labels[data.asset_class] || data.asset_class : "Minha carteira";
   const available = portfolio.return !== null && portfolio.status !== "INSUFFICIENT_DATA";
   const value = amount => amount === null || amount === undefined ? "—" : percentage(Number(amount) * 100);
   const points = amount => `${Number(amount) > 0 ? "+" : Number(amount) < 0 ? "−" : ""}${Math.abs(Number(amount) * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p.`;
@@ -134,33 +171,36 @@ async function renderComparison(data, requestId) {
   const benchmarkCards = keys.map(code => {
     const item = benchmark[code];
     const excess = available && item?.return !== null && item?.return !== undefined
-      ? `Carteira ${points(portfolio.return - Number(item.return))}`
+      ? `${portfolioLabel} ${points(portfolio.return - Number(item.return))}`
       : item?.status === "STALE" ? `Atualizado até ${dateLabel(item.last_observation)}` : "Referência independente da carteira";
     return card(code, item?.return, excess);
   }).join("");
   const portfolioCard = available
-    ? card(portfolio.status === "PARTIAL" ? "Minha carteira · parcial" : "Minha carteira", portfolio.return, portfolio.status === "PARTIAL" ? `Cobertura ${value(portfolio.coverage)}` : "")
-    : card("Minha carteira", null, "Rentabilidade indisponível: histórico insuficiente de preços e câmbio.");
+    ? card(portfolio.status === "PARTIAL" ? `${portfolioLabel} · parcial` : portfolioLabel, portfolio.return, portfolio.status === "PARTIAL" ? `Cobertura ${value(portfolio.coverage)}` : "")
+    : card(portfolioLabel, null, "Rentabilidade indisponível para o período selecionado.");
   const cards = portfolioCard + benchmarkCards;
   const missingDateText = (portfolio.missing_periods || []).map(dateLabel).join(", ");
   const missingAssets = (portfolio.missing_assets || []).map(item => String(item).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")).join(", ");
   const notice = !available && portfolio.status === "INSUFFICIENT_DATA"
-    ? `<aside class="data-quality-notice" role="status"><strong>O que falta para calcular a rentabilidade da carteira</strong><span>${portfolio.unavailable_reason || "Não há valuation de abertura suficiente para calcular o retorno da carteira."}</span>${portfolio.coverage === null ? "" : `<span>Cobertura no pior ponto: ${value(portfolio.coverage)} do patrimônio.</span>`}${portfolio.missing_value && Number(portfolio.missing_value) > 0 ? `<span>As posições sem cotação somam ${money(portfolio.missing_value)} pelo custo registrado; esse valor é uma referência, não uma cotação de mercado.</span>` : ""}${missingDateText ? `<span>Datas sem cobertura suficiente: ${missingDateText}.</span>` : ""}${missingAssets ? `<details><summary>Ver ${portfolio.missing_assets.length} ativos sem cotação</summary><p>${missingAssets}</p></details>` : ""}</aside>`
+    ? `<aside class="data-quality-notice" role="status"><strong>O que falta para calcular a rentabilidade de ${portfolioLabel}</strong><span>${portfolio.unavailable_reason || "Não há valuation de abertura suficiente para calcular o retorno selecionado."}</span>${portfolio.coverage === null ? "" : `<span>Cobertura no pior ponto: ${value(portfolio.coverage)} do patrimônio.</span>`}${portfolio.missing_value && Number(portfolio.missing_value) > 0 ? `<span>As posições sem cotação somam ${money(portfolio.missing_value)} pelo custo registrado; esse valor é uma referência, não uma cotação de mercado.</span>` : ""}${missingDateText ? `<span>Datas sem cobertura suficiente: ${missingDateText}.</span>` : ""}${missingAssets ? `<details><summary>Ver ${portfolio.missing_assets.length} posições sem valuation</summary><p>${missingAssets}</p></details>` : ""}</aside>`
     : available && portfolio.status === "PARTIAL"
       ? `<p class="coverage" role="status">Performance calculada com cobertura parcial de ${value(portfolio.coverage)} do patrimônio.${portfolio.missing_assets?.length ? ` ${portfolio.missing_assets.length} ativo(s) afetam o cálculo.` : ""}</p>` : "";
   const normalizedSeries = [
-    { code: "portfolio", label: "Minha carteira", color: "#46c98b", selected: true },
-    { code: "cdi", label: "CDI", color: "#78a9ff", selected: true },
-    { code: "ipca", label: "IPCA", color: "#ef8f9b", selected: true },
-    { code: "ibov", label: "IBOV", color: "#e8b86d", selected: true },
-    { code: "ifix", label: "IFIX", color: "#c69df2", selected: true },
-    { code: "smll", label: "SMLL", color: "#f08a56", selected: true },
-    { code: "idiv", label: "IDIV", color: "#d18be0", selected: true },
-    { code: "ivvb11", label: "IVVB11", color: "#79c879", selected: true },
+    { code: "portfolio", label: portfolioLabel, color: "#829cf3" },
+    { code: "cdi", label: "CDI", color: "#ffbd45" },
+    { code: "ipca", label: "IPCA", color: "#7cc65e" },
+    { code: "ifix", label: "IFIX", color: "#9e4a18" },
+    { code: "ibov", label: "IBOV", color: "#b7b7b7" },
+    { code: "smll", label: "SMLL", color: "#c9c9c9" },
+    { code: "idiv", label: "IDIV", color: "#ff784d" },
+    { code: "ivvb11", label: "IVVB11", color: "#9b59b6" },
   ];
   const benchmarkSeriesKeys = keys.map(code => code.toLowerCase());
   const hasBenchmarkSeries = data.series.some(point => benchmarkSeriesKeys.some(key => point[key] !== null && point[key] !== undefined));
   const rows = hasBenchmarkSeries ? `<div class="performance-chart-wrap"><div id="performance-comparison-chart" aria-label="Rentabilidade comparada" class="performance-chart"></div></div>` : "";
+  const availableClasses = data.available_asset_classes || [];
+  const classOptions = availableClasses.map(assetClass => `<option value="${assetClass}" ${assetClass === selectedComparisonAssetClass ? "selected" : ""}>${labels[assetClass] || assetClass}</option>`).join("");
+  const comparisonFilters = `<div class="performance-filter-controls"><label>Período<select id="performance-period-filter"><option value="ALL" ${selectedComparisonPeriod === "ALL" ? "selected" : ""}>Desde o início</option><option value="12M" ${selectedComparisonPeriod === "12M" ? "selected" : ""}>Últimos 12 meses</option><option value="CUSTOM" ${selectedComparisonPeriod === "CUSTOM" ? "selected" : ""}>Período selecionado</option></select></label><label>Categoria<select id="performance-class-filter"><option value="" ${selectedComparisonAssetClass ? "" : "selected"}>Todos os tipos</option>${classOptions}</select></label></div>`;
   const comparisonKeys = ["portfolio", ...benchmarkSeriesKeys];
   const monthly = data.monthly_returns.map(row => `<tr><th>${row.year}-${String(row.month).padStart(2,"0")}</th>${comparisonKeys.map(key => `<td>${value(row[key])}</td>`).join("")}</tr>`).join("");
   const annual = data.annual_returns.map(row => `<tr><th>${row.year}</th>${comparisonKeys.map(key => `<td>${value(row[key])}</td>`).join("")}</tr>`).join("");
@@ -171,7 +211,26 @@ async function renderComparison(data, requestId) {
     const delta = Number(portfolio.return) - Number(benchmark[code].return);
     return `${points(delta)} ${delta >= 0 ? "acima do" : "abaixo do"} ${code}`;
   }).join("; ") : "";
-  target.innerHTML = `<div class="performance-cards">${cards}</div>${notice}<h3>Rentabilidade comparada</h3>${rows ? `<div class="performance-series-toggles">${normalizedSeries.map(item => `<label><input type="checkbox" data-series="${item.code}" ${item.selected ? "checked" : ""}><span style="--series-color:${item.color}"></span>${item.label}</label>`).join("")}</div>${rows}` : ""}<p class="performance-reading">${available ? `No período, sua carteira rendeu ${value(portfolio.return)}. ${relativeRead}.` : "A rentabilidade da carteira não pode ser calculada sem preços de abertura. Os índices disponíveis seguem exibidos acima e nas tabelas."}</p>${latestNotes ? `<p class="coverage">${latestNotes}</p>` : ""}<h3>Rentabilidade mensal</h3>${tableHtml(monthly)}<h3>Comparação anual</h3>${tableHtml(annual)}`;
+  target.innerHTML = `<div class="performance-cards">${cards}</div>${notice}<div class="performance-comparison-heading"><h3>Rentabilidade comparada com índices</h3>${comparisonFilters}</div>${rows ? rows : ""}<p class="performance-reading">${available ? `No período, ${portfolioLabel.toLowerCase()} rendeu ${value(portfolio.return)}. ${relativeRead}.` : "A rentabilidade selecionada não pode ser calculada sem dados suficientes. As referências de mercado continuam exibidas."}</p>${latestNotes ? `<p class="coverage">${latestNotes}</p>` : ""}<h3>Rentabilidade mensal</h3>${tableHtml(monthly)}<h3>Comparação anual</h3>${tableHtml(annual)}`;
+  target.querySelector("#performance-period-filter")?.addEventListener("change", event => {
+    selectedComparisonPeriod = event.target.value;
+    const startInput = document.querySelector("#wealth-start-date");
+    const endInput = document.querySelector("#wealth-end-date");
+    if (selectedComparisonPeriod === "ALL") {
+      startInput.value = (data.available_start_dates || {})[selectedComparisonAssetClass || "ALL"] || startInput.value;
+    } else if (selectedComparisonPeriod === "12M") {
+      startInput.value = dateMinusMonths(endInput.value, 12);
+    }
+    loadExplanation();
+  });
+  target.querySelector("#performance-class-filter")?.addEventListener("change", event => {
+    selectedComparisonAssetClass = event.target.value;
+    if (selectedComparisonPeriod === "ALL") {
+      const starts = data.available_start_dates || {};
+      document.querySelector("#wealth-start-date").value = starts[selectedComparisonAssetClass || "ALL"] || document.querySelector("#wealth-start-date").value;
+    }
+    loadExplanation();
+  });
   if (!rows) return;
   const echarts = await loadECharts();
   const chartTarget = document.querySelector("#performance-comparison-chart");
@@ -179,19 +238,16 @@ async function renderComparison(data, requestId) {
   comparisonResizeObserver?.disconnect();
   comparisonChart?.dispose();
   comparisonChart = echarts.init(chartTarget, null, { renderer: "svg" });
-  const selected = () => new Set([...target.querySelectorAll("[data-series]:checked")].map(item => item.dataset.series));
   const applyOption = () => {
-    const active = selected();
     comparisonChart.setOption({
       backgroundColor: "transparent", tooltip: { trigger: "axis", valueFormatter: value },
-      legend: { show: false }, grid: { left: 58, right: 20, top: 20, bottom: 35 },
+      legend: { type: "scroll", top: 0, textStyle: { color: "#93a4b8" }, selectedMode: true }, grid: { left: 58, right: 20, top: 42, bottom: 35 },
       xAxis: { type: "category", data: data.series.map(item => item.date), axisLabel: { color: "#93a4b8" }, axisLine: { lineStyle: { color: "#24364d" } } },
       yAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: item => `${(Number(item) * 100).toLocaleString("pt-BR", {maximumFractionDigits:1})}%` }, splitLine: { lineStyle: { color: "#203247" } } },
-      series: normalizedSeries.filter(item => active.has(item.code)).map(item => ({ name: item.label, type: "line", smooth: true, connectNulls: true, showSymbol: false, data: data.series.map(point => point[item.code]), lineStyle: { color: item.color, width: 2 }, itemStyle: { color: item.color } })),
+      series: normalizedSeries.map(item => ({ name: item.label, type: "line", smooth: true, connectNulls: true, showSymbol: false, data: data.series.map(point => point[item.code]), lineStyle: { color: item.color, width: 2 }, itemStyle: { color: item.color } })),
     }, true);
   };
   applyOption();
-  target.querySelectorAll("[data-series]").forEach(input => input.addEventListener("change", applyOption));
   comparisonResizeObserver = new ResizeObserver(() => comparisonChart?.resize());
   comparisonResizeObserver.observe(chartTarget);
 }
