@@ -1690,6 +1690,11 @@ class PortfolioSession:
                     ),
                 )
                 for ticker in sorted(eligible)
+                if (
+                    values[ticker] != Decimal("0")
+                    or targets[ticker] != Decimal("0")
+                    or allocation.allocations.get(ticker, Decimal("0")) != Decimal("0")
+                )
             )
             distributed = sum(allocation.allocations.values(), Decimal("0"))
             details.append(

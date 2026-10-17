@@ -83,6 +83,51 @@ def test_valid_asset_policy_uses_after_composition_and_reconciles() -> None:
     assert detail.asset_distributed_amount + detail.undistributed_within_class == detail.amount
 
 
+def test_strategy_simulation_hides_zero_target_assets_without_positions() -> None:
+    session = _session()
+    session.register_trade(
+        event_type=FinancialEventType.BUY,
+        ticker="FUND-ZERO",
+        name="Fundo sem objetivo",
+        asset_class=AssetClass.FII,
+        quantity=Decimal("1"),
+        unit_price=Decimal("10"),
+        effective_date=TODAY,
+    )
+    session.update_market_price(
+        ticker="FUND-ZERO", current_price=Decimal("10"), effective_date=TODAY
+    )
+    session.register_trade(
+        event_type=FinancialEventType.SELL,
+        ticker="FUND-ZERO",
+        name="Fundo sem objetivo",
+        asset_class=AssetClass.FII,
+        quantity=Decimal("1"),
+        unit_price=Decimal("10"),
+        effective_date=TODAY,
+    )
+    session.set_asset_allocation_policy(
+        AssetAllocationPolicy(
+            targets={
+                AssetClass.FII: {
+                    "FUND-A": Decimal(".5"),
+                    "FUND-B": Decimal(".5"),
+                    "FUND-ZERO": Decimal("0"),
+                }
+            }
+        )
+    )
+
+    projection = session.hypothetical_contribution(
+        amount=Decimal("40"), as_of=TODAY, allocation_mode="STRATEGY_GUIDED"
+    )
+
+    detail = next(
+        item for item in projection.scenario.class_details if item.asset_class is AssetClass.FII
+    )
+    assert {item.asset_label for item in detail.asset_allocations} == {"Fundo A", "Fundo B"}
+
+
 def test_invalid_mutated_asset_policy_is_not_normalized() -> None:
     session = _session()
     policy = AssetAllocationPolicy(
