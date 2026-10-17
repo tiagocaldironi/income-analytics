@@ -1,0 +1,30 @@
+{
+  "issuingCompany": "CMIN",
+  "companyName": "CSN MINERAÇÃO S.A.",
+  "tradingName": "CSNMINERACAO",
+  "cnpj": "08902291000115",
+  "industryClassification": "Materiais Básicos / Mineração / Minerais Metálicos",
+  "industryClassificationEng": null,
+  "activity": "Mineração e comercialização de minério de ferro. infraestrutura de transporte portuária; geração de energia e participação em sociedades com objeto social compatível com o da Companhia.",
+  "website": "",
+  "hasQuotation": "S",
+  "status": "A",
+  "marketIndicator": "17",
+  "market": "BOVESPA NIVEL 2",
+  "institutionCommon": "BRADESCO",
+  "institutionPreferred": "",
+  "code": "CMIN3",
+  "codeCVM": "25585",
+  "lastDate": "22/09/2026 23:17:19",
+  "otherCodes": [
+    {
+      "code": "CMIN3",
+      "isin": "BRCMINACNOR2"
+    }
+  ],
+  "hasEmissions": false,
+  "hasBDR": false,
+  "typeBDR": null,
+  "describleCategoryBVMF": null,
+  "dateQuotation": "18/02/2021"
+}

@@ -1,0 +1,2364 @@
+{
+  "sample_policy": "GREEDY_FEATURE_COVERAGE_V1_UUID_TIEBREAK",
+  "unresolved_count": 25,
+  "control_count": 5,
+  "magnitude_used_for_resolution": false,
+  "strata_covered": [
+    [
+      "classes",
+      "ON"
+    ],
+    [
+      "classes",
+      "ON+PN"
+    ],
+    [
+      "classes",
+      "ON+PN+UNIT"
+    ],
+    [
+      "classes",
+      "PN"
+    ],
+    [
+      "classes",
+      "UNIT"
+    ],
+    [
+      "multiple_securities",
+      "False"
+    ],
+    [
+      "multiple_securities",
+      "True"
+    ],
+    [
+      "raw_digits",
+      "10"
+    ],
+    [
+      "raw_digits",
+      "11"
+    ],
+    [
+      "raw_digits",
+      "13"
+    ],
+    [
+      "raw_digits",
+      "2"
+    ],
+    [
+      "raw_digits",
+      "4"
+    ],
+    [
+      "raw_digits",
+      "5"
+    ],
+    [
+      "raw_digits",
+      "6"
+    ],
+    [
+      "raw_digits",
+      "7"
+    ],
+    [
+      "raw_digits",
+      "8"
+    ],
+    [
+      "raw_digits",
+      "9"
+    ],
+    [
+      "raw_fractional",
+      "False"
+    ],
+    [
+      "sector",
+      "Agricultura (Açúcar, Álcool e Cana)"
+    ],
+    [
+      "sector",
+      "Alimentos"
+    ],
+    [
+      "sector",
+      "Brinquedos e Lazer"
+    ],
+    [
+      "sector",
+      "Comunicação e Informática"
+    ],
+    [
+      "sector",
+      "Comércio (Atacado e Varejo)"
+    ],
+    [
+      "sector",
+      "Construção Civil, Mat. Constr. e Decoração"
+    ],
+    [
+      "sector",
+      "Educação"
+    ],
+    [
+      "sector",
+      "Emp. Adm. Part. - Agricultura (Açúcar, Álcool e Cana)"
+    ],
+    [
+      "sector",
+      "Emp. Adm. Part. - Const. Civil, Mat. Const. e Decoração"
+    ],
+    [
+      "sector",
+      "Emp. Adm. Part. - Educação"
+    ],
+    [
+      "sector",
+      "Emp. Adm. Part. - Energia Elétrica"
+    ],
+    [
+      "sector",
+      "Emp. Adm. Part. - Metalurgia e Siderurgia"
+    ],
+    [
+      "sector",
+      "Emp. Adm. Part. - Saneamento, Serv. Água e Gás"
+    ],
+    [
+      "sector",
+      "Emp. Adm. Part. - Serviços Transporte e Logística"
+    ],
+    [
+      "sector",
+      "Energia Elétrica"
+    ],
+    [
+      "sector",
+      "Extração Mineral"
+    ],
+    [
+      "sector",
+      "Metalurgia e Siderurgia"
+    ],
+    [
+      "sector",
+      "Máquinas, Equipamentos, Veículos e Peças"
+    ],
+    [
+      "sector",
+      "Petróleo e Gás"
+    ],
+    [
+      "sector",
+      "Saneamento, Serv. Água e Gás"
+    ],
+    [
+      "sector",
+      "Serviços Transporte e Logística"
+    ],
+    [
+      "sector",
+      "Serviços médicos"
+    ],
+    [
+      "sector",
+      "Telecomunicações"
+    ],
+    [
+      "sector",
+      "Têxtil e Vestuário"
+    ],
+    [
+      "size",
+      "LARGE"
+    ],
+    [
+      "size",
+      "MEDIUM"
+    ],
+    [
+      "size",
+      "SMALL"
+    ],
+    [
+      "size",
+      "UNKNOWN"
+    ],
+    [
+      "treasury",
+      "False"
+    ],
+    [
+      "treasury",
+      "True"
+    ]
+  ],
+  "issuers": [
+    {
+      "issuer_id": "03aa0b15-47db-5867-81ad-26ec43c392f8",
+      "cvm_code": "021067",
+      "cnpj": "12049631000184",
+      "display_name": "MOURA DUBEUX ENGENHARIA S/A",
+      "control": false,
+      "strata": {
+        "sector": "Construção Civil, Mat. Constr. e Decoração",
+        "size": "MEDIUM",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "8",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "5568082000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "12.049.631/0001-84",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "MOURA DUBEUX ENGENHARIA S/A",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "84909375",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "84909375",
+        "QT_ACAO_ORDIN_TESOURO": "426382",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "426382",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=265"
+      },
+      "document": {
+        "CNPJ_CIA": "12.049.631/0001-84",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "MOURA DUBEUX ENGENHARIA S/A",
+        "CD_CVM": "021067",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155260",
+        "DT_RECEB": "2026-03-11",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155260",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=291"
+      },
+      "securities": [
+        {
+          "issuer_id": "03aa0b15-47db-5867-81ad-26ec43c392f8",
+          "security_id": "BR:MDNE3",
+          "ticker": "MDNE3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRMDNEACNOR9",
+          "valid_from": "2020-02-13",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=381",
+          "form_id": "148790",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "27.45",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692125"
+        }
+      ]
+    },
+    {
+      "issuer_id": "074b6f8c-7a09-560b-9d48-acb0fa737e27",
+      "cvm_code": "019569",
+      "cnpj": "06164253000187",
+      "display_name": "GOL LINHAS AEREAS INTELIGENTES S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Emp. Adm. Part. - Serviços Transporte e Logística",
+        "size": "LARGE",
+        "classes": "PN",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "13",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "26682569000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "06.164.253/0001-87",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "2",
+        "DENOM_CIA": "GOL LINHAS AEREAS INTELIGENTES S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "8196784982987",
+        "QT_ACAO_PREF_CAP_INTEGR": "969160400803",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "9165945383790",
+        "QT_ACAO_ORDIN_TESOURO": "2109",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "2109",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=140"
+      },
+      "document": {
+        "CNPJ_CIA": "06.164.253/0001-87",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "2",
+        "DENOM_CIA": "GOL LINHAS AEREAS INTELIGENTES S.A.",
+        "CD_CVM": "019569",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155870",
+        "DT_RECEB": "2026-03-31",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155870",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=157"
+      },
+      "securities": [
+        {
+          "issuer_id": "074b6f8c-7a09-560b-9d48-acb0fa737e27",
+          "security_id": "BR:GOLL54",
+          "ticker": "GOLL54",
+          "share_class": "PN",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRGOLLA01PR5",
+          "valid_from": "2004-06-23",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=219",
+          "form_id": "151630",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "6.15",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692084"
+        }
+      ]
+    },
+    {
+      "issuer_id": "07872f60-b67a-5d03-817d-41bcf869c318",
+      "cvm_code": "012823",
+      "cnpj": "61156931000178",
+      "display_name": "ALIPERTI S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Emp. Adm. Part. - Agricultura (Açúcar, Álcool e Cana)",
+        "size": "SMALL",
+        "classes": "ON+PN",
+        "multiple_securities": "True",
+        "treasury": "True",
+        "raw_digits": "5",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "504516000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "61.156.931/0001-78",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "ALIPERTI S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "6250",
+        "QT_ACAO_PREF_CAP_INTEGR": "12345",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "18595",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "380",
+        "QT_ACAO_TOTAL_TESOURO": "380",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=575"
+      },
+      "document": {
+        "CNPJ_CIA": "61.156.931/0001-78",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "ALIPERTI S.A.",
+        "CD_CVM": "012823",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155680",
+        "DT_RECEB": "2026-03-25",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155680",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=653"
+      },
+      "securities": [
+        {
+          "issuer_id": "07872f60-b67a-5d03-817d-41bcf869c318",
+          "security_id": "BR:APTI4",
+          "ticker": "APTI4",
+          "share_class": "PN",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "1986-06-06",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=835",
+          "form_id": "148360",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        },
+        {
+          "issuer_id": "07872f60-b67a-5d03-817d-41bcf869c318",
+          "security_id": "BR:APTI3",
+          "ticker": "APTI3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "1986-06-06",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=834",
+          "form_id": "148360",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        }
+      ]
+    },
+    {
+      "issuer_id": "09192be5-2532-5925-8d5c-bc5e0a398b5b",
+      "cvm_code": "011231",
+      "cnpj": "33467572000134",
+      "display_name": "TEKNO S.A. - INDUSTRIA E COMERCIO",
+      "control": false,
+      "strata": {
+        "sector": "Emp. Adm. Part. - Metalurgia e Siderurgia",
+        "size": "SMALL",
+        "classes": "ON+PN",
+        "multiple_securities": "True",
+        "treasury": "False",
+        "raw_digits": "4",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "353075000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "33.467.572/0001-34",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "TEKNO S.A. - INDUSTRIA E COMERCIO",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "1587",
+        "QT_ACAO_PREF_CAP_INTEGR": "1360",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "2947",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "0",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=423"
+      },
+      "document": {
+        "CNPJ_CIA": "33.467.572/0001-34",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "TEKNO S.A. - INDUSTRIA E COMERCIO",
+        "CD_CVM": "011231",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155760",
+        "DT_RECEB": "2026-03-27",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155760",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=477"
+      },
+      "securities": [
+        {
+          "issuer_id": "09192be5-2532-5925-8d5c-bc5e0a398b5b",
+          "security_id": "BR:TKNO3",
+          "ticker": "TKNO3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "1977-07-20",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=639",
+          "form_id": "153099",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        },
+        {
+          "issuer_id": "09192be5-2532-5925-8d5c-bc5e0a398b5b",
+          "security_id": "BR:TKNO4",
+          "ticker": "TKNO4",
+          "share_class": "PN",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "1977-07-20",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=640",
+          "form_id": "153099",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        }
+      ]
+    },
+    {
+      "issuer_id": "0afdb2f8-314e-54eb-9acb-a0d8804afd3c",
+      "cvm_code": "017329",
+      "cnpj": "02474103000119",
+      "display_name": "ENGIE BRASIL ENERGIA S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Energia Elétrica",
+        "size": "LARGE",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "False",
+        "raw_digits": "10",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "55312909000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "02.474.103/0001-19",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "2",
+        "DENOM_CIA": "ENGIE BRASIL ENERGIA S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "1142298836",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "1142298836",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "0",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=71"
+      },
+      "document": {
+        "CNPJ_CIA": "02.474.103/0001-19",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "2",
+        "DENOM_CIA": "ENGIE BRASIL ENERGIA S.A.",
+        "CD_CVM": "017329",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155137",
+        "DT_RECEB": "2026-03-06",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155137",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=81"
+      },
+      "securities": [
+        {
+          "issuer_id": "0afdb2f8-314e-54eb-9acb-a0d8804afd3c",
+          "security_id": "BR:EGIE3",
+          "ticker": "EGIE3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BREGIEACNOR9",
+          "valid_from": "2005-11-16",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=114",
+          "form_id": "149679",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "31.37",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692081"
+        }
+      ]
+    },
+    {
+      "issuer_id": "0d83e2de-7d41-55d2-8386-320236fa841b",
+      "cvm_code": "020370",
+      "cnpj": "08078847000109",
+      "display_name": "LPS BRASIL - CONSULTORIA DE IMOVEIS S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Emp. Adm. Part. - Const. Civil, Mat. Const. e Decoração",
+        "size": "SMALL",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "6",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "396987000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "08.078.847/0001-09",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "LPS BRASIL - CONSULTORIA DE IMOVEIS S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "147555",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "147555",
+        "QT_ACAO_ORDIN_TESOURO": "10267",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "10267",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=178"
+      },
+      "document": {
+        "CNPJ_CIA": "08.078.847/0001-09",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "LPS BRASIL - CONSULTORIA DE IMOVEIS S.A.",
+        "CD_CVM": "020370",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155501",
+        "DT_RECEB": "2026-03-19",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155501",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=196"
+      },
+      "securities": [
+        {
+          "issuer_id": "0d83e2de-7d41-55d2-8386-320236fa841b",
+          "security_id": "BR:LPSB3",
+          "ticker": "LPSB3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRLPSBACNOR0",
+          "valid_from": "2006-12-18",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=268",
+          "form_id": "147058",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "1.74",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692053"
+        }
+      ]
+    },
+    {
+      "issuer_id": "0fc62377-20ff-5d09-ad6b-e554817aacaa",
+      "cvm_code": "024805",
+      "cnpj": "33839910000111",
+      "display_name": "Vivara Participações S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Comércio (Atacado e Varejo)",
+        "size": "MEDIUM",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "9",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "4722693388.0000000000",
+      "capital": {
+        "CNPJ_CIA": "33.839.910/0001-11",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "VIVARA PARTICIPAÇÕES S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "236197769",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "236197769",
+        "QT_ACAO_ORDIN_TESOURO": "1125955",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "1125955",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=428"
+      },
+      "document": {
+        "CNPJ_CIA": "33.839.910/0001-11",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "VIVARA PARTICIPAÇÕES S.A.",
+        "CD_CVM": "024805",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155474",
+        "DT_RECEB": "2026-03-18",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155474",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=483"
+      },
+      "securities": [
+        {
+          "issuer_id": "0fc62377-20ff-5d09-ad6b-e554817aacaa",
+          "security_id": "BR:VIVA3",
+          "ticker": "VIVA3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRVIVAACNOR0",
+          "valid_from": "2019-10-10",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=648",
+          "form_id": "145002",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "33.24",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692146"
+        }
+      ]
+    },
+    {
+      "issuer_id": "0ff7ba36-31ac-5a5f-983c-fcecf380546a",
+      "cvm_code": "025763",
+      "cnpj": "45365558000109",
+      "display_name": "VITTIA S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Agricultura (Açúcar, Álcool e Cana)",
+        "size": "SMALL",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "9",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "929946000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "45.365.558/0001-09",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "VITTIA S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "147314018",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "147314018",
+        "QT_ACAO_ORDIN_TESOURO": "555436",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "555436",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=486"
+      },
+      "document": {
+        "CNPJ_CIA": "45.365.558/0001-09",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "VITTIA S.A.",
+        "CD_CVM": "025763",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155333",
+        "DT_RECEB": "2026-03-12",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155333",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=552"
+      },
+      "securities": [
+        {
+          "issuer_id": "0ff7ba36-31ac-5a5f-983c-fcecf380546a",
+          "security_id": "BR:VITT3",
+          "ticker": "VITT3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRVITTACNOR4",
+          "valid_from": "2021-09-02",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=718",
+          "form_id": "152207",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "4.6",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692145"
+        }
+      ]
+    },
+    {
+      "issuer_id": "105c899a-872a-5018-a576-81d271a6c049",
+      "cvm_code": "025291",
+      "cnpj": "12091809000155",
+      "display_name": "Brava Energia S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Petróleo e Gás",
+        "size": "LARGE",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "9",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "42708275000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "12.091.809/0001-55",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "BRAVA ENERGIA S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "464557268",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "464557268",
+        "QT_ACAO_ORDIN_TESOURO": "14166",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "14166",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=266"
+      },
+      "document": {
+        "CNPJ_CIA": "12.091.809/0001-55",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "BRAVA ENERGIA S.A.",
+        "CD_CVM": "025291",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155283",
+        "DT_RECEB": "2026-03-11",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155283",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=292"
+      },
+      "securities": [
+        {
+          "issuer_id": "105c899a-872a-5018-a576-81d271a6c049",
+          "security_id": "BR:BRAV3",
+          "ticker": "BRAV3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRBRAVACNOR3",
+          "valid_from": "2020-11-12",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=382",
+          "form_id": "153618",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "16.84",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692363"
+        }
+      ]
+    },
+    {
+      "issuer_id": "17fe5784-b93a-5d08-bf40-6da3fb609389",
+      "cvm_code": "026077",
+      "cnpj": "26345998000150",
+      "display_name": "TC S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Comunicação e Informática",
+        "size": "SMALL",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "5",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "143689000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "26.345.998/0001-50",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "ECONOMATICA S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "40021",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "40021",
+        "QT_ACAO_ORDIN_TESOURO": "388",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "388",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=372"
+      },
+      "document": {
+        "CNPJ_CIA": "26.345.998/0001-50",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "ECONOMATICA S.A.",
+        "CD_CVM": "026077",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155872",
+        "DT_RECEB": "2026-03-31",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155872",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=417"
+      },
+      "securities": [
+        {
+          "issuer_id": "17fe5784-b93a-5d08-bf40-6da3fb609389",
+          "security_id": "BR:TRAD3",
+          "ticker": "TRAD3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRTRADACNOR3",
+          "valid_from": "2021-07-26",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=560",
+          "form_id": "148896",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "4.04",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692160"
+        }
+      ]
+    },
+    {
+      "issuer_id": "19e1c2d8-6178-5de3-b087-9c3c82ab8a86",
+      "cvm_code": "025208",
+      "cnpj": "59418806000147",
+      "display_name": "TRACK & FIELD CO S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Têxtil e Vestuário",
+        "size": "SMALL",
+        "classes": "PN",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "9",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "974206000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "59.418.806/0001-47",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "TRACK & FIELD CO S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "877251375",
+        "QT_ACAO_PREF_CAP_INTEGR": "65492864",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "942744239",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "1730117",
+        "QT_ACAO_TOTAL_TESOURO": "1730117",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=542"
+      },
+      "document": {
+        "CNPJ_CIA": "59.418.806/0001-47",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "TRACK & FIELD CO S.A.",
+        "CD_CVM": "025208",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155199",
+        "DT_RECEB": "2026-03-09",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155199",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=616"
+      },
+      "securities": [
+        {
+          "issuer_id": "19e1c2d8-6178-5de3-b087-9c3c82ab8a86",
+          "security_id": "BR:TFCO4",
+          "ticker": "TFCO4",
+          "share_class": "PN",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRTFCOACNPR8",
+          "valid_from": "2020-10-26",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=778",
+          "form_id": "148188",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "16.3",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692232"
+        }
+      ]
+    },
+    {
+      "issuer_id": "1a4cc191-bd1c-533b-be1b-c67e005712f8",
+      "cvm_code": "001570",
+      "cnpj": "95426862000197",
+      "display_name": "EXCELSIOR ALIMENTOS S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Alimentos",
+        "size": "UNKNOWN",
+        "classes": "ON+PN",
+        "multiple_securities": "True",
+        "treasury": "False",
+        "raw_digits": "7",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": null,
+      "capital": {
+        "CNPJ_CIA": "95.426.862/0001-97",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "EXCELSIOR ALIMENTOS S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "2846929",
+        "QT_ACAO_PREF_CAP_INTEGR": "2375293",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "5222222",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "0",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=663"
+      },
+      "document": {
+        "CNPJ_CIA": "95.426.862/0001-97",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "EXCELSIOR ALIMENTOS S.A.",
+        "CD_CVM": "001570",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155541",
+        "DT_RECEB": "2026-03-20",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155541",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=750"
+      },
+      "securities": [
+        {
+          "issuer_id": "1a4cc191-bd1c-533b-be1b-c67e005712f8",
+          "security_id": "BR:BAUH3",
+          "ticker": "BAUH3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "1995-08-01",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=986",
+          "form_id": "148382",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        },
+        {
+          "issuer_id": "1a4cc191-bd1c-533b-be1b-c67e005712f8",
+          "security_id": "BR:BAUH4",
+          "ticker": "BAUH4",
+          "share_class": "PN",
+          "preferred_class": "PNA",
+          "unit_composition": null,
+          "isin": "BRBAUHACNPR3",
+          "valid_from": "1995-08-01",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=987",
+          "form_id": "148382",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "93.45",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692308"
+        }
+      ]
+    },
+    {
+      "issuer_id": "1c842329-db1d-57bc-ab27-3b2f7abdf0c6",
+      "cvm_code": "024821",
+      "cnpj": "06047087000139",
+      "display_name": "Rede D'Or São Luiz S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Serviços médicos",
+        "size": "LARGE",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "10",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "106548532000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "06.047.087/0001-39",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "REDE D'OR SÃO LUIZ S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "2289292590",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "2289292590",
+        "QT_ACAO_ORDIN_TESOURO": "82882567",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "82882567",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=138"
+      },
+      "document": {
+        "CNPJ_CIA": "06.047.087/0001-39",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "REDE D'OR SÃO LUIZ S.A.",
+        "CD_CVM": "024821",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "154910",
+        "DT_RECEB": "2026-02-25",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154910",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=154"
+      },
+      "securities": [
+        {
+          "issuer_id": "1c842329-db1d-57bc-ab27-3b2f7abdf0c6",
+          "security_id": "BR:RDOR3",
+          "ticker": "RDOR3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRRDORACNOR8",
+          "valid_from": "2020-12-10",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=214",
+          "form_id": "149150",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "40.61",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692197"
+        }
+      ]
+    },
+    {
+      "issuer_id": "21fd22c3-c2fa-5a1c-8311-c7fe450b007e",
+      "cvm_code": "022020",
+      "cnpj": "52548435000179",
+      "display_name": "JSL S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Serviços Transporte e Logística",
+        "size": "LARGE",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "9",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "12133203000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "52.548.435/0001-79",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "JSL S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "286431078",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "286431078",
+        "QT_ACAO_ORDIN_TESOURO": "1986132",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "1986132",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=524"
+      },
+      "document": {
+        "CNPJ_CIA": "52.548.435/0001-79",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "JSL S.A.",
+        "CD_CVM": "022020",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155651",
+        "DT_RECEB": "2026-03-24",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155651",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=594"
+      },
+      "securities": [
+        {
+          "issuer_id": "21fd22c3-c2fa-5a1c-8311-c7fe450b007e",
+          "security_id": "BR:JSLG3",
+          "ticker": "JSLG3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRJSLGACNOR2",
+          "valid_from": "2010-04-20",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=755",
+          "form_id": "148900",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "6.07",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692345"
+        }
+      ]
+    },
+    {
+      "issuer_id": "276256a2-f602-57a4-a9f7-e8efdbd92411",
+      "cvm_code": "002437",
+      "cnpj": "00001180000126",
+      "display_name": "CENTRAIS ELET BRAS S.A. - ELETROBRAS",
+      "control": false,
+      "strata": {
+        "sector": "Emp. Adm. Part. - Energia Elétrica",
+        "size": "LARGE",
+        "classes": "ON+PN",
+        "multiple_securities": "True",
+        "treasury": "True",
+        "raw_digits": "7",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "279685593000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "00.001.180/0001-26",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "AXIA ENERGIA S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "2028544",
+        "QT_ACAO_PREF_CAP_INTEGR": "886884",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "2915428",
+        "QT_ACAO_ORDIN_TESOURO": "52799",
+        "QT_ACAO_PREF_TESOURO": "23181",
+        "QT_ACAO_TOTAL_TESOURO": "75980",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=3"
+      },
+      "document": {
+        "CNPJ_CIA": "00.001.180/0001-26",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "AXIA ENERGIA S.A.",
+        "CD_CVM": "002437",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "154939",
+        "DT_RECEB": "2026-02-26",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154939",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=3"
+      },
+      "securities": [
+        {
+          "issuer_id": "276256a2-f602-57a4-a9f7-e8efdbd92411",
+          "security_id": "BR:ELET3",
+          "ticker": "ELET3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "1971-09-07",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=5",
+          "form_id": "150856",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        },
+        {
+          "issuer_id": "276256a2-f602-57a4-a9f7-e8efdbd92411",
+          "security_id": "BR:ELET5",
+          "ticker": "ELET5",
+          "share_class": "PN",
+          "preferred_class": "PNA",
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "2006-09-29",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=8",
+          "form_id": "150856",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        },
+        {
+          "issuer_id": "276256a2-f602-57a4-a9f7-e8efdbd92411",
+          "security_id": "BR:ELET6",
+          "ticker": "ELET6",
+          "share_class": "PN",
+          "preferred_class": "PNB",
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "2006-09-29",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=7",
+          "form_id": "150856",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        }
+      ]
+    },
+    {
+      "issuer_id": "2f2e9e0d-2c95-57d1-bcc3-9f14ce255d93",
+      "cvm_code": "025127",
+      "cnpj": "21389501000181",
+      "display_name": "Compass Gás e Energia S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Emp. Adm. Part. - Saneamento, Serv. Água e Gás",
+        "size": "LARGE",
+        "classes": "ON+PN",
+        "multiple_securities": "True",
+        "treasury": "False",
+        "raw_digits": "9",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "33347589000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "21.389.501/0001-81",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "COMPASS GÁS E ENERGIA S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "628487691",
+        "QT_ACAO_PREF_CAP_INTEGR": "85702404",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "714190095",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "0",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=350"
+      },
+      "document": {
+        "CNPJ_CIA": "21.389.501/0001-81",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "COMPASS GÁS E ENERGIA S.A.",
+        "CD_CVM": "025127",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155070",
+        "DT_RECEB": "2026-03-04",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155070",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=388"
+      },
+      "securities": [
+        {
+          "issuer_id": "2f2e9e0d-2c95-57d1-bcc3-9f14ce255d93",
+          "security_id": "BR:PASS6",
+          "ticker": "PASS6",
+          "share_class": "PN",
+          "preferred_class": "ONB",
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "2021-08-20",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=529",
+          "form_id": "148591",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        },
+        {
+          "issuer_id": "2f2e9e0d-2c95-57d1-bcc3-9f14ce255d93",
+          "security_id": "BR:PASS5",
+          "ticker": "PASS5",
+          "share_class": "PN",
+          "preferred_class": "PNA",
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "2021-08-20",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=528",
+          "form_id": "148591",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        },
+        {
+          "issuer_id": "2f2e9e0d-2c95-57d1-bcc3-9f14ce255d93",
+          "security_id": "BR:PASS3",
+          "ticker": "PASS3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "2020-09-11",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=526",
+          "form_id": "148591",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        }
+      ]
+    },
+    {
+      "issuer_id": "2f5cf695-2571-5da5-802c-b5ccfc667fcf",
+      "cvm_code": "003069",
+      "cnpj": "15141799000103",
+      "display_name": "CIA FERRO LIGAS DA BAHIA - FERBASA",
+      "control": false,
+      "strata": {
+        "sector": "Metalurgia e Siderurgia",
+        "size": "MEDIUM",
+        "classes": "ON+PN",
+        "multiple_securities": "True",
+        "treasury": "True",
+        "raw_digits": "9",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "4459480000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "15.141.799/0001-03",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "CIA FERRO LIGAS DA BAHIA - FERBASA",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "117725000",
+        "QT_ACAO_PREF_CAP_INTEGR": "235450000",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "353175000",
+        "QT_ACAO_ORDIN_TESOURO": "125000",
+        "QT_ACAO_PREF_TESOURO": "14182400",
+        "QT_ACAO_TOTAL_TESOURO": "14307400",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=298"
+      },
+      "document": {
+        "CNPJ_CIA": "15.141.799/0001-03",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "CIA FERRO LIGAS DA BAHIA - FERBASA",
+        "CD_CVM": "003069",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155153",
+        "DT_RECEB": "2026-03-06",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155153",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=329"
+      },
+      "securities": [
+        {
+          "issuer_id": "2f5cf695-2571-5da5-802c-b5ccfc667fcf",
+          "security_id": "BR:FESA4",
+          "ticker": "FESA4",
+          "share_class": "PN",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRFESAACNPR5",
+          "valid_from": "2011-01-05",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=433",
+          "form_id": "148764",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "6.93",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692357"
+        },
+        {
+          "issuer_id": "2f5cf695-2571-5da5-802c-b5ccfc667fcf",
+          "security_id": "BR:FESA3",
+          "ticker": "FESA3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRFESAACNOR8",
+          "valid_from": "2011-01-05",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=432",
+          "form_id": "148764",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "11.18",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692356"
+        }
+      ]
+    },
+    {
+      "issuer_id": "349c588e-60d5-5a49-ba09-137697acbbc5",
+      "cvm_code": "018597",
+      "cnpj": "03303999000136",
+      "display_name": "DTCOM - DIRECT TO COMPANY S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Telecomunicações",
+        "size": "UNKNOWN",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "False",
+        "raw_digits": "8",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": null,
+      "capital": {
+        "CNPJ_CIA": "03.303.999/0001-36",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "DTCOM - DIRECT TO COMPANY S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "10680489",
+        "QT_ACAO_PREF_CAP_INTEGR": "450642",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "11131131",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "0",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=98"
+      },
+      "document": {
+        "CNPJ_CIA": "03.303.999/0001-36",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "DTCOM - DIRECT TO COMPANY S.A.",
+        "CD_CVM": "018597",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155917",
+        "DT_RECEB": "2026-03-31",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155917",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=113"
+      },
+      "securities": [
+        {
+          "issuer_id": "349c588e-60d5-5a49-ba09-137697acbbc5",
+          "security_id": "BR:DTCY3",
+          "ticker": "DTCY3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "2000-12-31",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=149",
+          "form_id": "144950",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        }
+      ]
+    },
+    {
+      "issuer_id": "398d6b94-4f22-59c0-8b13-305e493cbeaa",
+      "cvm_code": "021016",
+      "cnpj": "08807432000110",
+      "display_name": "YDUQS PARTICIPACOES S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Emp. Adm. Part. - Educação",
+        "size": "MEDIUM",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "6",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "9919168000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "08.807.432/0001-10",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "YDUQS PARTICIPACOES S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "274089",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "274089",
+        "QT_ACAO_ORDIN_TESOURO": "10535",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "10535",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=203"
+      },
+      "document": {
+        "CNPJ_CIA": "08.807.432/0001-10",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "YDUQS PARTICIPACOES S.A.",
+        "CD_CVM": "021016",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155266",
+        "DT_RECEB": "2026-03-11",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155266",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=222"
+      },
+      "securities": [
+        {
+          "issuer_id": "398d6b94-4f22-59c0-8b13-305e493cbeaa",
+          "security_id": "BR:YDUQ3",
+          "ticker": "YDUQ3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRYDUQACNOR3",
+          "valid_from": "2008-06-13",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=306",
+          "form_id": "150180",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "12.17",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692289"
+        }
+      ]
+    },
+    {
+      "issuer_id": "3de03f82-9f51-51e9-8b58-603bf942a9f8",
+      "cvm_code": "001694",
+      "cnpj": "56992423000190",
+      "display_name": "BICICLETAS MONARK S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Brinquedos e Lazer",
+        "size": "UNKNOWN",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "False",
+        "raw_digits": "6",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": null,
+      "capital": {
+        "CNPJ_CIA": "56.992.423/0001-90",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "BICICLETAS MONARK S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "454750",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "454750",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "0",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=534"
+      },
+      "document": {
+        "CNPJ_CIA": "56.992.423/0001-90",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "BICICLETAS MONARK S.A.",
+        "CD_CVM": "001694",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155759",
+        "DT_RECEB": "2026-03-27",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155759",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=606"
+      },
+      "securities": [
+        {
+          "issuer_id": "3de03f82-9f51-51e9-8b58-603bf942a9f8",
+          "security_id": "BR:BMKS3",
+          "ticker": "BMKS3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRBMKSACNOR9",
+          "valid_from": "1973-11-28",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=767",
+          "form_id": "148311",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "389",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692154"
+        }
+      ]
+    },
+    {
+      "issuer_id": "4284d8b4-f21b-5623-aa5d-34ddaba1a1e4",
+      "cvm_code": "027057",
+      "cnpj": "20512706000140",
+      "display_name": "VITRU EDUCAÇÃO S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Educação",
+        "size": "MEDIUM",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "9",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "6093744000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "20.512.706/0001-40",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "3",
+        "DENOM_CIA": "VITRU EDUCAÇÃO S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "134172428",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "134172428",
+        "QT_ACAO_ORDIN_TESOURO": "519900",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "519900",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=344"
+      },
+      "document": {
+        "CNPJ_CIA": "20.512.706/0001-40",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "3",
+        "DENOM_CIA": "VITRU EDUCAÇÃO S.A.",
+        "CD_CVM": "027057",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "156065",
+        "DT_RECEB": "2026-04-07",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=156065",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=380"
+      },
+      "securities": [
+        {
+          "issuer_id": "4284d8b4-f21b-5623-aa5d-34ddaba1a1e4",
+          "security_id": "BR:VTRU3",
+          "ticker": "VTRU3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRVTRUACNOR3",
+          "valid_from": "2024-06-10",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=510",
+          "form_id": "153782",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "14.21",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692214"
+        }
+      ]
+    },
+    {
+      "issuer_id": "467ad6ab-50d2-596a-8d2f-a26dc3af3787",
+      "cvm_code": "008818",
+      "cnpj": "17161241000115",
+      "display_name": "MINASMAQUINAS S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Máquinas, Equipamentos, Veículos e Peças",
+        "size": "UNKNOWN",
+        "classes": "ON+PN",
+        "multiple_securities": "True",
+        "treasury": "False",
+        "raw_digits": "2",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": null,
+      "capital": {
+        "CNPJ_CIA": "17.161.241/0001-15",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "MINASMAQUINAS S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "20",
+        "QT_ACAO_PREF_CAP_INTEGR": "17",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "37",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "0",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=316"
+      },
+      "document": {
+        "CNPJ_CIA": "17.161.241/0001-15",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "MINASMAQUINAS S.A.",
+        "CD_CVM": "008818",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155528",
+        "DT_RECEB": "2026-03-20",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155528",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=349"
+      },
+      "securities": [
+        {
+          "issuer_id": "467ad6ab-50d2-596a-8d2f-a26dc3af3787",
+          "security_id": "BR:MMAQ3",
+          "ticker": "MMAQ3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "1972-01-13",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=460",
+          "form_id": "145137",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        },
+        {
+          "issuer_id": "467ad6ab-50d2-596a-8d2f-a26dc3af3787",
+          "security_id": "BR:MMAQ4",
+          "ticker": "MMAQ4",
+          "share_class": "PN",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "1972-01-13",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=461",
+          "form_id": "145137",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        }
+      ]
+    },
+    {
+      "issuer_id": "66ed46ae-3438-4bc9-a945-c4b7ba9df9b0",
+      "cvm_code": "013986",
+      "cnpj": "16404287000155",
+      "display_name": "SUZANO S.A.",
+      "control": true,
+      "strata": {
+        "sector": "Papel e Celulose",
+        "size": "UNKNOWN",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "10",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "167935519000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "16.404.287/0001-55",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "SUZANO S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "1264117615",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "1264117615",
+        "QT_ACAO_ORDIN_TESOURO": "28208827",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "28208827",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=306"
+      },
+      "document": {
+        "CNPJ_CIA": "16.404.287/0001-55",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "SUZANO S.A.",
+        "CD_CVM": "013986",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "154674",
+        "DT_RECEB": "2026-02-10",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154674",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=338"
+      },
+      "securities": [
+        {
+          "issuer_id": "66ed46ae-3438-4bc9-a945-c4b7ba9df9b0",
+          "security_id": "BR:SUZB3",
+          "ticker": "SUZB3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRSUZBACNOR0",
+          "valid_from": "2017-11-10",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=442",
+          "form_id": "148219",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "51.45",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692207"
+        }
+      ]
+    },
+    {
+      "issuer_id": "71aced01-4da8-5ac7-b30b-b57252fd5777",
+      "cvm_code": "025801",
+      "cnpj": "59981829000165",
+      "display_name": "Rodobens SA",
+      "control": false,
+      "strata": {
+        "sector": "Máquinas, Equipamentos, Veículos e Peças",
+        "size": "MEDIUM",
+        "classes": "UNIT",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "9",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "7510788000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "59.981.829/0001-65",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "RODOBENS SA",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "711983027",
+        "QT_ACAO_PREF_CAP_INTEGR": "528422249",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "1240405276",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "2489004",
+        "QT_ACAO_TOTAL_TESOURO": "2489004",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=547"
+      },
+      "document": {
+        "CNPJ_CIA": "59.981.829/0001-65",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "RODOBENS SA",
+        "CD_CVM": "025801",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155796",
+        "DT_RECEB": "2026-03-27",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155796",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=621"
+      },
+      "securities": [
+        {
+          "issuer_id": "71aced01-4da8-5ac7-b30b-b57252fd5777",
+          "security_id": "BR:RBNS",
+          "ticker": "RBNS",
+          "share_class": "UNIT",
+          "preferred_class": null,
+          "unit_composition": "1 ON e 2PNs",
+          "isin": null,
+          "valid_from": "2021-07-26",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=784",
+          "form_id": "146489",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        }
+      ]
+    },
+    {
+      "issuer_id": "ac3825e0-6d00-58cf-b654-39bc203322da",
+      "cvm_code": "018627",
+      "cnpj": "76484013000145",
+      "display_name": "CIA SANEAMENTO DO PARANA - SANEPAR",
+      "control": false,
+      "strata": {
+        "sector": "Saneamento, Serv. Água e Gás",
+        "size": "UNKNOWN",
+        "classes": "ON+PN+UNIT",
+        "multiple_securities": "True",
+        "treasury": "False",
+        "raw_digits": "10",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": null,
+      "capital": {
+        "CNPJ_CIA": "76.484.013/0001-45",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "CIA SANEAMENTO DO PARANA - SANEPAR",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "503735259",
+        "QT_ACAO_PREF_CAP_INTEGR": "1007470260",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "1511205519",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "0",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=607"
+      },
+      "document": {
+        "CNPJ_CIA": "76.484.013/0001-45",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "CIA SANEAMENTO DO PARANA - SANEPAR",
+        "CD_CVM": "018627",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "154938",
+        "DT_RECEB": "2026-02-26",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154938",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=690"
+      },
+      "securities": [
+        {
+          "issuer_id": "ac3825e0-6d00-58cf-b654-39bc203322da",
+          "security_id": "BR:SAPR4",
+          "ticker": "SAPR4",
+          "share_class": "PN",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRSAPRACNPR6",
+          "valid_from": "2016-12-21",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=888",
+          "form_id": "144538",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "7.83",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692224"
+        },
+        {
+          "issuer_id": "ac3825e0-6d00-58cf-b654-39bc203322da",
+          "security_id": "BR:SAPR3",
+          "ticker": "SAPR3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRSAPRACNOR9",
+          "valid_from": "2016-12-21",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=887",
+          "form_id": "144538",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "9",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692223"
+        },
+        {
+          "issuer_id": "ac3825e0-6d00-58cf-b654-39bc203322da",
+          "security_id": "BR:SAPR11",
+          "ticker": "SAPR11",
+          "share_class": "UNIT",
+          "preferred_class": null,
+          "unit_composition": "1 ON e 4 PN",
+          "isin": "BRSAPRCDAM13",
+          "valid_from": "2017-11-22",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=889",
+          "form_id": "144538",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "40.18",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692222"
+        }
+      ]
+    },
+    {
+      "issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+      "cvm_code": "009512",
+      "cnpj": "33000167000101",
+      "display_name": "PETROLEO BRASILEIRO S.A. PETROBRAS",
+      "control": true,
+      "strata": {
+        "sector": "Petróleo e Gás",
+        "size": "UNKNOWN",
+        "classes": "ON+PN",
+        "multiple_securities": "True",
+        "treasury": "False",
+        "raw_digits": "10",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "1223389000000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "33.000.167/0001-01",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "PETROLEO BRASILEIRO S.A. PETROBRAS",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "7442231382",
+        "QT_ACAO_PREF_CAP_INTEGR": "5446501379",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "12888732761",
+        "QT_ACAO_ORDIN_TESOURO": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "0",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=408"
+      },
+      "document": {
+        "CNPJ_CIA": "33.000.167/0001-01",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "PETROLEO BRASILEIRO S.A. PETROBRAS",
+        "CD_CVM": "009512",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155122",
+        "DT_RECEB": "2026-03-05",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155122",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=458"
+      },
+      "securities": [
+        {
+          "issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+          "security_id": "BR:PETR4",
+          "ticker": "PETR4",
+          "share_class": "PN",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRPETRACNPR6",
+          "valid_from": "2018-05-14",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=612",
+          "form_id": "147760",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "30.82",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692377"
+        },
+        {
+          "issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+          "security_id": "BR:PETR3",
+          "ticker": "PETR3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRPETRACNOR9",
+          "valid_from": "2018-05-14",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=609",
+          "form_id": "147760",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "32.57",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692376"
+        }
+      ]
+    },
+    {
+      "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+      "cvm_code": "025585",
+      "cnpj": "08902291000115",
+      "display_name": "CSN MINERAÇÃO S.A.",
+      "control": false,
+      "strata": {
+        "sector": "Extração Mineral",
+        "size": "LARGE",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "11",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "33553574000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "08.902.291/0001-15",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "2",
+        "DENOM_CIA": "CSN MINERAÇÃO S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "54320445380",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "54320445380",
+        "QT_ACAO_ORDIN_TESOURO": "53294297",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "53294297",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=209"
+      },
+      "document": {
+        "CNPJ_CIA": "08.902.291/0001-15",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "2",
+        "DENOM_CIA": "CSN MINERAÇÃO S.A.",
+        "CD_CVM": "025585",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155318",
+        "DT_RECEB": "2026-03-12",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155318",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=230"
+      },
+      "securities": [
+        {
+          "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+          "security_id": "BR:25585",
+          "ticker": "25585",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": null,
+          "valid_from": "2021-02-12",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=315",
+          "form_id": "147177",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "DATA_GAP",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": null,
+          "price": null,
+          "price_source_reference": null
+        }
+      ]
+    },
+    {
+      "issuer_id": "e8e1f3bd-eab1-4ed0-a503-ced7d797d03e",
+      "cvm_code": "017671",
+      "cnpj": "02558157000162",
+      "display_name": "TELEFÔNICA BRASIL S.A",
+      "control": true,
+      "strata": {
+        "sector": "Telecomunicações",
+        "size": "UNKNOWN",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "10",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "128071708000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "02.558.157/0001-62",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "TELEFÔNICA BRASIL S.A",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "3226546622",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "3226546622",
+        "QT_ACAO_ORDIN_TESOURO": "30940270",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "30940270",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=75"
+      },
+      "document": {
+        "CNPJ_CIA": "02.558.157/0001-62",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "TELEFÔNICA BRASIL S.A",
+        "CD_CVM": "017671",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "154821",
+        "DT_RECEB": "2026-02-23",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154821",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=86"
+      },
+      "securities": [
+        {
+          "issuer_id": "e8e1f3bd-eab1-4ed0-a503-ced7d797d03e",
+          "security_id": "BR:VIVT3",
+          "ticker": "VIVT3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRVIVTACNOR0",
+          "valid_from": "1998-08-19",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=121",
+          "form_id": "144156",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "33.1",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692148"
+        }
+      ]
+    },
+    {
+      "issuer_id": "e9b5b58f-ba9f-4708-8b45-c70315d588b9",
+      "cvm_code": "017450",
+      "cnpj": "02387241000160",
+      "display_name": "RUMO S.A.",
+      "control": true,
+      "strata": {
+        "sector": "Emp. Adm. Part. - Serviços Transporte e Logística",
+        "size": "UNKNOWN",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "10",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "53783092000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "02.387.241/0001-60",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "RUMO S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "1858828617",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "1858828617",
+        "QT_ACAO_ORDIN_TESOURO": "3042509",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "3042509",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=66"
+      },
+      "document": {
+        "CNPJ_CIA": "02.387.241/0001-60",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "RUMO S.A.",
+        "CD_CVM": "017450",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "155068",
+        "DT_RECEB": "2026-03-04",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155068",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=75"
+      },
+      "securities": [
+        {
+          "issuer_id": "e9b5b58f-ba9f-4708-8b45-c70315d588b9",
+          "security_id": "BR:RAIL3",
+          "ticker": "RAIL3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRRAILACNOR9",
+          "valid_from": "2015-04-01",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=105",
+          "form_id": "150936",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "14.76",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692292"
+        }
+      ]
+    },
+    {
+      "issuer_id": "eb89bcc0-8295-45c6-91c7-8832ce58d76f",
+      "cvm_code": "005410",
+      "cnpj": "84429695000111",
+      "display_name": "WEG S.A.",
+      "control": true,
+      "strata": {
+        "sector": "Emp. Adm. Part. - Máqs., Equip., Veíc. e Peças",
+        "size": "UNKNOWN",
+        "classes": "ON",
+        "multiple_securities": "False",
+        "treasury": "True",
+        "raw_digits": "10",
+        "raw_fractional": "False"
+      },
+      "assets_for_stratification": "42645030000.0000000000",
+      "capital": {
+        "CNPJ_CIA": "84.429.695/0001-11",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "WEG S.A.",
+        "QT_ACAO_ORDIN_CAP_INTEGR": "4197317998",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "4197317998",
+        "QT_ACAO_ORDIN_TESOURO": "1622025",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_TESOURO": "1622025",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=622"
+      },
+      "document": {
+        "CNPJ_CIA": "84.429.695/0001-11",
+        "DT_REFER": "2025-12-31",
+        "VERSAO": "1",
+        "DENOM_CIA": "WEG S.A.",
+        "CD_CVM": "005410",
+        "CATEG_DOC": "DFP",
+        "ID_DOC": "154872",
+        "DT_RECEB": "2026-02-25",
+        "LINK_DOC": "http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154872",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_2025.csv|line=706"
+      },
+      "securities": [
+        {
+          "issuer_id": "eb89bcc0-8295-45c6-91c7-8832ce58d76f",
+          "security_id": "BR:WEGE3",
+          "ticker": "WEGE3",
+          "share_class": "ON",
+          "preferred_class": null,
+          "unit_composition": null,
+          "isin": "BRWEGEACNOR0",
+          "valid_from": "2007-06-22",
+          "valid_to": null,
+          "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=916",
+          "form_id": "152581",
+          "form_reference": "2025-01-01",
+          "security_status": "RESOLVED",
+          "price_status": "AVAILABLE",
+          "requested_market_date": "2025-12-31",
+          "effective_market_date": "2025-12-30",
+          "price": "48.51",
+          "price_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692121"
+        }
+      ]
+    }
+  ],
+  "universe_snapshot_id": "22db1605-56e5-48ed-985b-4b611dba3a5d",
+  "sample_selection_seconds": 0.9478503999998793
+}

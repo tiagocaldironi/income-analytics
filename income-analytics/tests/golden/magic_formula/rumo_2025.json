@@ -1,0 +1,283 @@
+{
+  "accounting": {
+    "cash_and_equivalents": {
+      "components": [
+        {
+          "account_code": "1.01.01",
+          "account_description": "Caixa e Equivalentes de Caixa",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "7018132000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "7018132.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|017450|2025-12-31|CONSOLIDATED|BPA|1.01.01||2025-12-31",
+          "statement_name": "BPA",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "7018132000.0000000000",
+      "rule_id": "CASH_RULE_001"
+    },
+    "ebit": {
+      "components": [
+        {
+          "account_code": "3.05",
+          "account_description": "Resultado Antes do Resultado Financeiro e dos Tributos",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "4579664000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": "2025-01-01",
+          "raw_value": "4579664.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|017450|2025-12-31|CONSOLIDATED|DRE|3.05|2025-01-01|2025-12-31",
+          "statement_name": "DRE",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "4579664000.0000000000",
+      "rule_id": "EBIT_RULE_002"
+    },
+    "financial_debt_long_term": {
+      "components": [
+        {
+          "account_code": "2.02.01",
+          "account_description": "Empréstimos e Financiamentos",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "22277407000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "22277407.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|017450|2025-12-31|CONSOLIDATED|BPP|2.02.01||2025-12-31",
+          "statement_name": "BPP",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "22277407000.0000000000",
+      "rule_id": "DEBT_LT_RULE_001"
+    },
+    "financial_debt_short_term": {
+      "components": [
+        {
+          "account_code": "2.01.04",
+          "account_description": "Empréstimos e Financiamentos",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "846430000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "846430.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|017450|2025-12-31|CONSOLIDATED|BPP|2.01.04||2025-12-31",
+          "statement_name": "BPP",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "846430000.0000000000",
+      "rule_id": "DEBT_ST_RULE_001"
+    },
+    "net_fixed_assets": {
+      "components": [
+        {
+          "account_code": "1.02.03",
+          "account_description": "Imobilizado",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "23948573000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "23948573.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|017450|2025-12-31|CONSOLIDATED|BPA|1.02.03||2025-12-31",
+          "statement_name": "BPA",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "23948573000.0000000000",
+      "rule_id": "FIXED_ASSET_RULE_001"
+    },
+    "operating_current_assets": {
+      "components": [
+        {
+          "account_code": "1.01.03",
+          "account_description": "Contas a Receber",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "660428000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "660428.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|017450|2025-12-31|CONSOLIDATED|BPA|1.01.03||2025-12-31",
+          "statement_name": "BPA",
+          "statement_scope": "CONSOLIDATED"
+        },
+        {
+          "account_code": "1.01.04",
+          "account_description": "Estoques",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "263489000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "263489.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|017450|2025-12-31|CONSOLIDATED|BPA|1.01.04||2025-12-31",
+          "statement_name": "BPA",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "923917000.0000000000",
+      "rule_id": "NWC_ASSET_RULE_002"
+    },
+    "operating_current_liabilities": {
+      "components": [
+        {
+          "account_code": "2.01.02",
+          "account_description": "Fornecedores",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "1138378000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "1138378.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|017450|2025-12-31|CONSOLIDATED|BPP|2.01.02||2025-12-31",
+          "statement_name": "BPP",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "1138378000.0000000000",
+      "rule_id": "NWC_LIABILITY_RULE_001"
+    }
+  },
+  "capital": {
+    "securities": [
+      {
+        "cvm_code": "017450",
+        "fca_form_id": "150936",
+        "fca_source": "CVM_FCA",
+        "fca_source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|02.387.241/0001-60|2025-01-01|150936|RAIL3",
+        "issued_or_integralized_shares": "1858828617",
+        "issued_source_reference": "dfp_cia_aberta_2025.zip:dfp_cia_aberta_composicao_capital_2025.csv|02.387.241/0001-60|2025-12-31|ON|ISSUED_SHARES|QT_ACAO_ORDIN_CAP_INTEGR",
+        "issuer_id": "e9b5b58f-ba9f-4708-8b45-c70315d588b9",
+        "legacy_issuer_id": "rumo",
+        "normalized_quantity": "1855786108",
+        "outstanding_derivation_rule": "OUTSTANDING = ISSUED_SHARES - TREASURY_SHARES",
+        "outstanding_shares": "1855786108",
+        "quantity_multiplier": "1",
+        "quantity_unit": "UNIT",
+        "reference_date": "2025-12-31",
+        "security_id": "BR:RAIL3",
+        "share_class": "ON",
+        "source": "CVM_DFP_COMPOSICAO_CAPITAL",
+        "source_reference": "dfp_cia_aberta_2025.zip:dfp_cia_aberta_composicao_capital_2025.csv|02.387.241/0001-60|2025-12-31|ON|OUTSTANDING_SHARES|DERIVED_OUTSTANDING",
+        "ticker": "RAIL3",
+        "treasury_shares": "3042509",
+        "treasury_source_reference": "dfp_cia_aberta_2025.zip:dfp_cia_aberta_composicao_capital_2025.csv|02.387.241/0001-60|2025-12-31|ON|TREASURY_SHARES|QT_ACAO_ORDIN_TESOURO",
+        "valid_from": "2015-04-01",
+        "valid_to": null
+      }
+    ]
+  },
+  "expected": {
+    "cash_and_equivalents": "7018132000.0000000000",
+    "earnings_yield": "0.1052866320407959569016255136",
+    "ebit": "4579664000.0000000000",
+    "enterprise_value": "43497107954.0800000000",
+    "financial_debt_long_term": "22277407000.0000000000",
+    "financial_debt_short_term": "846430000.0000000000",
+    "financial_debt_total": "23123837000.0000000000",
+    "invested_capital": "23734112000.0000000000",
+    "market_cap": "27391402954.08",
+    "net_debt": "16105705000.0000000000",
+    "net_fixed_assets": "23948573000.0000000000",
+    "net_working_capital": "-214461000.0000000000",
+    "operating_current_assets": "923917000.0000000000",
+    "operating_current_liabilities": "1138378000.0000000000",
+    "return_on_capital": "0.1929570400611575440446223562"
+  },
+  "fixture_status": "READY_FOR_VALIDATION",
+  "issuer": {
+    "cnpj": "02387241000160",
+    "cvm_code": "017450",
+    "display_name": "Rumo S.A.",
+    "issuer_id": "e9b5b58f-ba9f-4708-8b45-c70315d588b9",
+    "slug": "rumo"
+  },
+  "legacy_fixture_hash": "5b234d636ac843e814ce063898f767baa4f3c087214d5f21e56865c3b03e2b86",
+  "legacy_issuer_id": "017450",
+  "lineage_complete": true,
+  "lineage_missing": [],
+  "methodology_version": "MAGIC_FORMULA_STOCKS_V1",
+  "prices": [
+    {
+      "currency": "BRL",
+      "effective_date": "2025-12-30",
+      "price": "14.76",
+      "record_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692292|date=20251230|ticker=RAIL3|close=14.76",
+      "requested_reference_date": "2025-12-31",
+      "source": "B3_COTAHIST",
+      "source_file": "COTAHIST_A2025.ZIP",
+      "ticker": "RAIL3"
+    }
+  ],
+  "reference": {
+    "adapter_version": "CVM_MAGIC_FORMULA_ADAPTER_V2_COMPONENT_LINEAGE",
+    "financial_reference_date": "2025-12-31",
+    "market_reference_date": "2025-12-31",
+    "price_effective_date": "2025-12-30"
+  },
+  "reference_date": "2025-12-31",
+  "schema_version": "MAGIC_FORMULA_GOLDEN_V2",
+  "security": [
+    {
+      "cnpj": "02387241000160",
+      "fca_form_id": "150936",
+      "fca_source": "CVM_FCA",
+      "fca_source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|02.387.241/0001-60|2025-01-01|150936|RAIL3",
+      "issuer_id": "e9b5b58f-ba9f-4708-8b45-c70315d588b9",
+      "security_id": "BR:RAIL3",
+      "share_class": "ON",
+      "ticker": "RAIL3",
+      "valid_from": "2015-04-01",
+      "valid_to": null
+    }
+  ]
+}

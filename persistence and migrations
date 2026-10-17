@@ -1,0 +1,1127 @@
+[1mdiff --git a/income-analytics/src/income_analytics/api/routers/dashboard.py b/income-analytics/src/income_analytics/api/routers/dashboard.py[m
+[1mindex d92bd3a..b981453 100644[m
+[1m--- a/income-analytics/src/income_analytics/api/routers/dashboard.py[m
+[1m+++ b/income-analytics/src/income_analytics/api/routers/dashboard.py[m
+[36m@@ -11,9 +11,11 @@[m [mfrom pydantic import BaseModel, Field[m
+ [m
+ from income_analytics.application.portfolio_session import PortfolioSession[m
+ from income_analytics.domain.allocation_policy import AllocationPolicy[m
+[32m+[m[32mfrom income_analytics.domain.asset_allocation_policy import AssetAllocationPolicy[m
+ from income_analytics.domain.enums.asset_class import AssetClass[m
+ from income_analytics.domain.enums.financial_event_type import FinancialEventType[m
+ from income_analytics.domain.projectors.asset_rebalancing_projector import AssetAllocationStrategy[m
+[32m+[m[32mfrom income_analytics.domain.read_models.diversification_projection import DiversificationDimension[m
+ from income_analytics.domain.read_models.portfolio_projection import PortfolioProjection[m
+ from income_analytics.domain.value_objects.money import Money[m
+ [m
+[36m@@ -28,6 +30,9 @@[m [mclass TradeInput(BaseModel):[m
+     unit_price: Decimal = Field(gt=0)[m
+     effective_date: date[m
+     asset_class: AssetClass[m
+[32m+[m[32m    country: str = Field(default="BR", min_length=1, max_length=16)[m
+[32m+[m[32m    currency_code: str = Field(default="BRL", min_length=1, max_length=12)[m
+[32m+[m[32m    sector: str | None = Field(default=None, max_length=80)[m
+ [m
+ [m
+ class MarketPriceInput(BaseModel):[m
+[36m@@ -66,6 +71,10 @@[m [mclass AllocationPolicyInput(BaseModel):[m
+     targets: dict[AssetClass, Decimal][m
+ [m
+ [m
+[32m+[m[32mclass AssetAllocationPolicyInput(BaseModel):[m
+[32m+[m[32m    targets: dict[AssetClass, dict[str, Decimal]][m
+[32m+[m
+[32m+[m
+ class ContributionSimulationInput(BaseModel):[m
+     amount: Decimal = Field(gt=0)[m
+ [m
+[36m@@ -137,6 +146,9 @@[m [mdef create_trade(trade: TradeInput) -> dict[str, object]:[m
+             event_type=FinancialEventType(trade.event_type),[m
+             ticker=trade.ticker,[m
+             asset_class=trade.asset_class,[m
+[32m+[m[32m            country=trade.country,[m
+[32m+[m[32m            currency_code=trade.currency_code,[m
+[32m+[m[32m            sector=trade.sector,[m
+             quantity=trade.quantity,[m
+             unit_price=trade.unit_price,[m
+             effective_date=trade.effective_date,[m
+[36m@@ -275,6 +287,27 @@[m [mdef get_portfolio_risk(start_date: date, end_date: date) -> dict[str, object]:[m
+     }[m
+ [m
+ [m
+[32m+[m[32m@router.get("/portfolio/risk-contribution")[m
+[32m+[m[32mdef get_portfolio_risk_contribution(as_of: date | None = None) -> dict[str, object]:[m
+[32m+[m[32m    risk = session.risk_contribution(as_of=as_of)[m
+[32m+[m[32m    return {[m
+[32m+[m[32m        "portfolio_volatility": risk.portfolio_volatility,[m
+[32m+[m[32m        "risk_coverage": risk.risk_coverage,[m
+[32m+[m[32m        "covariance": risk.covariance,[m
+[32m+[m[32m        "correlation": risk.correlation,[m
+[32m+[m[32m        "assets": [[m
+[32m+[m[32m            {[m
+[32m+[m[32m                "ticker": item.ticker,[m
+[32m+[m[32m                "weight": item.weight,[m
+[32m+[m[32m                "volatility": item.volatility,[m
+[32m+[m[32m                "risk_contribution": item.contribution,[m
+[32m+[m[32m                "risk_contribution_share": item.contribution_share,[m
+[32m+[m[32m            }[m
+[32m+[m[32m            for item in risk.assets[m
+[32m+[m[32m        ],[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m
+ @router.get("/portfolio/allocation")[m
+ def get_portfolio_allocation(as_of: date | None = None) -> dict[str, object]:[m
+     allocation = session.allocation(as_of=as_of)[m
+[36m@@ -338,6 +371,52 @@[m [mdef get_portfolio_class_allocation(as_of: date | None = None) -> dict[str, objec[m
+     }[m
+ [m
+ [m
+[32m+[m[32m@router.get("/portfolio/diversification")[m
+[32m+[m[32mdef get_portfolio_diversification(as_of: date | None = None) -> dict[str, object]:[m
+[32m+[m[32m    projection = session.diversification(as_of=as_of)[m
+[32m+[m
+[32m+[m[32m    def serialize(dimension: DiversificationDimension) -> dict[str, object]:[m
+[32m+[m[32m        return {[m
+[32m+[m[32m            "exposures": [{"key": item.key, "weight": item.weight} for item in dimension.exposures],[m
+[32m+[m[32m            "hhi": dimension.hhi,[m
+[32m+[m[32m            "coverage": dimension.coverage,[m
+[32m+[m[32m            "unavailable_reason": dimension.unavailable_reason,[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m    return {[m
+[32m+[m[32m        "asset": serialize(projection.asset),[m
+[32m+[m[32m        "asset_class": serialize(projection.asset_class),[m
+[32m+[m[32m        "sector": serialize(projection.sector),[m
+[32m+[m[32m        "country": serialize(projection.country),[m
+[32m+[m[32m        "currency": serialize(projection.currency),[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@router.get("/portfolio/intelligence")[m
+[32m+[m[32mdef get_portfolio_intelligence(as_of: date | None = None) -> dict[str, object]:[m
+[32m+[m[32m    intelligence = session.intelligence(as_of=as_of)[m
+[32m+[m[32m    return {[m
+[32m+[m[32m        "as_of": intelligence.as_of,[m
+[32m+[m[32m        "counts": {[m
+[32m+[m[32m            "info": intelligence.info_count,[m
+[32m+[m[32m            "attention": intelligence.attention_count,[m
+[32m+[m[32m            "high_attention": intelligence.high_attention_count,[m
+[32m+[m[32m        },[m
+[32m+[m[32m        "findings": [[m
+[32m+[m[32m            {[m
+[32m+[m[32m                "code": finding.code,[m
+[32m+[m[32m                "category": finding.category,[m
+[32m+[m[32m                "severity": finding.severity,[m
+[32m+[m[32m                "title": finding.title,[m
+[32m+[m[32m                "description": finding.description,[m
+[32m+[m[32m                "evidence": finding.evidence,[m
+[32m+[m[32m                "as_of": finding.as_of,[m
+[32m+[m[32m            }[m
+[32m+[m[32m            for finding in intelligence.findings[m
+[32m+[m[32m        ],[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m
+ @router.put("/allocation-policy")[m
+ def set_allocation_policy(policy: AllocationPolicyInput) -> dict[str, str]:[m
+     try:[m
+[36m@@ -349,6 +428,17 @@[m [mdef set_allocation_policy(policy: AllocationPolicyInput) -> dict[str, str]:[m
+     return {"status": "updated"}[m
+ [m
+ [m
+[32m+[m[32m@router.put("/asset-allocation-policy")[m
+[32m+[m[32mdef set_asset_allocation_policy(policy: AssetAllocationPolicyInput) -> dict[str, str]:[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        session.set_asset_allocation_policy(AssetAllocationPolicy(targets=policy.targets))[m
+[32m+[m[32m    except ValueError as error:[m
+[32m+[m[32m        raise HTTPException([m
+[32m+[m[32m            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)[m
+[32m+[m[32m        ) from error[m
+[32m+[m[32m    return {"status": "updated"}[m
+[32m+[m
+[32m+[m
+ @router.get("/portfolio/allocation-analysis")[m
+ def get_allocation_analysis(as_of: date | None = None) -> dict[str, object]:[m
+     try:[m
+[1mdiff --git a/income-analytics/src/income_analytics/application/portfolio_session.py b/income-analytics/src/income_analytics/application/portfolio_session.py[m
+[1mindex a37bb78..b02e2e8 100644[m
+[1m--- a/income-analytics/src/income_analytics/application/portfolio_session.py[m
+[1m+++ b/income-analytics/src/income_analytics/application/portfolio_session.py[m
+[36m@@ -8,6 +8,7 @@[m [mfrom decimal import Decimal[m
+ from uuid import UUID, uuid4[m
+ [m
+ from income_analytics.domain.allocation_policy import AllocationPolicy[m
+[32m+[m[32mfrom income_analytics.domain.asset_allocation_policy import AssetAllocationPolicy[m
+ from income_analytics.domain.benchmark_rate import BenchmarkRate[m
+ from income_analytics.domain.entities.asset import Asset[m
+ from income_analytics.domain.entities.currency import Currency[m
+[36m@@ -26,18 +27,30 @@[m [mfrom income_analytics.domain.projectors.asset_rebalancing_projector import ([m
+     AssetRebalancingProjector,[m
+ )[m
+ from income_analytics.domain.projectors.class_allocation_projector import ClassAllocationProjector[m
+[32m+[m[32mfrom income_analytics.domain.projectors.diversification_projector import DiversificationProjector[m
+ from income_analytics.domain.projectors.performance_projector import PerformanceProjector[m
+[32m+[m[32mfrom income_analytics.domain.projectors.portfolio_diagnostic_engine import ([m
+[32m+[m[32m    PortfolioDiagnosticEngine,[m
+[32m+[m[32m)[m
+ from income_analytics.domain.projectors.portfolio_projector import PortfolioProjector[m
+[32m+[m[32mfrom income_analytics.domain.projectors.risk_contribution_projector import ([m
+[32m+[m[32m    RiskContributionProjector,[m
+[32m+[m[32m)[m
+ from income_analytics.domain.projectors.risk_projector import RiskProjector[m
+ from income_analytics.domain.read_models.allocation_analysis import PortfolioAllocationAnalysis[m
+ from income_analytics.domain.read_models.allocation_projection import AllocationProjection[m
+ from income_analytics.domain.read_models.class_allocation_projection import ([m
+     ClassAllocationProjection,[m
+ )[m
+[32m+[m[32mfrom income_analytics.domain.read_models.diversification_projection import DiversificationProjection[m
+ from income_analytics.domain.read_models.performance_projection import PerformanceProjection[m
+ from income_analytics.domain.read_models.portfolio_history import PortfolioHistory[m
+[32m+[m[32mfrom income_analytics.domain.read_models.portfolio_intelligence import PortfolioIntelligence[m
+ from income_analytics.domain.read_models.portfolio_projection import PortfolioProjection[m
+ from income_analytics.domain.read_models.rebalancing_projection import RebalancingProjection[m
+[32m+[m[32mfrom income_analytics.domain.read_models.risk_contribution_projection import ([m
+[32m+[m[32m    RiskContributionProjection,[m
+[32m+[m[32m)[m
+ from income_analytics.domain.read_models.risk_projection import RiskProjection[m
+ from income_analytics.domain.value_objects.money import Money[m
+ from income_analytics.domain.value_objects.quantity import Quantity[m
+[36m@@ -56,6 +69,7 @@[m [mclass PortfolioSession:[m
+     _market_prices: list[MarketPrice] = field(default_factory=list, init=False)[m
+     _benchmark_rates: list[BenchmarkRate] = field(default_factory=list, init=False)[m
+     _allocation_policy: AllocationPolicy | None = field(default=None, init=False)[m
+[32m+[m[32m    _asset_allocation_policy: AssetAllocationPolicy | None = field(default=None, init=False)[m
+ [m
+     def register_trade([m
+         self,[m
+[36m@@ -63,6 +77,9 @@[m [mclass PortfolioSession:[m
+         event_type: FinancialEventType,[m
+         ticker: str,[m
+         asset_class: AssetClass = AssetClass.OTHER,[m
+[32m+[m[32m        country: str = "BR",[m
+[32m+[m[32m        currency_code: str = "BRL",[m
+[32m+[m[32m        sector: str | None = None,[m
+         quantity: Decimal,[m
+         unit_price: Decimal,[m
+         effective_date: date = DEFAULT_EFFECTIVE_DATE,[m
+[36m@@ -72,7 +89,12 @@[m [mclass PortfolioSession:[m
+         asset = self._assets.get(normalized_ticker)[m
+         if asset is None:[m
+             asset = self._create_asset([m
+[31m-                normalized_ticker, name=normalized_ticker, asset_class=asset_class[m
+[32m+[m[32m                normalized_ticker,[m
+[32m+[m[32m                name=normalized_ticker,[m
+[32m+[m[32m                asset_class=asset_class,[m
+[32m+[m[32m                country=country,[m
+[32m+[m[32m                currency_code=currency_code,[m
+[32m+[m[32m                sector=sector,[m
+             )[m
+             self._assets[normalized_ticker] = asset[m
+ [m
+[36m@@ -215,6 +237,16 @@[m [mclass PortfolioSession:[m
+             end_date=end_date,[m
+         )[m
+ [m
+[32m+[m[32m    def risk_contribution(self, *, as_of: date | None = None) -> RiskContributionProjection:[m
+[32m+[m[32m        cutoff = as_of or date.max[m
+[32m+[m[32m        prices: dict[str, dict[date, Decimal]] = {}[m
+[32m+[m[32m        for point in self._market_prices:[m
+[32m+[m[32m            if point.effective_date <= cutoff:[m
+[32m+[m[32m                prices.setdefault(str(point.asset.ticker), {})[point.effective_date] = ([m
+[32m+[m[32m                    point.price.amount[m
+[32m+[m[32m                )[m
+[32m+[m[32m        return RiskContributionProjector.project(self.allocation(as_of=as_of), prices)[m
+[32m+[m
+     def allocation(self, *, as_of: date | None = None) -> AllocationProjection:[m
+         """Return point-in-time allocation and per-asset result contribution."""[m
+         return AllocationProjector.project(self.projection(as_of=as_of))[m
+[36m@@ -222,9 +254,27 @@[m [mclass PortfolioSession:[m
+     def class_allocation(self, *, as_of: date | None = None) -> ClassAllocationProjection:[m
+         return ClassAllocationProjector.project(self.allocation(as_of=as_of))[m
+ [m
+[32m+[m[32m    def diversification(self, *, as_of: date | None = None) -> DiversificationProjection:[m
+[32m+[m[32m        return DiversificationProjector.project(self.allocation(as_of=as_of))[m
+[32m+[m
+[32m+[m[32m    def intelligence(self, *, as_of: date | None = None) -> PortfolioIntelligence:[m
+[32m+[m[32m        allocation = self.allocation(as_of=as_of)[m
+[32m+[m[32m        analysis = self.allocation_analysis(as_of=as_of) if self._allocation_policy else None[m
+[32m+[m[32m        return PortfolioDiagnosticEngine.analyze([m
+[32m+[m[32m            allocation=allocation,[m
+[32m+[m[32m            diversification=DiversificationProjector.project(allocation),[m
+[32m+[m[32m            risk=self.risk_contribution(as_of=as_of),[m
+[32m+[m[32m            allocation_analysis=analysis,[m
+[32m+[m[32m            as_of=as_of,[m
+[32m+[m[32m        )[m
+[32m+[m
+     def set_allocation_policy(self, policy: AllocationPolicy) -> None:[m
+         self._allocation_policy = policy[m
+ [m
+[32m+[m[32m    def set_asset_allocation_policy(self, policy: AssetAllocationPolicy) -> None:[m
+[32m+[m[32m        policy.validate_assets(tuple(self._assets.values()))[m
+[32m+[m[32m        self._asset_allocation_policy = policy[m
+[32m+[m
+     def allocation_analysis(self, *, as_of: date | None = None) -> PortfolioAllocationAnalysis:[m
+         if self._allocation_policy is None:[m
+             raise ValueError("Defina uma política de alocação-alvo primeiro.")[m
+[36m@@ -239,7 +289,7 @@[m [mclass PortfolioSession:[m
+         self, *, asset_class: AssetClass, amount: Decimal, strategy: AssetAllocationStrategy[m
+     ) -> tuple[tuple[str, Money], ...]:[m
+         return AssetRebalancingProjector.distribute([m
+[31m-            self.allocation(), asset_class, Money(amount), strategy[m
+[32m+[m[32m            self.allocation(), asset_class, Money(amount), strategy, self._asset_allocation_policy[m
+         )[m
+ [m
+     def update_asset_class(self, *, ticker: str, asset_class: AssetClass) -> None:[m
+[36m@@ -256,16 +306,26 @@[m [mclass PortfolioSession:[m
+         self._benchmark_rates.clear()[m
+ [m
+     @staticmethod[m
+[31m-    def _create_asset(ticker: str, *, name: str, asset_class: AssetClass) -> Asset:[m
+[32m+[m[32m    def _create_asset([m
+[32m+[m[32m        ticker: str,[m
+[32m+[m[32m        *,[m
+[32m+[m[32m        name: str,[m
+[32m+[m[32m        asset_class: AssetClass,[m
+[32m+[m[32m        country: str = "BR",[m
+[32m+[m[32m        currency_code: str = "BRL",[m
+[32m+[m[32m        sector: str | None = None,[m
+[32m+[m[32m    ) -> Asset:[m
+         return Asset([m
+             ticker=Ticker(ticker),[m
+             name=name,[m
+             asset_type=AssetType.STOCK,[m
+             asset_class=asset_class,[m
+[32m+[m[32m            country=country,[m
+[32m+[m[32m            sector=sector,[m
+             currency=Currency([m
+[31m-                code="BRL",[m
+[31m-                name="Real brasileiro",[m
+[31m-                symbol="R$",[m
+[32m+[m[32m                code=currency_code,[m
+[32m+[m[32m                name=currency_code,[m
+[32m+[m[32m                symbol=currency_code,[m
+                 decimal_places=2,[m
+             ),[m
+             institution=Institution(name="Cadastro local"),[m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/asset_allocation_policy.py b/income-analytics/src/income_analytics/domain/asset_allocation_policy.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..eb8cde4[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/domain/asset_allocation_policy.py[m
+[36m@@ -0,0 +1,42 @@[m
+[32m+[m[32m"""Editable target weights for assets inside a portfolio asset class."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom dataclasses import dataclass[m
+[32m+[m[32mfrom decimal import Decimal[m
+[32m+[m
+[32m+[m[32mfrom income_analytics.domain.entities.asset import Asset[m
+[32m+[m[32mfrom income_analytics.domain.enums.asset_class import AssetClass[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass AssetAllocationPolicy:[m
+[32m+[m[32m    """Current (non-versioned) target weights within each configured class."""[m
+[32m+[m
+[32m+[m[32m    targets: dict[AssetClass, dict[str, Decimal]][m
+[32m+[m
+[32m+[m[32m    def __post_init__(self) -> None:[m
+[32m+[m[32m        for asset_class, class_targets in self.targets.items():[m
+[32m+[m[32m            if not class_targets:[m
+[32m+[m[32m                raise ValueError(f"A classe {asset_class.value} precisa ter ao menos um ativo.")[m
+[32m+[m[32m            if any(weight < 0 or weight > 1 for weight in class_targets.values()):[m
+[32m+[m[32m                raise ValueError("Cada peso-alvo por ativo deve estar entre 0 e 1.")[m
+[32m+[m[32m            total = sum(class_targets.values(), Decimal("0"))[m
+[32m+[m[32m            if abs(total - Decimal("1")) > Decimal("0.000001"):[m
+[32m+[m[32m                raise ValueError("Os pesos-alvo dos ativos da classe devem somar 100%.")[m
+[32m+[m
+[32m+[m[32m    def validate_assets(self, assets: tuple[Asset, ...]) -> None:[m
+[32m+[m[32m        by_ticker = {str(asset.ticker): asset for asset in assets}[m
+[32m+[m[32m        for asset_class, class_targets in self.targets.items():[m
+[32m+[m[32m            eligible = {[m
+[32m+[m[32m                ticker[m
+[32m+[m[32m                for ticker, asset in by_ticker.items()[m
+[32m+[m[32m                if asset.asset_class is asset_class[m
+[32m+[m[32m            }[m
+[32m+[m[32m            if set(class_targets) != eligible:[m
+[32m+[m[32m                raise ValueError([m
+[32m+[m[32m                    f"A política de {asset_class.value} deve incluir todos os ativos da classe."[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m    def target_for(self, asset: Asset) -> Decimal | None:[m
+[32m+[m[32m        return self.targets.get(asset.asset_class, {}).get(str(asset.ticker))[m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/entities/asset.py b/income-analytics/src/income_analytics/domain/entities/asset.py[m
+[1mindex 0f4b65c..2e38a1f 100644[m
+[1m--- a/income-analytics/src/income_analytics/domain/entities/asset.py[m
+[1m+++ b/income-analytics/src/income_analytics/domain/entities/asset.py[m
+[36m@@ -31,6 +31,8 @@[m [mclass Asset(Entity):[m
+     currency: Currency[m
+     institution: Institution[m
+     asset_class: AssetClass[m
+[32m+[m[32m    country: str = "BR"[m
+[32m+[m[32m    sector: str | None = None[m
+     isin: str | None = None[m
+     current_price: Money | None = None[m
+     active: bool = True[m
+[36m@@ -62,6 +64,21 @@[m [mclass Asset(Entity):[m
+         if not isinstance(self.asset_class, AssetClass):[m
+             raise TypeError("Asset class must be an AssetClass.")[m
+ [m
+[32m+[m[32m        if not isinstance(self.country, str) or not self.country.strip():[m
+[32m+[m[32m            raise ValueError("Asset country is required.")[m
+[32m+[m[32m        country = self.country.strip().upper()[m
+[32m+[m[32m        if len(country) > 16:[m
+[32m+[m[32m            raise ValueError("Asset country cannot have more than 16 characters.")[m
+[32m+[m[32m        object.__setattr__(self, "country", country)[m
+[32m+[m
+[32m+[m[32m        if self.sector is not None:[m
+[32m+[m[32m            if not isinstance(self.sector, str) or not self.sector.strip():[m
+[32m+[m[32m                raise ValueError("Asset sector must be a non-empty string when provided.")[m
+[32m+[m[32m            sector = self.sector.strip().upper()[m
+[32m+[m[32m            if len(sector) > 80:[m
+[32m+[m[32m                raise ValueError("Asset sector cannot have more than 80 characters.")[m
+[32m+[m[32m            object.__setattr__(self, "sector", sector)[m
+[32m+[m
+         if self.currency is None:[m
+             raise ValueError("Asset currency is required.")[m
+ [m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/projectors/asset_rebalancing_projector.py b/income-analytics/src/income_analytics/domain/projectors/asset_rebalancing_projector.py[m
+[1mindex f4f4ba9..03b76e0 100644[m
+[1m--- a/income-analytics/src/income_analytics/domain/projectors/asset_rebalancing_projector.py[m
+[1m+++ b/income-analytics/src/income_analytics/domain/projectors/asset_rebalancing_projector.py[m
+[36m@@ -5,14 +5,20 @@[m [mfrom __future__ import annotations[m
+ from decimal import Decimal[m
+ from enum import StrEnum[m
+ [m
+[32m+[m[32mfrom income_analytics.domain.asset_allocation_policy import AssetAllocationPolicy[m
+ from income_analytics.domain.enums.asset_class import AssetClass[m
+ from income_analytics.domain.read_models.allocation_projection import AllocationProjection[m
+[32m+[m[32mfrom income_analytics.domain.read_models.asset_rebalancing_plan import ([m
+[32m+[m[32m    AssetRebalancingAllocation,[m
+[32m+[m[32m    AssetRebalancingPlan,[m
+[32m+[m[32m)[m
+ from income_analytics.domain.value_objects.money import Money[m
+ [m
+ [m
+ class AssetAllocationStrategy(StrEnum):[m
+     PROPORTIONAL_TO_CURRENT_WEIGHT = "PROPORTIONAL_TO_CURRENT_WEIGHT"[m
+     EQUAL_WEIGHT_WITHIN_CLASS = "EQUAL_WEIGHT_WITHIN_CLASS"[m
+[32m+[m[32m    TARGET_WEIGHT_WITHIN_CLASS = "TARGET_WEIGHT_WITHIN_CLASS"[m
+ [m
+ [m
+ class AssetRebalancingProjector:[m
+[36m@@ -23,7 +29,20 @@[m [mclass AssetRebalancingProjector:[m
+         asset_class: AssetClass,[m
+         amount: Money,[m
+         strategy: AssetAllocationStrategy,[m
+[32m+[m[32m        policy: AssetAllocationPolicy | None = None,[m
+     ) -> tuple[tuple[str, Money], ...]:[m
+[32m+[m[32m        plan = cls.plan(allocation, asset_class, amount, strategy, policy)[m
+[32m+[m[32m        return tuple((item.ticker, item.allocated_amount) for item in plan.allocations)[m
+[32m+[m
+[32m+[m[32m    @classmethod[m
+[32m+[m[32m    def plan([m
+[32m+[m[32m        cls,[m
+[32m+[m[32m        allocation: AllocationProjection,[m
+[32m+[m[32m        asset_class: AssetClass,[m
+[32m+[m[32m        amount: Money,[m
+[32m+[m[32m        strategy: AssetAllocationStrategy,[m
+[32m+[m[32m        policy: AssetAllocationPolicy | None = None,[m
+[32m+[m[32m    ) -> AssetRebalancingPlan:[m
+         assets = [[m
+             item[m
+             for item in allocation.assets[m
+[36m@@ -32,13 +51,44 @@[m [mclass AssetRebalancingProjector:[m
+             and item.position.current_price[m
+         ][m
+         if not assets or amount.is_zero:[m
+[31m-            return ()[m
+[32m+[m[32m            return AssetRebalancingPlan([m
+[32m+[m[32m                asset_class=asset_class, class_amount=amount, strategy=strategy.value,[m
+[32m+[m[32m                allocations=(), unallocated_amount=amount,[m
+[32m+[m[32m            )[m
+         if strategy is AssetAllocationStrategy.EQUAL_WEIGHT_WITHIN_CLASS:[m
+             weights = [Decimal("1") / Decimal(len(assets))] * len(assets)[m
+[32m+[m[32m        elif strategy is AssetAllocationStrategy.TARGET_WEIGHT_WITHIN_CLASS:[m
+[32m+[m[32m            if policy is None:[m
+[32m+[m[32m                raise ValueError("A estratégia por alvo exige uma política-alvo por ativo.")[m
+[32m+[m[32m            policy_weights = [policy.target_for(item.position.asset) for item in assets][m
+[32m+[m[32m            if any(weight is None for weight in policy_weights):[m
+[32m+[m[32m                raise ValueError("Todos os ativos da classe precisam ter peso-alvo.")[m
+[32m+[m[32m            weights = [weight for weight in policy_weights if weight is not None][m
+         else:[m
+             total = sum((item.position.market_value.amount for item in assets), Decimal("0"))[m
+             weights = [item.position.market_value.amount / total for item in assets][m
+[31m-        return tuple([m
+[31m-            (str(item.position.asset.ticker), Money(amount.amount * weight))[m
+[31m-            for item, weight in zip(assets, weights, strict=True)[m
+[32m+[m[32m        typed_weights = weights[m
+[32m+[m[32m        cents = amount.amount.quantize(Decimal("0.01"))[m
+[32m+[m[32m        provisional = [[m
+[32m+[m[32m            (cents * weight).quantize(Decimal("0.01"), rounding="ROUND_DOWN")[m
+[32m+[m[32m            for weight in typed_weights[m
+[32m+[m[32m        ][m
+[32m+[m[32m        residual_cents = int((cents - sum(provisional, Decimal("0"))) * 100)[m
+[32m+[m[32m        for index in range(residual_cents):[m
+[32m+[m[32m            provisional[index % len(provisional)] += Decimal("0.01")[m
+[32m+[m[32m        class_value = sum((item.position.market_value.amount for item in assets), Decimal("0"))[m
+[32m+[m[32m        return AssetRebalancingPlan([m
+[32m+[m[32m            asset_class=asset_class,[m
+[32m+[m[32m            class_amount=amount,[m
+[32m+[m[32m            strategy=strategy.value,[m
+[32m+[m[32m            allocations=tuple([m
+[32m+[m[32m                AssetRebalancingAllocation([m
+[32m+[m[32m                    ticker=str(item.position.asset.ticker), allocated_amount=Money(value),[m
+[32m+[m[32m                    current_weight_within_class=item.position.market_value.amount / class_value,[m
+[32m+[m[32m                    simulated_weight_within_class=(item.position.market_value.amount + value)[m
+[32m+[m[32m                    / (class_value + cents),[m
+[32m+[m[32m                )[m
+[32m+[m[32m                for item, value in zip(assets, provisional, strict=True)[m
+[32m+[m[32m            ),[m
+[32m+[m[32m            unallocated_amount=Money(cents - sum(provisional, Decimal("0"))),[m
+         )[m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/projectors/diversification_projector.py b/income-analytics/src/income_analytics/domain/projectors/diversification_projector.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..9b80e15[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/domain/projectors/diversification_projector.py[m
+[36m@@ -0,0 +1,78 @@[m
+[32m+[m[32m"""Derive concentration across structural asset dimensions."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom collections import defaultdict[m
+[32m+[m[32mfrom decimal import Decimal[m
+[32m+[m[32mfrom typing import Callable[m
+[32m+[m
+[32m+[m[32mfrom income_analytics.domain.read_models.allocation_projection import ([m
+[32m+[m[32m    AllocationProjection,[m
+[32m+[m[32m    AssetAllocation,[m
+[32m+[m[32m)[m
+[32m+[m[32mfrom income_analytics.domain.read_models.diversification_projection import ([m
+[32m+[m[32m    DimensionExposure,[m
+[32m+[m[32m    DiversificationDimension,[m
+[32m+[m[32m    DiversificationProjection,[m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m
+[32m+[m[32mclass DiversificationProjector:[m
+[32m+[m[32m    @classmethod[m
+[32m+[m[32m    def project(cls, allocation: AllocationProjection) -> DiversificationProjection:[m
+[32m+[m[32m        asset = cls._dimension(allocation, lambda item: str(item.position.asset.ticker))[m
+[32m+[m[32m        classes = cls._dimension(allocation, lambda item: item.position.asset.asset_class.value)[m
+[32m+[m[32m        sector = cls._dimension([m
+[32m+[m[32m            allocation, lambda item: item.position.asset.sector or "NOT_APPLICABLE"[m
+[32m+[m[32m        )[m
+[32m+[m[32m        country = cls._dimension(allocation, lambda item: item.position.asset.country)[m
+[32m+[m[32m        currency_codes = {[m
+[32m+[m[32m            item.position.asset.currency.code[m
+[32m+[m[32m            for item in allocation.assets[m
+[32m+[m[32m            if not item.position.is_empty and item.position.current_price[m
+[32m+[m[32m        }[m
+[32m+[m[32m        currency = ([m
+[32m+[m[32m            cls._dimension(allocation, lambda item: item.position.asset.currency.code)[m
+[32m+[m[32m            if len(currency_codes) <= 1[m
+[32m+[m[32m            else cls._unavailable(allocation, "Exposição monetária requer conversão FX.")[m
+[32m+[m[32m        )[m
+[32m+[m[32m        return DiversificationProjection([m
+[32m+[m[32m            asset=asset, asset_class=classes, sector=sector, country=country, currency=currency[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m    @staticmethod[m
+[32m+[m[32m    def _dimension([m
+[32m+[m[32m        allocation: AllocationProjection,[m
+[32m+[m[32m        key_for: Callable[[AssetAllocation], str],[m
+[32m+[m[32m    ) -> DiversificationDimension:[m
+[32m+[m[32m        open_assets = [item for item in allocation.assets if not item.position.is_empty][m
+[32m+[m[32m        valued = [item for item in open_assets if item.position.current_price][m
+[32m+[m[32m        if not valued or allocation.valuation_coverage != Decimal("1"):[m
+[32m+[m[32m            return DiversificationProjector._unavailable(allocation, "Valuation incompleto.")[m
+[32m+[m[32m        totals: defaultdict[str, Decimal] = defaultdict(Decimal)[m
+[32m+[m[32m        for item in valued:[m
+[32m+[m[32m            totals[key_for(item)] += item.position.market_value.amount[m
+[32m+[m[32m        total = allocation.portfolio_market_value.amount[m
+[32m+[m[32m        exposures = tuple([m
+[32m+[m[32m            sorted([m
+[32m+[m[32m                (DimensionExposure(key=key, weight=value / total) for key, value in totals.items()),[m
+[32m+[m[32m                key=lambda item: (-item.weight, item.key),[m
+[32m+[m[32m            )[m
+[32m+[m[32m        )[m
+[32m+[m[32m        return DiversificationDimension([m
+[32m+[m[32m            exposures=exposures,[m
+[32m+[m[32m            hhi=sum((item.weight**2 for item in exposures), Decimal("0")),[m
+[32m+[m[32m            largest_exposure=exposures[0] if exposures else None,[m
+[32m+[m[32m            coverage=([m
+[32m+[m[32m                Decimal(len(valued)) / Decimal(len(open_assets))[m
+[32m+[m[32m                if open_assets[m
+[32m+[m[32m                else Decimal("1")[m
+[32m+[m[32m            ),[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m    @staticmethod[m
+[32m+[m[32m    def _unavailable(allocation: AllocationProjection, reason: str) -> DiversificationDimension:[m
+[32m+[m[32m        return DiversificationDimension([m
+[32m+[m[32m            exposures=(), hhi=None, largest_exposure=None,[m
+[32m+[m[32m            coverage=allocation.valuation_coverage, unavailable_reason=reason,[m
+[32m+[m[32m        )[m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/projectors/portfolio_diagnostic_engine.py b/income-analytics/src/income_analytics/domain/projectors/portfolio_diagnostic_engine.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..c5741f5[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/domain/projectors/portfolio_diagnostic_engine.py[m
+[36m@@ -0,0 +1,214 @@[m
+[32m+[m[32m"""Centralized deterministic diagnostic rules."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom datetime import date[m
+[32m+[m[32mfrom decimal import Decimal[m
+[32m+[m
+[32m+[m[32mfrom income_analytics.domain.read_models.allocation_analysis import PortfolioAllocationAnalysis[m
+[32m+[m[32mfrom income_analytics.domain.read_models.allocation_projection import AllocationProjection[m
+[32m+[m[32mfrom income_analytics.domain.read_models.diversification_projection import DiversificationProjection[m
+[32m+[m[32mfrom income_analytics.domain.read_models.portfolio_intelligence import ([m
+[32m+[m[32m    DiagnosticThresholds,[m
+[32m+[m[32m    PortfolioFinding,[m
+[32m+[m[32m    PortfolioIntelligence,[m
+[32m+[m[32m)[m
+[32m+[m[32mfrom income_analytics.domain.read_models.risk_contribution_projection import ([m
+[32m+[m[32m    RiskContributionProjection,[m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m
+[32m+[m[32mclass PortfolioDiagnosticEngine:[m
+[32m+[m[32m    @classmethod[m
+[32m+[m[32m    def analyze([m
+[32m+[m[32m        cls,[m
+[32m+[m[32m        *,[m
+[32m+[m[32m        allocation: AllocationProjection,[m
+[32m+[m[32m        diversification: DiversificationProjection,[m
+[32m+[m[32m        risk: RiskContributionProjection | None = None,[m
+[32m+[m[32m        allocation_analysis: PortfolioAllocationAnalysis | None = None,[m
+[32m+[m[32m        thresholds: DiagnosticThresholds = DiagnosticThresholds(),[m
+[32m+[m[32m        as_of: date | None = None,[m
+[32m+[m[32m    ) -> PortfolioIntelligence:[m
+[32m+[m[32m        findings: list[PortfolioFinding] = [][m
+[32m+[m[32m        cls._asset_rule(findings, allocation, thresholds, as_of)[m
+[32m+[m[32m        cls._dimension_rules(findings, diversification, thresholds, as_of)[m
+[32m+[m[32m        if ([m
+[32m+[m[32m            allocation_analysis[m
+[32m+[m[32m            and allocation_analysis.portfolio_drift > thresholds.max_portfolio_drift[m
+[32m+[m[32m        ):[m
+[32m+[m[32m            findings.append([m
+[32m+[m[32m                cls._finding([m
+[32m+[m[32m                    "PORTFOLIO_DRIFT",[m
+[32m+[m[32m                    "ALLOCATION",[m
+[32m+[m[32m                    "ATTENTION",[m
+[32m+[m[32m                    "Desvio da política-alvo",[m
+[32m+[m[32m                    {[m
+[32m+[m[32m                        "drift": allocation_analysis.portfolio_drift,[m
+[32m+[m[32m                        "threshold": thresholds.max_portfolio_drift,[m
+[32m+[m[32m                    },[m
+[32m+[m[32m                    as_of,[m
+[32m+[m[32m                )[m
+[32m+[m[32m            )[m
+[32m+[m[32m        if allocation.valuation_coverage < 1:[m
+[32m+[m[32m            findings.append([m
+[32m+[m[32m                cls._finding([m
+[32m+[m[32m                    "INCOMPLETE_VALUATION",[m
+[32m+[m[32m                    "DATA_QUALITY",[m
+[32m+[m[32m                    "HIGH_ATTENTION",[m
+[32m+[m[32m                    "Valuation incompleto",[m
+[32m+[m[32m                    {"coverage": allocation.valuation_coverage},[m
+[32m+[m[32m                    as_of,[m
+[32m+[m[32m                )[m
+[32m+[m[32m            )[m
+[32m+[m[32m        if risk:[m
+[32m+[m[32m            cls._risk_rules(findings, risk, thresholds, as_of)[m
+[32m+[m[32m        findings = sorted([m
+[32m+[m[32m            findings,[m
+[32m+[m[32m            key=lambda f: ([m
+[32m+[m[32m                {"HIGH_ATTENTION": 0, "ATTENTION": 1, "INFO": 2}[f.severity],[m
+[32m+[m[32m                f.category,[m
+[32m+[m[32m                f.code,[m
+[32m+[m[32m                str(f.evidence),[m
+[32m+[m[32m            ),[m
+[32m+[m[32m        )[m
+[32m+[m[32m        return PortfolioIntelligence([m
+[32m+[m[32m            as_of=as_of,[m
+[32m+[m[32m            findings=tuple(findings),[m
+[32m+[m[32m            info_count=sum(f.severity == "INFO" for f in findings),[m
+[32m+[m[32m            attention_count=sum(f.severity == "ATTENTION" for f in findings),[m
+[32m+[m[32m            high_attention_count=sum(f.severity == "HIGH_ATTENTION" for f in findings),[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m    @classmethod[m
+[32m+[m[32m    def _asset_rule([m
+[32m+[m[32m        cls,[m
+[32m+[m[32m        findings: list[PortfolioFinding],[m
+[32m+[m[32m        allocation: AllocationProjection,[m
+[32m+[m[32m        thresholds: DiagnosticThresholds,[m
+[32m+[m[32m        as_of: date | None,[m
+[32m+[m[32m    ) -> None:[m
+[32m+[m[32m        if ([m
+[32m+[m[32m            allocation.largest_position_weight is None[m
+[32m+[m[32m            or allocation.largest_position_weight <= thresholds.max_asset_weight[m
+[32m+[m[32m        ):[m
+[32m+[m[32m            return[m
+[32m+[m[32m        item = max([m
+[32m+[m[32m            (a for a in allocation.assets if a.portfolio_weight is not None),[m
+[32m+[m[32m            key=lambda a: (a.portfolio_weight or 0, str(a.position.asset.ticker)),[m
+[32m+[m[32m        )[m
+[32m+[m[32m        findings.append([m
+[32m+[m[32m            cls._finding([m
+[32m+[m[32m                "ASSET_CONCENTRATION",[m
+[32m+[m[32m                "CONCENTRATION",[m
+[32m+[m[32m                "ATTENTION",[m
+[32m+[m[32m                "Concentração por ativo",[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    "ticker": str(item.position.asset.ticker),[m
+[32m+[m[32m                    "weight": item.portfolio_weight or Decimal("0"),[m
+[32m+[m[32m                    "threshold": thresholds.max_asset_weight,[m
+[32m+[m[32m                },[m
+[32m+[m[32m                as_of,[m
+[32m+[m[32m            )[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m    @classmethod[m
+[32m+[m[32m    def _dimension_rules([m
+[32m+[m[32m        cls,[m
+[32m+[m[32m        findings: list[PortfolioFinding],[m
+[32m+[m[32m        projection: DiversificationProjection,[m
+[32m+[m[32m        thresholds: DiagnosticThresholds,[m
+[32m+[m[32m        as_of: date | None,[m
+[32m+[m[32m    ) -> None:[m
+[32m+[m[32m        rules = ([m
+[32m+[m[32m            ([m
+[32m+[m[32m                projection.asset_class,[m
+[32m+[m[32m                "CLASS_CONCENTRATION",[m
+[32m+[m[32m                "CONCENTRATION",[m
+[32m+[m[32m                thresholds.max_class_weight,[m
+[32m+[m[32m            ),[m
+[32m+[m[32m            ([m
+[32m+[m[32m                projection.country,[m
+[32m+[m[32m                "COUNTRY_CONCENTRATION",[m
+[32m+[m[32m                "DIVERSIFICATION",[m
+[32m+[m[32m                thresholds.max_country_weight,[m
+[32m+[m[32m            ),[m
+[32m+[m[32m            ([m
+[32m+[m[32m                projection.sector,[m
+[32m+[m[32m                "SECTOR_CONCENTRATION",[m
+[32m+[m[32m                "DIVERSIFICATION",[m
+[32m+[m[32m                thresholds.max_sector_weight,[m
+[32m+[m[32m            ),[m
+[32m+[m[32m        )[m
+[32m+[m[32m        for dimension, code, category, threshold in rules:[m
+[32m+[m[32m            if dimension.largest_exposure and dimension.largest_exposure.weight > threshold:[m
+[32m+[m[32m                evidence: dict[str, Decimal | str] = {[m
+[32m+[m[32m                    "key": dimension.largest_exposure.key,[m
+[32m+[m[32m                    "weight": dimension.largest_exposure.weight,[m
+[32m+[m[32m                    "threshold": threshold,[m
+[32m+[m[32m                }[m
+[32m+[m[32m                findings.append([m
+[32m+[m[32m                    cls._finding([m
+[32m+[m[32m                        code, category, "ATTENTION", "Concentração de exposição", evidence, as_of[m
+[32m+[m[32m                    )[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m    @classmethod[m
+[32m+[m[32m    def _risk_rules([m
+[32m+[m[32m        cls,[m
+[32m+[m[32m        findings: list[PortfolioFinding],[m
+[32m+[m[32m        risk: RiskContributionProjection,[m
+[32m+[m[32m        thresholds: DiagnosticThresholds,[m
+[32m+[m[32m        as_of: date | None,[m
+[32m+[m[32m    ) -> None:[m
+[32m+[m[32m        if risk.risk_coverage < 1:[m
+[32m+[m[32m            findings.append([m
+[32m+[m[32m                cls._finding([m
+[32m+[m[32m                    "INCOMPLETE_RISK_COVERAGE",[m
+[32m+[m[32m                    "DATA_QUALITY",[m
+[32m+[m[32m                    "INFO",[m
+[32m+[m[32m                    "Cobertura de risco incompleta",[m
+[32m+[m[32m                    {"coverage": risk.risk_coverage},[m
+[32m+[m[32m                    as_of,[m
+[32m+[m[32m                )[m
+[32m+[m[32m            )[m
+[32m+[m[32m        for item in risk.assets:[m
+[32m+[m[32m            if ([m
+[32m+[m[32m                item.contribution_share is not None[m
+[32m+[m[32m                and item.contribution_share[m
+[32m+[m[32m                > item.weight * thresholds.max_risk_contribution_multiple[m
+[32m+[m[32m            ):[m
+[32m+[m[32m                evidence: dict[str, Decimal | str] = {[m
+[32m+[m[32m                    "ticker": item.ticker,[m
+[32m+[m[32m                    "weight": item.weight,[m
+[32m+[m[32m                    "risk_contribution_share": item.contribution_share,[m
+[32m+[m[32m                }[m
+[32m+[m[32m                findings.append([m
+[32m+[m[32m                    cls._finding([m
+[32m+[m[32m                        "DISPROPORTIONATE_RISK_CONTRIBUTION",[m
+[32m+[m[32m                        "RISK",[m
+[32m+[m[32m                        "ATTENTION",[m
+[32m+[m[32m                        "Contribuição de risco desproporcional",[m
+[32m+[m[32m                        evidence,[m
+[32m+[m[32m                        as_of,[m
+[32m+[m[32m                    )[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m    @staticmethod[m
+[32m+[m[32m    def _finding([m
+[32m+[m[32m        code: str,[m
+[32m+[m[32m        category: str,[m
+[32m+[m[32m        severity: str,[m
+[32m+[m[32m        title: str,[m
+[32m+[m[32m        evidence: dict[str, Decimal | str],[m
+[32m+[m[32m        as_of: date | None,[m
+[32m+[m[32m    ) -> PortfolioFinding:[m
+[32m+[m[32m        return PortfolioFinding([m
+[32m+[m[32m            code=code,[m
+[32m+[m[32m            category=category,[m
+[32m+[m[32m            severity=severity,[m
+[32m+[m[32m            title=title,[m
+[32m+[m[32m            description=f"{title}.",[m
+[32m+[m[32m            evidence=evidence,[m
+[32m+[m[32m            as_of=as_of,[m
+[32m+[m[32m        )[m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/projectors/risk_contribution_projector.py b/income-analytics/src/income_analytics/domain/projectors/risk_contribution_projector.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..33492f3[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/domain/projectors/risk_contribution_projector.py[m
+[36m@@ -0,0 +1,144 @@[m
+[32m+[m[32m"""Compute covariance-based marginal and component risk attribution."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom datetime import date[m
+[32m+[m[32mfrom decimal import Decimal[m
+[32m+[m[32mfrom math import sqrt[m
+[32m+[m
+[32m+[m[32mfrom income_analytics.domain.read_models.allocation_projection import AllocationProjection[m
+[32m+[m[32mfrom income_analytics.domain.read_models.risk_contribution_projection import ([m
+[32m+[m[32m    AssetRiskContribution,[m
+[32m+[m[32m    RiskContributionProjection,[m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m
+[32m+[m[32mclass RiskContributionProjector:[m
+[32m+[m[32m    @classmethod[m
+[32m+[m[32m    def project([m
+[32m+[m[32m        cls,[m
+[32m+[m[32m        allocation: AllocationProjection,[m
+[32m+[m[32m        prices: dict[str, dict[date, Decimal]],[m
+[32m+[m[32m    ) -> RiskContributionProjection:[m
+[32m+[m[32m        weighted = [item for item in allocation.assets if item.portfolio_weight is not None][m
+[32m+[m[32m        eligible = [item for item in weighted if str(item.position.asset.ticker) in prices][m
+[32m+[m[32m        coverage = sum((item.portfolio_weight or Decimal("0") for item in eligible), Decimal("0"))[m
+[32m+[m[32m        if len(eligible) < 2:[m
+[32m+[m[32m            return cls._unavailable(coverage)[m
+[32m+[m[32m        common_dates = set.intersection([m
+[32m+[m[32m            *(set(prices[str(item.position.asset.ticker)]) for item in eligible)[m
+[32m+[m[32m        )[m
+[32m+[m[32m        if len(common_dates) < 3:[m
+[32m+[m[32m            return cls._unavailable(coverage)[m
+[32m+[m[32m        tickers = tuple(str(item.position.asset.ticker) for item in eligible)[m
+[32m+[m[32m        returns = {[m
+[32m+[m[32m            ticker: cls._returns(prices[ticker], tuple(sorted(common_dates))) for ticker in tickers[m
+[32m+[m[32m        }[m
+[32m+[m[32m        covariance = {[m
+[32m+[m[32m            left: {right: cls._covariance(returns[left], returns[right]) for right in tickers}[m
+[32m+[m[32m            for left in tickers[m
+[32m+[m[32m        }[m
+[32m+[m[32m        correlation = {[m
+[32m+[m[32m            left: {[m
+[32m+[m[32m                right: cls._correlation([m
+[32m+[m[32m                    covariance[left][right], covariance[left][left], covariance[right][right][m
+[32m+[m[32m                )[m
+[32m+[m[32m                for right in tickers[m
+[32m+[m[32m            }[m
+[32m+[m[32m            for left in tickers[m
+[32m+[m[32m        }[m
+[32m+[m[32m        weights = {[m
+[32m+[m[32m            str(item.position.asset.ticker): item.portfolio_weight or Decimal("0")[m
+[32m+[m[32m            for item in eligible[m
+[32m+[m[32m        }[m
+[32m+[m[32m        variance = sum([m
+[32m+[m[32m            ([m
+[32m+[m[32m                weights[left] * covariance[left][right] * weights[right][m
+[32m+[m[32m                for left in tickers[m
+[32m+[m[32m                for right in tickers[m
+[32m+[m[32m            ),[m
+[32m+[m[32m            Decimal("0"),[m
+[32m+[m[32m        )[m
+[32m+[m[32m        volatility = Decimal(str(sqrt(float(variance)))) if variance > 0 else None[m
+[32m+[m[32m        contributions = {[m
+[32m+[m[32m            ticker: cls._contribution(ticker, tickers, weights, covariance, volatility)[m
+[32m+[m[32m            for ticker in tickers[m
+[32m+[m[32m        }[m
+[32m+[m[32m        assets: tuple[AssetRiskContribution, ...] = tuple([m
+[32m+[m[32m            sorted([m
+[32m+[m[32m                ([m
+[32m+[m[32m                    AssetRiskContribution([m
+[32m+[m[32m                        ticker=ticker,[m
+[32m+[m[32m                        weight=weights[ticker],[m
+[32m+[m[32m                        volatility=Decimal(str(sqrt(float(covariance[ticker][ticker])))),[m
+[32m+[m[32m                        contribution=contributions[ticker],[m
+[32m+[m[32m                        contribution_share=cls._share(contributions[ticker], volatility),[m
+[32m+[m[32m                    )[m
+[32m+[m[32m                    for ticker in tickers[m
+[32m+[m[32m                ),[m
+[32m+[m[32m                key=lambda item: (item.contribution or Decimal("0"), item.ticker),[m
+[32m+[m[32m                reverse=True,[m
+[32m+[m[32m            )[m
+[32m+[m[32m        )[m
+[32m+[m[32m        return RiskContributionProjection([m
+[32m+[m[32m            assets=assets,[m
+[32m+[m[32m            portfolio_volatility=volatility,[m
+[32m+[m[32m            risk_coverage=coverage,[m
+[32m+[m[32m            covariance=covariance,[m
+[32m+[m[32m            correlation=correlation,[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m    @staticmethod[m
+[32m+[m[32m    def _share(contribution: Decimal | None, volatility: Decimal | None) -> Decimal | None:[m
+[32m+[m[32m        if contribution is None or volatility is None:[m
+[32m+[m[32m            return None[m
+[32m+[m[32m        return contribution / volatility[m
+[32m+[m
+[32m+[m[32m    @staticmethod[m
+[32m+[m[32m    def _returns(values: dict[date, Decimal], dates: tuple[date, ...]) -> tuple[Decimal, ...]:[m
+[32m+[m[32m        return tuple([m
+[32m+[m[32m            values[current] / values[previous] - Decimal("1")[m
+[32m+[m[32m            for previous, current in zip(dates, dates[1:], strict=False)[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m    @staticmethod[m
+[32m+[m[32m    def _covariance(left: tuple[Decimal, ...], right: tuple[Decimal, ...]) -> Decimal:[m
+[32m+[m[32m        left_mean = sum(left, Decimal("0")) / Decimal(len(left))[m
+[32m+[m[32m        right_mean = sum(right, Decimal("0")) / Decimal(len(right))[m
+[32m+[m[32m        numerator = sum([m
+[32m+[m[32m            ((a - left_mean) * (b - right_mean) for a, b in zip(left, right, strict=True)),[m
+[32m+[m[32m            Decimal("0"),[m
+[32m+[m[32m        )[m
+[32m+[m[32m        return numerator / Decimal(len(left) - 1)[m
+[32m+[m
+[32m+[m[32m    @staticmethod[m
+[32m+[m[32m    def _correlation([m
+[32m+[m[32m        covariance: Decimal, left_variance: Decimal, right_variance: Decimal[m
+[32m+[m[32m    ) -> Decimal:[m
+[32m+[m[32m        product = left_variance * right_variance[m
+[32m+[m[32m        return Decimal("0") if product == 0 else covariance / Decimal(str(sqrt(float(product))))[m
+[32m+[m
+[32m+[m[32m    @staticmethod[m
+[32m+[m[32m    def _contribution([m
+[32m+[m[32m        ticker: str,[m
+[32m+[m[32m        tickers: tuple[str, ...],[m
+[32m+[m[32m        weights: dict[str, Decimal],[m
+[32m+[m[32m        covariance: dict[str, dict[str, Decimal]],[m
+[32m+[m[32m        volatility: Decimal | None,[m
+[32m+[m[32m    ) -> Decimal | None:[m
+[32m+[m[32m        if volatility is None:[m
+[32m+[m[32m            return None[m
+[32m+[m[32m        marginal = sum([m
+[32m+[m[32m            (covariance[ticker][other] * weights[other] for other in tickers), Decimal("0")[m
+[32m+[m[32m        )[m
+[32m+[m[32m        return weights[ticker] * marginal / volatility[m
+[32m+[m
+[32m+[m[32m    @staticmethod[m
+[32m+[m[32m    def _unavailable(coverage: Decimal) -> RiskContributionProjection:[m
+[32m+[m[32m        return RiskContributionProjection([m
+[32m+[m[32m            assets=(),[m
+[32m+[m[32m            portfolio_volatility=None,[m
+[32m+[m[32m            risk_coverage=coverage,[m
+[32m+[m[32m            covariance={},[m
+[32m+[m[32m            correlation={},[m
+[32m+[m[32m        )[m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/read_models/asset_rebalancing_plan.py b/income-analytics/src/income_analytics/domain/read_models/asset_rebalancing_plan.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..7a59a05[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/domain/read_models/asset_rebalancing_plan.py[m
+[36m@@ -0,0 +1,25 @@[m
+[32m+[m[32m"""Detailed, non-executing asset-level rebalance simulation."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom dataclasses import dataclass[m
+[32m+[m
+[32m+[m[32mfrom income_analytics.domain.enums.asset_class import AssetClass[m
+[32m+[m[32mfrom income_analytics.domain.value_objects.money import Money[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass AssetRebalancingAllocation:[m
+[32m+[m[32m    ticker: str[m
+[32m+[m[32m    allocated_amount: Money[m
+[32m+[m[32m    current_weight_within_class: object | None[m
+[32m+[m[32m    simulated_weight_within_class: object | None[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass AssetRebalancingPlan:[m
+[32m+[m[32m    asset_class: AssetClass[m
+[32m+[m[32m    class_amount: Money[m
+[32m+[m[32m    strategy: str[m
+[32m+[m[32m    allocations: tuple[AssetRebalancingAllocation, ...][m
+[32m+[m[32m    unallocated_amount: Money[m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/read_models/diversification_projection.py b/income-analytics/src/income_analytics/domain/read_models/diversification_projection.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..41bc1ba[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/domain/read_models/diversification_projection.py[m
+[36m@@ -0,0 +1,30 @@[m
+[32m+[m[32m"""Explicit diversification metrics, without cross-currency aggregation."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom dataclasses import dataclass[m
+[32m+[m[32mfrom decimal import Decimal[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass DimensionExposure:[m
+[32m+[m[32m    key: str[m
+[32m+[m[32m    weight: Decimal[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass DiversificationDimension:[m
+[32m+[m[32m    exposures: tuple[DimensionExposure, ...][m
+[32m+[m[32m    hhi: Decimal | None[m
+[32m+[m[32m    largest_exposure: DimensionExposure | None[m
+[32m+[m[32m    coverage: Decimal[m
+[32m+[m[32m    unavailable_reason: str | None = None[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass DiversificationProjection:[m
+[32m+[m[32m    asset: DiversificationDimension[m
+[32m+[m[32m    asset_class: DiversificationDimension[m
+[32m+[m[32m    sector: DiversificationDimension[m
+[32m+[m[32m    country: DiversificationDimension[m
+[32m+[m[32m    currency: DiversificationDimension[m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/read_models/portfolio_intelligence.py b/income-analytics/src/income_analytics/domain/read_models/portfolio_intelligence.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..6e01128[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/domain/read_models/portfolio_intelligence.py[m
+[36m@@ -0,0 +1,37 @@[m
+[32m+[m[32m"""Structured, deterministic portfolio diagnostic outputs."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom dataclasses import dataclass[m
+[32m+[m[32mfrom datetime import date[m
+[32m+[m[32mfrom decimal import Decimal[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass DiagnosticThresholds:[m
+[32m+[m[32m    max_asset_weight: Decimal = Decimal("0.25")[m
+[32m+[m[32m    max_class_weight: Decimal = Decimal("0.50")[m
+[32m+[m[32m    max_country_weight: Decimal = Decimal("0.70")[m
+[32m+[m[32m    max_sector_weight: Decimal = Decimal("0.45")[m
+[32m+[m[32m    max_portfolio_drift: Decimal = Decimal("0.10")[m
+[32m+[m[32m    max_risk_contribution_multiple: Decimal = Decimal("2")[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass PortfolioFinding:[m
+[32m+[m[32m    code: str[m
+[32m+[m[32m    category: str[m
+[32m+[m[32m    severity: str[m
+[32m+[m[32m    title: str[m
+[32m+[m[32m    description: str[m
+[32m+[m[32m    evidence: dict[str, Decimal | str][m
+[32m+[m[32m    as_of: date | None[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass PortfolioIntelligence:[m
+[32m+[m[32m    as_of: date | None[m
+[32m+[m[32m    findings: tuple[PortfolioFinding, ...][m
+[32m+[m[32m    info_count: int[m
+[32m+[m[32m    attention_count: int[m
+[32m+[m[32m    high_attention_count: int[m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/read_models/risk_contribution_projection.py b/income-analytics/src/income_analytics/domain/read_models/risk_contribution_projection.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..8394a6d[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/domain/read_models/risk_contribution_projection.py[m
+[36m@@ -0,0 +1,24 @@[m
+[32m+[m[32m"""Risk attribution by asset, based on covariance of observed returns."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom dataclasses import dataclass[m
+[32m+[m[32mfrom decimal import Decimal[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass AssetRiskContribution:[m
+[32m+[m[32m    ticker: str[m
+[32m+[m[32m    weight: Decimal[m
+[32m+[m[32m    volatility: Decimal | None[m
+[32m+[m[32m    contribution: Decimal | None[m
+[32m+[m[32m    contribution_share: Decimal | None[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass(frozen=True, slots=True, kw_only=True)[m
+[32m+[m[32mclass RiskContributionProjection:[m
+[32m+[m[32m    assets: tuple[AssetRiskContribution, ...][m
+[32m+[m[32m    portfolio_volatility: Decimal | None[m
+[32m+[m[32m    risk_coverage: Decimal[m
+[32m+[m[32m    covariance: dict[str, dict[str, Decimal]][m
+[32m+[m[32m    correlation: dict[str, dict[str, Decimal]][m
+[1mdiff --git a/income-analytics/src/income_analytics/domain/repositories/asset_repository.py b/income-analytics/src/income_analytics/domain/repositories/asset_repository.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..da9a9f6[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/domain/repositories/asset_repository.py[m
+[36m@@ -0,0 +1,15 @@[m
+[32m+[m[32m"""Asset persistence contract."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mfrom typing import Protocol[m
+[32m+[m
+[32m+[m[32mfrom income_analytics.domain.entities.asset import Asset[m
+[32m+[m
+[32m+[m
+[32m+[m[32mclass AssetRepository(Protocol):[m
+[32m+[m[32m    def save(self, asset: Asset) -> None: ...[m
+[32m+[m
+[32m+[m[32m    def get_by_ticker(self, ticker: str) -> Asset | None: ...[m
+[32m+[m
+[32m+[m[32m    def list(self) -> tuple[Asset, ...]: ...[m
+[1mdiff --git a/income-analytics/src/income_analytics/infrastructure/database.py b/income-analytics/src/income_analytics/infrastructure/database.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0c9a8aa[m
+[1m--- /dev/null[m
+[1m+++ b/income-analytics/src/income_analytics/infrastructure/database.py[m
+[36m@@ -0,0 +1,22 @@[m
+[32m+[m[32m"""Database configuration isolated from the domain."""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mimport os[m
+[32m+[m[32mfrom pathlib import Path[m
+[32m+[m
+[32m+[m[32mfrom sqlalchemy import create_engine[m
+[32m+[m[32mfrom sqlalchemy.orm import DeclarativeBase, sessionmaker[m
+[32m+[m
+[32m+[m
+[32m+[m[32mclass Base(DeclarativeBase):[m
+[32m+[m[32m    """SQLAlchemy metadata owned by infrastructure."""[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef database_url() -> str:[m
+[32m+[m[32m    path = Path(os.environ.get("INCOME_ANALYTICS_DATABASE", "income_analytics.db"))[m
+[32m+[m[32m    return f"sqlite:///{path.as_posix()}"[m
+[32m+[m
+[32m+[m
+[32m+[m[32mengine = create_engine(database_url())[m
+[32m+[m[32mSessionFactory = sessionmaker(bind=engine)[m

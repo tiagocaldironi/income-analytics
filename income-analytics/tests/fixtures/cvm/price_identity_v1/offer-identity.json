@@ -1,0 +1,19 @@
+{
+  "schema_version": "B3_OFFER_IDENTITY_V1",
+  "cnpj": "08902291000115",
+  "isin": "BRCMINACNOR2",
+  "ticker": "CMIN3",
+  "share_class": "ON",
+  "document_date": "2021-01-22",
+  "source_file": "ipo-notice.pdf",
+  "source_sha256": "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e",
+  "identity_page": 1,
+  "date_page": 44,
+  "extraction_method": "LABELLED_OFFER_COVER_AND_SIGNED_DATE_V1",
+  "acquisition": {
+    "url": "https://www.b3.com.br/data/files/22/E1/42/82/7CE477108F39C077AC094EA8/CSN%20Mineracao%20-%20Aviso%20ao%20Mercado.pdf",
+    "sha256": "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e",
+    "retrieved_at": "2026-09-23T10:21:40.196553+00:00"
+  },
+  "extraction_sha256": "c51340d854d40d8eb40868aa48d8c2f1c0647fe725e8c760d286a7ec87cc50fa"
+}

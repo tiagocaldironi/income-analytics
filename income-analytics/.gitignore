@@ -21,6 +21,22 @@ htmlcov/
 
 # Banco local
 *.db
+backups/
+
+# Dados locais e artefatos gerados (podem conter dados financeiros da carteira)
+data/
+tmp/
+docs/appendices/
+*.log
+*.pstats
+operations_snapshot.json
+strategy-real-*.json
+windows-startup-backup-*.json
+
+# Cache local de arquivos oficiais COTAHIST
+data/cotahist/
+tmp/paid-income-spike/
+tmp/paid-income-b3-cvm/
 
 # Variáveis de ambiente
 .env

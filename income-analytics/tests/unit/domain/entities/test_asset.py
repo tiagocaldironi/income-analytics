@@ -3,25 +3,16 @@ from uuid import uuid4
 
 import pytest
 
-from income_analytics.domain.entities.asset import Asset
 from income_analytics.domain.enums.asset_type import AssetType
 from income_analytics.domain.value_objects.ticker import Ticker
-
-
-def build_asset(**overrides: object) -> Asset:
-    values: dict[str, object] = {
-        "ticker": Ticker("petr4"),
-        "name": "  Petrobras PN  ",
-        "asset_type": AssetType.STOCK,
-        "currency": object(),
-        "institution": object(),
-    }
-    values.update(overrides)
-    return Asset(**values)  # type: ignore[arg-type]
+from tests.unit.domain.builders import build_asset
 
 
 def test_creates_asset_with_normalized_data_and_generated_metadata() -> None:
-    asset = build_asset(isin="  brpetracnpr6 ")
+    asset = build_asset(
+        name="  Petrobras PN  ",
+        isin="  brpetracnpr6 ",
+    )
 
     assert asset.ticker == Ticker("PETR4")
     assert asset.name == "Petrobras PN"

@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "issuers": {
+    "027189": [
+      "Votorantim Cimentos",
+      "construction materials"
+    ],
+    "004170": [
+      "Vale",
+      "mining"
+    ],
+    "024813": [
+      "Localiza Fleet",
+      "vehicle rental"
+    ],
+    "020915": [
+      "MRV",
+      "homebuilding"
+    ],
+    "023264": [
+      "Ambev",
+      "beverages"
+    ]
+  },
+  "datasets": {
+    "DFP": {
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2025.zip",
+      "archive_sha256": "de8b7be1cdae032a402ab33916015c74fdc30f0bc64be3f38a4b5dd1d43f6d79",
+      "reference_date": "2025-12-31",
+      "members": {
+        "dfp_cia_aberta_DRE_con_2025.csv": {
+          "sha256": "1c5c91d006c09a59d72efac2b441c403802854aedf2746a868f325c645a258d0",
+          "rows": 336
+        },
+        "dfp_cia_aberta_BPA_con_2025.csv": {
+          "sha256": "2b667719652dd51f07db7e819deef0264f2afd945ee2571a711da8252229572a",
+          "rows": 720
+        },
+        "dfp_cia_aberta_BPP_con_2025.csv": {
+          "sha256": "9b243109f7c67cdcca552999456c9498283e23a2057274bf61faec1fd6aaac11",
+          "rows": 1242
+        }
+      }
+    },
+    "ITR": {
+      "url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_2025.zip",
+      "archive_sha256": "33818c4d8b755961010d7353accad4dfe2659b2b2e035493d8a838e88289a491",
+      "reference_date": "2025-09-30",
+      "members": {
+        "itr_cia_aberta_DRE_con_2025.csv": {
+          "sha256": "f00af1550172f1b2479cf5ff6bffc7ce136e1e8bc6439f9669c98cfdad44f84a",
+          "rows": 680
+        },
+        "itr_cia_aberta_BPA_con_2025.csv": {
+          "sha256": "3ead4ca8c0f1300c58d9c84cbdfa1891363caa5356b991ce1919ed145651ad70",
+          "rows": 720
+        },
+        "itr_cia_aberta_BPP_con_2025.csv": {
+          "sha256": "c924d3510a1182dde5667aa94ae3dfd457a13f293efb9a94a010efa3624724b2",
+          "rows": 1236
+        }
+      }
+    }
+  },
+  "provenance": "Unchanged row excerpts from existing data/cvm official archive cache; original retrieval timestamp unavailable."
+}

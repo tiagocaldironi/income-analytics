@@ -1,0 +1,338 @@
+{
+  "accounting": {
+    "cash_and_equivalents": {
+      "components": [
+        {
+          "account_code": "1.01.01",
+          "account_description": "Caixa e Equivalentes de Caixa",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "35608000000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "35608000.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|009512|2025-12-31|CONSOLIDATED|BPA|1.01.01||2025-12-31",
+          "statement_name": "BPA",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "35608000000.0000000000",
+      "rule_id": "CASH_RULE_001"
+    },
+    "ebit": {
+      "components": [
+        {
+          "account_code": "3.05",
+          "account_description": "Resultado Antes do Resultado Financeiro e dos Tributos",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "145628000000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": "2025-01-01",
+          "raw_value": "145628000.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|009512|2025-12-31|CONSOLIDATED|DRE|3.05|2025-01-01|2025-12-31",
+          "statement_name": "DRE",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "145628000000.0000000000",
+      "rule_id": "EBIT_RULE_002"
+    },
+    "financial_debt_long_term": {
+      "components": [
+        {
+          "account_code": "2.02.01",
+          "account_description": "Empréstimos e Financiamentos",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "316772000000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "316772000.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|009512|2025-12-31|CONSOLIDATED|BPP|2.02.01||2025-12-31",
+          "statement_name": "BPP",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "316772000000.0000000000",
+      "rule_id": "DEBT_LT_RULE_001"
+    },
+    "financial_debt_short_term": {
+      "components": [
+        {
+          "account_code": "2.01.04",
+          "account_description": "Empréstimos e Financiamentos",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "67253000000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "67253000.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|009512|2025-12-31|CONSOLIDATED|BPP|2.01.04||2025-12-31",
+          "statement_name": "BPP",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "67253000000.0000000000",
+      "rule_id": "DEBT_ST_RULE_001"
+    },
+    "net_fixed_assets": {
+      "components": [
+        {
+          "account_code": "1.02.03",
+          "account_description": "Imobilizado",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "924624000000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "924624000.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|009512|2025-12-31|CONSOLIDATED|BPA|1.02.03||2025-12-31",
+          "statement_name": "BPA",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "924624000000.0000000000",
+      "rule_id": "FIXED_ASSET_RULE_001"
+    },
+    "operating_current_assets": {
+      "components": [
+        {
+          "account_code": "1.01.03",
+          "account_description": "Contas a Receber",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "25461000000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "25461000.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|009512|2025-12-31|CONSOLIDATED|BPA|1.01.03||2025-12-31",
+          "statement_name": "BPA",
+          "statement_scope": "CONSOLIDATED"
+        },
+        {
+          "account_code": "1.01.04",
+          "account_description": "Estoques",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "45173000000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "45173000.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|009512|2025-12-31|CONSOLIDATED|BPA|1.01.04||2025-12-31",
+          "statement_name": "BPA",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "70634000000.0000000000",
+      "rule_id": "NWC_ASSET_RULE_002"
+    },
+    "operating_current_liabilities": {
+      "components": [
+        {
+          "account_code": "2.01.02",
+          "account_description": "Fornecedores",
+          "currency": "BRL",
+          "currency_scale": "THOUSAND",
+          "dataset": "dfp_cia_aberta_2025.zip",
+          "normalization_multiplier": "1000",
+          "normalized_expected_value": "40948000000.0000000000",
+          "period_end": "2025-12-31",
+          "period_start": null,
+          "raw_value": "40948000.0000000000",
+          "reference_date": "2025-12-31",
+          "source": "CVM_DFP",
+          "source_file": "dfp_cia_aberta_2025.zip",
+          "source_reference": "dfp_cia_aberta_2025.zip|009512|2025-12-31|CONSOLIDATED|BPP|2.01.02||2025-12-31",
+          "statement_name": "BPP",
+          "statement_scope": "CONSOLIDATED"
+        }
+      ],
+      "normalized_expected_value": "40948000000.0000000000",
+      "rule_id": "NWC_LIABILITY_RULE_001"
+    }
+  },
+  "capital": {
+    "securities": [
+      {
+        "cvm_code": "009512",
+        "fca_form_id": "147760",
+        "fca_source": "CVM_FCA",
+        "fca_source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|33.000.167/0001-01|2025-01-01|147760|PETR3",
+        "issued_or_integralized_shares": "7442231382",
+        "issued_source_reference": "dfp_cia_aberta_2025.zip:dfp_cia_aberta_composicao_capital_2025.csv|33.000.167/0001-01|2025-12-31|ON|ISSUED_SHARES|QT_ACAO_ORDIN_CAP_INTEGR",
+        "issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+        "legacy_issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+        "normalized_quantity": "7442231382",
+        "outstanding_derivation_rule": "OUTSTANDING = ISSUED_SHARES - TREASURY_SHARES",
+        "outstanding_shares": "7442231382",
+        "quantity_multiplier": "1",
+        "quantity_unit": "UNIT",
+        "reference_date": "2025-12-31",
+        "security_id": "BR:PETR3",
+        "share_class": "ON",
+        "source": "CVM_DFP_COMPOSICAO_CAPITAL",
+        "source_reference": "dfp_cia_aberta_2025.zip:dfp_cia_aberta_composicao_capital_2025.csv|33.000.167/0001-01|2025-12-31|ON|OUTSTANDING_SHARES|DERIVED_OUTSTANDING",
+        "ticker": "PETR3",
+        "treasury_shares": "0",
+        "treasury_source_reference": "dfp_cia_aberta_2025.zip:dfp_cia_aberta_composicao_capital_2025.csv|33.000.167/0001-01|2025-12-31|ON|TREASURY_SHARES|QT_ACAO_ORDIN_TESOURO",
+        "valid_from": "2018-05-14",
+        "valid_to": null
+      },
+      {
+        "cvm_code": "009512",
+        "fca_form_id": "147760",
+        "fca_source": "CVM_FCA",
+        "fca_source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|33.000.167/0001-01|2025-01-01|147760|PETR4",
+        "issued_or_integralized_shares": "5446501379",
+        "issued_source_reference": "dfp_cia_aberta_2025.zip:dfp_cia_aberta_composicao_capital_2025.csv|33.000.167/0001-01|2025-12-31|PN|ISSUED_SHARES|QT_ACAO_PREF_CAP_INTEGR",
+        "issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+        "legacy_issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+        "normalized_quantity": "5446501379",
+        "outstanding_derivation_rule": "OUTSTANDING = ISSUED_SHARES - TREASURY_SHARES",
+        "outstanding_shares": "5446501379",
+        "quantity_multiplier": "1",
+        "quantity_unit": "UNIT",
+        "reference_date": "2025-12-31",
+        "security_id": "BR:PETR4",
+        "share_class": "PN",
+        "source": "CVM_DFP_COMPOSICAO_CAPITAL",
+        "source_reference": "dfp_cia_aberta_2025.zip:dfp_cia_aberta_composicao_capital_2025.csv|33.000.167/0001-01|2025-12-31|PN|OUTSTANDING_SHARES|DERIVED_OUTSTANDING",
+        "ticker": "PETR4",
+        "treasury_shares": "0",
+        "treasury_source_reference": "dfp_cia_aberta_2025.zip:dfp_cia_aberta_composicao_capital_2025.csv|33.000.167/0001-01|2025-12-31|PN|TREASURY_SHARES|QT_ACAO_PREF_TESOURO",
+        "valid_from": "2018-05-14",
+        "valid_to": null
+      }
+    ]
+  },
+  "expected": {
+    "cash_and_equivalents": "35608000000.0000000000",
+    "earnings_yield": "0.1919512878414905484530907490",
+    "ebit": "145628000000.0000000000",
+    "enterprise_value": "758671648612.5200000000",
+    "financial_debt_long_term": "316772000000.0000000000",
+    "financial_debt_short_term": "67253000000.0000000000",
+    "financial_debt_total": "384025000000.0000000000",
+    "invested_capital": "954310000000.0000000000",
+    "market_cap": "410254648612.52",
+    "net_debt": "348417000000.0000000000",
+    "net_fixed_assets": "924624000000.0000000000",
+    "net_working_capital": "29686000000.0000000000",
+    "operating_current_assets": "70634000000.0000000000",
+    "operating_current_liabilities": "40948000000.0000000000",
+    "return_on_capital": "0.1526003080759920780459179931"
+  },
+  "fixture_status": "READY_FOR_VALIDATION",
+  "issuer": {
+    "cnpj": "33000167000101",
+    "cvm_code": "009512",
+    "display_name": "Petróleo Brasileiro S.A. Petrobras",
+    "issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+    "slug": "petrobras"
+  },
+  "legacy_fixture_hash": "35ba78ac65cb57bc90eb468b38f08495f0c4d8a6fda7e5d082516d31c84fc3a7",
+  "legacy_issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+  "lineage_complete": true,
+  "lineage_missing": [],
+  "methodology_version": "MAGIC_FORMULA_STOCKS_V1",
+  "prices": [
+    {
+      "currency": "BRL",
+      "effective_date": "2025-12-30",
+      "isin": "BRPETRACNOR9",
+      "price": "32.57",
+      "record_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692376|date=20251230|ticker=PETR3|close=32.57",
+      "requested_reference_date": "2025-12-31",
+      "source": "B3_COTAHIST",
+      "source_file": "COTAHIST_A2025.ZIP",
+      "ticker": "PETR3"
+    },
+    {
+      "currency": "BRL",
+      "effective_date": "2025-12-30",
+      "isin": "BRPETRACNPR6",
+      "price": "30.82",
+      "record_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692377|date=20251230|ticker=PETR4|close=30.82",
+      "requested_reference_date": "2025-12-31",
+      "source": "B3_COTAHIST",
+      "source_file": "COTAHIST_A2025.ZIP",
+      "ticker": "PETR4"
+    }
+  ],
+  "reference": {
+    "adapter_version": "CVM_MAGIC_FORMULA_ADAPTER_V2_COMPONENT_LINEAGE",
+    "financial_reference_date": "2025-12-31",
+    "market_reference_date": "2025-12-31",
+    "price_effective_date": "2025-12-30"
+  },
+  "reference_date": "2025-12-31",
+  "schema_version": "MAGIC_FORMULA_GOLDEN_V2",
+  "security": [
+    {
+      "cnpj": "33000167000101",
+      "cvm_code": "009512",
+      "fca_form_id": "147760",
+      "fca_source": "CVM_FCA",
+      "fca_source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|33.000.167/0001-01|2025-01-01|147760|PETR3",
+      "isin": "BRPETRACNOR9",
+      "isin_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692376|date=20251230|ticker=PETR3|close=32.57",
+      "issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+      "security_id": "BR:PETR3",
+      "share_class": "ON",
+      "ticker": "PETR3",
+      "valid_from": "2018-05-14",
+      "valid_to": null
+    },
+    {
+      "cnpj": "33000167000101",
+      "cvm_code": "009512",
+      "fca_form_id": "147760",
+      "fca_source": "CVM_FCA",
+      "fca_source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|33.000.167/0001-01|2025-01-01|147760|PETR4",
+      "isin": "BRPETRACNPR6",
+      "isin_source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692377|date=20251230|ticker=PETR4|close=30.82",
+      "issuer_id": "d534bf40-ca22-4d9d-83b6-458f29b27399",
+      "security_id": "BR:PETR4",
+      "share_class": "PN",
+      "ticker": "PETR4",
+      "valid_from": "2018-05-14",
+      "valid_to": null
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "PRICE_IDENTITY_FIXTURE_V1",
+  "reference_date": "2025-12-31",
+  "source_reference": "COTAHIST_A2025.ZIP|COTAHIST_A2025.TXT|line=1692364",
+  "source_archive": {
+    "file": "COTAHIST_A2025.ZIP",
+    "member": "COTAHIST_A2025.TXT",
+    "sha256": "6cc0ad851c8f605ca30418acac48be81f1767f6ed05b4f563772d06ae448047d",
+    "scan_complete": true,
+    "requested_tickers": [
+      "CMIN3"
+    ]
+  },
+  "offer_acquisition": {
+    "url": "https://www.b3.com.br/data/files/22/E1/42/82/7CE477108F39C077AC094EA8/CSN%20Mineracao%20-%20Aviso%20ao%20Mercado.pdf",
+    "sha256": "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e",
+    "retrieved_at": "2026-09-23T10:21:40.196553+00:00"
+  },
+  "directory_acquisition": {
+    "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+    "cvm_code": "025585",
+    "expected_cnpj": "08902291000115",
+    "url": "https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall/GetDetail/eyJjb2RlQ1ZNIjogIjI1NTg1IiwgImxhbmd1YWdlIjogInB0LWJyIn0=",
+    "retrieved_at": "2026-09-23T10:21:12.381071+00:00",
+    "historical_mapping_approved": false,
+    "file": "025585.json",
+    "sha256": "8a55483619ddd05aedd66acb0d31fd0332906fdda3fdce2ac5e97f0641a614a0",
+    "identity_match": true,
+    "status": "CURRENT_IDENTITY_MATCH"
+  },
+  "files": {
+    "cotahist-record.txt": "67fdbb7e6f3e56f235635240b3c4057876afb20b055b11562bdf532c457a45d9",
+    "current-directory.json": "d0c14ea112fc242b17b87e590a0f93fa272d9e8f88d4605bc8a0f2ab4b1eafad",
+    "issuer-before.json": "a4b0734c50046306f46448bd3f496fad2c20e98923cd38307b5fd3f7a5c1edfc",
+    "offer-identity.json": "10924734efc14d6d247f8e57d6683bb3b158dd451ebad3ca3f72b3dfb8411057",
+    "offer-notice.pdf": "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e"
+  }
+}
