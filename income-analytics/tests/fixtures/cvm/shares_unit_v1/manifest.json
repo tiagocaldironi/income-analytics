@@ -1,0 +1,190 @@
+{
+  "schema_version": "CVM_DFP_EXPLICIT_SHARE_UNITS_V1",
+  "documents": [
+    {
+      "file": "155260-evidence.zip",
+      "sha256": "b80a510349538aa740a095e2d46e95d8e52c16886ad801b467e1cff4a3b4aa3a",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155260",
+      "original_archive_sha256": "43ab69ee5cbefc11fdfffde46026eab1c3c3fd9b599cc4fa59e738fe14b3b5e6"
+    },
+    {
+      "file": "155870-evidence.zip",
+      "sha256": "a8d2f2494036a777cba0793a7d02ea9e3a3c170133175e8cf9dcde0920a21f59",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155870",
+      "original_archive_sha256": "fa8f7aceee591f1d71fe97fa7cfaf88cd21acb07853c373a88fe4cbcbb6eeeeb"
+    },
+    {
+      "file": "155680-evidence.zip",
+      "sha256": "d61aa0422deb6f19e0f30ad859ad8cbad89adf7306b47bb693c712adaf7500f8",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155680",
+      "original_archive_sha256": "ad2304a4860411470ac617915dd10c07e8120c12a4a390abddcac744ef9ac21a"
+    },
+    {
+      "file": "155760-evidence.zip",
+      "sha256": "a40dd4393c5d8c53bb7419d17bc6daea50e8040f3ac20fc90f435c5b7b007a45",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155760",
+      "original_archive_sha256": "82c3a0e209d4aba6f504441e21cf91dbe44f68bbd50fc99fec706b4f4fe7a96c"
+    },
+    {
+      "file": "155137-evidence.zip",
+      "sha256": "de0be176a88d3301fb8e5816da41a0130284de72f18481ed1cec2ad41fbb2f50",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155137",
+      "original_archive_sha256": "d4aae889a672c8f2a391b8d738421563b33476cce04a8912f4d04d5269e6cf87"
+    },
+    {
+      "file": "155501-evidence.zip",
+      "sha256": "20777d30893993fdd34f564ff553fbcd9b7ab1895f5032c3cbfa991ac6f9b98a",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155501",
+      "original_archive_sha256": "979d1e2858eaf57211a48f1ad711dc04a6740317549c7cf8f49561e34a05d938"
+    },
+    {
+      "file": "155474-evidence.zip",
+      "sha256": "f831f90f3500239323bd77ee29469315e9c10a80be8cad8f2c1f1dd5347a594a",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155474",
+      "original_archive_sha256": "acf5f5b32c1c55a351d97485b1b364d862ada4fcacf6ec3ca12d82daa71a274e"
+    },
+    {
+      "file": "155333-evidence.zip",
+      "sha256": "368d4399ffd51a199343149e8ab9ad0c2b29b4537a42a0fff7c01e5692b19d99",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155333",
+      "original_archive_sha256": "b41bbf2c150ddc6be73d3599e03d980b76e6419b63359d94dfc1d3abb565ff68"
+    },
+    {
+      "file": "155283-evidence.zip",
+      "sha256": "b5d7222264472bfa066355f811656ac1359446810621f980be75b6dd1fa0ae2c",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155283",
+      "original_archive_sha256": "686f010fa1f84a30dfb21c0f066f0f56112e4fe880ff2362235fe7ba47a733d5"
+    },
+    {
+      "file": "155872-evidence.zip",
+      "sha256": "0b841111105dead17a241868582baca144d12dfcbbc9cc21188041b5f28842fb",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155872",
+      "original_archive_sha256": "05e93c42df182a781626ad9bcdc0dbe81ae83b52967a3c28a56f3024db9cd76d"
+    },
+    {
+      "file": "155199-evidence.zip",
+      "sha256": "2bcce67a9870d953ac0ccf391868bed5f4afa50a6d5dbcf014b7aa063af12a8a",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155199",
+      "original_archive_sha256": "fe972b6f3711245d1fa5136a23524a1d7234ecbe09fa8efb3d7a2617cfacc3d7"
+    },
+    {
+      "file": "155541-evidence.zip",
+      "sha256": "e64d8a124acdf367dc70a0380b6c7b7cead608b94cf386811bd23e1c9cc8811f",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155541",
+      "original_archive_sha256": "0bb788d5ca965aa8234409e98d979939024e8e069a571f2f5aec2e50f0f72660"
+    },
+    {
+      "file": "154910-evidence.zip",
+      "sha256": "12a381aec678cefb2e50d522587f167e91c820a1534dd9ec4209d9419046fa62",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154910",
+      "original_archive_sha256": "2c9396c8b833b34d7b11b30570f73e225b985e9354f6b8521550aa579e8e16c6"
+    },
+    {
+      "file": "155651-evidence.zip",
+      "sha256": "e16859766c8272df4be6453e590004a71ab489a8d40464428f75ac6f1e5e7478",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155651",
+      "original_archive_sha256": "a7259336ae4dcac19835beaf2988b5be4a6f1ecaaa0f64cd1709ee6929578f20"
+    },
+    {
+      "file": "154939-evidence.zip",
+      "sha256": "8c30f69138e9e38d0dc410679751e3117cee6bfb938f18e429d56c60b1c976ef",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154939",
+      "original_archive_sha256": "7d9f823ac54146a465fea1ca3ba81f08b810a2f03a0ab32cfdbc2b0d1d63e9ab"
+    },
+    {
+      "file": "155070-evidence.zip",
+      "sha256": "c5db6c9a4a97524d402faebe5fa1de2d382a4d4d82a5e983e3d6c87a8aded6c7",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155070",
+      "original_archive_sha256": "ba3c6809069cc5208225ebb7c2929f04de937827896e3863acd47192a7dac391"
+    },
+    {
+      "file": "155153-evidence.zip",
+      "sha256": "e8eaf7e2cea68e2efb9b506dc4ac91619aeeeaf8c0d222e6677acb60b08041d9",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155153",
+      "original_archive_sha256": "0cfb5b5a89d5c949a44cf0178786ad26f689461e44dd1f940316611d8b497960"
+    },
+    {
+      "file": "155917-evidence.zip",
+      "sha256": "2d31ab2d4608f0c75f0bb95c6c1c87b9058c3d91758820bf22ff3b5a7597df7f",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155917",
+      "original_archive_sha256": "f70c8d5d8f755228e05466aa376dc629ab1fa8063dc9001a251158cba86348a1"
+    },
+    {
+      "file": "155266-evidence.zip",
+      "sha256": "6f06ba0ac4eae0fe80c855c0c70ef9863e861a1e183263518ed387093dfdb4ff",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155266",
+      "original_archive_sha256": "eb9c6bef98c63aaf691a443557b87ee8a93278b2a46f8b958d0d22a4ff897a3d"
+    },
+    {
+      "file": "155759-evidence.zip",
+      "sha256": "c87b27fdc4e399944d287ba4440e74b7663725143d13b14a10defff28e12a3df",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155759",
+      "original_archive_sha256": "dc6b28604f43ee5600fa09293a1d57e52637fbfa38504540a0b931c21e9943dd"
+    },
+    {
+      "file": "156065-evidence.zip",
+      "sha256": "6f9874f91d95e42b94f54b3eb1b4037e32b92aa02f45338b234e61ccb1a70283",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=156065",
+      "original_archive_sha256": "dbf73b693eefba14754dae2299350eaac65a8cd51d2549211f54c6f3314464e1"
+    },
+    {
+      "file": "155528-evidence.zip",
+      "sha256": "1bfa2becf142590eb723ca7d1a361e72c3016a6a5c007cd5b2ad5407a6661362",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155528",
+      "original_archive_sha256": "464ffd9d03e68420f98ec34f11b63a1b6be326bb5430fc0dcc87f56b5cf9cc16"
+    },
+    {
+      "file": "154674-evidence.zip",
+      "sha256": "5e0da115b9241c6cb3ed706aaee98f0156791bb97f10f72370ab8162bb7dc1ab",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154674",
+      "original_archive_sha256": "a0d3d8363d924edfb5af74781a07db3c1737a3ef255a27e603b19f6b34b28875"
+    },
+    {
+      "file": "155796-evidence.zip",
+      "sha256": "46b2efb985eb54ad12ff78e6b2ef46bbd0427efd0f68cc5baf9ad1a65dd25e58",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155796",
+      "original_archive_sha256": "47f17dbc69d4e1aa9c50a0646e3b71e1323b8f702d0bc2a4b0026c4e9c8134b4"
+    },
+    {
+      "file": "154938-evidence.zip",
+      "sha256": "2186caec583aa0ee3e180abad9cb8187c36182fcd39954af25fc7243bcf8af88",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154938",
+      "original_archive_sha256": "b22fe8913e082f5d0b9e7b4f4cc3bbf61760a026c0aa7043e703049f643b0c26"
+    },
+    {
+      "file": "155122-evidence.zip",
+      "sha256": "bdd9cb021f08916bdca3afdd81bd02c695ceceac66865b4096043c0077060c31",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155122",
+      "original_archive_sha256": "7ddbb472c2857fac1bd6eb43c674717238b55049722f97cb7b237925d327704a"
+    },
+    {
+      "file": "155318-evidence.zip",
+      "sha256": "01f2a0b2f466b56ebe1c1a9020531708f7b2ac08709f28775100c1756757ebd1",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155318",
+      "original_archive_sha256": "3882ac680c0572ed816d4fa97be6592f163f3590b5de9e27b828a1ea08c07875"
+    },
+    {
+      "file": "154821-evidence.zip",
+      "sha256": "cb95ada8b7a179a12e0720c512b82e88c4134f438423df2af881e452149f7ca4",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154821",
+      "original_archive_sha256": "1f51a14b903ef7aa91e706f377a5ebd9a554b4ce8839d5b92fae8848414ecf0d"
+    },
+    {
+      "file": "155068-evidence.zip",
+      "sha256": "577b1fa2063e1a9d3d022c5cf101234cd5b4b7060a6152ecbc195a97d826cfc5",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155068",
+      "original_archive_sha256": "71054473befca4bcad2a99a1179f147307496fd6fb5e3d15f1a6613c7283834f"
+    },
+    {
+      "file": "154872-evidence.zip",
+      "sha256": "03a740c017bc12e686d2fe23e4524eac5e660de7b7e310c15b4cee48d3eff511",
+      "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=154872",
+      "original_archive_sha256": "d849c691b3dbd5c602ac01faa77f688013b550a694e89eca490e89825e43b006"
+    }
+  ],
+  "frozen_code_sha256": {
+    "src/income_analytics/application/magic_formula_stocks.py": "27b58d132b461afe867ca2af05757b1309739c40156549ac0bf1785ae5ad27a4",
+    "src/income_analytics/application/magic_formula_ranking_validation.py": "47140198ac099487f4160be411c46ef549a1d3ac3e8db25dbbc672d7133e6a37",
+    "src/income_analytics/application/magic_formula_contract.py": "9e299489a57c049fcbcc940a0d3fdfa573d174cc8c57b97c14f4fcc63204163f"
+  }
+}

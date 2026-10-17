@@ -1,0 +1,82 @@
+{
+  "schema_version": "PETROBRAS_RAW_EXCERPTS_V1",
+  "reference_date": "2025-12-31",
+  "description": "Unchanged official CSV records; COTAHIST unrelated physical lines replaced by blank lines, preserving original line numbers. Test-only excerpts, not complete official archives.",
+  "sources": [
+    {
+      "source_file": "dfp_cia_aberta_2025.zip",
+      "original_sha256": "de8b7be1cdae032a402ab33916015c74fdc30f0bc64be3f38a4b5dd1d43f6d79",
+      "members": [
+        {
+          "name": "dfp_cia_aberta_BPA_con_2025.csv",
+          "original_member_sha256": "675b65ed4b947edb63859485fd83a7d8bcb9bfde6079dd8f4efd0bda24e1f4b1",
+          "excerpt_sha256": "872f21b0cf169557dc1a83ed3f9f27de387a5937125e3acff232f2b979ce1faf",
+          "records": 136
+        },
+        {
+          "name": "dfp_cia_aberta_BPP_con_2025.csv",
+          "original_member_sha256": "50d48a225adebbf713fa23e5d1b59b80becc7c1b72daf05f0338dfd190bf4bce",
+          "excerpt_sha256": "278f55de5160b01bf4facdb700732149aa515c5d0e3641f5485734c52d9aeffa",
+          "records": 220
+        },
+        {
+          "name": "dfp_cia_aberta_composicao_capital_2025.csv",
+          "original_member_sha256": "51d870dde78182776b9b51f778315ed3a90508db3ee030a5d9f7c52d33adba1e",
+          "excerpt_sha256": "07750b1451500dd8fff10549e8171874a883d3f9a056aa57a585e5cc24948159",
+          "records": 1
+        },
+        {
+          "name": "dfp_cia_aberta_DRE_con_2025.csv",
+          "original_member_sha256": "464c68acbe6fea521efb6a76c8e0d96ca31fde5ead572b3c6b3e6e8829a86122",
+          "excerpt_sha256": "aadbef5d01e4f65817ea345386cc99bbaff1e3a63f4f8ddb2df38a9eb338502b",
+          "records": 86
+        }
+      ],
+      "excerpt_archive_sha256": "f156d16516cbf7053e492c8500fe1059a744f32fc477993745e425cf8b998682"
+    },
+    {
+      "source_file": "fca_cia_aberta_2025.zip",
+      "original_sha256": "dbbbda515a98d402ff0b0fb2808d15f3d81b029e0c61de8b95655323604d1192",
+      "members": [
+        {
+          "name": "fca_cia_aberta_valor_mobiliario_2025.csv",
+          "original_member_sha256": "86439af368838751e1915f721baeb1919eb11364f9ba430d9427d9a4f5dc86a3",
+          "excerpt_sha256": "14e2281112258bd26679955c5709814049349136b13ecad1031a0f33d27a510b",
+          "records": 2
+        }
+      ],
+      "excerpt_archive_sha256": "5626ffd2af2384fb5d4e4e85f157330b6c59e157dd6f0e937014feda25c8f382"
+    },
+    {
+      "source_file": "COTAHIST_A2025.ZIP",
+      "original_sha256": "6cc0ad851c8f605ca30418acac48be81f1767f6ed05b4f563772d06ae448047d",
+      "records": [
+        {
+          "line": 1688640,
+          "sha256": "13f85ef3abe45f8d57cabbf65d72fd427918ef2d42e199fb6e9782b9c68fcc0d"
+        },
+        {
+          "line": 1688641,
+          "sha256": "e81ab38da84fc63b9f0ad02ed1c345c20840d57534240fee1f9f98f448e3bc2b"
+        },
+        {
+          "line": 1690515,
+          "sha256": "c44ef142ea4e0336e9680c1e4b6ec0efea9262af67fc05ba6ac64a279b83ef4c"
+        },
+        {
+          "line": 1690516,
+          "sha256": "eaa758e2f8ad5126b085e101aa7566ec1576f08bc181a51c62e45317e4f4e9fe"
+        },
+        {
+          "line": 1692376,
+          "sha256": "3f48ebb3e18c09105e749349dca5edffeaeb0b558f86d023518080826528635e"
+        },
+        {
+          "line": 1692377,
+          "sha256": "2543b1926feaf20888b962f4563bdc4817cd9d4ee986ed74b0d0dc918c74b179"
+        }
+      ],
+      "excerpt_archive_sha256": "f8cdd55f547926bc5522a92cd0379093d48bca4a30e6924632c3994e69dd7b8c"
+    }
+  ]
+}

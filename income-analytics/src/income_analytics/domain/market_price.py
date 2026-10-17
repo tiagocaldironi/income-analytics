@@ -17,6 +17,8 @@ class MarketPrice:
     asset: Asset
     price: Money
     effective_date: date
+    provider: str = "manual"
+    price_timestamp: datetime | None = None
     id: UUID = field(default_factory=uuid4)
     registered_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
@@ -31,3 +33,7 @@ class MarketPrice:
             raise TypeError("Market price effective date must be a date instance.")
         if self.registered_at.tzinfo is None:
             raise ValueError("Market price registered_at must be timezone-aware.")
+        if not isinstance(self.provider, str) or not self.provider.strip():
+            raise ValueError("Market price provider is required.")
+        if self.price_timestamp is not None and self.price_timestamp.tzinfo is None:
+            raise ValueError("Market price timestamp must be timezone-aware.")

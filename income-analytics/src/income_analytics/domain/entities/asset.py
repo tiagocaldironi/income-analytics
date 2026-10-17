@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from income_analytics.domain.entities.entity import Entity
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.asset_type import AssetType
+from income_analytics.domain.enums.valuation_method import ValuationMethod
 from income_analytics.domain.value_objects.money import Money
 from income_analytics.domain.value_objects.ticker import Ticker
 
@@ -31,6 +32,7 @@ class Asset(Entity):
     currency: Currency
     institution: Institution
     asset_class: AssetClass
+    valuation_method: ValuationMethod = ValuationMethod.MARKET_PRICE
     country: str = "BR"
     sector: str | None = None
     isin: str | None = None
@@ -40,7 +42,7 @@ class Asset(Entity):
     updated_at: datetime = field(default_factory=_now_utc)
 
     def __post_init__(self) -> None:
-        super().__post_init__()
+        Entity.__post_init__(self)
 
         if not isinstance(self.ticker, Ticker):
             raise TypeError("Asset ticker must be a Ticker.")
@@ -63,6 +65,9 @@ class Asset(Entity):
 
         if not isinstance(self.asset_class, AssetClass):
             raise TypeError("Asset class must be an AssetClass.")
+
+        if not isinstance(self.valuation_method, ValuationMethod):
+            raise TypeError("Asset valuation method must be a ValuationMethod.")
 
         if not isinstance(self.country, str) or not self.country.strip():
             raise ValueError("Asset country is required.")
@@ -140,6 +145,13 @@ class Asset(Entity):
         """Update the latest manually informed market price for this asset."""
         self._validate_current_price(current_price)
         object.__setattr__(self, "current_price", current_price)
+        object.__setattr__(self, "updated_at", _now_utc())
+
+    def update_asset_class(self, asset_class: AssetClass) -> None:
+        """Apply an explicit user classification correction to this asset."""
+        if not isinstance(asset_class, AssetClass):
+            raise TypeError("Asset class must be an AssetClass.")
+        object.__setattr__(self, "asset_class", asset_class)
         object.__setattr__(self, "updated_at", _now_utc())
 
     @staticmethod

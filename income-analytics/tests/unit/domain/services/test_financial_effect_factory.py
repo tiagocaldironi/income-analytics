@@ -63,6 +63,27 @@ def test_should_create_a_position_effect_for_sell() -> None:
     assert effects[1].amount == Money(Decimal("2500"))
 
 
+def test_sell_with_financial_data_gap_changes_only_the_position() -> None:
+    asset = build_asset()
+    event = FinancialEvent(
+        account_id=uuid4(),
+        asset=asset,
+        event_type=FinancialEventType.SELL,
+        occurred_at=datetime(2026, 1, 10, tzinfo=UTC),
+        quantity=Quantity(Decimal("31")),
+        metadata={"financial_status": "DATA_GAP"},
+    )
+
+    effects = FinancialEffectFactory.from_event(event)
+
+    assert len(effects) == 1
+    assert isinstance(effects[0], PositionEffect)
+    assert effects[0].quantity_delta == Decimal("-31")
+    assert effects[0].sale_value is None
+    assert event.unit_price is None
+    assert event.amount is None
+
+
 def test_should_create_cash_and_income_effects_for_dividend() -> None:
     asset = build_asset()
     event = FinancialEvent(

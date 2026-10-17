@@ -44,13 +44,14 @@ class PositionAccumulator:
         quantity_sold = -effect.quantity_delta
         if quantity_sold > self.quantity:
             raise ValueError("Cannot sell more than the current position quantity.")
-        if effect.sale_value is None:
-            raise ValueError("A sell position effect requires a sale value.")
-
         cost_of_sale = Money(quantity_sold * self.average_price.amount)
         self.quantity -= quantity_sold
         self.cost = self.cost - cost_of_sale
-        self.realized_result = self.realized_result + (effect.sale_value - cost_of_sale)
+        # A custody-confirmed sale may lack monetary evidence.  It reduces the
+        # lot while deliberately leaving realized result unavailable rather
+        # than converting an unknown sale value into zero.
+        if effect.sale_value is not None:
+            self.realized_result = self.realized_result + (effect.sale_value - cost_of_sale)
 
         if self.quantity == Decimal("0"):
             self.cost = Money.zero()

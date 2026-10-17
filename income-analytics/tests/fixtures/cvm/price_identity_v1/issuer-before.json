@@ -1,0 +1,296 @@
+{
+  "candidate_key": "08902291000115",
+  "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+  "cvm_code": "025585",
+  "cnpj": "08902291000115",
+  "display_name": "CSN MINERAÇÃO S.A.",
+  "economic_sector": "Extração Mineral",
+  "economic_sector_group": "NON_FINANCIAL",
+  "sector_source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_geral_2025.csv|line=226",
+  "methodology_eligibility": "ELIGIBLE",
+  "exclusion_reason": null,
+  "identity_status": "RESOLVED",
+  "identity_source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_geral_2025.csv|line=226",
+  "eligibility_status": "DATA_GAP",
+  "data_readiness_status": "DATA_GAP",
+  "data_reason_codes": [
+    "NO_REFERENCE_PRICE"
+  ],
+  "accounting_readiness": {
+    "status": "NORMALIZATION_REQUIRED",
+    "ready": true,
+    "missing_accounts": [],
+    "reason_codes": [],
+    "evidence": [
+      {
+        "metric": "financial_debt_short_term",
+        "account_code": "2.01.04",
+        "rule_id": "DEBT_ST_RULE_001",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_BPP_con_2025.csv|line=32351",
+        "raw_value": "1650923.0000000000",
+        "currency": "REAL",
+        "currency_scale": "MIL"
+      },
+      {
+        "metric": "financial_debt_long_term",
+        "account_code": "2.02.01",
+        "rule_id": "DEBT_LT_RULE_001",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_BPP_con_2025.csv|line=32419",
+        "raw_value": "7535494.0000000000",
+        "currency": "REAL",
+        "currency_scale": "MIL"
+      },
+      {
+        "metric": "operating_current_assets",
+        "account_code": "1.01.03",
+        "rule_id": "NWC_ASSET_RULE_002",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_BPA_con_2025.csv|line=18899",
+        "raw_value": "1914795.0000000000",
+        "currency": "REAL",
+        "currency_scale": "MIL"
+      },
+      {
+        "metric": "operating_current_assets",
+        "account_code": "1.01.04",
+        "rule_id": "NWC_ASSET_RULE_002",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_BPA_con_2025.csv|line=18905",
+        "raw_value": "825422.0000000000",
+        "currency": "REAL",
+        "currency_scale": "MIL"
+      },
+      {
+        "metric": "operating_current_liabilities",
+        "account_code": "2.01.02",
+        "rule_id": "NWC_LIABILITY_RULE_001",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_BPP_con_2025.csv|line=32335",
+        "raw_value": "2171640.0000000000",
+        "currency": "REAL",
+        "currency_scale": "MIL"
+      },
+      {
+        "metric": "cash_and_equivalents",
+        "account_code": "1.01.01",
+        "rule_id": "CASH_RULE_001",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_BPA_con_2025.csv|line=18885",
+        "raw_value": "8871892.0000000000",
+        "currency": "REAL",
+        "currency_scale": "MIL"
+      },
+      {
+        "metric": "net_fixed_assets",
+        "account_code": "1.02.03",
+        "rule_id": "FIXED_ASSET_RULE_001",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_BPA_con_2025.csv|line=18997",
+        "raw_value": "10994169.0000000000",
+        "currency": "REAL",
+        "currency_scale": "MIL"
+      },
+      {
+        "metric": "ebit",
+        "account_code": "3.05",
+        "rule_id": "EBIT_RULE_002",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_DRE_con_2025.csv|line=9647",
+        "raw_value": "5011143.0000000000",
+        "currency": "REAL",
+        "currency_scale": "MIL"
+      }
+    ]
+  },
+  "market_readiness": {
+    "status": "INSUFFICIENT_MARKET_DATA",
+    "security_ready": true,
+    "capital_ready": true,
+    "price_ready": false,
+    "price_readiness_tickers": [
+      "25585"
+    ],
+    "reason_codes": [
+      "NO_REFERENCE_PRICE"
+    ],
+    "capital_source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=209",
+    "raw_capital_quantities": {
+      "ON": {
+        "issued": "54320445380",
+        "treasury": "53294297"
+      },
+      "PN": {
+        "issued": "0",
+        "treasury": "0"
+      }
+    },
+    "quantity_unit": "UNIT",
+    "unit_evidence_snapshot_id": null,
+    "normalized_outstanding_by_class": {
+      "ON": "54267151083",
+      "PN": "0"
+    },
+    "unit_resolution_policy_version": "MAGIC_FORMULA_HISTORICAL_SHARES_UNIT_V1"
+  },
+  "securities": [
+    {
+      "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+      "security_id": "BR:25585",
+      "ticker": "25585",
+      "share_class": "ON",
+      "preferred_class": null,
+      "unit_composition": null,
+      "isin": null,
+      "valid_from": "2021-02-12",
+      "valid_to": null,
+      "source_reference": "fca_cia_aberta_2025.zip|fca_cia_aberta_valor_mobiliario_2025.csv|line=315",
+      "form_id": "147177",
+      "form_reference": "2025-01-01",
+      "security_status": "RESOLVED",
+      "price_status": "DATA_GAP",
+      "requested_market_date": "2025-12-31",
+      "effective_market_date": null,
+      "price": null,
+      "price_source_reference": null
+    }
+  ],
+  "canonical_status": "NOT_RESOLVED",
+  "canonical_snapshot_id": null,
+  "canonical_qa_id": null,
+  "canonical_ranking_eligible": false,
+  "historical_shares_unit_resolution": {
+    "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+    "reference_date": "2025-12-31",
+    "policy_version": "MAGIC_FORMULA_HISTORICAL_SHARES_UNIT_V1",
+    "dataset": "CVM_DFP_COMPOSICAO_CAPITAL",
+    "source_file": "dfp_cia_aberta_2025.zip",
+    "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=209",
+    "status": "RESOLVED",
+    "reason_code": null,
+    "resolution_method": "EXPLICIT_SOURCE_UNIT",
+    "raw_unit": {
+      "csv": null,
+      "xml_code": "1",
+      "pdf_label": "Unidade"
+    },
+    "normalization_multiplier": "1",
+    "quantities": [
+      {
+        "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+        "share_class": "ON",
+        "quantity_kind": "issued",
+        "raw_quantity": "54320445380",
+        "raw_unit_metadata": {
+          "csv": null,
+          "xml_code": "1",
+          "pdf_label": "Unidade"
+        },
+        "normalization_multiplier": "1",
+        "normalized_quantity": "54320445380",
+        "reference_date": "2025-12-31",
+        "policy_version": "MAGIC_FORMULA_HISTORICAL_SHARES_UNIT_V1",
+        "resolution_method": "EXPLICIT_SOURCE_UNIT",
+        "dataset": "CVM_DFP_COMPOSICAO_CAPITAL",
+        "source_file": "dfp_cia_aberta_2025.zip",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=209",
+        "unit_source_reference": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155318|025585DFP31-12-2025v2.xml|DadosDFP/EscalaQtdAcoes"
+      },
+      {
+        "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+        "share_class": "ON",
+        "quantity_kind": "treasury",
+        "raw_quantity": "53294297",
+        "raw_unit_metadata": {
+          "csv": null,
+          "xml_code": "1",
+          "pdf_label": "Unidade"
+        },
+        "normalization_multiplier": "1",
+        "normalized_quantity": "53294297",
+        "reference_date": "2025-12-31",
+        "policy_version": "MAGIC_FORMULA_HISTORICAL_SHARES_UNIT_V1",
+        "resolution_method": "EXPLICIT_SOURCE_UNIT",
+        "dataset": "CVM_DFP_COMPOSICAO_CAPITAL",
+        "source_file": "dfp_cia_aberta_2025.zip",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=209",
+        "unit_source_reference": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155318|025585DFP31-12-2025v2.xml|DadosDFP/EscalaQtdAcoes"
+      },
+      {
+        "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+        "share_class": "PN",
+        "quantity_kind": "issued",
+        "raw_quantity": "0",
+        "raw_unit_metadata": {
+          "csv": null,
+          "xml_code": "1",
+          "pdf_label": "Unidade"
+        },
+        "normalization_multiplier": "1",
+        "normalized_quantity": "0",
+        "reference_date": "2025-12-31",
+        "policy_version": "MAGIC_FORMULA_HISTORICAL_SHARES_UNIT_V1",
+        "resolution_method": "EXPLICIT_SOURCE_UNIT",
+        "dataset": "CVM_DFP_COMPOSICAO_CAPITAL",
+        "source_file": "dfp_cia_aberta_2025.zip",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=209",
+        "unit_source_reference": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155318|025585DFP31-12-2025v2.xml|DadosDFP/EscalaQtdAcoes"
+      },
+      {
+        "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+        "share_class": "PN",
+        "quantity_kind": "treasury",
+        "raw_quantity": "0",
+        "raw_unit_metadata": {
+          "csv": null,
+          "xml_code": "1",
+          "pdf_label": "Unidade"
+        },
+        "normalization_multiplier": "1",
+        "normalized_quantity": "0",
+        "reference_date": "2025-12-31",
+        "policy_version": "MAGIC_FORMULA_HISTORICAL_SHARES_UNIT_V1",
+        "resolution_method": "EXPLICIT_SOURCE_UNIT",
+        "dataset": "CVM_DFP_COMPOSICAO_CAPITAL",
+        "source_file": "dfp_cia_aberta_2025.zip",
+        "source_reference": "dfp_cia_aberta_2025.zip|dfp_cia_aberta_composicao_capital_2025.csv|line=209",
+        "unit_source_reference": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155318|025585DFP31-12-2025v2.xml|DadosDFP/EscalaQtdAcoes"
+      }
+    ],
+    "evidence": {
+      "status": "VERIFIED",
+      "reason_code": null,
+      "source_reference": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155318|025585DFP31-12-2025v2.xml|DadosDFP/EscalaQtdAcoes",
+      "acquisition": {
+        "issuer_id": "d5f0aa85-a0d2-5521-b052-1f82b89a664a",
+        "document_id": "155318",
+        "url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=155318",
+        "retrieved_at": "2026-09-17T16:58:57.952035+00:00",
+        "original_sha256": "3882ac680c0572ed816d4fa97be6592f163f3590b5de9e27b828a1ea08c07875",
+        "main_xml_member": "025585DFP31-12-2025v2.xml",
+        "descriptor_member": "FormularioDemonstracaoFinanceiraDFP.xml",
+        "pdf_member": "155318_025585_17092026132341.pdf",
+        "pdf_sha256": "b6ad1298f93229a2c798e20382f9284350cfad6cb14ca397618e3f875c3ba037",
+        "pdf_capital_page": {
+          "page_number": 2,
+          "text": "Dados da Empresa / Composição do Capital\nNúmero de Ações\n(Unidades)\nÚltimo Exercício Social\n31/12/2025\nDo Capital Integralizado\nOrdinárias\n54.320.445.380\nPreferenciais\n0\nTotal\n54.320.445.380\nEm Tesouraria\nOrdinárias\n53.294.297\nPreferenciais\n0\nTotal\n53.294.297\n#Error\n#Error\nPÁGINA: 1 de 117\nDFP - Demonstrações Financeiras Padronizadas - 31/12/2025 - CSN MINERAÇÃO S.A. Versão : 2"
+        },
+        "duration_seconds": 0.49874329997692257,
+        "status": "ACQUIRED",
+        "member_sha256": {
+          "025585DFP31-12-2025v2.xml": "4f9912b1534baf18c9e948405e0bd52e00ccb99a322466ea45a07cd48aec34f0",
+          "FormularioDemonstracaoFinanceiraDFP.xml": "ad832c41cef50c205750bc4efac48f9885ca928dac7d3152d166d02db6e1892f"
+        }
+      },
+      "cnpj": "08902291000115",
+      "cvm_code": "025585",
+      "reference_date": "2025-12-31",
+      "version": "2",
+      "quantity_scale_code": "1",
+      "unit_label": "Unidade",
+      "quantities": {
+        "QT_ACAO_ORDIN_CAP_INTEGR": "54320445380",
+        "QT_ACAO_ORDIN_TESOURO": "53294297",
+        "QT_ACAO_PREF_CAP_INTEGR": "0",
+        "QT_ACAO_PREF_TESOURO": "0",
+        "QT_ACAO_TOTAL_CAP_INTEGR": "54320445380",
+        "QT_ACAO_TOTAL_TESOURO": "53294297"
+      }
+    },
+    "source_precision": "SINGLE_SHARE",
+    "confidence": "EXPLICIT_DOCUMENT_METADATA_AND_PDF_LABEL"
+  }
+}

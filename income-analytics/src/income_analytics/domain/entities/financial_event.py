@@ -11,6 +11,7 @@ from typing import Any, Mapping
 from uuid import UUID
 
 from income_analytics.domain.entities.asset import Asset
+from income_analytics.domain.enums.capital_flow_type import CapitalFlowType
 from income_analytics.domain.entities.entity import Entity
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.value_objects.money import Money
@@ -55,7 +56,7 @@ class FinancialEvent(Entity):
     registered_at: datetime = field(default_factory=now_utc)
 
     def __post_init__(self) -> None:
-        super().__post_init__()
+        Entity.__post_init__(self)
 
         if self.occurred_at.tzinfo is None:
             raise ValueError("occurred_at must be timezone-aware.")
@@ -75,7 +76,11 @@ class FinancialEvent(Entity):
         if self.event_type in (FinancialEventType.BUY, FinancialEventType.SELL):
             self._validate_trade()
 
-        if self.event_type is FinancialEventType.DIVIDEND:
+        if self.event_type in (
+            FinancialEventType.DIVIDEND,
+            FinancialEventType.INTEREST_ON_EQUITY,
+            FinancialEventType.FII_INCOME,
+        ):
             self._validate_dividend()
 
         if self.event_type in (
@@ -101,12 +106,19 @@ class FinancialEvent(Entity):
         if self.quantity is None or not self.quantity.is_positive:
             raise ValueError(f"{event_name} event requires a positive quantity.")
 
+        if self.event_type is FinancialEventType.SELL and self.financial_status == "DATA_GAP":
+            return
         if self.unit_price is None or not self.unit_price.is_positive:
             raise ValueError(f"{event_name} event requires a positive unit price.")
 
+    @property
+    def financial_status(self) -> str:
+        """Completeness of monetary evidence; absent metadata means complete."""
+        return str(self.metadata.get("financial_status", "COMPLETE"))
+
     def _validate_dividend(self) -> None:
         if self.asset is None:
-            raise ValueError("DIVIDEND event requires an asset.")
+            raise ValueError("Income event requires an asset.")
         if self.amount is None or not self.amount.is_positive:
             raise ValueError("O valor do provento deve ser maior que zero.")
 
@@ -118,10 +130,22 @@ class FinancialEvent(Entity):
             raise ValueError(f"O valor da {label} deve ser maior que zero.")
 
     @property
+    def capital_flow_type(self) -> CapitalFlowType:
+        """Return the persisted capital-origin classification, if supplied.
+
+        Historical events deliberately default to UNKNOWN: class and asset TWR
+        must not invent a transfer origin from neighbouring operations.
+        """
+        value = self.metadata.get("capital_flow_type", CapitalFlowType.UNKNOWN.value)
+        return CapitalFlowType(str(value))
+
+    @property
     def total_amount(self) -> Money:
         """Return the financial total derived from quantity and unit price."""
         if self.event_type in (
             FinancialEventType.DIVIDEND,
+            FinancialEventType.INTEREST_ON_EQUITY,
+            FinancialEventType.FII_INCOME,
             FinancialEventType.DEPOSIT,
             FinancialEventType.WITHDRAWAL,
         ):
@@ -133,3 +157,10 @@ class FinancialEvent(Entity):
             raise ValueError("Event does not have enough data to calculate its total.")
 
         return Money(self.quantity.value * self.unit_price.amount)
+
+    @property
+    def known_total_amount(self) -> Money | None:
+        """Return a monetary total only when the source supplied enough evidence."""
+        if self.financial_status == "DATA_GAP":
+            return None
+        return self.total_amount

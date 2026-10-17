@@ -1,0 +1,50 @@
+{
+  "schema_version": "CVM_B3_UNIVERSE_RAW_EXCERPTS_V1",
+  "description": "Full FCA archive; unchanged consolidated DFP required-account rows and capital member; original COTAHIST rows with original physical line numbers preserved by blank padding. No manufactured financial values.",
+  "sources": [
+    {
+      "source_file": "fca_cia_aberta_2025.zip",
+      "original_sha256": "dbbbda515a98d402ff0b0fb2808d15f3d81b029e0c61de8b95655323604d1192",
+      "fixture_sha256": "dbbbda515a98d402ff0b0fb2808d15f3d81b029e0c61de8b95655323604d1192",
+      "scope": "complete official FCA archive"
+    },
+    {
+      "source_file": "dfp_cia_aberta_2025.zip",
+      "original_sha256": "de8b7be1cdae032a402ab33916015c74fdc30f0bc64be3f38a4b5dd1d43f6d79",
+      "members": [
+        {
+          "name": "dfp_cia_aberta_BPA_con_2025.csv",
+          "original_sha256": "675b65ed4b947edb63859485fd83a7d8bcb9bfde6079dd8f4efd0bda24e1f4b1",
+          "excerpt_sha256": "c696e218aaea69d386558443ef177fb274ce2711caff1dbf7f703655c86f0937",
+          "scope": "required accounts; physical source line numbers preserved"
+        },
+        {
+          "name": "dfp_cia_aberta_BPP_con_2025.csv",
+          "original_sha256": "50d48a225adebbf713fa23e5d1b59b80becc7c1b72daf05f0338dfd190bf4bce",
+          "excerpt_sha256": "9b1369dfe1507fde6194847a4b8efd749224f151278ac81f604f1913b20eb9dd",
+          "scope": "required accounts; physical source line numbers preserved"
+        },
+        {
+          "name": "dfp_cia_aberta_composicao_capital_2025.csv",
+          "sha256": "51d870dde78182776b9b51f778315ed3a90508db3ee030a5d9f7c52d33adba1e",
+          "scope": "complete original member"
+        },
+        {
+          "name": "dfp_cia_aberta_DRE_con_2025.csv",
+          "original_sha256": "464c68acbe6fea521efb6a76c8e0d96ca31fde5ead572b3c6b3e6e8829a86122",
+          "excerpt_sha256": "8b43f7e1f87140816b43cd1a061c13c4e5b23e23291128e28337518a75609516",
+          "scope": "required accounts; physical source line numbers preserved"
+        }
+      ],
+      "fixture_sha256": "cd6ec28eaed28e694f9cb886b4defc61e94263656ac9640b44f21857548f3a0e"
+    },
+    {
+      "source_file": "COTAHIST_A2025.ZIP",
+      "original_sha256": "6cc0ad851c8f605ca30418acac48be81f1767f6ed05b4f563772d06ae448047d",
+      "scope": "candidate equity quotes in window 2025-12-24..2025-12-31; physical lines preserved",
+      "retained_records": 957,
+      "member_sha256": "14fc55531d268ad5aa0f3a13216c05c641bb83fd7acb431f9406a618fc0738a8",
+      "fixture_sha256": "13c20bae28d2b66e8dc611c8ad6e36204f2ade5d8d1d6c8b34a6f74ae3fa2864"
+    }
+  ]
+}

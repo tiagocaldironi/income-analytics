@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
+from income_analytics.domain.projectors.portfolio_projector import PortfolioProjector
 from income_analytics.domain.value_objects.money import Money
 from income_analytics.domain.value_objects.quantity import Quantity
 
@@ -145,6 +146,13 @@ def test_history_contains_derived_snapshots_at_each_relevant_date() -> None:
         date(2026, 1, 10),
     ]
     assert history.snapshots[-1].portfolio.total_cost == Money(Decimal("7000"))
+    assert all(
+        snapshot.portfolio
+        == PortfolioProjector.project_as_of(
+            session.history(), session._market_prices, snapshot.effective_date
+        )
+        for snapshot in history.snapshots
+    )
 
 
 def test_future_events_do_not_change_a_previous_as_of_projection() -> None:

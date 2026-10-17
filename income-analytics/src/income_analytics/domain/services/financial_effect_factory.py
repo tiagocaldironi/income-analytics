@@ -37,7 +37,11 @@ class FinancialEffectFactory:
             case FinancialEventType.SELL:
                 return cls._sell(event)
 
-            case FinancialEventType.DIVIDEND:
+            case (
+                FinancialEventType.DIVIDEND
+                | FinancialEventType.INTEREST_ON_EQUITY
+                | FinancialEventType.FII_INCOME
+            ):
                 return cls._dividend(event)
 
             case FinancialEventType.DEPOSIT:
@@ -48,6 +52,12 @@ class FinancialEffectFactory:
 
             case _:
                 raise ValueError(f"Unsupported financial event type: {event.event_type}")
+
+    @staticmethod
+    def _asset_currency_code(event: FinancialEvent) -> str:
+        # Legacy domain fixtures may omit a Currency value object. Their
+        # historical convention is the base currency (BRL).
+        return str(getattr(getattr(event.asset, "currency", None), "code", "BRL"))
 
     @staticmethod
     def _buy(
@@ -68,6 +78,7 @@ class FinancialEffectFactory:
                 financial_event_id=event.id,
                 account_id=event.account_id,
                 amount=-event.total_amount,
+                currency_code=FinancialEffectFactory._asset_currency_code(event),
             ),
         )
 
@@ -76,6 +87,14 @@ class FinancialEffectFactory:
         if event.asset is None or event.quantity is None:
             raise ValueError("SELL event must be valid before effects are created.")
 
+        if event.financial_status == "DATA_GAP":
+            return (
+                PositionEffect(
+                    financial_event_id=event.id,
+                    asset=event.asset,
+                    quantity_delta=-event.quantity.value,
+                ),
+            )
         return (
             PositionEffect(
                 financial_event_id=event.id,
@@ -87,6 +106,7 @@ class FinancialEffectFactory:
                 financial_event_id=event.id,
                 account_id=event.account_id,
                 amount=event.total_amount,
+                currency_code=FinancialEffectFactory._asset_currency_code(event),
             ),
         )
 
@@ -100,6 +120,7 @@ class FinancialEffectFactory:
                 financial_event_id=event.id,
                 account_id=event.account_id,
                 amount=event.amount,
+                currency_code=FinancialEffectFactory._asset_currency_code(event),
             ),
             IncomeEffect(
                 financial_event_id=event.id,

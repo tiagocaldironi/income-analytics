@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import vm from "node:vm";
+
+let source = fs.readFileSync("src/income_analytics/api/static/js/features/attention-center.js", "utf8");
+source = source.replace(/^import .*;\r?\n/gm, "").replaceAll("export async function", "async function").replaceAll("export function", "function");
+const context = vm.createContext({ console, document: { querySelector: () => null }, window: { location: { hash: "" } }, queueMicrotask });
+vm.runInContext(source, context);
+const patrimonial = code => ({ code, logical_key: code, category: code === "INCOMPLETE_RISK_COVERAGE" ? "DATA_QUALITY" : "STRATEGY", materiality: "HIGH", trajectory: "NEW", should_surface: true });
+let groups = context.attentionGroups({ findings: [patrimonial("PORTFOLIO_DRIFT"), { ...patrimonial("COUNTRY_CONCENTRATION"), category: "EXPOSURE", materiality: "MEDIUM" }, patrimonial("INCOMPLETE_RISK_COVERAGE"), { ...patrimonial("HIDDEN"), should_surface: false }] });
+assert.equal(groups.patrimonial.length, 2);
+assert.equal(groups.quality.length, 1);
+assert.equal(groups.patrimonial.length + groups.quality.length, 3);
+assert.equal(groups.patrimonial[0].code, "PORTFOLIO_DRIFT");
+groups = context.attentionGroups({ findings: [patrimonial("INCOMPLETE_RISK_COVERAGE")] });
+assert.equal(groups.patrimonial.length, 0);
+assert.equal(groups.quality.length, 1);
+assert.match(source, /count >= 10 \? "9\+"/);
+assert.match(source, /patrimonialCount \+ qualityCount/);
+assert.match(source, /attention-center-drawer/);
+assert.match(source, /window\.location\.hash = "minha-carteira"/);
+console.log("Global Attention Center V1 checks passed.");

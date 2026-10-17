@@ -20,7 +20,7 @@ class PositionEffect(FinancialEffect):
     sale_value: Money | None = None
 
     def __post_init__(self) -> None:
-        super().__post_init__()
+        FinancialEffect.__post_init__(self)
 
         if self.quantity_delta == Decimal("0"):
             raise ValueError("Position effect quantity delta cannot be zero.")
@@ -32,7 +32,7 @@ class PositionEffect(FinancialEffect):
                 raise ValueError("A buy position effect cannot have a sale value.")
             return
 
-        if self.sale_value is None or not self.sale_value.is_positive:
-            raise ValueError("A sell position effect requires a positive sale value.")
+        if self.sale_value is not None and not self.sale_value.is_positive:
+            raise ValueError("A sell position effect sale value must be positive when supplied.")
         if self.cost_delta is not None:
             raise ValueError("Sell cost is calculated from the current position average.")

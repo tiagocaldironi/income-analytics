@@ -15,3 +15,4 @@ class CashEffect(FinancialEffect):
 
     account_id: UUID
     amount: Money
+    currency_code: str = "BRL"

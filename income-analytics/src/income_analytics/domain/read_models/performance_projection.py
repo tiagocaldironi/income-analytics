@@ -32,6 +32,11 @@ class PerformanceProjection:
     xirr: Decimal | None
     periods: tuple[PerformancePeriod, ...] = ()
     unavailable_reason: str | None = None
+    coverage_ratio: Decimal | None = None
+    performance_status: str = "AVAILABLE"
+    missing_assets: tuple[str, ...] = ()
+    missing_value: Money = Money.zero()
+    missing_periods: tuple[date, ...] = ()
 
     @property
     def net_external_flow(self) -> Money:

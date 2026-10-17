@@ -28,6 +28,7 @@ class PortfolioProjection:
     income_received: Money = Money.zero()
     total_contributions: Money = Money.zero()
     total_withdrawals: Money = Money.zero()
+    cash_by_currency: tuple[tuple[str, Money], ...] = ()
 
     @property
     def position_count(self) -> int:
