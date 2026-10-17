@@ -1508,9 +1508,13 @@ class PortfolioSession:
             active_assets
             + tuple(asset for ticker, asset in self._assets.items() if ticker in target_tickers)
         )
-        self._asset_allocation_policy = policy
+        current_targets = (
+            self._asset_allocation_policy.targets if self._asset_allocation_policy else {}
+        )
+        merged_targets = {**current_targets, **policy.targets}
+        self._asset_allocation_policy = AssetAllocationPolicy(targets=merged_targets)
         if self.persistent:
-            SqliteAssetAllocationPolicyRepository().save(policy)
+            SqliteAssetAllocationPolicyRepository().save(self._asset_allocation_policy)
 
     @property
     def allocation_policy(self) -> AllocationPolicy | None:

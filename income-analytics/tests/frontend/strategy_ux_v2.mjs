@@ -41,6 +41,8 @@ assert(!target.innerHTML.includes("Classe:percentual"));
 assert.match(source, /save\.disabled = !valid/);
 assert.match(source, /Math\.abs\(remaining\) < \.000001/);
 assert.match(source, /portfolioApi\.assetAllocationPolicy/);
+assert.match(source, /assetAllocationPolicy\(\{ \[group\.asset_class\]: targets \}\)/);
+assert.doesNotMatch(source, /Object\.fromEntries\(state\.classes\.filter/);
 assert.match(source, /Qual classe você quer distribuir/);
 const sessionSource = fs.readFileSync("src/income_analytics/application/portfolio_session.py", "utf8");
 assert.match(sessionSource, /active_assets = tuple\(/);

@@ -97,3 +97,34 @@ def test_invalid_mutated_asset_policy_is_not_normalized() -> None:
     assert detail.asset_distribution_status == "INCOMPLETE_OR_INVALID_POLICY"
     assert detail.asset_distributed_amount == 0
     assert detail.undistributed_within_class == detail.amount
+
+
+def test_updating_one_class_preserves_unrelated_policy_even_if_it_is_stale() -> None:
+    session = _session()
+    fixed_income_policy = AssetAllocationPolicy(
+        targets={AssetClass.FII: {"FUND-A": Decimal(".5"), "FUND-B": Decimal(".5")}}
+    )
+    session.set_asset_allocation_policy(fixed_income_policy)
+    session.register_trade(
+        event_type=FinancialEventType.BUY,
+        ticker="FUND-C",
+        name="Fundo C",
+        asset_class=AssetClass.FII,
+        quantity=Decimal("1"),
+        unit_price=Decimal("5"),
+        effective_date=TODAY,
+    )
+
+    session.set_asset_allocation_policy(
+        AssetAllocationPolicy(
+            targets={AssetClass.BRAZILIAN_STOCK: {"STOCK": Decimal("1")}}
+        )
+    )
+
+    policy = session.asset_allocation_policy
+    assert policy is not None
+    assert policy.targets[AssetClass.FII] == {
+        "FUND-A": Decimal(".5"),
+        "FUND-B": Decimal(".5"),
+    }
+    assert policy.targets[AssetClass.BRAZILIAN_STOCK] == {"STOCK": Decimal("1")}
