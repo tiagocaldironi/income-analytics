@@ -122,3 +122,40 @@ def test_stale_index_is_labeled_without_invalidating_portfolio() -> None:
     assert result["portfolio"]["return"] == Decimal("0.08")
     assert by_code["IBOV"]["status"] == "STALE"
     assert by_code["IBOV"]["last_observation"] == last
+
+
+def test_comparison_includes_small_cap_dividend_and_ivvb11_series() -> None:
+    start, end = date(2026, 1, 1), date(2026, 1, 31)
+    observations = {
+        name: (
+            BenchmarkObservation(
+                benchmark=name,
+                effective_date=date(2026, 1, 2),
+                value=Decimal("100"),
+                nature="INDEX_LEVEL",
+                source="b3",
+            ),
+            BenchmarkObservation(
+                benchmark=name,
+                effective_date=end,
+                value=Decimal("110"),
+                nature="INDEX_LEVEL",
+                source="b3" if name != "IVVB11" else "b3_cotahist",
+            ),
+        )
+        for name in ("SMLL", "IDIV", "IVVB11")
+    }
+    result = build_performance_comparison(
+        start_date=start,
+        end_date=end,
+        rates=(),
+        observations=observations,
+        performance_at=lambda low, high: projection(low, high),
+    )
+
+    by_code = {item["code"]: item for item in result["benchmarks"]}
+    assert by_code["SMLL"]["return"] == Decimal("0.1")
+    assert by_code["IDIV"]["return"] == Decimal("0.1")
+    assert by_code["IVVB11"]["return"] == Decimal("0.1")
+    assert result["series"][-1]["ivvb11"] == Decimal("0.1")
+    assert result["monthly_returns"][0]["smll"] == Decimal("0.1")

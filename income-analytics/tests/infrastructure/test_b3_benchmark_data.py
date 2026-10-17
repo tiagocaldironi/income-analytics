@@ -1,10 +1,11 @@
-from datetime import date
-from decimal import Decimal
 import base64
 import json
+from datetime import date
+from decimal import Decimal
 from urllib.parse import unquote
 
 from income_analytics.application.benchmark_data import BenchmarkDataUnavailable
+from income_analytics.application.market_data import MarketPriceObservation
 from income_analytics.infrastructure import b3_benchmark_data as b3
 
 
@@ -50,7 +51,10 @@ def test_b3_provider_reads_daily_observations_for_both_semesters(monkeypatch) ->
     def fake_urlopen(request, timeout):
         requested.append(request.full_url)
         response = FakeResponse()
-        response.body = b'{"results":[{"day":2,"rateValue1":"180.000,00","rateValue7":"190.000,00"}]}'
+        response.body = (
+            b'{"results":[{"day":2,"rateValue1":"180.000,00",'
+            b'"rateValue7":"190.000,00"}]}'
+        )
         return response
 
     monkeypatch.setattr(b3, "urlopen", fake_urlopen)
@@ -61,6 +65,51 @@ def test_b3_provider_reads_daily_observations_for_both_semesters(monkeypatch) ->
     assert len(requested) == 2
     assert [item.effective_date for item in result] == [date(2026, 1, 2), date(2026, 7, 2)]
     assert all(item.benchmark == "IFIX" and item.source == "b3" for item in result)
+
+
+def test_b3_provider_supports_small_cap_and_dividend_indices(monkeypatch) -> None:
+    requested = []
+
+    def fake_urlopen(request, timeout):
+        requested.append(request.full_url)
+        return FakeResponse()
+
+    monkeypatch.setattr(b3, "urlopen", fake_urlopen)
+    provider = b3.B3BenchmarkDataProvider()
+    for name in ("SMLL", "IDIV"):
+        result = provider.observations(
+            name, start_date=date(2026, 1, 1), end_date=date(2026, 1, 31)
+        )
+        assert result[0].benchmark == name
+
+    requested_payloads = [
+        json.loads(base64.b64decode(unquote(url.rsplit("/", 1)[-1])))
+        for url in requested
+    ]
+    assert [item["index"] for item in requested_payloads] == ["SMLL", "IDIV"]
+
+
+def test_ivvb11_comparison_provider_wraps_official_b3_closes() -> None:
+    class MarketData:
+        def history(self, symbol, *, start_date, end_date):
+            assert symbol == "IVVB11"
+            return (
+                MarketPriceObservation(
+                    symbol=symbol,
+                    price=Decimal("350.50"),
+                    currency_code="BRL",
+                    effective_date=date(2026, 10, 1),
+                    source="b3_cotahist",
+                ),
+            )
+
+    result = b3.IVVB11BenchmarkDataProvider(MarketData()).observations(
+        "IVVB11", start_date=date(2026, 10, 1), end_date=date(2026, 10, 31)
+    )
+
+    assert result[0].value == Decimal("350.50")
+    assert result[0].nature == "INDEX_LEVEL"
+    assert result[0].source == "b3_cotahist"
 
 
 def test_b3_parser_rejects_unrecognized_official_table_format() -> None:

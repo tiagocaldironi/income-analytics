@@ -12,7 +12,7 @@ from income_analytics.application.performance_coverage import GOOD_COVERAGE, MIN
 from income_analytics.domain.benchmark_rate import BenchmarkRate
 from income_analytics.domain.read_models.performance_projection import PerformanceProjection
 
-BENCHMARKS = ("CDI", "IBOV", "IFIX", "IPCA")
+BENCHMARKS = ("CDI", "IBOV", "IFIX", "IPCA", "SMLL", "IDIV", "IVVB11")
 
 
 def _benchmark_return(
@@ -107,7 +107,7 @@ def build_performance_comparison(
                 ),
                 "last_observation": latest.effective_date if latest else None,
                 "status": status,
-                "frequency": "MONTHLY" if code == "IPCA" else "DAILY",
+            "frequency": "MONTHLY" if code == "IPCA" else "DAILY",
             }
         )
 

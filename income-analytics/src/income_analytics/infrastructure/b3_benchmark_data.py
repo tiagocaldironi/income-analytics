@@ -17,6 +17,8 @@ from income_analytics.application.benchmark_data import (
     BenchmarkDataUnavailable,
     BenchmarkObservation,
 )
+from income_analytics.application.market_data import MarketDataUnavailable
+from income_analytics.infrastructure.b3_cotahist_market_data import B3CotahistMarketDataProvider
 
 _MONTHS = {
     "JAN": 1,
@@ -32,7 +34,12 @@ _MONTHS = {
     "NOV": 11,
     "DEZ": 12,
 }
-_PAGE_CODES = {"IBOV": "IBOVESPA", "IFIX": "IFIX"}
+_PAGE_CODES = {
+    "IBOV": "IBOVESPA",
+    "IFIX": "IFIX",
+    "SMLL": "SMLL",
+    "IDIV": "IDIV",
+}
 
 
 class _IndexTableParser(HTMLParser):
@@ -183,6 +190,37 @@ class B3BenchmarkDataProvider:
         if not observations:
             raise BenchmarkDataUnavailable(f"A B3 não retornou observações de {name} no período.")
         return tuple(observations[key] for key in sorted(observations))
+
+
+class IVVB11BenchmarkDataProvider:
+    """Expose the official B3 close series for IVVB11 as a comparison line."""
+
+    def __init__(self, market_data: B3CotahistMarketDataProvider | None = None) -> None:
+        self._market_data = market_data or B3CotahistMarketDataProvider()
+
+    def observations(
+        self, benchmark: str, *, start_date: date, end_date: date
+    ) -> tuple[BenchmarkObservation, ...]:
+        if benchmark.upper() != "IVVB11":
+            raise BenchmarkDataUnavailable(f"Série comparativa não suportada: {benchmark}.")
+        try:
+            prices = self._market_data.history(
+                "IVVB11", start_date=start_date, end_date=end_date
+            )
+        except MarketDataUnavailable as error:
+            raise BenchmarkDataUnavailable(
+                "Não foi possível consultar o histórico de IVVB11 na B3."
+            ) from error
+        return tuple(
+            BenchmarkObservation(
+                benchmark="IVVB11",
+                effective_date=item.effective_date,
+                value=item.price,
+                nature="INDEX_LEVEL",
+                source="b3_cotahist",
+            )
+            for item in prices
+        )
 
 
 def _parse_b3_index_api_response(
