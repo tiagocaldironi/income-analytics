@@ -1,6 +1,6 @@
 import { bindPortfolioFilters, loadPortfolio } from "./features/portfolio.js?v=20261008-twr-methodology";
 import { bindOperations, loadOperationsRoute } from "./features/operations.js?v=20261004-operations-refinement-v2";
-import { bindPerformance, loadExplanation } from "./features/performance.js?v=20261017-performance-class-filters-v1";
+import { bindPerformance, loadExplanation } from "./features/performance.js?v=20261017-performance-class-filters-v2";
 import { bindSimulation } from "./features/simulation.js?v=20260924-experience-v2";
 import { bindBenchmark } from "./features/benchmark.js?v=20260924-route-scoped-v1";
 import { bindAttentionCenter, loadAttentionCenter } from "./features/attention-center.js?v=20260924-route-scoped-v1";

@@ -1,4 +1,4 @@
-import { portfolioApi } from "../api.js?v=20261017-performance-class-filters-v1";
+import { portfolioApi } from "../api.js?v=20261017-performance-class-filters-v2";
 import { emptyState, errorState, money, percentage, table } from "../shared/ui.js";
 import { loadECharts } from "../shared/charts.js";
 
@@ -29,27 +29,19 @@ export async function loadExplanation() {
   const target = document.querySelector("#wealth-explanation");
   target.innerHTML = '<div class="empty">Calculando explicação com o histórico persistido…</div>';
   try {
-    let resolvedStart = start;
+    let comparisonStart = start;
     if (selectedComparisonPeriod === "ALL") {
       const range = await portfolioApi.performanceComparison(start, end, selectedComparisonAssetClass);
       if (requestId !== explanationRequestId) return;
       const starts = range.available_start_dates || {};
-      resolvedStart = starts[selectedComparisonAssetClass || "ALL"] || start;
-      if (resolvedStart !== start) {
-        document.querySelector("#wealth-start-date").value = resolvedStart;
-        return loadExplanation();
-      }
+      comparisonStart = starts[selectedComparisonAssetClass || "ALL"] || start;
     } else if (selectedComparisonPeriod === "12M") {
-      resolvedStart = dateMinusMonths(end, 12);
-      if (resolvedStart !== start) {
-        document.querySelector("#wealth-start-date").value = resolvedStart;
-        return loadExplanation();
-      }
+      comparisonStart = dateMinusMonths(end, 12);
     }
     const [data, evolution, comparison] = await Promise.all([
-      portfolioApi.wealthExplanation(resolvedStart, end),
-      loadWealthEvolution(resolvedStart, end),
-      portfolioApi.performanceComparison(resolvedStart, end, selectedComparisonAssetClass),
+      portfolioApi.wealthExplanation(start, end),
+      loadWealthEvolution(start, end),
+      portfolioApi.performanceComparison(comparisonStart, end, selectedComparisonAssetClass),
     ]);
     if (requestId !== explanationRequestId) return;
     document.querySelector("#wealth-end-date").value = data.period.end_date;
@@ -214,21 +206,10 @@ async function renderComparison(data, requestId) {
   target.innerHTML = `<div class="performance-cards">${cards}</div>${notice}<div class="performance-comparison-heading"><h3>Rentabilidade comparada com índices</h3>${comparisonFilters}</div>${rows ? rows : ""}<p class="performance-reading">${available ? `No período, ${portfolioLabel.toLowerCase()} rendeu ${value(portfolio.return)}. ${relativeRead}.` : "A rentabilidade selecionada não pode ser calculada sem dados suficientes. As referências de mercado continuam exibidas."}</p>${latestNotes ? `<p class="coverage">${latestNotes}</p>` : ""}<h3>Rentabilidade mensal</h3>${tableHtml(monthly)}<h3>Comparação anual</h3>${tableHtml(annual)}`;
   target.querySelector("#performance-period-filter")?.addEventListener("change", event => {
     selectedComparisonPeriod = event.target.value;
-    const startInput = document.querySelector("#wealth-start-date");
-    const endInput = document.querySelector("#wealth-end-date");
-    if (selectedComparisonPeriod === "ALL") {
-      startInput.value = (data.available_start_dates || {})[selectedComparisonAssetClass || "ALL"] || startInput.value;
-    } else if (selectedComparisonPeriod === "12M") {
-      startInput.value = dateMinusMonths(endInput.value, 12);
-    }
     loadExplanation();
   });
   target.querySelector("#performance-class-filter")?.addEventListener("change", event => {
     selectedComparisonAssetClass = event.target.value;
-    if (selectedComparisonPeriod === "ALL") {
-      const starts = data.available_start_dates || {};
-      document.querySelector("#wealth-start-date").value = starts[selectedComparisonAssetClass || "ALL"] || document.querySelector("#wealth-start-date").value;
-    }
     loadExplanation();
   });
   if (!rows) return;
