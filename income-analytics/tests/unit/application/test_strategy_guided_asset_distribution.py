@@ -83,6 +83,51 @@ def test_valid_asset_policy_uses_after_composition_and_reconciles() -> None:
     assert detail.asset_distributed_amount + detail.undistributed_within_class == detail.amount
 
 
+def test_strategy_simulation_hides_zero_target_assets_without_positions() -> None:
+    session = _session()
+    session.register_trade(
+        event_type=FinancialEventType.BUY,
+        ticker="FUND-ZERO",
+        name="Fundo sem objetivo",
+        asset_class=AssetClass.FII,
+        quantity=Decimal("1"),
+        unit_price=Decimal("10"),
+        effective_date=TODAY,
+    )
+    session.update_market_price(
+        ticker="FUND-ZERO", current_price=Decimal("10"), effective_date=TODAY
+    )
+    session.register_trade(
+        event_type=FinancialEventType.SELL,
+        ticker="FUND-ZERO",
+        name="Fundo sem objetivo",
+        asset_class=AssetClass.FII,
+        quantity=Decimal("1"),
+        unit_price=Decimal("10"),
+        effective_date=TODAY,
+    )
+    session.set_asset_allocation_policy(
+        AssetAllocationPolicy(
+            targets={
+                AssetClass.FII: {
+                    "FUND-A": Decimal(".5"),
+                    "FUND-B": Decimal(".5"),
+                    "FUND-ZERO": Decimal("0"),
+                }
+            }
+        )
+    )
+
+    projection = session.hypothetical_contribution(
+        amount=Decimal("40"), as_of=TODAY, allocation_mode="STRATEGY_GUIDED"
+    )
+
+    detail = next(
+        item for item in projection.scenario.class_details if item.asset_class is AssetClass.FII
+    )
+    assert {item.asset_label for item in detail.asset_allocations} == {"Fundo A", "Fundo B"}
+
+
 def test_invalid_mutated_asset_policy_is_not_normalized() -> None:
     session = _session()
     policy = AssetAllocationPolicy(
@@ -97,3 +142,34 @@ def test_invalid_mutated_asset_policy_is_not_normalized() -> None:
     assert detail.asset_distribution_status == "INCOMPLETE_OR_INVALID_POLICY"
     assert detail.asset_distributed_amount == 0
     assert detail.undistributed_within_class == detail.amount
+
+
+def test_updating_one_class_preserves_unrelated_policy_even_if_it_is_stale() -> None:
+    session = _session()
+    fixed_income_policy = AssetAllocationPolicy(
+        targets={AssetClass.FII: {"FUND-A": Decimal(".5"), "FUND-B": Decimal(".5")}}
+    )
+    session.set_asset_allocation_policy(fixed_income_policy)
+    session.register_trade(
+        event_type=FinancialEventType.BUY,
+        ticker="FUND-C",
+        name="Fundo C",
+        asset_class=AssetClass.FII,
+        quantity=Decimal("1"),
+        unit_price=Decimal("5"),
+        effective_date=TODAY,
+    )
+
+    session.set_asset_allocation_policy(
+        AssetAllocationPolicy(
+            targets={AssetClass.BRAZILIAN_STOCK: {"STOCK": Decimal("1")}}
+        )
+    )
+
+    policy = session.asset_allocation_policy
+    assert policy is not None
+    assert policy.targets[AssetClass.FII] == {
+        "FUND-A": Decimal(".5"),
+        "FUND-B": Decimal(".5"),
+    }
+    assert policy.targets[AssetClass.BRAZILIAN_STOCK] == {"STOCK": Decimal("1")}

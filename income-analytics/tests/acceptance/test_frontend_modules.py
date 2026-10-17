@@ -192,6 +192,8 @@ def test_critical_submits_are_bound_to_the_modular_api_client() -> None:
     assert "portfolioApi.allocationPolicy" in strategy
     assert "portfolioApi.assetAllocationPolicy" in strategy
     assert "data-save-strategy" in strategy
+    app = (STATIC / "js/app.js").read_text(encoding="utf-8")
+    assert "strategy.js?v=20261017-class-allocation-fix-v1" in app
 
 
 def test_income_entry_does_not_request_an_automatic_market_price() -> None:
