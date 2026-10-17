@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import base64
+import json
 import re
 from calendar import monthrange
 from datetime import date
 from decimal import Decimal, InvalidOperation
 from html.parser import HTMLParser
 from urllib.error import URLError
-from urllib.parse import urlencode
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 from income_analytics.application.benchmark_data import (
@@ -127,9 +129,9 @@ def parse_b3_index_table(
 
 
 class B3BenchmarkDataProvider:
-    """Fetch benchmark index history from B3's public daily-evolution tables."""
+    """Fetch benchmark index history from B3's public daily-evolution API."""
 
-    _base_url = "https://sistemaswebb3-listados.b3.com.br/indexStatisticsPage/daily-evolution"
+    _base_url = "https://sistemaswebb3-listados.b3.com.br/indexStatisticsProxy/IndexCall/GetPortfolioDay/"
 
     def __init__(self, *, timeout_seconds: float = 15) -> None:
         self._timeout_seconds = timeout_seconds
@@ -152,20 +154,28 @@ class B3BenchmarkDataProvider:
                 semester_end = date(year, last_month, monthrange(year, last_month)[1])
                 if semester_end < start_date or semester_start > end_date:
                     continue
-                params = urlencode({"language": "pt-br", "year": year, "semester": semester})
-                url = f"{self._base_url}/{page_code}?{params}"
+                payload = json.dumps(
+                    {
+                        "index": page_code,
+                        "year": year,
+                        "semester": semester,
+                        "language": "pt-br",
+                    },
+                    separators=(",", ":"),
+                ).encode("utf-8")
+                url = f"{self._base_url}{quote(base64.b64encode(payload).decode('ascii'))}"
                 request = Request(url, headers={"User-Agent": "IncomeAnalytics/1.0"})
                 try:
                     with urlopen(request, timeout=self._timeout_seconds) as response:
-                        html = response.read().decode("utf-8")
-                    parsed = parse_b3_index_table(
-                        html,
+                        body = json.loads(response.read().decode("utf-8"))
+                    parsed = _parse_b3_index_api_response(
+                        body,
                         benchmark=name,
                         year=year,
                         start_date=max(start_date, semester_start),
                         end_date=min(end_date, semester_end),
                     )
-                except (OSError, URLError, UnicodeDecodeError) as error:
+                except (OSError, URLError, UnicodeDecodeError, json.JSONDecodeError) as error:
                     raise BenchmarkDataUnavailable(
                         f"Não foi possível consultar o histórico {name} na B3."
                     ) from error
@@ -173,3 +183,41 @@ class B3BenchmarkDataProvider:
         if not observations:
             raise BenchmarkDataUnavailable(f"A B3 não retornou observações de {name} no período.")
         return tuple(observations[key] for key in sorted(observations))
+
+
+def _parse_b3_index_api_response(
+    payload: object,
+    *,
+    benchmark: str,
+    year: int,
+    start_date: date,
+    end_date: date,
+) -> tuple[BenchmarkObservation, ...]:
+    """Normalize the daily rows returned by B3's GetPortfolioDay API."""
+    if not isinstance(payload, dict) or not isinstance(payload.get("results"), list):
+        raise BenchmarkDataUnavailable("A B3 retornou uma resposta de índice inválida.")
+    observations: dict[date, BenchmarkObservation] = {}
+    for row in payload["results"]:
+        if not isinstance(row, dict):
+            continue
+        try:
+            day = int(row["day"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        for month in range(1, 13):
+            value = _number(str(row.get(f"rateValue{month}") or ""))
+            if value is None:
+                continue
+            try:
+                effective_date = date(year, month, day)
+            except ValueError:
+                continue
+            if start_date <= effective_date <= end_date:
+                observations[effective_date] = BenchmarkObservation(
+                    benchmark=benchmark,
+                    effective_date=effective_date,
+                    value=value,
+                    nature="INDEX_LEVEL",
+                    source="b3",
+                )
+    return tuple(observations[key] for key in sorted(observations))
