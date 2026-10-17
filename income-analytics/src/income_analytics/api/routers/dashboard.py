@@ -77,7 +77,10 @@ from income_analytics.domain.read_models.portfolio_projection import PortfolioPr
 from income_analytics.domain.read_models.position_projection import PositionProjection
 from income_analytics.domain.recurring_rule import RecurrenceFrequency, RecurringRule
 from income_analytics.domain.value_objects.money import Money
-from income_analytics.infrastructure.b3_benchmark_data import B3BenchmarkDataProvider
+from income_analytics.infrastructure.b3_benchmark_data import (
+    B3BenchmarkDataProvider,
+    IVVB11BenchmarkDataProvider,
+)
 from income_analytics.infrastructure.b3_cotahist_market_data import B3CotahistMarketDataProvider
 from income_analytics.infrastructure.b3_etf_market_data import B3EtfPriceProvider
 from income_analytics.infrastructure.b3_report_parser import (
@@ -111,6 +114,7 @@ from income_analytics.infrastructure.twelve_data_us_market_data import TwelveDat
 
 router = APIRouter(prefix="/api", tags=["Portfolio"])
 logger = logging.getLogger(__name__)
+B3_COMPARISON_BENCHMARKS = frozenset({"IBOV", "IFIX", "SMLL", "IDIV", "IVVB11"})
 b3_import_router = APIRouter(tags=["B3 imports"])
 session = PortfolioSession(persistent=True)
 _b3_preview_cache: dict[UUID, tuple[object, tuple[object, ...]]] = {}
@@ -122,6 +126,7 @@ us_market_data = TwelveDataUSMarketProvider()
 cvm_pension_data = CvmPensionMarketDataProvider()
 benchmark_data = BcbBenchmarkDataProvider()
 index_benchmark_data = B3BenchmarkDataProvider()
+ivvb11_benchmark_data = IVVB11BenchmarkDataProvider(historical_market_data)
 fx_data = BcbFxRateProvider()
 provider_health = ProviderHealthRegistry(SqliteProviderHealthRepository())
 paid_income_settings = SqlitePaidIncomeSettingsRepository()
@@ -2828,6 +2833,9 @@ def run_daily_reference_data_refresh() -> None:
         ("CDI", benchmark_data, today),
         ("IBOV", index_benchmark_data, today),
         ("IFIX", index_benchmark_data, today),
+        ("SMLL", index_benchmark_data, today),
+        ("IDIV", index_benchmark_data, today),
+        ("IVVB11", ivvb11_benchmark_data, today),
         ("IPCA", benchmark_data, today.replace(day=1)),
         ("TR", benchmark_data, today),
         ("SELIC_TARGET", benchmark_data, today),
@@ -2835,10 +2843,11 @@ def run_daily_reference_data_refresh() -> None:
     for name, provider, freshness_date in refresh_plan:
         if session.has_benchmark_data_for(name, freshness_date):
             continue
+        provider_name = "B3" if name in B3_COMPARISON_BENCHMARKS else "BCB"
         try:
             requested_start = (
                 max(date.min, today - timedelta(days=7))
-                if name in {"IBOV", "IFIX"}
+                if name in {"IBOV", "IFIX", "SMLL", "IDIV", "IVVB11"}
                 else freshness_date
             )
             imported = session.refresh_benchmark(
@@ -2848,18 +2857,18 @@ def run_daily_reference_data_refresh() -> None:
                 "benchmark_update benchmark=%s provider=%s requested=%s..%s "
                 "received=%s persisted=%s status=SUCCESS",
                 name,
-                "B3" if name in {"IBOV", "IFIX"} else "BCB",
+                provider_name,
                 requested_start,
                 today,
                 imported,
                 imported,
             )
-            provider_health.success("B3" if name in {"IBOV", "IFIX"} else "BCB")
+            provider_health.success(provider_name)
         except BenchmarkDataUnavailable as error:
             logger.warning(
                 "benchmark_update benchmark=%s status=PROVIDER_ERROR error=%s", name, error
             )
-            provider_health.failure("B3" if name in {"IBOV", "IFIX"} else "BCB", error)
+            provider_health.failure(provider_name, error)
     for currency in session.open_foreign_currencies():
         if session.has_fx_rate_for(currency, today):
             continue
@@ -2937,7 +2946,11 @@ def run_reference_data_bootstrap() -> None:
             ("IPCA", benchmark_data),
             ("IBOV", index_benchmark_data),
             ("IFIX", index_benchmark_data),
+            ("SMLL", index_benchmark_data),
+            ("IDIV", index_benchmark_data),
+            ("IVVB11", ivvb11_benchmark_data),
         ):
+            provider_name = "B3" if name in B3_COMPARISON_BENCHMARKS else "BCB"
             stored_dates = (
                 [
                     rate.effective_date
@@ -2961,7 +2974,7 @@ def run_reference_data_bootstrap() -> None:
                     "benchmark_update benchmark=%s provider=%s requested=%s..%s "
                     "received=%s persisted=%s latest=%s status=SUCCESS",
                     name,
-                    "B3" if name in {"IBOV", "IFIX"} else "BCB",
+                    provider_name,
                     requested_start,
                     end_date,
                     imported,
@@ -2982,14 +2995,14 @@ def run_reference_data_bootstrap() -> None:
                         default=None,
                     ),
                 )
-                provider_health.success("B3" if name in {"IBOV", "IFIX"} else "BCB")
+                provider_health.success(provider_name)
             except BenchmarkDataUnavailable as error:
                 logger.warning(
                     "benchmark_update benchmark=%s status=PROVIDER_ERROR error=%s",
                     name,
                     error,
                 )
-                provider_health.failure("B3" if name in {"IBOV", "IFIX"} else "BCB", error)
+                provider_health.failure(provider_name, error)
     run_daily_reference_data_refresh()
     run_fixed_income_reference_backfill()
 
@@ -3581,7 +3594,7 @@ def _performance_read_model_revision() -> tuple[object, ...]:
                 for item in session.benchmark_observations(name)
             ),
         )
-        for name in ("IBOV", "IFIX", "IPCA")
+        for name in ("IBOV", "IFIX", "IPCA", "SMLL", "IDIV", "IVVB11")
     )
     return (
         events,
@@ -3598,7 +3611,10 @@ def _cached_performance_comparison(
     start_date: date, end_date: date, revision: tuple[object, ...]
 ) -> dict[str, object]:
     del revision  # The immutable revision is the cache key and invalidation token.
-    stored = {name: session.benchmark_observations(name) for name in ("IBOV", "IFIX", "IPCA")}
+    stored = {
+        name: session.benchmark_observations(name)
+        for name in ("IBOV", "IFIX", "IPCA", "SMLL", "IDIV", "IVVB11")
+    }
 
     periods: dict[tuple[date, date], object] = {}
 
@@ -3662,18 +3678,27 @@ def create_benchmark_rate(name: str, benchmark: BenchmarkRateInput) -> dict[str,
 @router.post("/benchmarks/{name}/refresh")
 def refresh_benchmark(name: str, start_date: date, end_date: date) -> dict[str, object]:
     try:
-        provider = index_benchmark_data if name.upper() in {"IBOV", "IFIX"} else benchmark_data
+        normalized_name = name.upper()
+        provider = (
+            ivvb11_benchmark_data
+            if normalized_name == "IVVB11"
+            else index_benchmark_data
+            if normalized_name in B3_COMPARISON_BENCHMARKS
+            else benchmark_data
+        )
         imported = session.refresh_benchmark(
             provider, name=name, start_date=start_date, end_date=end_date
         )
     except BenchmarkDataUnavailable as error:
-        provider_health.failure("B3" if name.upper() in {"IBOV", "IFIX"} else "BCB", error)
+        provider_name = "B3" if normalized_name in B3_COMPARISON_BENCHMARKS else "BCB"
+        provider_health.failure(provider_name, error)
         raise HTTPException(status_code=503, detail=str(error)) from error
-    provider_health.success("B3" if name.upper() in {"IBOV", "IFIX"} else "BCB")
+    provider_name = "B3" if normalized_name in B3_COMPARISON_BENCHMARKS else "BCB"
+    provider_health.success(provider_name)
     return {
         "benchmark": name.upper(),
         "observations": imported,
-        "source": "b3" if name.upper() in {"IBOV", "IFIX"} else "bcb",
+        "source": "b3" if normalized_name in B3_COMPARISON_BENCHMARKS else "bcb",
     }
 
 

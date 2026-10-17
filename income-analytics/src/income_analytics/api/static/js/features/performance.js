@@ -126,11 +126,11 @@ async function renderComparison(data, requestId) {
   const benchmark = Object.fromEntries(data.benchmarks.map(item => [item.code, item]));
   const portfolio = data.portfolio;
   const available = portfolio.return !== null && portfolio.status !== "INSUFFICIENT_DATA";
-  const value = amount => amount === null || amount === undefined ? "â€”" : percentage(Number(amount) * 100);
-  const points = amount => `${Number(amount) > 0 ? "+" : Number(amount) < 0 ? "âˆ’" : ""}${Math.abs(Number(amount) * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p.`;
+  const value = amount => amount === null || amount === undefined ? "—" : percentage(Number(amount) * 100);
+  const points = amount => `${Number(amount) > 0 ? "+" : Number(amount) < 0 ? "−" : ""}${Math.abs(Number(amount) * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p.`;
   const dateLabel = value => value ? new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR") : "";
   const card = (title, result, extra = "") => `<article class="performance-card"><small>${title}</small><strong>${value(result)}</strong>${extra ? `<span>${extra}</span>` : ""}</article>`;
-  const keys = ["CDI", "IBOV", "IFIX"];
+  const keys = ["CDI", "IPCA", "IBOV", "IFIX", "SMLL", "IDIV", "IVVB11"];
   const benchmarkCards = keys.map(code => {
     const item = benchmark[code];
     const excess = available && item?.return !== null && item?.return !== undefined
@@ -148,17 +148,24 @@ async function renderComparison(data, requestId) {
     ? `<aside class="data-quality-notice" role="status"><strong>O que falta para calcular a rentabilidade da carteira</strong><span>${portfolio.unavailable_reason || "Não há valuation de abertura suficiente para calcular o retorno da carteira."}</span>${portfolio.coverage === null ? "" : `<span>Cobertura no pior ponto: ${value(portfolio.coverage)} do patrimônio.</span>`}${portfolio.missing_value && Number(portfolio.missing_value) > 0 ? `<span>As posições sem cotação somam ${money(portfolio.missing_value)} pelo custo registrado; esse valor é uma referência, não uma cotação de mercado.</span>` : ""}${missingDateText ? `<span>Datas sem cobertura suficiente: ${missingDateText}.</span>` : ""}${missingAssets ? `<details><summary>Ver ${portfolio.missing_assets.length} ativos sem cotação</summary><p>${missingAssets}</p></details>` : ""}</aside>`
     : available && portfolio.status === "PARTIAL"
       ? `<p class="coverage" role="status">Performance calculada com cobertura parcial de ${value(portfolio.coverage)} do patrimônio.${portfolio.missing_assets?.length ? ` ${portfolio.missing_assets.length} ativo(s) afetam o cálculo.` : ""}</p>` : "";
-  const normalizedSeries = [{ code: "portfolio", label: "Minha carteira", color: "#46c98b", selected: true },
+  const normalizedSeries = [
+    { code: "portfolio", label: "Minha carteira", color: "#46c98b", selected: true },
     { code: "cdi", label: "CDI", color: "#78a9ff", selected: true },
-    { code: "ibov", label: "IBOV", color: "#e8b86d", selected: false },
-    { code: "ifix", label: "IFIX", color: "#c69df2", selected: false },
-    { code: "ipca", label: "IPCA", color: "#ef8f9b", selected: false }];
-  const hasBenchmarkSeries = data.series.some(point => ["cdi", "ibov", "ifix", "ipca"].some(key => point[key] !== null && point[key] !== undefined));
+    { code: "ipca", label: "IPCA", color: "#ef8f9b", selected: true },
+    { code: "ibov", label: "IBOV", color: "#e8b86d", selected: true },
+    { code: "ifix", label: "IFIX", color: "#c69df2", selected: true },
+    { code: "smll", label: "SMLL", color: "#f08a56", selected: true },
+    { code: "idiv", label: "IDIV", color: "#d18be0", selected: true },
+    { code: "ivvb11", label: "IVVB11", color: "#79c879", selected: true },
+  ];
+  const benchmarkSeriesKeys = keys.map(code => code.toLowerCase());
+  const hasBenchmarkSeries = data.series.some(point => benchmarkSeriesKeys.some(key => point[key] !== null && point[key] !== undefined));
   const rows = hasBenchmarkSeries ? `<div class="performance-chart-wrap"><div id="performance-comparison-chart" aria-label="Rentabilidade comparada" class="performance-chart"></div></div>` : "";
-  const monthly = data.monthly_returns.map(row => `<tr><th>${row.year}-${String(row.month).padStart(2,"0")}</th>${["portfolio","cdi","ibov","ifix","ipca"].map(key => `<td>${value(row[key])}</td>`).join("")}</tr>`).join("");
-  const annual = data.annual_returns.map(row => `<tr><th>${row.year}</th>${["portfolio","cdi","ibov","ifix","ipca"].map(key => `<td>${value(row[key])}</td>`).join("")}</tr>`).join("");
-  const colNames = ["Período", "Carteira", "CDI", "IBOV", "IFIX", "IPCA"];
-  const tableHtml = body => `<div class="performance-table-scroll"><table class="performance-table"><thead><tr>${colNames.map(item => `<th>${item}</th>`).join("")}</tr></thead><tbody>${body || `<tr><td colspan="6">Sem dados para o período.</td></tr>`}</tbody></table></div>`;
+  const comparisonKeys = ["portfolio", ...benchmarkSeriesKeys];
+  const monthly = data.monthly_returns.map(row => `<tr><th>${row.year}-${String(row.month).padStart(2,"0")}</th>${comparisonKeys.map(key => `<td>${value(row[key])}</td>`).join("")}</tr>`).join("");
+  const annual = data.annual_returns.map(row => `<tr><th>${row.year}</th>${comparisonKeys.map(key => `<td>${value(row[key])}</td>`).join("")}</tr>`).join("");
+  const colNames = ["Período", "Carteira", ...keys];
+  const tableHtml = body => `<div class="performance-table-scroll"><table class="performance-table"><thead><tr>${colNames.map(item => `<th>${item}</th>`).join("")}</tr></thead><tbody>${body || `<tr><td colspan="${colNames.length}">Sem dados para o período.</td></tr>`}</tbody></table></div>`;
   const latestNotes = data.benchmarks.filter(item => item.last_observation && item.status !== "OK").map(item => `${item.code} atualizado até ${dateLabel(item.last_observation)}`).join(" · ");
   const relativeRead = available ? keys.filter(code => benchmark[code]?.return !== null && benchmark[code]?.return !== undefined).map(code => {
     const delta = Number(portfolio.return) - Number(benchmark[code].return);
