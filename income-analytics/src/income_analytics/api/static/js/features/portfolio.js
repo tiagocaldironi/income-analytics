@@ -231,16 +231,18 @@ function renderHoldingRow(asset, fixedIncome, assetClass) {
   const title = fixedIncome ? (asset.display_name || asset.name) : asset.ticker;
   const applicationCount = asset.lot_count || 1;
   const subtitle = fixedIncome
-    ? `${asset.instrument || "Renda fixa"} · ${asset.indexer || "Condição informada"}${asset.condition ? ` · ${asset.condition}` : ""} · ${applicationCount === 1 ? "1 aplicação" : `${applicationCount} aplicações`}`
-    : `${asset.name}${asset.price_as_of ? ` · Cotação de ${new Date(`${asset.price_as_of}T00:00:00`).toLocaleDateString("pt-BR")}` : ""}`;
-  const quantity = fixedIncome && asset.lot_count > 1
-    ? `${asset.lot_count} aplicações`
+    ? `${asset.instrument || "Renda fixa"} · ${asset.indexer || "Condição informada"}${asset.condition ? ` · ${asset.condition}` : ""}`
+    : asset.price_as_of ? `Cotação de ${new Date(`${asset.price_as_of}T00:00:00`).toLocaleDateString("pt-BR")}` : "";
+  const quantity = fixedIncome
+    ? applicationCount
     : asset.quantity;
   const tradeActions = !fixedIncome && !["PENSION", "REAL_ESTATE"].includes(assetClass)
     ? ["BUY", "SELL"].map(type => `<button type="button" role="menuitem" data-open-operation data-operation-type="${type}" data-operation-class="${assetClass}" data-operation-ticker="${escapeHtml(asset.ticker)}" data-operation-name="${escapeHtml(asset.name)}" data-operation-country="${escapeHtml(asset.country || "")}" data-operation-currency="${escapeHtml(asset.currency_code || "BRL")}" data-operation-sector="${escapeHtml(asset.sector || "")}">${type === "BUY" ? "Nova compra" : "Registrar venda"}</button>`).join("")
     : "";
   const menu = `<td class="asset-options-cell"><button class="asset-options-button" type="button" title="Opções" aria-label="Opções de ${escapeHtml(title)}" aria-haspopup="menu" aria-expanded="false" data-asset-options>⋯</button><div class="asset-context-menu" role="menu" hidden><button type="button" role="menuitem" data-asset-transactions data-asset-id="${asset.asset_id}" data-asset-title="${escapeHtml(title)}"><span aria-hidden="true">≡</span> Lançamentos</button>${tradeActions}</div></td>`;
-  return `<tr><td><span class="asset-identity"><i>${title.slice(0, 2)}</i><span><strong>${title}</strong><small>${subtitle}</small></span></span></td><td>${quantity}</td><td>${money(asset.average_price, asset.currency_code)}</td><td>${asset.current_price === null ? "Cotação indisponível" : money(asset.current_price, asset.currency_code)}</td><td>${asset.market_value === null ? "—" : money(asset.market_value, asset.currency_code)}</td><td><b class="metric-pill ${Number(asset.total_result) < 0 ? "negative" : "positive"}">${asset.total_result === null ? "—" : money(asset.total_result, asset.currency_code)}</b></td><td><b class="metric-pill ${Number(asset.return_percentage) < 0 ? "negative" : "positive"}">${percentage(asset.return_percentage)}</b></td><td>${money(asset.income_received, asset.currency_code)}</td><td>${asset.portfolio_weight === null ? "—" : percentage(asset.portfolio_weight * 100)}</td><td>${asset.target_weight === null ? "—" : `${percentage(asset.target_weight * 100)} <small>da classe</small>`}</td>${menu}</tr>`;
+  const fullName = asset.name || title;
+  const tickerHint = `title="${escapeHtml(fullName)}" aria-label="${escapeHtml(`${title} — ${fullName}`)}"`;
+  return `<tr><td data-label="Ativo"><span class="asset-identity"><i>${title.slice(0, 2)}</i><span><strong ${tickerHint}>${title}</strong><small>${subtitle}</small></span></span></td><td data-label="Quantidade">${quantity}</td><td data-label="PM">${money(asset.average_price, asset.currency_code)}</td><td data-label="Cotação">${asset.current_price === null ? "Cotação indisponível" : money(asset.current_price, asset.currency_code)}</td><td data-label="Saldo">${asset.market_value === null ? "—" : money(asset.market_value, asset.currency_code)}</td><td data-label="Resultado"><b class="metric-pill ${Number(asset.total_result) < 0 ? "negative" : "positive"}">${asset.total_result === null ? "—" : money(asset.total_result, asset.currency_code)}</b></td><td data-label="Valorização"><b class="metric-pill ${Number(asset.return_percentage) < 0 ? "negative" : "positive"}">${percentage(asset.return_percentage)}</b></td><td data-label="Rendimentos">${money(asset.income_received, asset.currency_code)}</td><td data-label="Peso">${asset.portfolio_weight === null ? "—" : percentage(asset.portfolio_weight * 100)}</td><td data-label="Alvo classe">${asset.target_weight === null ? "—" : percentage(asset.target_weight * 100)}</td>${menu.replace('<td class="asset-options-cell"', '<td class="asset-options-cell" data-label="Opções"')}</tr>`;
 }
 
 function renderPortfolio(data, holdings, performance) {
@@ -269,8 +271,8 @@ function renderPortfolio(data, holdings, performance) {
       const assets = assetsForDisplay(group);
       const fixedIncome = group.asset_class === "FIXED_INCOME";
       const columns = fixedIncome
-        ? ["Contrato", "Aplicações", "PM", "Cotação", "Valor atual", "Resultado acumulado", "Valorização desde a compra", "Rendimentos", "Peso", "Alvo na classe", "Opções"]
-        : ["Ativo", "Quantidade", "PM", "Cotação", "Valor atual", "Resultado acumulado", "Valorização desde a compra", "Rendimentos", "Peso", "Alvo na classe", "Opções"];
+        ? ["Contrato", "Aplicações", "PM", "Cotação", "Saldo", "Resultado", "Variação", "Rendimentos", "Peso", "Alvo classe", "Opções"]
+        : ["Ativo", "Quantidade", "PM", "Cotação", "Saldo", "Resultado", "Variação", "Rendimentos", "Peso", "Alvo classe", "Opções"];
       const coverage = group.performance_coverage;
       const classTwr = coverage?.twr !== null && coverage?.twr !== undefined
         && ["AVAILABLE", "PARTIAL"].includes(coverage?.status)

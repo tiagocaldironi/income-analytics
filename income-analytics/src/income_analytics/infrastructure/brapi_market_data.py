@@ -46,7 +46,7 @@ class BrapiMarketDataProvider:
             raw_price = data.get("regularMarketPrice") or data.get("lastPrice")
             try:
                 price = Decimal(str(raw_price))
-            except InvalidOperation, TypeError:
+            except (InvalidOperation, TypeError):
                 continue
             if price <= 0:
                 continue
@@ -88,7 +88,7 @@ class BrapiMarketDataProvider:
                 effective_date=effective_date,
                 source="brapi",
             )
-        except IndexError, KeyError, OSError, TypeError, URLError, ValueError:
+        except (IndexError, KeyError, OSError, TypeError, URLError, ValueError):
             # Some BRAPI plans require a token for the quote endpoint, while
             # public ticker search still provides the delayed last price.
             try:

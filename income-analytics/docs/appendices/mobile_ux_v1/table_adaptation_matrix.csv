@@ -1,0 +1,9 @@
+table_or_data,desktop_pattern,mobile_pattern,notes
+Portfolio holdings,11-column grouped table,asset cards with visible metric labels,calculations and row data unchanged
+Magic Formula stocks,ranking table,existing issuer ranking cards,global rank remains in existing renderer
+Magic Formula FIIs,ranking table,existing issuer ranking cards,existing responsive variant retained
+Monthly performance comparison,wide benchmark table,period card + labeled benchmark metrics,original API rows and values
+Annual performance comparison,wide benchmark table,year card + labeled benchmark metrics,original API rows and values
+Operations/income history,existing grouped timeline and tables,existing responsive timeline and scroll-contained table groups,touchable tabs and filters
+Asset transaction history,small detail table,controlled table scroll,secondary detail view; no data reduction
+Imports and technical audit tables,wide technical tables,contained horizontal scroll,desktop-first P1/technical exception

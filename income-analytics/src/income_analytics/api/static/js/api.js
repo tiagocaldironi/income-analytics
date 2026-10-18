@@ -117,7 +117,7 @@ export const portfolioApi = {
   wealthExplanation: (start, end) => request(`/analytics/wealth-explanation?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`),
   wealthEvolution: (start, end) => request(`/analytics/wealth-evolution?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`),
   benchmarkComparison: (name, start, end) => request(`/portfolio/benchmark-comparison?name=${encodeURIComponent(name)}&start_date=${start}&end_date=${end}`),
-  performanceComparison: (start, end) => request(`/analytics/performance-comparison?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`),
+  performanceComparison: (start, end, assetClass = "") => request(`/analytics/performance-comparison?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}${assetClass ? `&asset_class=${encodeURIComponent(assetClass)}` : ""}`),
   risk: (start, end) => request(`/portfolio/risk?start_date=${start}&end_date=${end}`),
   rebalancing: () => request("/portfolio/rebalancing"),
   contribution: amount => request("/portfolio/rebalancing/contribution-only", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount }) }),

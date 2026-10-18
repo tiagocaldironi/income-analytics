@@ -93,7 +93,7 @@ def _ranking_input(issuer: dict, reference_date: str, universe_snapshot_id: str)
                 source_scale=evidence["currency_scale"],
                 source=evidence["source_reference"],
             ).normalized_value
-        except InvalidOperation, KeyError:
+        except (InvalidOperation, KeyError):
             amount = None
         if amount is None:
             raise ValueError("ACCOUNTING_VALUE_UNRESOLVED")

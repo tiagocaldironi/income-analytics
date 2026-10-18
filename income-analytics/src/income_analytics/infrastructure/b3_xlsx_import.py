@@ -57,7 +57,7 @@ def parse_b3_brazilian_stock_trades(workbook: bytes) -> tuple[B3BrazilianStockTr
             quantity = Decimal(row.get(quantity_column, ""))
             price = Decimal(row.get(price_column, ""))
             effective_date = datetime.strptime(row.get(date_column, ""), "%d/%m/%Y")
-        except InvalidOperation, ValueError:
+        except (InvalidOperation, ValueError):
             continue
         if quantity > 0 and price > 0:
             trades.append(

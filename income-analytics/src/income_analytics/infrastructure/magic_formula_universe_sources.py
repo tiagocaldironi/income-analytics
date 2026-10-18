@@ -60,7 +60,7 @@ def readiness_sources(cvm_directory: Path, market_directory: Path, reference: st
                     continue
                 try:
                     price = str(Decimal(raw[108:121].decode("ascii")) / 100)
-                except ValueError, InvalidOperation:
+                except (ValueError, InvalidOperation):
                     price = None
                 quotes.append(
                     dict(

@@ -186,7 +186,7 @@ class TwelveDataUSMarketProvider:
             try:
                 observed = date.fromisoformat(str(value["datetime"])[:10])
                 close = Decimal(str(value["close"]))
-            except KeyError, ValueError:
+            except (KeyError, ValueError):
                 continue
             if observed <= effective_date and close > 0:
                 points.append((observed, close))
@@ -226,7 +226,7 @@ class TwelveDataUSMarketProvider:
             try:
                 observed = date.fromisoformat(str(item["datetime"])[:10])
                 close = Decimal(str(item["close"]))
-            except KeyError, ValueError:
+            except (KeyError, ValueError):
                 continue
             if start_date <= observed <= end_date and close > 0:
                 observations.append(

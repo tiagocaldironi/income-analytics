@@ -167,7 +167,7 @@ def test_holdings_experience_uses_one_aggregate_projection_and_strategy_context(
     portfolio = (STATIC / "js/features/portfolio.js").read_text(encoding="utf-8")
     dashboard = (STATIC / "index.html").read_text(encoding="utf-8")
     assert "/portfolio/holdings" in client
-    assert '"Alvo na classe"' in portfolio
+    assert '"Alvo classe"' in portfolio
     assert "#portfolio-evolution" in portfolio
     assert "Custo registrado" in dashboard
     assert "Resultado econômico" in portfolio
@@ -361,6 +361,6 @@ def test_financial_methodology_is_centralized_and_deep_linkable() -> None:
     assert "#ajuda-metodologia/${escapeConceptHtml(section.id)}" in methodology
     assert 'split("/")[0]' in navigation
     assert "financialConcepts.returnTooltip" in portfolio
-    assert "Valorização desde a compra" in portfolio
+    assert '"Variação"' in portfolio
     assert "performance-methodology-copy" in page
     assert "Ajuda e metodologia" in methodology

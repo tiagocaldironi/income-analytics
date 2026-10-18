@@ -3741,7 +3741,11 @@ def _performance_read_model_revision() -> tuple[object, ...]:
 
 @lru_cache(maxsize=32)
 def _cached_performance_comparison(
-    portfolio_id: UUID, start_date: date, end_date: date, revision: tuple[object, ...]
+    portfolio_id: UUID,
+    start_date: date,
+    end_date: date,
+    asset_class: AssetClass | None,
+    revision: tuple[object, ...],
 ) -> dict[str, object]:
     del (
         portfolio_id,
@@ -3757,27 +3761,59 @@ def _cached_performance_comparison(
     def performance_at(start: date, end: date) -> object:
         key = (start, end)
         if key not in periods:
-            periods[key] = session.performance(start_date=start, end_date=end)
+            periods[key] = session.performance(
+                start_date=start, end_date=end, asset_class=asset_class
+            )
         return periods[key]
 
-    return build_performance_comparison(
+    comparison = build_performance_comparison(
         start_date=start_date,
         end_date=end_date,
         rates=tuple(session._benchmark_rates),
         observations=stored,
         performance_at=performance_at,
     )
+    class_start_dates = {
+        item.value: min(
+            event.effective_date
+            for event in session._events
+            if event.asset is not None and event.asset.asset_class is item
+        )
+        for item in AssetClass
+        if any(
+            event.asset is not None and event.asset.asset_class is item
+            for event in session._events
+        )
+    }
+    all_start_dates = [
+        event.effective_date for event in session._events if event.asset is not None
+    ]
+    comparison["available_start_dates"] = {
+        "ALL": min(all_start_dates).isoformat() if all_start_dates else None,
+        **{name: value.isoformat() for name, value in class_start_dates.items()},
+    }
+    comparison["available_asset_classes"] = tuple(sorted(class_start_dates))
+    comparison["asset_class"] = asset_class.value if asset_class is not None else None
+    return comparison
 
 
 @router.get("/analytics/performance-comparison")
-def get_performance_comparison(start_date: date, end_date: date) -> dict[str, object]:
+def get_performance_comparison(
+    start_date: date,
+    end_date: date,
+    asset_class: AssetClass | None = None,
+) -> dict[str, object]:
     """Serve the Entender comparison from persisted streams without provider calls."""
     if end_date < start_date:
         raise HTTPException(
             status_code=422, detail="A data final deve ser posterior à data inicial."
         )
     return _cached_performance_comparison(
-        current_portfolio_id(), start_date, end_date, _performance_read_model_revision()
+        current_portfolio_id(),
+        start_date,
+        end_date,
+        asset_class,
+        _performance_read_model_revision(),
     )
 
 

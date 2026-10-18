@@ -65,7 +65,7 @@ def resolve(security, records, requested_date, *, source_available=True):
     row = candidates[0]
     try:
         price = Decimal(row["price"])
-    except InvalidOperation, TypeError, ValueError:
+    except (InvalidOperation, TypeError, ValueError):
         return dict(result, status="REVIEW_REQUIRED", reason_code="INVALID_REFERENCE_PRICE")
     if not price.is_finite() or price <= 0 or row["currency"] != "R$":
         return dict(result, status="REVIEW_REQUIRED", reason_code="INVALID_REFERENCE_PRICE")

@@ -29,7 +29,7 @@ def evaluate_formal_qa(
         lineage = json.loads(snapshot["lineage_json"])
         expected = fixture["expected"]
         components = [s for entry in lineage for s in entry.get("market_cap_components", [])]
-    except KeyError, TypeError, ValueError:
+    except (KeyError, TypeError, ValueError):
         return tuple(
             (
                 DimensionDecision(d, ValidationStatus.REVIEW_REQUIRED, ("MALFORMED_ARTIFACT",))

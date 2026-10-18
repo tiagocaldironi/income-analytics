@@ -107,7 +107,7 @@ class CoinGeckoCryptoProvider:
             try:
                 observed_at = datetime.fromtimestamp(float(item[0]) / 1000, UTC)
                 price = Decimal(str(item[1]))
-            except TypeError, ValueError, OverflowError:
+            except (TypeError, ValueError, OverflowError):
                 continue
             effective_date = observed_at.date()
             if start_date <= effective_date <= end_date and price > 0:

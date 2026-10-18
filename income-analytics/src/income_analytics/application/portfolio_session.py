@@ -903,7 +903,7 @@ class PortfolioSession:
                     effective_date=observation.effective_date,
                 )
                 updated += 1
-            except MarketDataUnavailable, ValueError:
+            except (MarketDataUnavailable, ValueError):
                 unavailable.append(ticker)
         return updated, tuple(unavailable)
 

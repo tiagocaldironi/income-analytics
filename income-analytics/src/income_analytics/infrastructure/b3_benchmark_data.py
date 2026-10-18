@@ -240,7 +240,7 @@ def _parse_b3_index_api_response(
             continue
         try:
             day = int(row["day"])
-        except KeyError, TypeError, ValueError:
+        except (KeyError, TypeError, ValueError):
             continue
         for month in range(1, 13):
             value = _number(str(row.get(f"rateValue{month}") or ""))
