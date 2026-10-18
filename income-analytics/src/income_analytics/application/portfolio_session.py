@@ -355,6 +355,7 @@ class PortfolioSession:
         normalized_ticker = ticker.strip().upper()
         if normalized_ticker in self._assets:
             raise ValueError("Já existe um ativo com esse identificador.")
+        self._ensure_private_ticker_available(normalized_ticker)
         asset = self._create_asset(
             normalized_ticker,
             name=name,
@@ -440,6 +441,7 @@ class PortfolioSession:
         normalized_ticker = (ticker or f"PENSION-{uuid4().hex[:12]}").strip().upper()
         if normalized_ticker in self._assets:
             raise ValueError("Já existe um ativo com esse identificador.")
+        self._ensure_private_ticker_available(normalized_ticker)
         asset = self._create_asset(
             normalized_ticker,
             name=name or plan_name,
@@ -502,6 +504,7 @@ class PortfolioSession:
         normalized_ticker = ticker.strip().upper()
         if normalized_ticker in self._assets:
             raise ValueError("Já existe um ativo com esse identificador.")
+        self._ensure_private_ticker_available(normalized_ticker)
         asset = self._create_asset(
             normalized_ticker,
             name=name,
@@ -1841,3 +1844,10 @@ class PortfolioSession:
             ),
             institution=Institution(name="Cadastro local"),
         )
+
+    def _ensure_private_ticker_available(self, ticker: str) -> None:
+        if not self.persistent:
+            return
+        existing = SqliteAssetRepository(self.portfolio_id).get_by_ticker(ticker)
+        if existing is not None:
+            raise ValueError("Já existe um ativo com esse identificador nesta carteira.")

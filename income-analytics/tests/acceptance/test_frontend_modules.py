@@ -16,6 +16,19 @@ def test_frontend_client_centralizes_the_feature_endpoints() -> None:
     assert "rebalancing/assets" in client
 
 
+def test_frontend_propagates_and_selects_the_active_portfolio() -> None:
+    page = (STATIC / "index.html").read_text(encoding="utf-8")
+    client = (STATIC / "js/api.js").read_text(encoding="utf-8")
+    context = (STATIC / "js/features/portfolios.js").read_text(encoding="utf-8")
+    assert 'id="portfolio-selector"' in page
+    assert 'id="portfolio-create"' in page
+    assert 'localStorage.getItem("income.activePortfolioId")' in client
+    assert 'headers.set("X-Portfolio-Id", portfolioId)' in client
+    assert "localStorage.setItem(STORAGE_KEY, id)" in context
+    assert 'workspaceName.textContent = selected?.name || ""' in context
+    assert 'lifecycle.activate(route)' in context
+
+
 def test_magic_formula_page_uses_persisted_ranking_and_transparent_screening() -> None:
     tools = (STATIC / "js/features/tools.js").read_text(encoding="utf-8")
     client = (STATIC / "js/api.js").read_text(encoding="utf-8")

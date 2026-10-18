@@ -22,6 +22,7 @@ import {
 } from "./features/tools.js?v=20260924-route-scoped-v1";
 import { createRouteLifecycle } from "./shared/route-lifecycle.js";
 import { beginRouteResourceCycle } from "./shared/resources.js";
+import { setupPortfolioContext } from "./features/portfolios.js";
 
 let operationsSetup = false;
 let settingsSetup = false;
@@ -92,5 +93,7 @@ window.addEventListener("DOMContentLoaded", () => {
       });
     });
   });
-  bindNavigation();
+  setupPortfolioContext(lifecycle).then(() => bindNavigation()).catch(error => {
+    console.error("Não foi possível carregar as carteiras", error);
+  });
 });

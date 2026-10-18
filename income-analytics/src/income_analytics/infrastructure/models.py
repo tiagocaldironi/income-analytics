@@ -145,9 +145,7 @@ class PensionInvestmentVehicleRecord(Base):
 
 class PensionFundQuotaRecord(Base):
     __tablename__ = "pension_fund_quotas"
-    vehicle_id: Mapped[str] = mapped_column(
-        ForeignKey("pension_investment_vehicles.id"), primary_key=True
-    )
+    vehicle_cnpj: Mapped[str] = mapped_column(String(14), primary_key=True)
     reference_date: Mapped[date] = mapped_column(Date, primary_key=True)
     quota: Mapped[str] = mapped_column(String(48))
     source: Mapped[str] = mapped_column(String(16))

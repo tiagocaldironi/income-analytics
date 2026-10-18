@@ -10,18 +10,28 @@ from income_analytics.application.b3_import import (
     B3ImportReportType,
 )
 from income_analytics.application.paid_income import IncomeType, PaidIncomeEvent
+from income_analytics.application.pension_market_data import (
+    PensionFundQuota,
+    PensionInvestmentVehicle,
+)
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.allocation_policy import AllocationPolicy
 from income_analytics.domain.asset_allocation_policy import AssetAllocationPolicy
 from income_analytics.domain.entities.portfolio import Portfolio
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
+from income_analytics.domain.enums.fixed_income import (
+    FixedIncomeIndexerType,
+    FixedIncomeInstrumentType,
+)
 from income_analytics.infrastructure.sqlite_repositories import (
     SqliteAllocationPolicyRepository,
     SqliteAssetAllocationPolicyRepository,
     SqliteB3ImportRepository,
     SqliteFinancialEventRepository,
     SqliteImportedPaidIncomeRepository,
+    SqlitePensionFundQuotaRepository,
+    SqlitePensionInvestmentVehicleRepository,
     SqlitePortfolioDashboardSnapshotRepository,
     SqlitePortfolioRepository,
 )
@@ -213,3 +223,75 @@ def test_same_global_asset_events_targets_and_b3_batches_are_portfolio_scoped() 
     SqliteB3ImportRepository(portfolio_a).create_batch(batch)
     assert SqliteB3ImportRepository(portfolio_a).get_batch(batch.id) is not None
     assert SqliteB3ImportRepository(portfolio_b).get_batch(batch.id) is None
+
+
+def test_private_fixed_income_asset_cannot_be_reused_by_another_portfolio() -> None:
+    portfolio_a, portfolio_b = uuid4(), uuid4()
+    _portfolio(portfolio_a)
+    _portfolio(portfolio_b)
+    PortfolioSession(portfolio_id=portfolio_a, persistent=True).register_fixed_income_asset(
+        ticker="PRIVATE-CDB-V2",
+        name="Private CDB",
+        instrument_type=FixedIncomeInstrumentType.CDB,
+        indexer_type=FixedIncomeIndexerType.PREFIXED,
+        application_date=date(2026, 1, 1),
+        principal_amount=Decimal("1000"),
+        contracted_rate=Decimal("0"),
+    )
+
+    import pytest
+
+    with pytest.raises(ValueError, match="particular de outra carteira"):
+        PortfolioSession(portfolio_id=portfolio_b, persistent=True).register_trade(
+            event_type=FinancialEventType.BUY,
+            ticker="PRIVATE-CDB-V2",
+            quantity=Decimal("1"),
+            unit_price=Decimal("1000"),
+        )
+
+
+def test_pension_quotas_are_shared_by_cvm_identity_across_portfolios() -> None:
+    portfolio_a, portfolio_b = uuid4(), uuid4()
+    _portfolio(portfolio_a)
+    _portfolio(portfolio_b)
+    session_a = PortfolioSession(portfolio_id=portfolio_a, persistent=True)
+    session_b = PortfolioSession(portfolio_id=portfolio_b, persistent=True)
+    session_a.register_trade(
+        event_type=FinancialEventType.BUY,
+        ticker="PENS-A",
+        quantity=Decimal("1"),
+        unit_price=Decimal("1"),
+    )
+    session_b.register_trade(
+        event_type=FinancialEventType.BUY,
+        ticker="PENS-B",
+        quantity=Decimal("1"),
+        unit_price=Decimal("1"),
+    )
+    asset_a = session_a._assets["PENS-A"]
+    asset_b = session_b._assets["PENS-B"]
+    vehicle_a = PensionInvestmentVehicle(
+        id=uuid4(),
+        pension_asset_id=asset_a.id,
+        vehicle_name="Shared CVM fund",
+        vehicle_cnpj="12345678000195",
+    )
+    vehicle_b = PensionInvestmentVehicle(
+        id=uuid4(),
+        pension_asset_id=asset_b.id,
+        vehicle_name="Shared CVM fund",
+        vehicle_cnpj="12345678000195",
+    )
+    SqlitePensionInvestmentVehicleRepository(portfolio_a).save(vehicle_a)
+    SqlitePensionInvestmentVehicleRepository(portfolio_b).save(vehicle_b)
+    repository = SqlitePensionFundQuotaRepository()
+    repository.save_all(
+        (
+            PensionFundQuota(
+                vehicle_id=vehicle_a.id,
+                reference_date=date(2026, 10, 17),
+                quota=Decimal("10"),
+            ),
+        )
+    )
+    assert repository.list_for(vehicle_b.id)[0].quota == Decimal("10")

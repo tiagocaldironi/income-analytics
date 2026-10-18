@@ -48,9 +48,10 @@ from income_analytics.application.paid_income import (
 )
 from income_analytics.application.pension_market_data import PensionMarketDataUnavailable
 from income_analytics.application.portfolio_context import (
-    MAIN_PORTFOLIO_ID,
     current_portfolio_id,
     get_request_session,
+    reset_active_portfolio_id,
+    set_active_portfolio_id,
 )
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.application.provider_health import ProviderHealthRegistry
@@ -113,6 +114,7 @@ from income_analytics.infrastructure.sqlite_repositories import (
     SqlitePensionFundQuotaRepository,
     SqlitePensionInvestmentVehicleRepository,
     SqlitePortfolioDashboardSnapshotRepository,
+    SqlitePortfolioRepository,
     SqliteProviderHealthRepository,
 )
 from income_analytics.infrastructure.twelve_data_us_market_data import TwelveDataUSMarketProvider
@@ -139,6 +141,16 @@ class _PortfolioSessionProxy:
         setattr(self._target(), name, value)
 
 
+class _PortfolioRepositoryProxy:
+    """Resolve a portfolio-owned adapter against the current request context."""
+
+    def __init__(self, factory):
+        self._factory = factory
+
+    def __getattr__(self, name: str):
+        return getattr(self._factory(current_portfolio_id()), name)
+
+
 session = _PortfolioSessionProxy()
 _b3_preview_cache: dict[tuple[UUID, UUID], tuple[object, tuple[object, ...]]] = {}
 asset_discovery = BrapiAssetDiscoveryProvider()
@@ -153,11 +165,10 @@ ivvb11_benchmark_data = IVVB11BenchmarkDataProvider(historical_market_data)
 fx_data = BcbFxRateProvider()
 provider_health = ProviderHealthRegistry(SqliteProviderHealthRepository())
 paid_income_settings = SqlitePaidIncomeSettingsRepository()
-paid_income_sync = PaidIncomeSyncService(
-    paid_income_settings, SqliteImportedPaidIncomeRepository(MAIN_PORTFOLIO_ID)
+dashboard_snapshot_repository = _PortfolioRepositoryProxy(
+    SqlitePortfolioDashboardSnapshotRepository
 )
-dashboard_snapshot_repository = SqlitePortfolioDashboardSnapshotRepository(MAIN_PORTFOLIO_ID)
-market_price_refresh_runs = SqliteMarketPriceRefreshRunRepository(MAIN_PORTFOLIO_ID)
+market_price_refresh_runs = _PortfolioRepositoryProxy(SqliteMarketPriceRefreshRunRepository)
 PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 1
 
 
@@ -2172,7 +2183,10 @@ def sync_paid_income() -> dict[str, object]:
             "found": 0,
             "imported": 0,
         }
-    return paid_income_sync.sync(session, BrapiPaidIncomeProvider(settings.api_token))
+    service = PaidIncomeSyncService(
+        paid_income_settings, SqliteImportedPaidIncomeRepository(current_portfolio_id())
+    )
+    return service.sync(session, BrapiPaidIncomeProvider(settings.api_token))
 
 
 @router.post("/fx/{base_currency}/{quote_currency}/refresh")
@@ -2799,6 +2813,16 @@ def _refresh_open_fx_rates(*, today: date) -> list[dict[str, object]]:
 def run_daily_market_data_refresh() -> None:
     """Best-effort startup refresh; persist outcomes without stopping other work."""
 
+    for portfolio in SqlitePortfolioRepository().list(include_archived=False):
+        token = set_active_portfolio_id(portfolio.id)
+        try:
+            _run_daily_market_data_refresh_for_portfolio()
+        finally:
+            reset_active_portfolio_id(token)
+
+
+def _run_daily_market_data_refresh_for_portfolio() -> None:
+
     started_at = datetime.now(UTC)
     try:
         result = session.refresh_open_market_prices_report(
@@ -2857,14 +2881,16 @@ def run_daily_market_data_refresh() -> None:
 
 def run_daily_recurring_rule_execution() -> None:
     """Materialize due occurrences from rules that are still within their validity."""
-    try:
-        today = date.today()
-        # The session also closes any rule whose final date has already passed;
-        # its execution guard prevents both expired and future financial events.
-        session.execute_recurring_rules(through=today)
-        provider_health.success("Agendamentos recorrentes")
-    except Exception as error:
-        provider_health.failure("Agendamentos recorrentes", error)
+    for portfolio in SqlitePortfolioRepository().list(include_archived=False):
+        token = set_active_portfolio_id(portfolio.id)
+        try:
+            today = date.today()
+            session.execute_recurring_rules(through=today)
+            provider_health.success("Agendamentos recorrentes")
+        except Exception as error:
+            provider_health.failure("Agendamentos recorrentes", error)
+        finally:
+            reset_active_portfolio_id(token)
 
 
 def run_daily_paid_income_sync() -> None:
@@ -2872,12 +2898,19 @@ def run_daily_paid_income_sync() -> None:
     settings = paid_income_settings.get()
     if not settings.enabled or not settings.api_token:
         return
-    try:
-        result = paid_income_sync.sync(session, BrapiPaidIncomeProvider(settings.api_token))
-        if result["status"] is PaidIncomeIntegrationStatus.CONNECTED:
-            provider_health.success("BRAPI Proventos")
-    except Exception as error:
-        provider_health.failure("BRAPI Proventos", error)
+    for portfolio in SqlitePortfolioRepository().list(include_archived=False):
+        token = set_active_portfolio_id(portfolio.id)
+        try:
+            service = PaidIncomeSyncService(
+                paid_income_settings, SqliteImportedPaidIncomeRepository(portfolio.id)
+            )
+            result = service.sync(session, BrapiPaidIncomeProvider(settings.api_token))
+            if result["status"] is PaidIncomeIntegrationStatus.CONNECTED:
+                provider_health.success("BRAPI Proventos")
+        except Exception as error:
+            provider_health.failure("BRAPI Proventos", error)
+        finally:
+            reset_active_portfolio_id(token)
 
 
 def refresh_historical_market_cache(*, reference_date: date | None = None) -> bool:
