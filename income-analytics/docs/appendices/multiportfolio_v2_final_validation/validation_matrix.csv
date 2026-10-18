@@ -1,0 +1,59 @@
+gate,status,evidence
+FINAL_01,PASS,V1/V2 architecture revalidated by full suite and scoped HTTP tests
+FINAL_02,PASS,Real DB source checksum unchanged; 0 test writes
+FINAL_03,PASS,SQLite integrity_check=ok; foreign_key_check=0
+FINAL_04,PASS,MAIN identity retained
+FINAL_05,PASS,No portfolio ownership orphans in protected source DB
+FINAL_06,PASS,Invalid UUID and unknown portfolio rejected by API tests
+FINAL_07,PASS,Frontend API client adds X-Portfolio-Id; Node test passes
+FINAL_08,PASS,Portfolio-scoped snapshot proxy regression fixed and tested
+FINAL_09,PASS,Cross-portfolio B3 apply rejected before writes
+FINAL_10,PASS,Shared market/reference data remains global by design
+FINAL_11,PASS,"Historical golden matches for portfolio, dashboard and holdings"
+FINAL_12,PASS,Portfolio summary legacy/explicit MAIN semantic equivalence
+FINAL_13,PASS,Holdings Level A and B equivalence
+FINAL_14,PASS,Allocation Level B equivalence
+FINAL_15,PASS,Income/paid-income isolation tests and Level B where endpoint exists
+FINAL_16,PASS,Operations/history Level B equivalence
+FINAL_17,PASS,Wealth evolution Level B equivalence
+FINAL_18,PREEXISTING_EQUIVALENT,Wealth explanation identical HTTP 422 for identical legacy/explicit request
+FINAL_19,PASS,TWR/performance Level B equivalence and cross-portfolio isolation
+FINAL_20,PASS,Comparison Level B equivalence
+FINAL_21,PASS,Findings Level B and isolation tests
+FINAL_22,PASS,Targets/configuration Level B and isolation tests
+FINAL_23,PASS,No unexplained mismatch in validated equivalence/invariant checks
+FINAL_24,PASS,MF_BR_2027_V1 unchanged
+FINAL_25,PASS,Policy hash unchanged
+FINAL_26,PASS,Active snapshot reconciled to release artifacts
+FINAL_27,PASS,Canonical ranking hash matches
+FINAL_28,PASS,Same ranking with MAIN/A/B contexts
+FINAL_29,PASS,B3 token for A rejected over HTTP when applied to B
+FINAL_30,PASS,Rejected cross-portfolio apply made zero writes
+FINAL_31,PASS,Private asset lookup isolation tests
+FINAL_32,PASS,Revision 0020 shared quota identity tests
+FINAL_33,NOT_RUN_ENVIRONMENT_LIMITATION,Browser opened connection-refused; isolated local server launch rejected by execution policy
+FINAL_34,NOT_RUN_ENVIRONMENT_LIMITATION,Desktop browser automation unavailable
+FINAL_35,PASS,New empty portfolio read models return 200 and no positions/classes
+FINAL_36,NOT_RUN_ENVIRONMENT_LIMITATION,Requires interactive browser
+FINAL_37,NOT_RUN_ENVIRONMENT_LIMITATION,Requires interactive browser
+FINAL_38,NOT_RUN_ENVIRONMENT_LIMITATION,Requires interactive browser
+FINAL_39,NOT_RUN_ENVIRONMENT_LIMITATION,Requires interactive browser
+FINAL_40,NOT_RUN_ENVIRONMENT_LIMITATION,Requires interactive browser
+FINAL_41,NOT_RUN_ENVIRONMENT_LIMITATION,Requires interactive browser visual inspection
+FINAL_42,PASS,Frontend request race test confirms stale request cancellation
+FINAL_43,NOT_RUN_ENVIRONMENT_LIMITATION,Mobile browser unavailable
+FINAL_44,NOT_RUN_ENVIRONMENT_LIMITATION,Mobile browser unavailable
+FINAL_45,NOT_RUN_ENVIRONMENT_LIMITATION,Mobile browser unavailable
+FINAL_46,NOT_RUN_ENVIRONMENT_LIMITATION,Mobile browser unavailable
+FINAL_47,NOT_RUN_ENVIRONMENT_LIMITATION,Mobile browser unavailable
+FINAL_48,NOT_RUN_ENVIRONMENT_LIMITATION,Mobile viewport browser inspection unavailable
+FINAL_49,PASS,30 warm paired measurements per measured endpoint on isolated copy
+FINAL_50,PASS,Legacy MAIN vs explicit MAIN
+FINAL_51,PASS,No consistent/material V2 median overhead; TWR medians differ 24ms with high shared tail variability
+FINAL_52,PASS,Full suite result recorded in final report
+FINAL_53,PASS,New regression test passes
+FINAL_54,PASS,Multiportfolio isolation suite passes
+FINAL_55,PASS,Frontend Node tests pass
+FINAL_56,PASS,Ruff on touched and relevant V2 Python files passes
+FINAL_57,PASS,ASGI runtime HTTP validations pass on isolated copies
+FINAL_58,PASS,No private financial payload included in committable artifacts

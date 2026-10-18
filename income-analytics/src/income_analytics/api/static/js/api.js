@@ -3,10 +3,15 @@
 async function request(path, options = {}) {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 15000);
+  const requestPortfolioId = window.localStorage.getItem("income.activePortfolioId");
   try {
+    const headers = new Headers(options.headers || {});
+    const portfolioId = window.localStorage.getItem("income.activePortfolioId");
+    if (portfolioId) headers.set("X-Portfolio-Id", portfolioId);
     const response = await fetch(`/api${path}`, {
       cache: "no-store",
       ...options,
+      headers,
       signal: options.signal || controller.signal,
     });
     const parseStarted = performance.now();
@@ -16,6 +21,10 @@ async function request(path, options = {}) {
       end: performance.now(),
       detail: { path },
     });
+    const activePortfolioId = window.localStorage.getItem("income.activePortfolioId");
+    if (requestPortfolioId && activePortfolioId !== requestPortfolioId) {
+      throw new DOMException("A carteira ativa mudou durante a solicitação.", "AbortError");
+    }
     if (!response.ok) {
       const detail = Array.isArray(body.detail)
         ? body.detail.map(item => {
@@ -32,6 +41,11 @@ async function request(path, options = {}) {
 }
 
 export const portfolioApi = {
+  listPortfolios: () => request("/portfolios"),
+  createPortfolio: payload => request("/portfolios", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
+  renamePortfolio: (id, name) => request(`/portfolios/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) }),
+  archivePortfolio: id => request(`/portfolios/${encodeURIComponent(id)}/archive`, { method: "POST" }),
+  restorePortfolio: id => request(`/portfolios/${encodeURIComponent(id)}/restore`, { method: "POST" }),
   tools: () => request("/tools"),
   magicFormulaStocks: (filters = {}) => {
     const query = new URLSearchParams({

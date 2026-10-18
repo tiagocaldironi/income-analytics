@@ -1,0 +1,8 @@
+Runtime: Python 3.14 (project source uses Python 3.14 exception syntax)
+Previous baseline: 882 passing tests.
+Final full suite: 883 passed, 6 warnings; 882 existing plus 1 new regression.
+Focused regressions: acceptance persistence + multiportfolio + history boundary + operation history: 27 passed.
+Frontend: node tests/frontend/multiportfolio_context_v2.mjs PASS.
+Ruff: changed production/test Python files PASS; 110 relevant V2 Python files PASS.
+Runtime HTTP: isolated TestClient equivalence, Magic Formula portfolio independence, B3 cross-portfolio HTTP rejection and zero writes PASS.
+Browser: desktop/mobile NOT_RUN_ENVIRONMENT_LIMITATION.

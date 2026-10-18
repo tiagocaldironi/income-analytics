@@ -398,6 +398,25 @@ class SqlitePortfolioRepository:
             updated_at=SqliteAssetRepository._utc(row.updated_at),
         )
 
+    def list(self, *, include_archived: bool = True) -> tuple[Portfolio, ...]:
+        initialize_database()
+        with SessionFactory() as session:
+            query = session.query(PortfolioRecord)
+            if not include_archived:
+                query = query.filter(PortfolioRecord.status == "ACTIVE")
+            rows = query.order_by(PortfolioRecord.created_at, PortfolioRecord.id).all()
+        return tuple(
+            Portfolio(
+                id=UUID(row.id),
+                name=row.name,
+                base_currency=row.base_currency,
+                status=row.status,
+                created_at=SqliteAssetRepository._utc(row.created_at),
+                updated_at=SqliteAssetRepository._utc(row.updated_at),
+            )
+            for row in rows
+        )
+
     def save(self, portfolio: Portfolio) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
@@ -502,7 +521,33 @@ class SqliteAssetRepository:
             record = (
                 session.query(AssetRecord).filter_by(ticker=ticker.strip().upper()).one_or_none()
             )
-            return self._to_domain(record) if record else None
+            if record is None:
+                return None
+            linked = (
+                session.query(PortfolioAssetRecord)
+                .filter_by(portfolio_id=self.portfolio_id, asset_id=record.id)
+                .one_or_none()
+            )
+            if linked is not None:
+                return self._to_domain(record)
+            has_private_details = any(
+                session.query(model).filter_by(asset_id=record.id).first() is not None
+                for model in (
+                    FixedIncomeDetailsRecord,
+                    PensionPlanDetailsRecord,
+                    RealEstateDetailsRecord,
+                )
+            )
+            if has_private_details or record.asset_class in {
+                AssetClass.FIXED_INCOME.value,
+                AssetClass.PENSION.value,
+                AssetClass.REAL_ESTATE.value,
+            }:
+                raise ValueError(
+                    "Este ativo é particular de outra carteira e não pode ser reutilizado. "
+                    "Cadastre-o com um ticker local exclusivo."
+                )
+            return self._to_domain(record)
 
     def link(self, asset_id: UUID) -> None:
         initialize_database()
@@ -823,9 +868,12 @@ class SqlitePensionFundQuotaRepository:
         initialize_database()
         with SessionFactory.begin() as session:
             for quota in quotas:
+                vehicle = session.get(PensionInvestmentVehicleRecord, str(quota.vehicle_id))
+                if vehicle is None:
+                    raise ValueError(f"Pension vehicle not found: {quota.vehicle_id}")
                 session.merge(
                     PensionFundQuotaRecord(
-                        vehicle_id=str(quota.vehicle_id),
+                        vehicle_cnpj=vehicle.vehicle_cnpj,
                         reference_date=quota.reference_date,
                         quota=str(quota.quota),
                         source=quota.source,
@@ -836,15 +884,18 @@ class SqlitePensionFundQuotaRepository:
     def list_for(self, vehicle_id: UUID) -> tuple[PensionFundQuota, ...]:
         initialize_database()
         with SessionFactory() as session:
+            vehicle = session.get(PensionInvestmentVehicleRecord, str(vehicle_id))
+            if vehicle is None:
+                return ()
             rows = (
                 session.query(PensionFundQuotaRecord)
-                .filter_by(vehicle_id=str(vehicle_id))
+                .filter_by(vehicle_cnpj=vehicle.vehicle_cnpj)
                 .order_by(PensionFundQuotaRecord.reference_date)
                 .all()
             )
         return tuple(
             PensionFundQuota(
-                vehicle_id=UUID(row.vehicle_id),
+                vehicle_id=vehicle_id,
                 reference_date=row.reference_date,
                 quota=Decimal(row.quota),
                 source=row.source,

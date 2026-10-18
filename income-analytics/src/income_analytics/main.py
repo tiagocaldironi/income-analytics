@@ -3,9 +3,10 @@ import os
 from pathlib import Path
 from threading import Thread
 from time import perf_counter
+from uuid import UUID
 
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import Response
 from starlette.types import Scope
@@ -23,9 +24,12 @@ from income_analytics.api.routers.dashboard import (
     router as dashboard_router,
 )
 from income_analytics.api.routers.health import router as health_router
+from income_analytics.api.routers.portfolios import router as portfolios_router
 from income_analytics.application.portfolio_context import (
     current_portfolio_id,
+    reset_active_portfolio_id,
     reset_request_session,
+    set_active_portfolio_id,
     set_request_session,
 )
 from income_analytics.application.portfolio_session import PortfolioSession
@@ -34,6 +38,7 @@ from income_analytics.infrastructure.request_profiling import (
     current_request_metrics,
     install_sql_timing,
 )
+from income_analytics.infrastructure.sqlite_repositories import SqlitePortfolioRepository
 
 app = FastAPI(
     title="Income Analytics",
@@ -50,13 +55,30 @@ if os.environ.get("INCOME_ANALYTICS_PERF_LOG", "").strip().lower() in {"1", "tru
 
 @app.middleware("http")
 async def portfolio_request_context(request, call_next):
-    token = set_request_session(
-        PortfolioSession(portfolio_id=current_portfolio_id(), persistent=True)
+    if request.url.path.startswith("/api/portfolios"):
+        return await call_next(request)
+    explicit_id = request.headers.get("x-portfolio-id")
+    if explicit_id:
+        try:
+            portfolio_id = UUID(explicit_id)
+        except ValueError:
+            return JSONResponse({"detail": "Identificador de carteira inválido."}, status_code=400)
+    else:
+        portfolio_id = current_portfolio_id()
+    portfolio = SqlitePortfolioRepository().get(portfolio_id)
+    if portfolio is None:
+        return JSONResponse({"detail": "Carteira não encontrada."}, status_code=404)
+    if portfolio.status != "ACTIVE" and request.method not in {"GET", "HEAD", "OPTIONS"}:
+        return JSONResponse({"detail": "Restaure a carteira antes de alterá-la."}, status_code=409)
+    portfolio_token = set_active_portfolio_id(portfolio_id)
+    session_token = set_request_session(
+        PortfolioSession(portfolio_id=portfolio_id, persistent=True)
     )
     try:
         return await call_next(request)
     finally:
-        reset_request_session(token)
+        reset_request_session(session_token)
+        reset_active_portfolio_id(portfolio_token)
 
 
 @app.middleware("http")
@@ -102,6 +124,7 @@ initialize_database()
 app.include_router(health_router)
 app.include_router(dashboard_router)
 app.include_router(b3_import_router)
+app.include_router(portfolios_router)
 
 
 class NoCacheStaticFiles(StaticFiles):

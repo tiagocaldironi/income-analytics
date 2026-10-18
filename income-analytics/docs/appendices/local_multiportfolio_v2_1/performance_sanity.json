@@ -1,0 +1,22 @@
+{
+  "period": {
+    "start": "2025-10-18",
+    "end": "2026-10-18"
+  },
+  "portfolio_id": "MAIN (omitted in committable summary evidence; local evidence only)",
+  "classification": "INCONCLUSIVE",
+  "comparison_baseline": "No paired V1 baseline for identical DB snapshot, period, cache state and host. Approximate historical TWR warm reference: 1.31s.",
+  "warm_seconds": {
+    "dashboard": 0.0715,
+    "holdings": 0.0779,
+    "wealth_evolution": 10.4895,
+    "performance_twr": 2.87,
+    "performance_comparison": 0.1218,
+    "findings": 0.5338
+  },
+  "notes": [
+    "Each warm duration is the second of two sequential requests.",
+    "Performance comparison first request was cold at 27.0572s; second was 0.1218s.",
+    "No material regression conclusion is made from unmatched historical reference."
+  ]
+}

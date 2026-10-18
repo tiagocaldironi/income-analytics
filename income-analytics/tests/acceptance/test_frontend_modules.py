@@ -16,6 +16,33 @@ def test_frontend_client_centralizes_the_feature_endpoints() -> None:
     assert "rebalancing/assets" in client
 
 
+def test_frontend_propagates_and_selects_the_active_portfolio() -> None:
+    page = (STATIC / "index.html").read_text(encoding="utf-8")
+    client = (STATIC / "js/api.js").read_text(encoding="utf-8")
+    context = (STATIC / "js/features/portfolios.js").read_text(encoding="utf-8")
+    wallet_settings = (STATIC / "js/features/wallet-settings.js").read_text(encoding="utf-8")
+    assert 'id="portfolio-menu-trigger"' in page
+    assert 'id="portfolio-options"' in page
+    assert 'id="portfolio-settings"' in page or 'class="portfolio-settings"' in page
+    assert 'href="#carteira-configuracoes"' in page
+    assert 'data-page="carteira-configuracoes"' in page
+    assert 'id="portfolio-create"' in page
+    assert 'id="wallet-name-form"' in page
+    assert 'data-wallet-theme="light"' in page
+    assert 'data-wallet-theme="dark"' in page
+    assert "Compartilhamento indisponível" in page
+    assert 'href="#configuracoes" data-navigate title="Configurações"' in page
+    assert 'localStorage.getItem("income.activePortfolioId")' in client
+    assert 'headers.set("X-Portfolio-Id", portfolioId)' in client
+    assert "localStorage.setItem(STORAGE_KEY, id)" in context
+    assert 'currentName.textContent = selected?.name || "Carteira"' in context
+    assert 'option.setAttribute("aria-selected", String(item.id === current))' in context
+    assert 'lifecycle.activate(route)' in context
+    assert 'income.portfolioThemes.v1' in wallet_settings
+    assert 'portfolioApi.renamePortfolio(id, name)' in wallet_settings
+    assert 'document.documentElement.dataset.theme' in wallet_settings
+
+
 def test_magic_formula_page_uses_persisted_ranking_and_transparent_screening() -> None:
     tools = (STATIC / "js/features/tools.js").read_text(encoding="utf-8")
     client = (STATIC / "js/api.js").read_text(encoding="utf-8")
