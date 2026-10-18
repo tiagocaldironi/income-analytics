@@ -1,5 +1,5 @@
 import { bindPortfolioFilters, loadPortfolio } from "./features/portfolio.js?v=20261008-twr-methodology";
-import { bindOperations, loadOperationsRoute } from "./features/operations.js?v=20261018-fixed-income-sale-v1";
+import { bindOperations, loadOperationsRoute } from "./features/operations.js?v=20261018-fixed-income-sale-v2";
 import { bindPerformance, loadExplanation } from "./features/performance.js?v=20261017-performance-indices-v1";
 import { bindSimulation } from "./features/simulation.js?v=20260924-experience-v2";
 import { bindBenchmark } from "./features/benchmark.js?v=20260924-route-scoped-v1";

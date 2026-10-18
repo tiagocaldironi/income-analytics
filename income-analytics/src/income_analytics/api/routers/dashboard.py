@@ -2246,11 +2246,23 @@ def create_fixed_income_sale(sale: FixedIncomeSaleInput) -> dict[str, object]:
         ),
         None,
     )
-    if position is None:
+    if position is None or position.current_price is None or position.market_value.is_zero:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Este ativo não possui posição aberta na data informada.",
+            detail="Este ativo não possui saldo aberto e valorizado na data informada.",
         )
+
+    if sale.amount > position.market_value.amount:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="O valor da venda não pode ser maior que o saldo atual da posição.",
+        )
+
+    # Fixed-income contracts are represented as one application unit whose
+    # quote is the full current balance. Convert the requested BRL redemption
+    # into the proportional quantity so a partial sale leaves the remainder
+    # invested instead of selling the whole application one-for-one.
+    sale_quantity = sale.amount / position.current_price.amount
 
     try:
         projection = session.register_trade(
@@ -2260,8 +2272,8 @@ def create_fixed_income_sale(sale: FixedIncomeSaleInput) -> dict[str, object]:
             asset_class=AssetClass.FIXED_INCOME,
             country=asset.country,
             currency_code=asset.currency.code,
-            quantity=position.quantity.value,
-            unit_price=sale.amount / position.quantity.value,
+            quantity=sale_quantity,
+            unit_price=position.current_price.amount,
             effective_date=sale.effective_date,
         )
     except ValueError as error:

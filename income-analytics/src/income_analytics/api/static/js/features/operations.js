@@ -1,4 +1,4 @@
-import { portfolioApi } from "../api.js?v=20261004-operations-refinement-v2";
+import { portfolioApi } from "../api.js?v=20261018-fixed-income-sale-v2";
 import { confirmDangerousAction, confirmOperationDeletion, emptyState, friendlyError, money, setMessage, table, validateForm, withProcessing } from "../shared/ui.js";
 import { decimalForApi, isPositiveDecimal } from "../shared/numbers.js";
 import { loadPortfolio } from "./portfolio.js";

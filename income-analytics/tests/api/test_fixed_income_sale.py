@@ -27,7 +27,7 @@ def _session_with_fixed_income() -> PortfolioSession:
     return session
 
 
-def test_fixed_income_sale_uses_open_position_and_total_sale_amount(monkeypatch) -> None:
+def test_fixed_income_sale_reduces_balance_by_amount_and_keeps_remainder(monkeypatch) -> None:
     session = _session_with_fixed_income()
     monkeypatch.setattr(dashboard, "session", session)
     monkeypatch.setattr(dashboard, "rebuild_portfolio_dashboard_snapshot", lambda: {})
@@ -35,16 +35,36 @@ def test_fixed_income_sale_uses_open_position_and_total_sale_amount(monkeypatch)
     result = dashboard.create_fixed_income_sale(
         dashboard.FixedIncomeSaleInput(
             ticker="FI-CDB-01",
-            amount=Decimal("950.00"),
+            amount=Decimal("250.00"),
             effective_date=date(2026, 10, 18),
         )
     )
 
     position = next(item for item in result["positions"] if item["ticker"] == "FI-CDB-01")
-    assert position["quantity"] == 0
+    assert position["quantity"] == Decimal("0.75")
+    assert position["current_price"] == Decimal("1000.00")
+    assert position["market_value"] == Decimal("750.00")
+    assert result["total_market_value"] == Decimal("750.00")
     assert result["cash_status"]
     assert session.history()[-1].event_type.value == "SELL"
-    assert session.history()[-1].total_amount.amount == Decimal("950.00")
+    assert session.history()[-1].total_amount.amount == Decimal("250.00")
+
+
+def test_fixed_income_sale_cannot_exceed_the_position_balance(monkeypatch) -> None:
+    session = _session_with_fixed_income()
+    monkeypatch.setattr(dashboard, "session", session)
+
+    with pytest.raises(HTTPException) as error:
+        dashboard.create_fixed_income_sale(
+            dashboard.FixedIncomeSaleInput(
+                ticker="FI-CDB-01",
+                amount=Decimal("1000.01"),
+                effective_date=date(2026, 10, 18),
+            )
+        )
+
+    assert error.value.status_code == 422
+    assert len(session.history()) == 1
 
 
 def test_fixed_income_sale_rejects_non_portfolio_asset_without_creating_it(monkeypatch) -> None:
