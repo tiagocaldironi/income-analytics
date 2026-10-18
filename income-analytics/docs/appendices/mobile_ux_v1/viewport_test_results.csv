@@ -1,0 +1,13 @@
+viewport,screen,document_width,viewport_width,horizontal_overflow,bottom_nav,desktop_nav,notes
+360x800,Dashboard,360,360,NO,VISIBLE,HIDDEN,pass
+375x812,Dashboard,375,375,NO,VISIBLE,HIDDEN,pass; header action fits
+390x844,Dashboard,390,390,NO,VISIBLE,HIDDEN,reference viewport
+393x873,Dashboard,393,393,NO,VISIBLE,HIDDEN,pass
+412x915,Dashboard,412,412,NO,VISIBLE,HIDDEN,pass
+430x932,Dashboard,430,430,NO,VISIBLE,HIDDEN,pass
+390x844,Portfolio,390,390,NO,VISIBLE,HIDDEN,asset card and nested holdings route
+390x844,Understand / Performance / Comparison,390,390,NO,VISIBLE,HIDDEN,charts and monthly/annual card variant
+390x844,Operations / Income,390,390,NO,VISIBLE,HIDDEN,tab and grouped income route
+390x844,Magic Formula,390,390,NO,VISIBLE,HIDDEN,existing ranking-card variant
+844x390,Dashboard landscape,844,844,NO,VISIBLE,HIDDEN,mobile shell remains available
+1440x900,Dashboard desktop,1440,1440,NO,HIDDEN,VISIBLE,desktop nav and 2-column layout retained

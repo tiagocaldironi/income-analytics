@@ -1,0 +1,16 @@
+screen,route,desktop_layout,mobile_status,main_problem,recommended_pattern,priority
+Dashboard / Início,#minha-carteira,metrics + two-column overview + holdings,MOBILE_REDESIGN,desktop metrics and cards compress vertically,single-column priority stack with compact app shell,P0
+Minha Carteira / Ativos,#minha-carteira/ativos,grouped classes with wide holdings table,MOBILE_REDESIGN,eleven-column holding rows,group summaries plus labeled holding cards,P0
+Evolução,#minha-carteira,portfolio chart and period/class controls,MOBILE_ADAPT,axis and controls compete for narrow width,full-width responsive chart and compact controls,P0
+Performance,#entender,performance summary/cards,MOBILE_ADAPT,summary grid and period form,one-column summaries and stacked date form,P0
+Performance Comparada,#entender,benchmark cards + chart + monthly/annual tables,MOBILE_ADAPT,wide comparison tables,compact controls + full-width chart + monthly/annual cards,P0
+Rendimentos,#operacoes (Rendimentos tab),grouped income history and filters,MOBILE_ADAPT,filter fields and long groups,existing grouped income view with stacked filters and touch tabs,P0
+Operações,#operacoes,history, tabs, forms and dialogs,MOBILE_ADAPT,wide desktop table and large dialogs,timeline/cards + scrollable tabs + full-height bottom sheet,P0
+Fórmula Mágica,#tools-magic-formula-stocks,ranking table and company detail drawer,MOBILE_OK,ranking has many columns,existing mobile ranking cards and bottom detail drawer,P0
+Estratégia,#estrategia,desktop strategy workspace, MOBILE_ADAPT,policy forms can span columns,stacked controls and native scrolling,P1
+Simular,#simular,simulation workspace, MOBILE_ADAPT,forms and summaries may be dense,stacked form and result cards,P1
+Risco & Exposição,#risco-exposicao,analysis cards and data summaries, MOBILE_ADAPT,wide analytical presentation,one-column cards,P1
+Configurações,#configuracoes,settings cards, MOBILE_ADAPT,secondary actions compete for space,stacked settings cards and full-width actions,P1
+Ferramentas,#ferramentas,tools landing and links, MOBILE_ADAPT,desktop navigation density,one-column route list via Mais,P1
+Fórmula Mágica FIIs,#tools-magic-formula-fiis,ranking table and detail drawer, MOBILE_OK,ranking has many columns,existing mobile ranking cards and drawer,P1
+Ajuda e metodologia,#ajuda-metodologia,methodology sections and index, MOBILE_ADAPT,long reading layout,wrapped section links and readable single column,P1

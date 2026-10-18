@@ -1,4 +1,4 @@
-import "./attention-center-styles.js";
+import "./attention-center-styles.js?v=20261018-mobile-ux-v1";
 import { invalidateSharedIntelligence, sharedIntelligence } from "../shared/resources.js";
 
 const html = value => String(value ?? "").replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
