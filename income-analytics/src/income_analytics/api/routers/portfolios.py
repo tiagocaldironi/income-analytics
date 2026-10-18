@@ -7,7 +7,14 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.exc import IntegrityError
 
-from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
+from income_analytics.application.portfolio_context import (
+    MAIN_PORTFOLIO_ID,
+    reset_active_portfolio_id,
+    reset_request_session,
+    set_active_portfolio_id,
+    set_request_session,
+)
+from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.entities.portfolio import Portfolio
 from income_analytics.infrastructure.sqlite_repositories import SqlitePortfolioRepository
 
@@ -54,6 +61,26 @@ def _ensure_unique_name(
         raise HTTPException(status_code=409, detail="Já existe uma carteira ativa com esse nome.")
 
 
+def _initialize_portfolio_dashboard(portfolio_id: UUID) -> None:
+    """Create the portfolio-scoped dashboard projection before exposing the wallet."""
+    from income_analytics.api.routers.dashboard import rebuild_portfolio_dashboard_snapshot
+
+    portfolio_token = set_active_portfolio_id(portfolio_id)
+    session_token = set_request_session(
+        PortfolioSession(portfolio_id=portfolio_id, persistent=True)
+    )
+    try:
+        rebuild_portfolio_dashboard_snapshot()
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="A carteira foi criada, mas sua visão consolidada não pôde ser preparada.",
+        ) from error
+    finally:
+        reset_request_session(session_token)
+        reset_active_portfolio_id(portfolio_token)
+
+
 @router.get("")
 def list_portfolios() -> dict[str, object]:
     return {"portfolios": [_payload(item) for item in SqlitePortfolioRepository().list()]}
@@ -77,6 +104,7 @@ def create_portfolio(body: PortfolioCreate) -> dict[str, str]:
         raise HTTPException(
             status_code=409, detail="Já existe uma carteira ativa com esse nome."
         ) from error
+    _initialize_portfolio_dashboard(portfolio.id)
     return _payload(portfolio)
 
 

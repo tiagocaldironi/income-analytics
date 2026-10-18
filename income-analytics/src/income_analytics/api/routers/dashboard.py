@@ -14,7 +14,7 @@ from time import sleep
 from typing import Literal
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, HTTPException, Query, Response, status
+from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field
 
@@ -48,6 +48,7 @@ from income_analytics.application.paid_income import (
 )
 from income_analytics.application.pension_market_data import PensionMarketDataUnavailable
 from income_analytics.application.portfolio_context import (
+    MAIN_PORTFOLIO_ID,
     current_portfolio_id,
     get_request_session,
     reset_active_portfolio_id,
@@ -1316,10 +1317,18 @@ def _portfolio_performance_summary() -> dict[str, object]:
     }
 
 
+def _dashboard_snapshot_for_request(request: Request | None) -> dict[str, object] | None:
+    if request is None:
+        return dashboard_snapshot_repository.get()
+    portfolio_header = request.headers.get("x-portfolio-id")
+    portfolio_id = UUID(portfolio_header) if portfolio_header else MAIN_PORTFOLIO_ID
+    return SqlitePortfolioDashboardSnapshotRepository(portfolio_id).get()
+
+
 @router.get("/portfolio/dashboard")
-def get_portfolio_dashboard() -> dict[str, object]:
+def get_portfolio_dashboard(request: Request = None) -> dict[str, object]:
     """Fast read path for Minha Carteira; never projects when a snapshot exists."""
-    snapshot = dashboard_snapshot_repository.get()
+    snapshot = _dashboard_snapshot_for_request(request)
     if snapshot is not None:
         return snapshot
     raise HTTPException(
@@ -1341,13 +1350,15 @@ def rebuild_portfolio_dashboard() -> dict[str, object]:
 
 
 @router.get("/portfolio/holdings")
-def get_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
+def get_portfolio_holdings(
+    request: Request = None, as_of: date | None = None
+) -> dict[str, object]:
     """Read the current holdings projection; historical as-of views remain computed."""
     if as_of is not None:
         return _build_portfolio_holdings(as_of=as_of)
     if not session.persistent:
         return _build_portfolio_holdings()
-    snapshot = dashboard_snapshot_repository.get()
+    snapshot = _dashboard_snapshot_for_request(request)
     holdings = snapshot.get("holdings") if snapshot else None
     if isinstance(holdings, dict):
         return holdings

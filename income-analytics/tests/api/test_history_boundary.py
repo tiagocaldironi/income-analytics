@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import pytest
 from fastapi import HTTPException
+from starlette.requests import Request
 
 from income_analytics.api.routers import dashboard
 from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
@@ -60,15 +61,28 @@ def test_compact_dashboard_payload_omits_unused_history(monkeypatch) -> None:
 
 
 def test_dashboard_get_never_rebuilds_a_missing_read_model(monkeypatch) -> None:
-    monkeypatch.setattr(dashboard.dashboard_snapshot_repository, "get", lambda: None)
+    repository_factory = dashboard.dashboard_snapshot_repository._factory
+    monkeypatch.setattr(repository_factory, "get", lambda _repository: None)
     monkeypatch.setattr(
         dashboard,
         "rebuild_portfolio_dashboard_snapshot",
         lambda: pytest.fail("GET must not rebuild the dashboard read model"),
     )
 
+    request = Request(
+        {
+            "type": "http",
+            "method": "GET",
+            "path": "/api/portfolio/dashboard",
+            "headers": [],
+            "query_string": b"",
+            "server": ("test", 80),
+            "client": ("test", 1),
+            "scheme": "http",
+        }
+    )
     with pytest.raises(HTTPException) as error:
-        dashboard.get_portfolio_dashboard()
+        dashboard.get_portfolio_dashboard(request)
 
     assert error.value.status_code == 503
 

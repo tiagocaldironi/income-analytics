@@ -55,6 +55,42 @@ def test_portfolio_lifecycle_and_explicit_request_isolation() -> None:
     ).status_code == 404
 
 
+def test_new_empty_portfolio_has_dashboard_and_holdings_read_models() -> None:
+    client = TestClient(app)
+    main_trade = client.post(
+        "/api/trades",
+        json={
+            "event_type": "BUY",
+            "ticker": "MPV2MAIN",
+            "name": "Main portfolio only",
+            "quantity": "2",
+            "unit_price": "10",
+            "effective_date": date(2026, 10, 18).isoformat(),
+            "asset_class": "BRAZILIAN_STOCK",
+        },
+    )
+    assert main_trade.status_code == 201, main_trade.text
+
+    created = client.post("/api/portfolios", json={"name": "Empty dashboard"})
+    assert created.status_code == 201
+    headers = {"X-Portfolio-Id": created.json()["id"]}
+
+    dashboard = client.get("/api/portfolio/dashboard", headers=headers)
+    holdings = client.get("/api/portfolio/holdings", headers=headers)
+    portfolio = client.get("/api/portfolio", headers=headers)
+
+    assert dashboard.status_code == 200, dashboard.text
+    assert holdings.status_code == 200, holdings.text
+    assert portfolio.status_code == 200, portfolio.text
+    assert dashboard.json()["portfolio"]["positions"] == portfolio.json()["positions"]
+    assert portfolio.json()["positions"] == []
+    assert "MPV2MAIN" not in {
+        position["ticker"] for position in dashboard.json()["portfolio"]["positions"]
+    }
+    assert dashboard.json()["holdings"]["classes"] == []
+    assert holdings.json()["classes"] == []
+
+
 def test_archived_portfolio_is_read_only_and_can_be_restored() -> None:
     client = TestClient(app)
     created = client.post("/api/portfolios", json={"name": "Archive test"})
