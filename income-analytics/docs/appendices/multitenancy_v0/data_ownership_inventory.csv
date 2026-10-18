@@ -1,0 +1,36 @@
+﻿entity,table,classification,current_scope,future_scope,reason,migration_required,risk
+Assets,assets,GLOBAL_REFERENCE_DATA,global,Split canonical security master from portfolio-private asset/override metadata.,"Shared quote identity, but current mutable/user-created fields make this boundary mixed.",NO,HIGH
+Fixed Income Details,fixed_income_details,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Portfolio-owned instrument terms; scope PK/FK.,Application/principal/maturity describe held contract.,YES,HIGH
+Pension Plan Details,pension_plan_details,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Portfolio-owned pension contract.,Personal plan and balances.,YES,HIGH
+Pension Investment Vehicles,pension_investment_vehicles,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Portfolio-owned relation to plan.,Ownership follows personal pension plan.,YES,HIGH
+Pension Fund Quotas,pension_fund_quotas,GLOBAL_REFERENCE_DATA,global,Shared reference observations.,Potentially reusable market data; validate vehicle identity/source.,NO,MEDIUM
+Real Estate Details,real_estate_details,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Portfolio-owned property metadata.,Address/acquisition/value are personal.,YES,CRITICAL
+Recurring Rules,recurring_rules,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Portfolio-owned recurring rules.,Schedule and generated events belong to selected portfolio.,YES,HIGH
+Financial Events,financial_events,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Portfolio-owned ledger.,"Operations, flows, income and history source.",YES,CRITICAL
+Market Prices,market_prices,GLOBAL_REFERENCE_DATA,global,Shared canonical market data.,Never duplicate price history by portfolio.,NO,LOW
+Market Price Refresh Runs,market_price_refresh_runs,UNCERTAIN,single local portfolio / user singleton,Decide portfolio-owned audit vs system provider log.,Migration 0018 calls this one portfolio quote refresh; payload may identify holdings.,YES,HIGH
+Benchmark Rates,benchmark_rates,GLOBAL_REFERENCE_DATA,global,Shared reference data.,Independent benchmark.,NO,LOW
+Benchmark Observations,benchmark_observations,GLOBAL_REFERENCE_DATA,global,Shared reference data.,Independent benchmark.,NO,LOW
+Fx Rates,fx_rates,GLOBAL_REFERENCE_DATA,global,Shared reference data.,Reusable FX observations.,NO,LOW
+Portfolio Configuration,portfolio_configuration,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Scope portfolio settings; move system config elsewhere.,Portfolio-level currency/configuration.,YES,HIGH
+Portfolio Dashboard Snapshot,portfolio_dashboard_snapshot,DERIVED_PORTFOLIO_DATA,single local portfolio / user singleton,One versioned snapshot per portfolio.,Derived dashboard payload must not cross portfolios.,YES,CRITICAL
+Provider Health,provider_health,SYSTEM_DATA,system,Keep system-level.,"Operational health, not user portfolio.",NO,LOW
+Allocation Targets,allocation_targets,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,"Composite key (portfolio_id, asset_class).",Different portfolios need independent policy.,YES,HIGH
+Asset Targets,asset_targets,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,"Composite key (portfolio_id, asset_id).",Same asset can have different targets.,YES,HIGH
+Paid Income Provider Settings,paid_income_provider_settings,USER_OWNED_DATA,single local portfolio / user singleton,User-owned integration credential/settings.,Credential must not be shared across identities.,YES,CRITICAL
+Imported Paid Income,imported_paid_income,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Portfolio-scoped imported payments/idempotency.,May create income event for holdings.,YES,HIGH
+B3 Import Batches,b3_import_batches,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Portfolio-owned batch.,Preview/apply/history must authorize same portfolio.,YES,CRITICAL
+B3 Imported Records,b3_imported_records,PORTFOLIO_OWNED_DATA,single local portfolio / user singleton,Scope idempotency and apply by portfolio.,Import rows can mutate ledger.,YES,CRITICAL
+Magic Formula Fundamentals Snapshots,magic_formula_fundamentals_snapshots,GLOBAL_REFERENCE_DATA,global,Keep shared.,"Research source, not user holding.",NO,LOW
+Company Normalization Validations,company_normalization_validations,GLOBAL_REFERENCE_DATA,global,Keep shared.,Canonical methodology evidence.,NO,LOW
+Magic Formula Issuers,magic_formula_issuers,GLOBAL_REFERENCE_DATA,global,Keep shared.,Shared issuer identity.,NO,LOW
+Magic Formula Contract Migrations,magic_formula_contract_migrations,SYSTEM_DATA,system,Keep system-level.,Append-only migration evidence.,NO,LOW
+Magic Formula Golden Fixtures,magic_formula_golden_fixtures,GLOBAL_REFERENCE_DATA,global,Keep shared.,Shared QA reference data.,NO,LOW
+Magic Formula Formal Qa,magic_formula_formal_qa,SYSTEM_DATA,system,Keep system-level.,Global QA state.,NO,LOW
+Magic Formula Universe Snapshots,magic_formula_universe_snapshots,GLOBAL_REFERENCE_DATA,global,Keep shared.,Canonical universe.,NO,LOW
+Magic Formula Ranking Snapshots,magic_formula_ranking_snapshots,GLOBAL_REFERENCE_DATA,global,Keep shared.,Ranking per method/date; user preferences separate.,NO,LOW
+Magic Formula Ranking Results,magic_formula_ranking_results,GLOBAL_REFERENCE_DATA,global,Keep shared.,Canonical output.,NO,LOW
+Magic Formula Ranking Provenance,magic_formula_ranking_provenance,GLOBAL_REFERENCE_DATA,global,Keep shared.,Canonical lineage.,NO,LOW
+Magic Formula Ranking Release Events,magic_formula_ranking_release_events,SYSTEM_DATA,system,Keep system-level.,Global governance audit.,NO,LOW
+Magic Formula Ranking Release State Events,magic_formula_ranking_release_state_events,SYSTEM_DATA,system,Keep system-level.,Global governance audit.,NO,LOW
+Magic Formula Ranking Artifacts,magic_formula_ranking_artifacts,SYSTEM_DATA,system,Keep as validation/system data.,Confirm this file is not intended runtime source.,NO,MEDIUM

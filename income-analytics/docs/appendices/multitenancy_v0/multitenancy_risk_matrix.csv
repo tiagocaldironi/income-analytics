@@ -1,0 +1,16 @@
+﻿area,risk,severity,probability,impact,mitigation
+ledger,Events globally listed; account_id is not FK/scope.,CRITICAL,HIGH,"Cross-portfolio ledger, income, wealth and TWR leakage.",Scoped SQL repositories and two-portfolio invariants.
+session,One module-global persistent PortfolioSession.,CRITICAL,HIGH,All requests share source and derived state.,Scoped unit of work after membership validation.
+snapshot,Dashboard snapshot singleton id=1.,CRITICAL,HIGH,Wrong portfolio dashboard can be returned.,Per-portfolio snapshot/revision and pre-read auth.
+analytics cache,Comparison lru_cache lacks portfolio key.,CRITICAL,MEDIUM,Cross-portfolio cached performance.,portfolio_id + scoped revision in key.
+imports,B3 preview/apply has no user/portfolio ownership.,CRITICAL,HIGH,Wrong portfolio apply or batch disclosure.,Owner-bound batch and authorize history/preview/apply.
+asset boundary,Global ticker catalog includes user-created/reclassified attributes.,HIGH,HIGH,Private metadata or mutation leakage.,Split canonical security master from portfolio-specific asset.
+uniqueness,Global target and import fingerprint identities.,HIGH,HIGH,Portfolio B conflicts with A state.,Audit and scope only portfolio-owned unique constraints.
+authorization,No login or membership dependency.,CRITICAL,HIGH,IDOR/data breach if IDs are added without checks.,Principal -> membership -> service; never trust frontend ID.
+provider secret,Paid-income token stored in singleton settings.,CRITICAL,MEDIUM,Credential shared between users.,User-owned protected integration store.
+read models,History/holdings/findings derive from global session.,CRITICAL,HIGH,Plausible but mixed analytics.,Scope input before engines; keep formulas.
+reset,/data/reset clears shared local data.,HIGH,LOW,Tenant-facing action could erase all portfolios.,Operator-only local admin.
+migration,Long-lived events/imports/snapshots linked by ids.,CRITICAL,MEDIUM,Data loss or changed financial output.,"Backup, lineage reconciliation and golden hashes."
+SQLite concurrency,Single-writer/local file constraints.,MEDIUM,MEDIUM,Write locks at hosted concurrency.,Remain for local V1/V2; measure; migrate on evidenced need.
+consolidation,No transfer-elimination/consolidated view semantics.,MEDIUM,MEDIUM,Double-count flows in ALL_PORTFOLIOS.,Defer; define later as aggregate projection.
+Magic Formula scope,Risk of mixing personal filters with canonical ranking.,MEDIUM,LOW,Canonical ranking forks per user.,Keep MF_BR_2027_V1 shared/untouched; preferences separate.

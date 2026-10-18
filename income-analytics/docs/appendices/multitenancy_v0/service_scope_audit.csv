@@ -1,0 +1,13 @@
+﻿service_or_boundary,source,classification,current_evidence,future_design,risk
+PortfolioSession,application/portfolio_session.py,IMPLICIT_SINGLE_PORTFOLIO,Persistent initialization loads all assets/events/prices/policies/details/rules; module instance is reused.,Factory/context per authorized portfolio; shared references injected separately.,CRITICAL
+dashboard globals,api/routers/dashboard.py,IMPLICIT_SINGLE_PORTFOLIO,"Global PortfolioSession, repositories, settings and B3 preview cache.",Request-scoped unit of work after membership validation.,CRITICAL
+financial event repository,infrastructure/sqlite_repositories.py,IMPLICIT_SINGLE_PORTFOLIO,list() returns all events; account_id is not an authorization scope.,Require portfolio_id and filter in SQL.,CRITICAL
+asset repository,infrastructure/sqlite_repositories.py,GLOBAL_MIXED,"Ticker-unique catalog includes user-created assets, class changes and private details.",Split shared security master from portfolio-private assets/overrides.,HIGH
+B3 import,application/b3_import.py; dashboard.py,IMPLICIT_SINGLE_PORTFOLIO,Batch preview/apply/history and event creation have no owner boundary.,Bind batch to portfolio; authorize every operation; atomic scoped apply.,CRITICAL
+paid-income sync,application/paid_income.py,USER_SINGLETON,Singleton token/settings; eligibility is computed from current session.,"User-owned credential, portfolio-scoped eligibility/events.",CRITICAL
+performance/TWR and wealth services,performance engine; wealth_explanation.py,INPUTS_UNSCOPED,Math receives data from global session/API; pure projection math need not change.,Scope all input streams before engine call; preserve formulas.,CRITICAL
+dashboard snapshot,SqlitePortfolioDashboardSnapshotRepository,IMPLICIT_SINGLE_PORTFOLIO,Singleton get/save; snapshot row id=1.,Key by portfolio_id and revision.,CRITICAL
+allocation policy,allocation policy repositories,IMPLICIT_SINGLE_PORTFOLIO,Asset class and asset targets have global keys.,Composite portfolio keys and scoped loaders.,HIGH
+canonical Magic Formula,MagicFormulaCanonicalRankingRepository,GLOBAL_CORRECTLY,Immutable canonical snapshots in separate SQLite database.,Keep shared; store personal screening preferences separately.,LOW
+market data providers,infrastructure market/FX/benchmark providers,GLOBAL_CORRECTLY,Canonical observation series independent from portfolio positions.,Keep globally shared; no per-portfolio copies.,LOW
+recurrence scheduler,dashboard.py; PortfolioSession,IMPLICIT_SINGLE_PORTFOLIO,Executes all current rules into singleton event stream.,Claim/execute rules by portfolio with portfolio-aware idempotency.,HIGH
