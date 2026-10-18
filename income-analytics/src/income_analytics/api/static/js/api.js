@@ -85,6 +85,7 @@ export const portfolioApi = {
   intelligence: asOf => request(`/portfolio/intelligence${asOf ? `?as_of=${encodeURIComponent(asOf)}` : ""}`),
   diversification: () => request("/portfolio/diversification"),
   createTrade: payload => request("/trades", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
+  createFixedIncomeSale: payload => request("/fixed-income/sales", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
   previewIrpfBrazilianStocks: workbook_base64 => request("/imports/irpf/brazilian-stocks/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workbook_base64 }) }),
   importIrpfBrazilianStocks: workbook_base64 => request("/imports/irpf/brazilian-stocks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workbook_base64 }) }),
   previewB3Import: payload => request("/imports/b3/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),

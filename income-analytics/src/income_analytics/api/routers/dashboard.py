@@ -387,6 +387,12 @@ class TradeInput(BaseModel):
     destination_asset_class: AssetClass | None = None
 
 
+class FixedIncomeSaleInput(BaseModel):
+    ticker: str = Field(min_length=1, max_length=64)
+    amount: Decimal = Field(gt=0)
+    effective_date: date
+
+
 class IrpfBrazilianStocksImportInput(BaseModel):
     workbook_base64: str = Field(min_length=1, max_length=15_000_000)
 
@@ -2210,6 +2216,53 @@ def create_trade(trade: TradeInput) -> dict[str, object]:
             capital_flow_type=trade.capital_flow_type,
             source_asset_class=trade.source_asset_class,
             destination_asset_class=trade.destination_asset_class,
+        )
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(error),
+        ) from error
+
+    rebuild_portfolio_dashboard_snapshot()
+    return serialize_portfolio(projection)
+
+
+@router.post("/fixed-income/sales", status_code=status.HTTP_201_CREATED)
+def create_fixed_income_sale(sale: FixedIncomeSaleInput) -> dict[str, object]:
+    """Sell an existing fixed-income position for its total cash proceeds."""
+    ticker = sale.ticker.strip().upper()
+    asset = session._assets.get(ticker)
+    if asset is None or asset.asset_class is not AssetClass.FIXED_INCOME:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Selecione um ativo de Renda Fixa existente na carteira.",
+        )
+
+    position = next(
+        (
+            item
+            for item in session.project(as_of=sale.effective_date).positions
+            if item.asset.id == asset.id and not item.is_empty
+        ),
+        None,
+    )
+    if position is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Este ativo não possui posição aberta na data informada.",
+        )
+
+    try:
+        projection = session.register_trade(
+            event_type=FinancialEventType.SELL,
+            ticker=ticker,
+            name=asset.name,
+            asset_class=AssetClass.FIXED_INCOME,
+            country=asset.country,
+            currency_code=asset.currency.code,
+            quantity=position.quantity.value,
+            unit_price=sale.amount / position.quantity.value,
+            effective_date=sale.effective_date,
         )
     except ValueError as error:
         raise HTTPException(

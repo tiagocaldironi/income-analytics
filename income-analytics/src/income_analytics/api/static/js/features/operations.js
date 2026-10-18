@@ -11,16 +11,22 @@ function setOperationFields(type) {
   const income = dividend || jcp;
   const assetClass = document.querySelector("#trade-asset-class")?.value;
   const fixedIncome = type === "BUY" && assetClass === "FIXED_INCOME";
+  const fixedIncomeSale = type === "SELL" && assetClass === "FIXED_INCOME";
   const pension = type === "BUY" && assetClass === "PENSION";
   const realEstate = type === "BUY" && assetClass === "REAL_ESTATE";
   const wealth = fixedIncome || pension || realEstate;
   document.querySelector("#asset-details").hidden = external || wealth;
   document.querySelector("#asset-class-details").hidden = external;
+  const assetClassLabel = document.querySelector('label[for="trade-asset-class"]');
+  if (assetClassLabel) assetClassLabel.textContent = type === "SELL" ? "Classe do ativo" : "Classe do ativo (no primeiro lançamento)";
+  const tickerLabel = document.querySelector('label[for="ticker"]');
+  if (tickerLabel) tickerLabel.textContent = fixedIncomeSale ? "Ativo da carteira" : "Ativo";
+  document.querySelector("#ticker").maxLength = fixedIncomeSale ? 64 : 12;
   const capitalFlow = document.querySelector("#capital-flow-details");
   if (capitalFlow) capitalFlow.hidden = (type !== "BUY" && !external) || wealth;
   ["#country", "#currency-code", "#sector"].forEach(selector => {
     const input = document.querySelector(selector);
-    const hide = external || wealth || (selector === "#sector" && fixedIncome);
+    const hide = external || wealth || fixedIncomeSale || (selector === "#sector" && fixedIncome);
     input.hidden = hide;
     input.previousElementSibling.hidden = hide;
     const label = document.querySelector('label[for="' + input.id + '"]');
@@ -41,7 +47,8 @@ function setOperationFields(type) {
     effectiveDateLabel.style.display = hideEffectiveDate ? "none" : "";
     effectiveDateLabel.textContent = realEstate ? "Data da avaliação" : "Data";
   }
-  document.querySelector("#trade-details").hidden = external || income || wealth;
+  document.querySelector("#trade-details").hidden = external || income || wealth || fixedIncomeSale;
+  document.querySelector("#fixed-income-sale-details").hidden = !fixedIncomeSale;
   document.querySelector("#dividend-details").hidden = !dividend;
   document.querySelector("#jcp-details").hidden = !jcp;
   document.querySelector("#external-flow-details").hidden = !external;
@@ -81,9 +88,10 @@ function setOperationFields(type) {
       }
     });
   }
-  document.querySelector("#ticker").required = !external && !wealth;
-  document.querySelector("#quantity").required = !external && !income && !wealth;
-  document.querySelector("#unit_price").required = !external && !income && !wealth;
+  document.querySelector("#ticker").required = (!external && !wealth) || fixedIncomeSale;
+  document.querySelector("#quantity").required = !external && !income && !wealth && !fixedIncomeSale;
+  document.querySelector("#unit_price").required = !external && !income && !wealth && !fixedIncomeSale;
+  document.querySelector("#fixed-income-sale-value").required = fixedIncomeSale;
   document.querySelector("#dividend-amount").required = dividend;
   document.querySelector("#jcp-gross").required = jcp;
   document.querySelector("#jcp-tax").required = jcp;
@@ -381,6 +389,7 @@ export function openOperationModal(options = {}) {
   if (currencyCode) document.querySelector("#currency-code").value = currencyCode;
   if (sector) document.querySelector("#sector").value = sector;
   setOperationFields(type?.value || "BUY");
+  symbol?.loadFixedIncomeSaleOptions?.();
   document.querySelector("#operation-more-options").open = !["BUY", "SELL"].includes(type?.value)
     || ["FIXED_INCOME", "PENSION", "REAL_ESTATE"].includes(classSelect?.value);
   syncQuickOperationButtons();
@@ -409,6 +418,7 @@ function bindOperationModal() {
     const type = button.dataset.quickOperation;
     document.querySelector("#event_type").value = type;
     setOperationFields(type);
+    document.querySelector("#ticker").loadFixedIncomeSaleOptions?.();
     syncQuickOperationButtons();
     updateOperationSummary();
   }));
@@ -464,6 +474,7 @@ function updateOperationSummary() {
   if (!output) return;
   const type = document.querySelector("#event_type")?.value;
   const assetClass = document.querySelector("#trade-asset-class")?.value;
+  const fixedIncomeSale = type === "SELL" && assetClass === "FIXED_INCOME";
   const number = selector => {
     const input = document.querySelector(selector);
     if (!input || !input.value.trim()) return null;
@@ -475,7 +486,10 @@ function updateOperationSummary() {
   const currency = document.querySelector("#currency-code")?.value || "BRL";
   let amount = null;
   let label = type === "SELL" ? "Valor bruto da venda" : "Valor estimado";
-  if (["BUY", "SELL"].includes(type) && !["FIXED_INCOME", "PENSION", "REAL_ESTATE"].includes(assetClass)) {
+  if (fixedIncomeSale) {
+    amount = number("#fixed-income-sale-value");
+    label = "Valor total da venda";
+  } else if (["BUY", "SELL"].includes(type) && !["FIXED_INCOME", "PENSION", "REAL_ESTATE"].includes(assetClass)) {
     if (quantity > 0 && price > 0) amount = quantity * price;
   } else if (type === "BUY" && assetClass === "FIXED_INCOME") {
     amount = number("#fi-principal");
@@ -510,10 +524,33 @@ function bindOperationSearch() {
   let timer;
   let requestId = 0;
   let candidatesBySymbol = new Map();
+  const fixedIncomeSaleSelected = () => document.querySelector("#event_type")?.value === "SELL"
+    && document.querySelector("#trade-asset-class")?.value === "FIXED_INCOME";
+  const loadFixedIncomeSaleOptions = async () => {
+    if (!fixedIncomeSaleSelected()) return;
+    const current = ++requestId;
+    try {
+      const holdings = await portfolioApi.holdings();
+      if (current !== requestId || !fixedIncomeSaleSelected()) return;
+      const assets = (holdings.classes || [])
+        .filter(group => group.asset_class === "FIXED_INCOME")
+        .flatMap(group => group.assets || []);
+      candidatesBySymbol = new Map(assets.map(asset => [String(asset.ticker).toUpperCase(), asset]));
+      list.innerHTML = assets.map(asset => `<option value="${escapeAttribute(asset.ticker)}" label="${escapeAttribute(asset.contract_label || asset.name || asset.ticker)}">${escapeAttribute(asset.contract_label || asset.name || asset.ticker)}</option>`).join("");
+    } catch { list.replaceChildren(); }
+  };
+  ticker.loadFixedIncomeSaleOptions = loadFixedIncomeSaleOptions;
   ticker.addEventListener("input", () => {
     ticker.dataset.assetName = "";
     clearTimeout(timer);
     const query = ticker.value.trim();
+    if (fixedIncomeSaleSelected()) {
+      ticker.setCustomValidity("");
+      const candidate = candidatesBySymbol.get(query.toUpperCase());
+      ticker.dataset.assetName = candidate?.name || "";
+      updateOperationSummary();
+      return;
+    }
     if (query.length < 2) { list.replaceChildren(); return; }
     timer = setTimeout(async () => {
       const current = ++requestId;
@@ -528,6 +565,15 @@ function bindOperationSearch() {
   });
   ticker.addEventListener("change", () => {
     const candidate = candidatesBySymbol.get(ticker.value.trim().toUpperCase());
+    if (fixedIncomeSaleSelected()) {
+      if (!candidate) ticker.setCustomValidity("Selecione uma posição aberta de Renda Fixa da carteira.");
+      else {
+        ticker.setCustomValidity("");
+        ticker.dataset.assetName = candidate.name || candidate.contract_label || "";
+      }
+      updateOperationSummary();
+      return;
+    }
     if (!candidate) return;
     ticker.value = candidate.symbol;
     ticker.dataset.assetName = candidate.name || "";
@@ -736,18 +782,21 @@ export function bindOperations() {
   bindOperationSearch();
   typeInput?.addEventListener("change", event => {
     setOperationFields(event.target.value);
+    document.querySelector("#ticker").loadFixedIncomeSaleOptions?.();
     if (!["BUY", "SELL"].includes(event.target.value)) document.querySelector("#operation-more-options").open = true;
     updateOperationSummary();
     syncQuickOperationButtons();
   });
   document.querySelector("#trade-asset-class")?.addEventListener("change", () => {
     setOperationFields(typeInput.value);
+    document.querySelector("#ticker").loadFixedIncomeSaleOptions?.();
     if (["FIXED_INCOME", "PENSION", "REAL_ESTATE"].includes(document.querySelector("#trade-asset-class").value)) {
       document.querySelector("#operation-more-options").open = true;
     }
     updateOperationSummary();
   });
   setOperationFields(typeInput?.value || "BUY");
+  document.querySelector("#ticker").loadFixedIncomeSaleOptions?.();
   setFixedIncomeFields();
   syncQuickOperationButtons();
   updateOperationSummary();
@@ -755,6 +804,11 @@ export function bindOperations() {
     const input = document.querySelector(selector);
     input?.addEventListener("input", () => { input.setCustomValidity(""); updateOperationSummary(); });
   });
+  document.querySelector("#fixed-income-sale-value")?.addEventListener("input", () => {
+    document.querySelector("#fixed-income-sale-value").setCustomValidity("");
+    updateOperationSummary();
+  });
+  document.querySelector("#ticker")?.addEventListener("input", updateOperationSummary);
   ["#fi-principal", "#pension-balance", "#property-value", "#dividend-amount", "#external-flow-amount", "#jcp-gross", "#jcp-tax"].forEach(selector => {
     document.querySelector(selector)?.addEventListener("input", updateOperationSummary);
   });
@@ -763,6 +817,19 @@ export function bindOperations() {
   form?.addEventListener("submit", async event => {
     event.preventDefault();
     const type = typeInput.value;
+    const assetClass = document.querySelector("#trade-asset-class").value;
+    const fixedIncomeSale = type === "SELL" && assetClass === "FIXED_INCOME";
+    const saleValue = document.querySelector("#fixed-income-sale-value");
+    const tickerInput = document.querySelector("#ticker");
+    if (fixedIncomeSale) {
+      const holdings = await portfolioApi.holdings().catch(() => null);
+      const asset = (holdings?.classes || []).find(group => group.asset_class === "FIXED_INCOME")?.assets
+        ?.find(item => String(item.ticker).toUpperCase() === tickerInput.value.trim().toUpperCase());
+      if (!asset) tickerInput.setCustomValidity("Selecione uma posição aberta de Renda Fixa da carteira.");
+      if (!Number.isFinite(Number(saleValue.value)) || Number(saleValue.value) <= 0) {
+        saleValue.setCustomValidity("Informe o valor total da venda.");
+      }
+    }
     const quantityField = document.querySelector("#quantity");
     const priceField = document.querySelector("#unit_price");
     if (quantityField.required && (!Number.isFinite(Number(quantityField.value)) || Number(quantityField.value) <= 0)) {
@@ -771,11 +838,9 @@ export function bindOperations() {
     if (priceField.required && (!Number.isFinite(Number(priceField.value)) || Number(priceField.value) <= 0)) {
       priceField.setCustomValidity("Informe o preço da operação.");
     }
-    if (!validateForm(form)) return;
     const message = document.querySelector("#message");
     const button = form.querySelector("button[type=submit]");
     const external = ["DEPOSIT", "WITHDRAWAL"].includes(type);
-    const assetClass = document.querySelector("#trade-asset-class").value;
     const fixedIncome = type === "BUY" && assetClass === "FIXED_INCOME";
     const pension = type === "BUY" && assetClass === "PENSION";
     const realEstate = type === "BUY" && assetClass === "REAL_ESTATE";
@@ -789,9 +854,16 @@ export function bindOperations() {
       invalidInput.setCustomValidity("");
       return;
     }
+    if (!validateForm(form)) return;
     try {
       await withProcessing(button, async () => {
-        if (fixedIncome) {
+        if (fixedIncomeSale) {
+          await portfolioApi.createFixedIncomeSale({
+            ticker: tickerInput.value.trim(),
+            amount: saleValue.value,
+            effective_date: document.querySelector("#effective-date").value,
+          });
+        } else if (fixedIncome) {
           await portfolioApi.createFixedIncome(wealthPayload("FIXED_INCOME"));
         } else if (pension) {
           const payload = wealthPayload("PENSION");
@@ -852,6 +924,7 @@ export function bindOperations() {
       document.querySelector("#event_type").value = "BUY";
       document.querySelector("#trade-asset-class").value = "BRAZILIAN_STOCK";
       document.querySelector("#ticker").dataset.assetName = "";
+      document.querySelector("#fixed-income-sale-value").value = "";
       document.querySelector("#operation-more-options").open = false;
       setOperationFields("BUY");
       syncQuickOperationButtons();
