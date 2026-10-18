@@ -88,6 +88,13 @@ export async function setupPortfolioContext(routeLifecycle) {
     const menu = document.querySelector("#portfolio-menu");
     menu?.toggleAttribute("open");
   });
+  document.addEventListener("click", event => {
+    const menu = document.querySelector("#portfolio-menu");
+    if (menu?.open && !menu.contains(event.target)) menu.removeAttribute("open");
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeMenu();
+  });
   document.querySelector("#portfolio-create")?.addEventListener("click", async () => {
     closeMenu();
     const name = window.prompt("Nome da nova carteira:");
