@@ -1,0 +1,56 @@
+﻿repository,method,classification,future_scope,reason,future_contract
+SqliteB3ImportRepository,create_batch,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteB3ImportRepository,get_batch,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteB3ImportRepository,list_batches,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteB3ImportRepository,list_records,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteB3ImportRepository,get_record_by_identity,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteB3ImportRepository,save_record,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteB3ImportRepository,apply_batch,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteB3ImportRepository,save_record_in_session,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePortfolioDashboardSnapshotRepository,get,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePortfolioDashboardSnapshotRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteAssetRepository,save,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteAssetRepository,get_by_ticker,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteAssetRepository,list,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteFixedIncomeDetailsRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteFixedIncomeDetailsRepository,list,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteRecurringRuleRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteRecurringRuleRepository,list,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteRecurringRuleRepository,delete,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePensionPlanDetailsRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePensionPlanDetailsRepository,list,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePensionInvestmentVehicleRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePensionInvestmentVehicleRepository,list_for,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePensionFundQuotaRepository,save_all,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqlitePensionFundQuotaRepository,list_for,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteRealEstateDetailsRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteRealEstateDetailsRepository,list,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteFinancialEventRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteFinancialEventRepository,delete,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteFinancialEventRepository,list,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteMarketPriceRepository,save_many,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteMarketPriceRepository,save,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteMarketPriceRepository,list,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteMarketPriceRefreshRunRepository,save,UNCERTAIN,PORTFOLIO or SYSTEM,Refresh run can contain portfolio-derived outcomes; decide/redact payload.,N/A
+SqliteMarketPriceRefreshRunRepository,list_recent,UNCERTAIN,PORTFOLIO or SYSTEM,Refresh run can contain portfolio-derived outcomes; decide/redact payload.,N/A
+SqliteBenchmarkRateRepository,save,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteBenchmarkRateRepository,list,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteBenchmarkObservationRepository,save,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteBenchmarkObservationRepository,list,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteFxRateRepository,list,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteFxRateRepository,save,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteFxRateRepository,save_many,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqliteFxRateRepository,latest_on_or_before,GLOBAL_CORRECTLY,GLOBAL,Shared reference rows; split mixed asset metadata.,N/A
+SqlitePortfolioConfigurationRepository,get_base_currency,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePortfolioConfigurationRepository,save_base_currency,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteProviderHealthRepository,get,GLOBAL_CORRECTLY,SYSTEM,Provider-level operational health.,N/A
+SqliteProviderHealthRepository,save,GLOBAL_CORRECTLY,SYSTEM,Provider-level operational health.,N/A
+SqlitePaidIncomeSettingsRepository,get,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePaidIncomeSettingsRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteImportedPaidIncomeRepository,find_by_fingerprint,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteImportedPaidIncomeRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqlitePortfolioDataRepository,clear,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteAllocationPolicyRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteAllocationPolicyRepository,get,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteAssetAllocationPolicyRepository,save,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API
+SqliteAssetAllocationPolicyRepository,get,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_SCOPED,No portfolio context/predicate in repository contract; filter in SQL before materialization.,Require portfolio_id in read/write API

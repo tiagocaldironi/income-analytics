@@ -1,0 +1,82 @@
+﻿method,path,handler,router_mount,current_scope,future_scope,reason,security_boundary
+GET,/tools,list_investment_tools,router,UNCERTAIN,REVIEW,Review payload and side effects before tenancy.,No auth/membership boundary found
+GET,/tools/magic-formula/stocks,magic_formula_stocks,router,GLOBAL,GLOBAL,Canonical shared ranking; keep user filters separate.,No auth/membership boundary found
+GET,/tools/magic-formula/stocks/{company_id},magic_formula_stock_detail,router,GLOBAL,GLOBAL,Canonical shared ranking; keep user filters separate.,No auth/membership boundary found
+GET,/tools/magic-formula/fiis,magic_formula_fiis,router,GLOBAL,GLOBAL,Canonical shared ranking; keep user filters separate.,No auth/membership boundary found
+GET,/assets/search,search_assets,router,GLOBAL_MIXED,SPLIT_GLOBAL_AND_PORTFOLIO,Canonical security data mixed with user-created assets and held contract metadata.,No auth/membership boundary found
+POST,/assets,create_asset,router,GLOBAL_MIXED,SPLIT_GLOBAL_AND_PORTFOLIO,Canonical security data mixed with user-created assets and held contract metadata.,No auth/membership boundary found
+POST,/assets/fixed-income,create_fixed_income_asset,router,GLOBAL_MIXED,SPLIT_GLOBAL_AND_PORTFOLIO,Canonical security data mixed with user-created assets and held contract metadata.,No auth/membership boundary found
+POST,/assets/pension-plans,create_pension_plan,router,GLOBAL_MIXED,SPLIT_GLOBAL_AND_PORTFOLIO,Canonical security data mixed with user-created assets and held contract metadata.,No auth/membership boundary found
+PUT,/pensions/{ticker}/vehicle,associate_pension_vehicle,router,GLOBAL_MIXED,SPLIT_GLOBAL_AND_PORTFOLIO,Canonical security data mixed with user-created assets and held contract metadata.,No auth/membership boundary found
+POST,/pensions/{ticker}/vehicle/refresh,refresh_pension_vehicle,router,GLOBAL_MIXED,SPLIT_GLOBAL_AND_PORTFOLIO,Canonical security data mixed with user-created assets and held contract metadata.,No auth/membership boundary found
+GET,/pensions/{ticker}/fund-return,pension_fund_return,router,GLOBAL_MIXED,SPLIT_GLOBAL_AND_PORTFOLIO,Canonical security data mixed with user-created assets and held contract metadata.,No auth/membership boundary found
+POST,/assets/real-estate,create_real_estate,router,GLOBAL_MIXED,SPLIT_GLOBAL_AND_PORTFOLIO,Canonical security data mixed with user-created assets and held contract metadata.,No auth/membership boundary found
+POST,/recurring-rules,create_recurring_rule,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/recurring-rules/execute,execute_recurring_rules,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+PUT,/recurring-rules/{rule_id},update_recurring_rule,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/recurring-rules/{rule_id}/close,close_recurring_rule,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+DELETE,/recurring-rules/{rule_id},delete_recurring_rule,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/recurring-rules,list_recurring_rules,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio,get_portfolio,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/dashboard,get_portfolio_dashboard,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/portfolio/dashboard/rebuild,rebuild_portfolio_dashboard,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/holdings,get_portfolio_holdings,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/assets/{asset_id}/transactions,get_asset_transactions,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/operations,get_operations,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/operations/history,get_operations_history,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+DELETE,/operations/{event_id},delete_operation,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/configuration,get_portfolio_configuration,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+PUT,/portfolio/configuration,update_portfolio_configuration,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/settings/paid-income,get_paid_income_settings,router,USER_SINGLETON,USER_REQUIRED,Integration credentials/settings require authenticated user scope.,No auth/membership boundary found
+PUT,/settings/paid-income,update_paid_income_settings,router,USER_SINGLETON,USER_REQUIRED,Integration credentials/settings require authenticated user scope.,No auth/membership boundary found
+POST,/settings/paid-income/test,test_paid_income_connection,router,USER_SINGLETON,USER_REQUIRED,Integration credentials/settings require authenticated user scope.,No auth/membership boundary found
+POST,/settings/paid-income/sync,sync_paid_income,router,USER_SINGLETON,USER_REQUIRED,Integration credentials/settings require authenticated user scope.,No auth/membership boundary found
+POST,/fx/{base_currency}/{quote_currency}/refresh,refresh_fx_rate,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/trades,create_trade,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/imports/irpf/brazilian-stocks/preview,preview_irpf_brazilian_stocks_import,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/imports/irpf/brazilian-stocks,import_irpf_brazilian_stocks,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/imports/b3/history,list_b3_import_history,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/imports/b3/preview,preview_b3_import,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/imports/b3/preview,preview_b3_import,b3_import_router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/imports/b3/{batch_id}/apply,apply_b3_import,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/imports/b3/{batch_id}/apply,apply_b3_import,b3_import_router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+PUT,/market-prices/{ticker},update_market_price,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+GET,/market-prices/refresh-runs,list_market_price_refresh_runs,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/market-prices/refresh,refresh_market_prices,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+GET,/market-prices/{ticker}/automatic,get_automatic_market_price,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/market-prices/historical-cache/refresh,refresh_historical_price_cache,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/market-prices/history/b3-etf/backfill,backfill_b3_etf_price_history,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/market-prices/history/backfill,backfill_market_price_history,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/fx-rates/history/backfill,backfill_fx_rate_history,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/market-prices/us/history/backfill,backfill_us_market_price_history,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/market-prices/crypto/history/backfill,backfill_crypto_market_price_history,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/dividends,create_dividend,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/jcp,create_jcp,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/fii-income,create_fii_income,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/external-flows,create_external_flow,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/performance,get_portfolio_performance,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/analytics/wealth-explanation,get_wealth_explanation,router,UNCERTAIN,REVIEW,Review payload and side effects before tenancy.,No auth/membership boundary found
+GET,/analytics/wealth-evolution,get_wealth_evolution,router,UNCERTAIN,REVIEW,Review payload and side effects before tenancy.,No auth/membership boundary found
+GET,/analytics/performance-comparison,get_performance_comparison,router,UNCERTAIN,REVIEW,Review payload and side effects before tenancy.,No auth/membership boundary found
+GET,/portfolio/benchmark-comparison,get_benchmark_comparison,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/benchmarks/{name},create_benchmark_rate,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+POST,/benchmarks/{name}/refresh,refresh_benchmark,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+GET,/data-sources,get_data_sources,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+GET,/benchmarks/{name},get_benchmark_observations,router,GLOBAL_REFERENCE,GLOBAL,Shared quotes/FX/benchmarks; review any portfolio-triggered operational logging.,No auth/membership boundary found
+GET,/portfolio/risk,get_portfolio_risk,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/risk-contribution,get_portfolio_risk_contribution,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/allocation,get_portfolio_allocation,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+PUT,/assets/{ticker}/class,update_asset_class,router,GLOBAL_MIXED,SPLIT_GLOBAL_AND_PORTFOLIO,Canonical security data mixed with user-created assets and held contract metadata.,No auth/membership boundary found
+GET,/portfolio/class-allocation,get_portfolio_class_allocation,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/diversification,get_portfolio_diversification,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/intelligence,get_portfolio_intelligence,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+PUT,/allocation-policy,set_allocation_policy,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+PUT,/asset-allocation-policy,set_asset_allocation_policy,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/allocation-analysis,get_allocation_analysis,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/rebalancing,get_rebalancing,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/portfolio/rebalancing/contribution-only,simulate_contribution_rebalancing,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/portfolio/simulation/contribution,project_hypothetical_contribution,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/portfolio/rebalancing/assets,simulate_asset_rebalancing,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+GET,/portfolio/history,get_portfolio_history,router,IMPLICIT_SINGLE_PORTFOLIO,PORTFOLIO_REQUIRED,Current singleton state; validate membership before service/repository.,No auth/membership boundary found
+POST,/data/reset,reset_all_data,router,SYSTEM/LOCAL_ADMIN,SYSTEM_ADMIN,Global destructive reset; never tenant-facing.,No auth/membership boundary found
+GET,/health,health,router,SYSTEM,SYSTEM,Health probe.,No auth/membership boundary found

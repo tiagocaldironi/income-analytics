@@ -1,0 +1,11 @@
+﻿cache_or_state,implementation,classification,evidence_and_risk,severity,future_requirement
+_b3_preview_cache,dashboard.py module dict keyed by batch UUID; stores batch and parsed rows,MUST_BE_PORTFOLIO_SCOPED,A cached preview can be applied; verify batch ownership at every operation.,CRITICAL,Key/authorize by portfolio and bound/expire cache.
+_cached_performance_comparison,"dashboard.py lru_cache(maxsize=32), singleton session revision/query key",MUST_BE_PORTFOLIO_SCOPED,Current revision is global singleton; future cache collision can return another portfolio result.,CRITICAL,Include portfolio_id and scoped immutable revision; invalidate per portfolio.
+_company_metadata_for_data_snapshot,"Magic Formula lru_cache(maxsize=8), key=data snapshot id + digest",GLOBAL_SAFE,Canonical immutable issuer data only.,LOW,Remain shared; preserve digest check.
+PortfolioSession._market_prices_by_asset,Per-session index of global quote observations,GLOBAL_SAFE,Reference prices are shared though colocated in portfolio state.,MEDIUM,Separate shared price index/provider from session.
+PortfolioSession._fx_rate_cache,Per-session currency pair cache,GLOBAL_SAFE,FX series shared; cache currently colocated.,LOW,Move to shared provider cache.
+B3 COTAHIST / ETF provider caches,On-disk archive and date->price provider caches,GLOBAL_SAFE,Market archive data has no ownership payload.,LOW,Remain global; retain atomic archive semantics.
+_symbol_ids,CoinGecko provider instance symbol-to-external-id map,GLOBAL_SAFE,"Canonical provider identity lookup, not portfolio position data.",LOW,Remain shared; refresh if provider symbol mapping changes.
+_csv_cache,Magic Formula raw verification instance-local parsed CSV data,GLOBAL_SAFE,Canonical research/validation source data.,LOW,Keep within validation-source boundary; no user screening payload.
+portfolio_dashboard_snapshot,Database singleton id=1; derived JSON not conventional cache,MUST_BE_PORTFOLIO_SCOPED,Portfolio payload can be returned for every caller.,CRITICAL,Key snapshot and revision by portfolio; authorize before lookup.
+dashboard.session,Module-level persistent PortfolioSession with indexes/policies/events,MUST_BE_PORTFOLIO_SCOPED,All source and derived in-memory state is singleton.,CRITICAL,Replace with scoped service/session factory.

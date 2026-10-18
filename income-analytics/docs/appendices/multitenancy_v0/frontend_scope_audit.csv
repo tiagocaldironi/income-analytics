@@ -1,0 +1,10 @@
+﻿area,evidence,current_assumption,future_design,risk
+js/api.js,API wrapper builds /api paths without portfolio identifier/context.,One implicit local portfolio.,ACTIVE_PORTFOLIO_CONTEXT; server resolves authorization independently.,HIGH
+js/app.js,Bootstraps all feature modules with singleton API.,No portfolio context lifecycle.,Switch/reload/invalidate scoped UI state on context change.,HIGH
+features/portfolio.js,Holdings/dashboard use global routes.,One portfolio.,Use selected authorized context.,HIGH
+features/operations.js,"Operations, income and import forms lack ownership context.",Ownership inferred from singleton.,"Request active portfolio, server validates membership.",CRITICAL
+features/performance.js,"TWR, wealth and comparison request current global portfolio.",No portfolio id in route/client.,Scoped portfolio series + shared benchmarks.,CRITICAL
+features/strategy.js,Targets/intelligence assume one policy.,Singleton portfolio policy.,Scope policy and holdings.,HIGH
+features/simulation.js,Uses holdings fetched from singleton.,Input belongs to one portfolio.,Use selected portfolio positions.,MEDIUM
+settings / data sources,"User token, portfolio config and shared providers share settings UX/API.",Ownership boundary is mixed.,"Separate user integrations, portfolio preferences and operator/global config.",HIGH
+navigation / local state,No ACTIVE_PORTFOLIO_CONTEXT or membership-aware selector found.,Routes resolve same current portfolio.,Add selector after server context contracts; browser choice is preference only.,MEDIUM
