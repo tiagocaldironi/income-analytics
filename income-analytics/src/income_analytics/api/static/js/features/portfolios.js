@@ -10,22 +10,50 @@ function activePortfolio() {
 }
 
 function renderSelector() {
-  const selector = document.querySelector("#portfolio-selector");
-  if (!selector) return;
+  const options = document.querySelector("#portfolio-options");
+  if (!options) return;
   const current = localStorage.getItem(STORAGE_KEY);
-  selector.replaceChildren(...portfolios.map(item => {
-    const option = document.createElement("option");
-    option.value = item.id;
-    option.textContent = item.status === "ACTIVE" ? item.name : `${item.name} (arquivada)`;
-    option.selected = item.id === current;
+  options.replaceChildren(...portfolios.map(item => {
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = "portfolio-option";
+    option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", String(item.id === current));
+    const name = document.createElement("span");
+    name.className = "portfolio-option-name";
+    name.textContent = item.name;
+    option.append(name);
+    if (item.status !== "ACTIVE") {
+      const archived = document.createElement("small");
+      archived.textContent = "Arquivada";
+      option.append(archived);
+    } else if (item.id === current) {
+      const active = document.createElement("span");
+      active.className = "portfolio-option-check";
+      active.setAttribute("aria-hidden", "true");
+      active.textContent = "✓";
+      option.append(active);
+    }
+    option.addEventListener("click", async () => {
+      if (item.status === "ACTIVE") {
+        document.querySelector("#portfolio-menu")?.removeAttribute("open");
+        await activate(item.id);
+      } else {
+        localStorage.setItem(STORAGE_KEY, item.id);
+        renderSelector();
+      }
+    });
     return option;
   }));
   const selected = activePortfolio();
-  const workspaceName = document.querySelector(".workspace-name");
-  if (workspaceName) workspaceName.textContent = selected?.name || "";
-  document.querySelector("#portfolio-archive").disabled = !selected || selected.status !== "ACTIVE";
-  document.querySelector("#portfolio-rename").disabled = !selected || selected.status !== "ACTIVE";
-  document.querySelector("#portfolio-restore").disabled = !selected || selected.status === "ACTIVE";
+  const currentName = document.querySelector("#portfolio-current-name");
+  if (currentName) currentName.textContent = selected?.name || "Carteira";
+  const archive = document.querySelector("#portfolio-archive");
+  const rename = document.querySelector("#portfolio-rename");
+  const restore = document.querySelector("#portfolio-restore");
+  if (archive) archive.disabled = !selected || selected.status !== "ACTIVE";
+  if (rename) rename.disabled = !selected || selected.status !== "ACTIVE";
+  if (restore) restore.disabled = !selected || selected.status === "ACTIVE";
 }
 
 async function reloadPortfolios({ selectFallback = false } = {}) {
@@ -53,9 +81,14 @@ async function activate(id) {
 
 export async function setupPortfolioContext(routeLifecycle) {
   lifecycle = routeLifecycle;
-  const selector = document.querySelector("#portfolio-selector");
-  selector?.addEventListener("change", event => activate(event.target.value));
+  const closeMenu = () => document.querySelector("#portfolio-menu")?.removeAttribute("open");
+  document.querySelector("#portfolio-menu-trigger")?.addEventListener("click", event => {
+    event.preventDefault();
+    const menu = document.querySelector("#portfolio-menu");
+    menu?.toggleAttribute("open");
+  });
   document.querySelector("#portfolio-create")?.addEventListener("click", async () => {
+    closeMenu();
     const name = window.prompt("Nome da nova carteira:");
     if (name === null) return;
     try {
@@ -67,6 +100,7 @@ export async function setupPortfolioContext(routeLifecycle) {
     }
   });
   document.querySelector("#portfolio-rename")?.addEventListener("click", async () => {
+    closeMenu();
     const current = activePortfolio();
     if (!current) return;
     const name = window.prompt("Novo nome da carteira:", current.name);
@@ -79,6 +113,7 @@ export async function setupPortfolioContext(routeLifecycle) {
     }
   });
   document.querySelector("#portfolio-archive")?.addEventListener("click", async () => {
+    closeMenu();
     const current = activePortfolio();
     if (!current || !window.confirm(`Arquivar “${current.name}”? Os dados serão preservados.`)) return;
     try {
@@ -91,11 +126,14 @@ export async function setupPortfolioContext(routeLifecycle) {
     }
   });
   document.querySelector("#portfolio-restore")?.addEventListener("click", async () => {
+    closeMenu();
     const current = activePortfolio();
     if (!current) return;
     try {
       await portfolioApi.restorePortfolio(current.id);
       await reloadPortfolios();
+      const route = location.hash.replace(/^#/, "").split("/")[0] || "minha-carteira";
+      await lifecycle?.activate(route);
     } catch (error) {
       window.alert(error.message);
     }

@@ -20,12 +20,15 @@ def test_frontend_propagates_and_selects_the_active_portfolio() -> None:
     page = (STATIC / "index.html").read_text(encoding="utf-8")
     client = (STATIC / "js/api.js").read_text(encoding="utf-8")
     context = (STATIC / "js/features/portfolios.js").read_text(encoding="utf-8")
-    assert 'id="portfolio-selector"' in page
+    assert 'id="portfolio-menu-trigger"' in page
+    assert 'id="portfolio-options"' in page
+    assert 'id="portfolio-settings"' in page or 'class="portfolio-settings"' in page
     assert 'id="portfolio-create"' in page
     assert 'localStorage.getItem("income.activePortfolioId")' in client
     assert 'headers.set("X-Portfolio-Id", portfolioId)' in client
     assert "localStorage.setItem(STORAGE_KEY, id)" in context
-    assert 'workspaceName.textContent = selected?.name || ""' in context
+    assert 'currentName.textContent = selected?.name || "Carteira"' in context
+    assert 'option.setAttribute("aria-selected", String(item.id === current))' in context
     assert 'lifecycle.activate(route)' in context
 
 
