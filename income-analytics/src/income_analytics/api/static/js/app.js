@@ -23,6 +23,7 @@ import {
 import { createRouteLifecycle } from "./shared/route-lifecycle.js";
 import { beginRouteResourceCycle } from "./shared/resources.js";
 import { setupPortfolioContext } from "./features/portfolios.js";
+import { setupWalletSettings } from "./features/wallet-settings.js";
 
 let operationsSetup = false;
 let settingsSetup = false;
@@ -66,6 +67,7 @@ const routeLoaders = {
   simular: bindSimulation,
   operacoes: loadOperationsPage,
   configuracoes: loadSettingsPage,
+  "carteira-configuracoes": loadWalletSettings,
   ferramentas: loadTools,
   "tools-magic-formula-stocks": loadMagicFormulaStocksRoute,
   "tools-magic-formula-fiis": loadMagicFormulaFiisRoute,
@@ -96,4 +98,5 @@ window.addEventListener("DOMContentLoaded", () => {
   setupPortfolioContext(lifecycle).then(() => bindNavigation()).catch(error => {
     console.error("Não foi possível carregar as carteiras", error);
   });
+  setupWalletSettings();
 });

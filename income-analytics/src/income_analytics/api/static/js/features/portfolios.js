@@ -1,4 +1,5 @@
 import { portfolioApi } from "../api.js";
+import { applyPortfolioTheme } from "./wallet-settings.js";
 
 const STORAGE_KEY = "income.activePortfolioId";
 let portfolios = [];
@@ -46,13 +47,12 @@ function renderSelector() {
     return option;
   }));
   const selected = activePortfolio();
+  applyPortfolioTheme(selected?.id);
   const currentName = document.querySelector("#portfolio-current-name");
   if (currentName) currentName.textContent = selected?.name || "Carteira";
   const archive = document.querySelector("#portfolio-archive");
-  const rename = document.querySelector("#portfolio-rename");
   const restore = document.querySelector("#portfolio-restore");
   if (archive) archive.disabled = !selected || selected.status !== "ACTIVE";
-  if (rename) rename.disabled = !selected || selected.status !== "ACTIVE";
   if (restore) restore.disabled = !selected || selected.status === "ACTIVE";
 }
 
@@ -72,6 +72,7 @@ async function reloadPortfolios({ selectFallback = false } = {}) {
 async function activate(id) {
   const sequence = ++switchSequence;
   localStorage.setItem(STORAGE_KEY, id);
+  applyPortfolioTheme(id);
   renderSelector();
   if (lifecycle && sequence === switchSequence) {
     const route = location.hash.replace(/^#/, "").split("/")[0] || "minha-carteira";
@@ -99,19 +100,7 @@ export async function setupPortfolioContext(routeLifecycle) {
       window.alert(error.message);
     }
   });
-  document.querySelector("#portfolio-rename")?.addEventListener("click", async () => {
-    closeMenu();
-    const current = activePortfolio();
-    if (!current) return;
-    const name = window.prompt("Novo nome da carteira:", current.name);
-    if (name === null) return;
-    try {
-      await portfolioApi.renamePortfolio(current.id, name);
-      await reloadPortfolios();
-    } catch (error) {
-      window.alert(error.message);
-    }
-  });
+  window.addEventListener("income:portfolio-renamed", () => reloadPortfolios());
   document.querySelector("#portfolio-archive")?.addEventListener("click", async () => {
     closeMenu();
     const current = activePortfolio();
