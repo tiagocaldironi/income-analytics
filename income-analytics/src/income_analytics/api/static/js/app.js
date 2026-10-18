@@ -1,4 +1,4 @@
-import { bindPortfolioFilters, loadPortfolio } from "./features/portfolio.js?v=20261018-mobile-ux-v3";
+import { bindPortfolioFilters, loadPortfolio } from "./features/portfolio.js?v=20261018-mobile-ux-v4";
 import { bindOperations, loadOperationsRoute } from "./features/operations.js?v=20261004-operations-refinement-v2";
 import { bindPerformance, loadExplanation } from "./features/performance.js?v=20261018-mobile-ux-v1";
 import { bindSimulation } from "./features/simulation.js?v=20260924-experience-v2";
