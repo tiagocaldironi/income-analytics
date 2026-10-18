@@ -1,0 +1,19 @@
+Mobile UX V1 validation manifest
+================================
+
+UI stack: static HTML + vanilla ES modules + shared CSS; FastAPI serves the same application.
+Browser: installed Google Chrome controlled through Playwright from the workspace dependency runtime.
+App: existing local server at http://127.0.0.1:8000 (GET / returned HTTP 200; listener bound to 0.0.0.0:8000).
+
+Automated responsive checks:
+- 360x800, 375x812, 390x844, 393x873, 412x915, 430x932, 844x390 landscape, 1440x900 desktop.
+- mobile shell visibility, desktop nav visibility, document overflow, P0 routes, More sheet, operation dialog.
+- one same-route anchor transition checked for duplicate portfolio API calls.
+- same-screen desktop/mobile displayed value equality.
+- screenshots in screenshots/<viewport>/.
+
+Focused browser checks: PASS (viewports/routes, More sheet links, operation sheet dimensions, targets >=44 px, value equality, no repeat portfolio API request for same-page holdings anchor).
+Full Python suite: `python -B -m pytest -q` — 871 passed, 2 FastAPI deprecation warnings, 149.90 s.
+Static diff check: `git diff --check` — PASS.
+Repository-wide lint: `ruff check .` — FAIL, 133 findings in unchanged repository files; no Python file was changed by this task.
+Physical device: NOT_RUN; no real phone or remote mobile browser was exposed to this test environment.
