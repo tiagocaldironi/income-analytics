@@ -271,8 +271,8 @@ function renderPortfolio(data, holdings, performance) {
       const assets = assetsForDisplay(group);
       const fixedIncome = group.asset_class === "FIXED_INCOME";
       const columns = fixedIncome
-        ? ["Contrato", "Aplicações", "PM", "Cotação", "Saldo", "Resultado acumulado", "Variação", "Rendimentos", "Peso", "Alvo classe", "Opções"]
-        : ["Ativo", "Quantidade", "PM", "Cotação", "Saldo", "Resultado acumulado", "Variação", "Rendimentos", "Peso", "Alvo classe", "Opções"];
+        ? ["Contrato", "Aplicações", "PM", "Cotação", "Saldo", "Resultado", "Variação", "Rendimentos", "Peso", "Alvo classe", "Opções"]
+        : ["Ativo", "Quantidade", "PM", "Cotação", "Saldo", "Resultado", "Variação", "Rendimentos", "Peso", "Alvo classe", "Opções"];
       const coverage = group.performance_coverage;
       const classTwr = coverage?.twr !== null && coverage?.twr !== undefined
         && ["AVAILABLE", "PARTIAL"].includes(coverage?.status)
