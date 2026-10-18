@@ -1,12 +1,13 @@
 from datetime import UTC, datetime, timedelta
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.infrastructure.sqlite_repositories import (
     SqliteMarketPriceRefreshRunRepository,
 )
 
 
 def test_refresh_run_history_keeps_structured_errors_queryable() -> None:
-    repository = SqliteMarketPriceRefreshRunRepository()
+    repository = SqliteMarketPriceRefreshRunRepository(MAIN_PORTFOLIO_ID)
     started = datetime.now(UTC)
     providers = [
         {

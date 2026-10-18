@@ -12,13 +12,36 @@ def test_bdi_layout_maps_fixed_income_etf_category_without_ticker_special_case()
     provider._request_table = lambda _day: {  # type: ignore[method-assign]
         "table": {
             "columns": [
-                {"name": "Code"}, {"name": "Company"}, {"name": "Opening"},
-                {"name": "Minimum"}, {"name": "Maximum"}, {"name": "Average"},
-                {"name": "Last"}, {"name": "D1ReferencePrice"},
+                {"name": "Code"},
+                {"name": "Company"},
+                {"name": "Opening"},
+                {"name": "Minimum"},
+                {"name": "Maximum"},
+                {"name": "Average"},
+                {"name": "Last"},
+                {"name": "D1ReferencePrice"},
             ],
             "values": [
-                ["AUPO11", "ETF renda fixa A", "111,00", "110,00", "112,00", "111,50", "112,34", "112,00"],
-                ["FIXA11", "ETF renda fixa B", "17,00", "17,00", "17,50", "17,20", "17,38", "17,33"],
+                [
+                    "AUPO11",
+                    "ETF renda fixa A",
+                    "111,00",
+                    "110,00",
+                    "112,00",
+                    "111,50",
+                    "112,34",
+                    "112,00",
+                ],
+                [
+                    "FIXA11",
+                    "ETF renda fixa B",
+                    "17,00",
+                    "17,00",
+                    "17,50",
+                    "17,20",
+                    "17,38",
+                    "17,33",
+                ],
                 ["AREA11", "sem negócio", "-", "-", "-", "-", "-", "17,00"],
             ],
         }
@@ -33,24 +56,41 @@ def test_bdi_current_price_keeps_reference_date_and_provenance() -> None:
     provider = B3EtfPriceProvider()
     day = date.today()
     provider._request_table = lambda _day: {  # type: ignore[method-assign]
-        "table": {"columns": [{"name": "Code"}, *({"name": str(i)} for i in range(1, 6)), {"name": "Last"}],
-                  "values": [["BDAP11", "", "", "", "", "", "99.10"]]}
+        "table": {
+            "columns": [
+                {"name": "Code"},
+                *({"name": str(i)} for i in range(1, 6)),
+                {"name": "Last"},
+            ],
+            "values": [["BDAP11", "", "", "", "", "", "99.10"]],
+        }
     }
 
     observation = provider.latest_price("bdap11")
 
-    assert observation == MarketPriceObservation(
-        symbol="BDAP11", price=Decimal("99.10"), currency_code="BRL",
-        effective_date=day, source="b3_etf",
+    expected = MarketPriceObservation(
+        symbol="BDAP11",
+        price=Decimal("99.10"),
+        currency_code="BRL",
+        effective_date=day,
+        source="b3_etf",
+        retrieved_at=observation.retrieved_at,
     )
+    assert observation == expected
 
 
 def test_bdi_historical_lookup_never_uses_quote_after_requested_date() -> None:
     provider = B3EtfPriceProvider()
     requested = date(2026, 9, 1)
     provider._request_table = lambda _day: {  # type: ignore[method-assign]
-        "table": {"columns": [{"name": "Code"}, *({"name": str(i)} for i in range(1, 6)), {"name": "Last"}],
-                  "values": [["AUPO11", "", "", "", "", "", "110.50"]]}
+        "table": {
+            "columns": [
+                {"name": "Code"},
+                *({"name": str(i)} for i in range(1, 6)),
+                {"name": "Last"},
+            ],
+            "values": [["AUPO11", "", "", "", "", "", "110.50"]],
+        }
     }
 
     observation = provider.price_on("AUPO11", requested)
@@ -62,13 +102,18 @@ def test_bdi_historical_lookup_never_uses_quote_after_requested_date() -> None:
 def test_bdi_provider_does_not_invent_price_for_missing_asset() -> None:
     provider = B3EtfPriceProvider()
     provider._request_table = lambda _day: {
-        "table": {"columns": [{"name": "Code"}, *({"name": str(i)} for i in range(1, 6)), {"name": "Last"}],
-                  "values": []}
+        "table": {
+            "columns": [
+                {"name": "Code"},
+                *({"name": str(i)} for i in range(1, 6)),
+                {"name": "Last"},
+            ],
+            "values": [],
+        }
     }  # type: ignore[method-assign]
 
     with pytest.raises(MarketDataUnavailable):
         provider.latest_price("UNKNOWN11")
-
 
 
 def test_bdi_batch_reads_multiple_etfs_from_one_daily_table():
@@ -80,8 +125,18 @@ def test_bdi_batch_reads_multiple_etfs_from_one_daily_table():
         calls.append(requested_day)
         return {
             "table": {
-                "columns": [{"name": name} for name in
-                            ("Codigo", "Empresa", "Abertura", "Minimo", "Maximo", "Medio", "Ultimo")],
+                "columns": [
+                    {"name": name}
+                    for name in (
+                        "Codigo",
+                        "Empresa",
+                        "Abertura",
+                        "Minimo",
+                        "Maximo",
+                        "Medio",
+                        "Ultimo",
+                    )
+                ],
                 "values": [
                     ["AUPO11", "ETF A", "", "", "", "", "112,34"],
                     ["FIXA11", "ETF B", "", "", "", "", "17,38"],
@@ -108,8 +163,10 @@ def test_bdi_request_uses_official_structured_endpoint_and_post(monkeypatch):
     class Response:
         def __enter__(self):
             return self
+
         def __exit__(self, *_args):
             return None
+
         def read(self):
             return b'{"table":{"columns":[],"values":[]}}'
 
@@ -132,28 +189,52 @@ def test_bdi_request_uses_official_structured_endpoint_and_post(monkeypatch):
     }
 
 
-
-
 def test_bdi_real_layout_uses_ticker_and_last_trade_columns():
     provider = B3EtfPriceProvider()
     provider._request_table = lambda _day: {  # type: ignore[method-assign]
         "table": {
-            "columns": [{"name": name} for name in (
-                "RptDt", "TckrSymb", "Company", "Opening", "Minimum", "Maximum",
-                "Average", "Final", "ClosRefPric", "PurchaseOffer",
-                "SaleOffer", "Quant", "Neg", "Volume",
-            )],
-            "values": [[
-                "06/10/2026", "AUPO11", "BTGP AUPO F11", "106,18", "106,06",
-                "106,56", "106,33", "106,54", "106,11", "106,48", "106,54",
-                "50114", "670", "5328822,77",
-            ]],
+            "columns": [
+                {"name": name}
+                for name in (
+                    "RptDt",
+                    "TckrSymb",
+                    "Company",
+                    "Opening",
+                    "Minimum",
+                    "Maximum",
+                    "Average",
+                    "Final",
+                    "ClosRefPric",
+                    "PurchaseOffer",
+                    "SaleOffer",
+                    "Quant",
+                    "Neg",
+                    "Volume",
+                )
+            ],
+            "values": [
+                [
+                    "06/10/2026",
+                    "AUPO11",
+                    "BTGP AUPO F11",
+                    "106,18",
+                    "106,06",
+                    "106,56",
+                    "106,33",
+                    "106,54",
+                    "106,11",
+                    "106,48",
+                    "106,54",
+                    "50114",
+                    "670",
+                    "5328822,77",
+                ]
+            ],
         }
     }
 
-    assert provider._prices_for_date(date(2026, 10, 6)) == {
-        "AUPO11": Decimal("106.54")
-    }
+    assert provider._prices_for_date(date(2026, 10, 6)) == {"AUPO11": Decimal("106.54")}
+
 
 def test_bdi_history_returns_historical_closes_for_observed_business_days() -> None:
     provider = B3EtfPriceProvider()

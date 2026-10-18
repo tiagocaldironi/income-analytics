@@ -9,10 +9,15 @@ from income_analytics.domain.wealth_details import PensionPlanDetails, RealEstat
 
 def test_pension_normalizes_valid_institution_cnpj() -> None:
     details = PensionPlanDetails(
-        asset_id=uuid4(), pension_type="PGBL", institution="Banco X",
-        institution_cnpj="12.345.678/0001-95", plan_name="Plano X",
-        tax_regime="DESCONHECIDO", start_date=date(2024, 1, 1),
-        reported_balance=Decimal("80000"), reported_balance_date=date(2026, 8, 28),
+        asset_id=uuid4(),
+        pension_type="PGBL",
+        institution="Banco X",
+        institution_cnpj="12.345.678/0001-95",
+        plan_name="Plano X",
+        tax_regime="DESCONHECIDO",
+        start_date=date(2024, 1, 1),
+        reported_balance=Decimal("80000"),
+        reported_balance_date=date(2026, 8, 28),
     )
     assert details.institution_cnpj == "12345678000195"
 
@@ -20,10 +25,15 @@ def test_pension_normalizes_valid_institution_cnpj() -> None:
 def test_pension_rejects_invalid_cnpj() -> None:
     with pytest.raises(ValueError, match="valid CNPJ"):
         PensionPlanDetails(
-            asset_id=uuid4(), pension_type="VGBL", institution="Banco X",
-            institution_cnpj="12345678000190", plan_name="Plano X",
-            tax_regime="PROGRESSIVO", start_date=date(2024, 1, 1),
-            reported_balance=Decimal("0"), reported_balance_date=date(2024, 1, 1),
+            asset_id=uuid4(),
+            pension_type="VGBL",
+            institution="Banco X",
+            institution_cnpj="12345678000190",
+            plan_name="Plano X",
+            tax_regime="PROGRESSIVO",
+            start_date=date(2024, 1, 1),
+            reported_balance=Decimal("0"),
+            reported_balance_date=date(2024, 1, 1),
         )
 
 
@@ -102,10 +112,17 @@ def test_pension_requires_consistent_explicit_balance_composition() -> None:
 
 def test_real_estate_uses_only_owned_share_for_portfolio_value() -> None:
     details = RealEstateDetails(
-        asset_id=uuid4(), property_type="APARTMENT", description="Apartamento",
-        cep="13184-000", country="BR", city="Hortolândia", state="SP",
-        acquisition_date=date(2022, 6, 1), acquisition_value=Decimal("500000"),
-        ownership_percentage=Decimal("50"), current_manual_value=Decimal("600000"),
+        asset_id=uuid4(),
+        property_type="APARTMENT",
+        description="Apartamento",
+        cep="13184-000",
+        country="BR",
+        city="Hortolândia",
+        state="SP",
+        acquisition_date=date(2022, 6, 1),
+        acquisition_value=Decimal("500000"),
+        ownership_percentage=Decimal("50"),
+        current_manual_value=Decimal("600000"),
         valuation_date=date(2026, 8, 28),
     )
     assert details.cep == "13184000"

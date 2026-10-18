@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 
@@ -23,7 +24,9 @@ def add_position(session: PortfolioSession, ticker: str, market_value: str) -> N
 
 
 def test_allocation_weights_and_concentration_use_market_value() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     for ticker, value in (
         ("PETR4", "4000"),
         ("BBAS3", "3000"),
@@ -48,7 +51,9 @@ def test_allocation_weights_and_concentration_use_market_value() -> None:
 
 
 def test_missing_price_does_not_create_fictitious_weight() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     add_position(session, "PETR4", "5000")
     session.register_trade(
         event_type=FinancialEventType.BUY,

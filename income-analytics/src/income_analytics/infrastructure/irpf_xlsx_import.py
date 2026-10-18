@@ -70,9 +70,7 @@ def parse_irpf_brazilian_stocks(workbook: bytes) -> tuple[IrpfBrazilianStockPosi
         if quantity is None or total_cost is None or quantity <= 0 or total_cost <= 0:
             continue
         name = row.get(0, ticker).strip() or ticker
-        positions.append(
-            IrpfBrazilianStockPosition(ticker, name, quantity, total_cost)
-        )
+        positions.append(IrpfBrazilianStockPosition(ticker, name, quantity, total_cost))
     if not positions:
         raise ValueError("Não encontrei posições válidas de ações brasileiras para importar.")
     return tuple(positions)
@@ -82,8 +80,7 @@ def _sheet_path(archive: ZipFile, name: str) -> str:
     workbook = ElementTree.fromstring(archive.read("xl/workbook.xml"))
     relationships = ElementTree.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
     targets = {
-        relationship.attrib["Id"]: relationship.attrib["Target"]
-        for relationship in relationships
+        relationship.attrib["Id"]: relationship.attrib["Target"] for relationship in relationships
     }
     for sheet in workbook.findall("main:sheets/main:sheet", _NS):
         if sheet.attrib.get("name") != name:
@@ -126,9 +123,7 @@ def _column_index(reference: str) -> int:
 
 
 def _column_for(header: dict[int, str], predicate: object) -> int | None:
-    return next(
-        (column for column, value in header.items() if predicate(_normalized(value))), None
-    )
+    return next((column for column, value in header.items() if predicate(_normalized(value))), None)
 
 
 def _normalized(value: str) -> str:

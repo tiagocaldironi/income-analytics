@@ -52,8 +52,7 @@ def test_b3_provider_reads_daily_observations_for_both_semesters(monkeypatch) ->
         requested.append(request.full_url)
         response = FakeResponse()
         response.body = (
-            b'{"results":[{"day":2,"rateValue1":"180.000,00",'
-            b'"rateValue7":"190.000,00"}]}'
+            b'{"results":[{"day":2,"rateValue1":"180.000,00","rateValue7":"190.000,00"}]}'
         )
         return response
 
@@ -83,8 +82,7 @@ def test_b3_provider_supports_small_cap_and_dividend_indices(monkeypatch) -> Non
         assert result[0].benchmark == name
 
     requested_payloads = [
-        json.loads(base64.b64decode(unquote(url.rsplit("/", 1)[-1])))
-        for url in requested
+        json.loads(base64.b64decode(unquote(url.rsplit("/", 1)[-1]))) for url in requested
     ]
     assert [item["index"] for item in requested_payloads] == ["SMLL", "IDIV"]
 

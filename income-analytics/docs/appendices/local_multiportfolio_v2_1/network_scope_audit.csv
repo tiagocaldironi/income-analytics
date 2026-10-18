@@ -1,0 +1,8 @@
+endpoint,expected_portfolio,actual_portfolio,header_present,status,evidence
+/api/portfolio,MAIN,MAIN,YES,200,read-only local HTTP; raw hash matches stored V2
+/api/portfolio/dashboard,MAIN,MAIN,YES,200,read-only local HTTP; raw hash matches stored V2
+/api/portfolio/holdings,MAIN,MAIN,YES,200,read-only local HTTP; raw hash matches stored V2
+/api/portfolio,MAIN compatibility,MAIN,NO,200,headerless response byte-identical to explicit MAIN
+/api/portfolio,explicit invalid UUID,none,YES,400,rejected; no MAIN fallback
+/api/portfolio,explicit nonexistent UUID,none,YES,404,rejected; no MAIN fallback
+browser portfolio-scoped requests,portfolio selected in UI,NOT_RUN,NOT_RUN,NOT_RUN,real browser network capture blocked

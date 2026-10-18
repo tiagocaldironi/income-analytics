@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "validation_database": "isolated copy",
+  "preview_owner": "portfolio A",
+  "cross_portfolio_apply": "HTTP 404 rejected",
+  "writes_after_rejection": 0,
+  "owner_apply": "HTTP 200",
+  "repeat_apply": "HTTP 200 deterministic/idempotent",
+  "real_database_touched": false
+}

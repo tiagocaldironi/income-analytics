@@ -4,10 +4,39 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Date,
+    DateTime,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from income_analytics.infrastructure.database import Base
+
+
+class PortfolioRecord(Base):
+    __tablename__ = "portfolios"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    base_currency: Mapped[str] = mapped_column(String(3), nullable=False, default="BRL")
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="ACTIVE")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class PortfolioAssetRecord(Base):
+    __tablename__ = "portfolio_assets"
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), primary_key=True
+    )
+    asset_id: Mapped[str] = mapped_column(
+        ForeignKey("assets.id", ondelete="RESTRICT"), primary_key=True
+    )
 
 
 class AssetRecord(Base):
@@ -26,7 +55,17 @@ class AssetRecord(Base):
 
 class FixedIncomeDetailsRecord(Base):
     __tablename__ = "fixed_income_details"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+    )
     asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), primary_key=True, index=True
+    )
     instrument_type: Mapped[str] = mapped_column(String(50))
     issuer: Mapped[str | None] = mapped_column(String(200))
     indexer_type: Mapped[str] = mapped_column(String(50))
@@ -43,7 +82,17 @@ class FixedIncomeDetailsRecord(Base):
 
 class PensionPlanDetailsRecord(Base):
     __tablename__ = "pension_plan_details"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+    )
     asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), primary_key=True, index=True
+    )
     pension_type: Mapped[str] = mapped_column(String(16))
     institution: Mapped[str] = mapped_column(String(200))
     institution_cnpj: Mapped[str | None] = mapped_column(String(14))
@@ -74,7 +123,17 @@ class PensionPlanDetailsRecord(Base):
 
 class PensionInvestmentVehicleRecord(Base):
     __tablename__ = "pension_investment_vehicles"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["portfolio_id", "pension_asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+    )
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
     pension_asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"))
     vehicle_name: Mapped[str] = mapped_column(String(300))
     vehicle_cnpj: Mapped[str] = mapped_column(String(14))
@@ -86,9 +145,7 @@ class PensionInvestmentVehicleRecord(Base):
 
 class PensionFundQuotaRecord(Base):
     __tablename__ = "pension_fund_quotas"
-    vehicle_id: Mapped[str] = mapped_column(
-        ForeignKey("pension_investment_vehicles.id"), primary_key=True
-    )
+    vehicle_cnpj: Mapped[str] = mapped_column(String(14), primary_key=True)
     reference_date: Mapped[date] = mapped_column(Date, primary_key=True)
     quota: Mapped[str] = mapped_column(String(48))
     source: Mapped[str] = mapped_column(String(16))
@@ -97,7 +154,17 @@ class PensionFundQuotaRecord(Base):
 
 class RealEstateDetailsRecord(Base):
     __tablename__ = "real_estate_details"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+    )
     asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), primary_key=True, index=True
+    )
     property_type: Mapped[str] = mapped_column(String(32))
     country: Mapped[str] = mapped_column(String(16), default="BR")
     description: Mapped[str] = mapped_column(Text)
@@ -117,7 +184,17 @@ class RealEstateDetailsRecord(Base):
 
 class RecurringRuleRecord(Base):
     __tablename__ = "recurring_rules"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+    )
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
     event_type: Mapped[str] = mapped_column(String(32))
     amount: Mapped[str] = mapped_column(String(40))
     asset_id: Mapped[str | None] = mapped_column(ForeignKey("assets.id"))
@@ -129,7 +206,18 @@ class RecurringRuleRecord(Base):
 
 class FinancialEventRecord(Base):
     __tablename__ = "financial_events"
+    __table_args__ = (
+        UniqueConstraint("portfolio_id", "id", name="uq_financial_events_portfolio_id"),
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+    )
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
     account_id: Mapped[str] = mapped_column(String(36), index=True)
     event_type: Mapped[str] = mapped_column(String(32))
     asset_id: Mapped[str | None] = mapped_column(ForeignKey("assets.id"))
@@ -159,6 +247,9 @@ class MarketPriceRefreshRunRecord(Base):
 
     __tablename__ = "market_price_refresh_runs"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     finished_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     status: Mapped[str] = mapped_column(String(24), nullable=False)
@@ -192,6 +283,9 @@ class FxRateRecord(Base):
 
 class PortfolioConfigurationRecord(Base):
     __tablename__ = "portfolio_configuration"
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), primary_key=True
+    )
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
     value: Mapped[str] = mapped_column(String(64), nullable=False)
 
@@ -200,7 +294,10 @@ class PortfolioDashboardSnapshotRecord(Base):
     """Atomically replaced read model used by the Minha Carteira first render."""
 
     __tablename__ = "portfolio_dashboard_snapshot"
-    id: Mapped[int] = mapped_column(primary_key=True, default=1)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), nullable=False, unique=True, index=True
+    )
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="VALID")
     version: Mapped[int] = mapped_column(nullable=False, default=1)
     calculated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -218,12 +315,25 @@ class ProviderHealthRecord(Base):
 
 class AllocationTargetRecord(Base):
     __tablename__ = "allocation_targets"
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), primary_key=True
+    )
     asset_class: Mapped[str] = mapped_column(String(50), primary_key=True)
     target: Mapped[str] = mapped_column(String(40))
 
 
 class AssetTargetRecord(Base):
     __tablename__ = "asset_targets"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+    )
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), primary_key=True
+    )
     asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), primary_key=True)
     target: Mapped[str] = mapped_column(String(40))
 
@@ -242,10 +352,25 @@ class PaidIncomeProviderSettingsRecord(Base):
 
 class ImportedPaidIncomeRecord(Base):
     __tablename__ = "imported_paid_income"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["portfolio_id", "financial_event_id"],
+            ["financial_events.portfolio_id", "financial_events.id"],
+            ondelete="RESTRICT",
+        ),
+    )
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
     provider: Mapped[str] = mapped_column(String(32), nullable=False)
     provider_event_id: Mapped[str | None] = mapped_column(String(160), index=True)
-    raw_fingerprint: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    raw_fingerprint: Mapped[str] = mapped_column(String(128), index=True)
     asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), nullable=False)
     income_type: Mapped[str] = mapped_column(String(32), nullable=False)
     record_date: Mapped[date | None] = mapped_column(Date)
@@ -263,8 +388,12 @@ class ImportedPaidIncomeRecord(Base):
 
 class B3ImportBatchRecord(Base):
     __tablename__ = "b3_import_batches"
+    __table_args__ = (UniqueConstraint("portfolio_id", "id", name="uq_b3_batches_portfolio_id"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
     source: Mapped[str] = mapped_column(String(16), nullable=False, default="B3")
     file_name: Mapped[str] = mapped_column(String(512), nullable=False)
     file_hash: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
@@ -284,11 +413,33 @@ class B3ImportedRecord(Base):
     __tablename__ = "b3_imported_records"
     __table_args__ = (
         UniqueConstraint(
-            "source", "fingerprint", "occurrence_index", name="uq_b3_imported_record_identity"
+            "portfolio_id",
+            "source",
+            "fingerprint",
+            "occurrence_index",
+            name="uq_b3_imported_record_identity",
+        ),
+        ForeignKeyConstraint(
+            ["portfolio_id", "batch_id"],
+            ["b3_import_batches.portfolio_id", "b3_import_batches.id"],
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["portfolio_id", "financial_event_id"],
+            ["financial_events.portfolio_id", "financial_events.id"],
+            ondelete="RESTRICT",
         ),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
     batch_id: Mapped[str] = mapped_column(ForeignKey("b3_import_batches.id"), index=True)
     source: Mapped[str] = mapped_column(String(16), nullable=False, default="B3")
     fingerprint: Mapped[str] = mapped_column(String(128), nullable=False, index=True)

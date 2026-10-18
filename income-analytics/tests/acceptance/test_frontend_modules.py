@@ -16,6 +16,33 @@ def test_frontend_client_centralizes_the_feature_endpoints() -> None:
     assert "rebalancing/assets" in client
 
 
+def test_frontend_propagates_and_selects_the_active_portfolio() -> None:
+    page = (STATIC / "index.html").read_text(encoding="utf-8")
+    client = (STATIC / "js/api.js").read_text(encoding="utf-8")
+    context = (STATIC / "js/features/portfolios.js").read_text(encoding="utf-8")
+    wallet_settings = (STATIC / "js/features/wallet-settings.js").read_text(encoding="utf-8")
+    assert 'id="portfolio-menu-trigger"' in page
+    assert 'id="portfolio-options"' in page
+    assert 'id="portfolio-settings"' in page or 'class="portfolio-settings"' in page
+    assert 'href="#carteira-configuracoes"' in page
+    assert 'data-page="carteira-configuracoes"' in page
+    assert 'id="portfolio-create"' in page
+    assert 'id="wallet-name-form"' in page
+    assert 'data-wallet-theme="light"' in page
+    assert 'data-wallet-theme="dark"' in page
+    assert "Compartilhamento indisponível" in page
+    assert 'href="#configuracoes" data-navigate title="Configurações"' in page
+    assert 'localStorage.getItem("income.activePortfolioId")' in client
+    assert 'headers.set("X-Portfolio-Id", portfolioId)' in client
+    assert "localStorage.setItem(STORAGE_KEY, id)" in context
+    assert 'currentName.textContent = selected?.name || "Carteira"' in context
+    assert 'option.setAttribute("aria-selected", String(item.id === current))' in context
+    assert 'lifecycle.activate(route)' in context
+    assert 'income.portfolioThemes.v1' in wallet_settings
+    assert 'portfolioApi.renamePortfolio(id, name)' in wallet_settings
+    assert 'document.documentElement.dataset.theme' in wallet_settings
+
+
 def test_magic_formula_page_uses_persisted_ranking_and_transparent_screening() -> None:
     tools = (STATIC / "js/features/tools.js").read_text(encoding="utf-8")
     client = (STATIC / "js/api.js").read_text(encoding="utf-8")
@@ -35,7 +62,7 @@ def test_magic_formula_page_uses_persisted_ranking_and_transparent_screening() -
     assert "informações públicas disponíveis até ${financialCutoff}" in tools
     assert 'data.status === "NO_PUBLISHED_RANKING"' in tools
     assert "O ranking ainda não está disponível." in tools
-    assert 'data-mf-retry' in tools and "Tentar novamente" in tools
+    assert "data-mf-retry" in tools and "Tentar novamente" in tools
     assert "INVALID_MAGIC_FORMULA_RESPONSE" in tools
     assert "controller.abort()" in (STATIC / "js/api.js").read_text(encoding="utf-8")
     assert "exclude_retail" in client and "exclude_aviation" in client
@@ -140,7 +167,7 @@ def test_holdings_experience_uses_one_aggregate_projection_and_strategy_context(
     portfolio = (STATIC / "js/features/portfolio.js").read_text(encoding="utf-8")
     dashboard = (STATIC / "index.html").read_text(encoding="utf-8")
     assert "/portfolio/holdings" in client
-    assert '"Alvo na classe"' in portfolio
+    assert '"Alvo classe"' in portfolio
     assert "#portfolio-evolution" in portfolio
     assert "Custo registrado" in dashboard
     assert "Resultado econômico" in portfolio
@@ -314,11 +341,11 @@ def test_portfolio_history_chart_uses_economic_result_and_preserves_negative_ret
     assert (
         'event.target.matches("#portfolio-history-period, #portfolio-history-class")' in portfolio
     )
-    assert 'data: points.map(point => Number(point.total_result))' in portfolio
-    assert 'data: points.map(point => Number(point.capital_gain))' not in portfolio
-    assert 'item.market_value !== null && Number(item.market_value) > 0' in portfolio
-    assert 'Number(item.market_value) / total' in portfolio
-    assert 'value: Number(group.market_value)' in portfolio
+    assert "data: points.map(point => Number(point.total_result))" in portfolio
+    assert "data: points.map(point => Number(point.capital_gain))" not in portfolio
+    assert "item.market_value !== null && Number(item.market_value) > 0" in portfolio
+    assert "Number(item.market_value) / total" in portfolio
+    assert "value: Number(group.market_value)" in portfolio
     assert "id='history-period'" in operations
 
 
@@ -334,6 +361,6 @@ def test_financial_methodology_is_centralized_and_deep_linkable() -> None:
     assert "#ajuda-metodologia/${escapeConceptHtml(section.id)}" in methodology
     assert 'split("/")[0]' in navigation
     assert "financialConcepts.returnTooltip" in portfolio
-    assert "Valorização desde a compra" in portfolio
+    assert '"Variação"' in portfolio
     assert "performance-methodology-copy" in page
     assert "Ajuda e metodologia" in methodology

@@ -17,9 +17,7 @@ def _item(name: str, value: str | None, target: str | None) -> AssetCompositionI
 
 
 def test_composition_distance_is_zero_when_current_matches_targets() -> None:
-    projection = AssetCompositionProjector.project(
-        (_item("A", "50", ".5"), _item("B", "50", ".5"))
-    )
+    projection = AssetCompositionProjector.project((_item("A", "50", ".5"), _item("B", "50", ".5")))
     assert projection.distance == Decimal("0")
     assert projection.valuation_quality == "COMPLETE"
 

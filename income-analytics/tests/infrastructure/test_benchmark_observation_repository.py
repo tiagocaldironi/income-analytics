@@ -7,6 +7,7 @@ from income_analytics.infrastructure.sqlite_repositories import SqliteBenchmarkO
 
 def test_benchmark_observation_upsert_is_idempotent_for_same_date() -> None:
     repository = SqliteBenchmarkObservationRepository()
+    assert repository.list("TESTIDEMPOTENT") == ()
     observation = BenchmarkObservation(
         benchmark="TESTIDEMPOTENT",
         effective_date=date(2026, 1, 2),

@@ -1,4 +1,5 @@
 from income_analytics.application.asset_discovery import AssetCandidate
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.asset_class import AssetClass
 
@@ -15,7 +16,9 @@ def test_asset_candidate_can_be_confirmed_and_persisted_in_the_session() -> None
         sector=None,
         source="test",
     )
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
 
     asset = session.register_asset(
         ticker=candidate.symbol,
@@ -28,6 +31,7 @@ def test_asset_candidate_can_be_confirmed_and_persisted_in_the_session() -> None
 
     assert str(asset.ticker) == "PETR4"
     assert asset.name == "Petrobras PN"
-    assert session.register_asset(
-        ticker="PETR4", name="Outro nome", asset_class=AssetClass.OTHER
-    ) == asset
+    assert (
+        session.register_asset(ticker="PETR4", name="Outro nome", asset_class=AssetClass.OTHER)
+        == asset
+    )

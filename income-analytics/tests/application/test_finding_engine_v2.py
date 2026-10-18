@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import pytest
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.allocation_policy import AllocationPolicy
 from income_analytics.domain.enums.asset_class import AssetClass
@@ -21,7 +22,9 @@ BEFORE = TODAY - timedelta(days=90)
 def portfolio(
     previous: str = "75", current: str = "82", us_currency: str = "BRL"
 ) -> PortfolioSession:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     for ticker, country, asset_class in [
         ("BRTEST", "BR", AssetClass.BRAZILIAN_STOCK),
         ("USTEST", "US", AssetClass.INTERNATIONAL),

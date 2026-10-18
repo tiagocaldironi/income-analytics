@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.allocation_policy import AllocationPolicy
 from income_analytics.domain.asset_allocation_policy import AssetAllocationPolicy
@@ -11,7 +12,9 @@ TODAY = date(2026, 9, 24)
 
 
 def _session() -> PortfolioSession:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="STOCK",
@@ -161,9 +164,7 @@ def test_updating_one_class_preserves_unrelated_policy_even_if_it_is_stale() -> 
     )
 
     session.set_asset_allocation_policy(
-        AssetAllocationPolicy(
-            targets={AssetClass.BRAZILIAN_STOCK: {"STOCK": Decimal("1")}}
-        )
+        AssetAllocationPolicy(targets={AssetClass.BRAZILIAN_STOCK: {"STOCK": Decimal("1")}})
     )
 
     policy = session.asset_allocation_policy

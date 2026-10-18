@@ -54,10 +54,14 @@ class FixedIncomeDetails:
             self.percentage_of_indexer is None
         ):
             raise ValueError("CDI_PERCENT instruments require percentage_of_indexer.")
-        if self.indexer_type in (
-            FixedIncomeIndexerType.CDI_PLUS,
-            FixedIncomeIndexerType.IPCA_PLUS,
-        ) and self.spread is None:
+        if (
+            self.indexer_type
+            in (
+                FixedIncomeIndexerType.CDI_PLUS,
+                FixedIncomeIndexerType.IPCA_PLUS,
+            )
+            and self.spread is None
+        ):
             raise ValueError(f"{self.indexer_type.value} instruments require spread.")
         if not isinstance(self.tax_exempt, bool):
             raise TypeError("tax_exempt must be a bool.")

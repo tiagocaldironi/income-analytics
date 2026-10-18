@@ -32,10 +32,13 @@ def test_past_cdi_application_refreshes_its_historical_curve(monkeypatch) -> Non
 
 
 def test_prefixed_application_does_not_need_external_reference_data() -> None:
-    assert _refresh_fixed_income_reference_history(
-        indexer_type=FixedIncomeIndexerType.PREFIXED,
-        application_date=date(2026, 1, 2),
-    ) == ()
+    assert (
+        _refresh_fixed_income_reference_history(
+            indexer_type=FixedIncomeIndexerType.PREFIXED,
+            application_date=date(2026, 1, 2),
+        )
+        == ()
+    )
 
 
 def test_fixed_income_reference_mapping_only_uses_official_variable_indexes() -> None:

@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.projectors.portfolio_projector import PortfolioProjector
@@ -27,7 +28,9 @@ def trade(
 
 
 def test_projects_portfolio_as_of_each_relevant_date() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     january_5 = date(2026, 1, 5)
     january_10 = date(2026, 1, 10)
     january_20 = date(2026, 1, 20)
@@ -76,7 +79,9 @@ def test_projects_portfolio_as_of_each_relevant_date() -> None:
 
 
 def test_orders_events_by_effective_date_instead_of_registration_order() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, date(2026, 1, 10), "100", "40")
     trade(session, FinancialEventType.SELL, date(2026, 1, 20), "50", "50")
     trade(session, FinancialEventType.BUY, date(2026, 1, 5), "100", "30")
@@ -89,7 +94,9 @@ def test_orders_events_by_effective_date_instead_of_registration_order() -> None
 
 
 def test_uses_only_the_latest_market_price_available_as_of_the_requested_date() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, date(2026, 1, 5), "100", "30")
     for effective_date, price in (
         (date(2026, 1, 10), "40"),
@@ -113,7 +120,9 @@ def test_uses_only_the_latest_market_price_available_as_of_the_requested_date() 
 
 
 def test_same_date_events_use_registration_order_as_a_stable_tiebreaker() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     effective_date = date(2026, 1, 5)
     trade(session, FinancialEventType.BUY, effective_date, "100", "30")
     trade(session, FinancialEventType.SELL, effective_date, "50", "40")
@@ -125,7 +134,9 @@ def test_same_date_events_use_registration_order_as_a_stable_tiebreaker() -> Non
 
 
 def test_history_contains_derived_snapshots_at_each_relevant_date() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, date(2026, 1, 5), "100", "30")
     session.update_market_price(
         ticker="PETR4",
@@ -156,7 +167,9 @@ def test_history_contains_derived_snapshots_at_each_relevant_date() -> None:
 
 
 def test_future_events_do_not_change_a_previous_as_of_projection() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, date(2026, 1, 5), "100", "30")
     trade(session, FinancialEventType.BUY, date(2030, 1, 1), "100", "40")
 

@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from threading import RLock
 
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, event, inspect
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 
@@ -22,6 +22,16 @@ def database_url() -> str:
 
 
 engine = create_engine(database_url())
+
+
+@event.listens_for(engine, "connect")
+def _enable_sqlite_foreign_keys(connection, _record) -> None:
+    if connection.__class__.__module__.startswith("sqlite3"):
+        cursor = connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+
 SessionFactory = sessionmaker(bind=engine)
 _migration_lock = RLock()
 _initialized_database_path: Path | None = None

@@ -1,0 +1,7 @@
+scope,result,evidence
+API client portfolio header,PASS,Central request() sends X-Portfolio-Id from active portfolio selection
+portfolio management registry,GLOBAL_EXCEPTION,Portfolio registry/lifecycle endpoints intentionally do not require selected-portfolio header
+global reference data,GLOBAL_EXCEPTION,Benchmarks and reference data are intentionally shared
+Magic Formula,GLOBAL_EXCEPTION,Canonical ranking remains global and independent from active portfolio
+late response race,PASS,Existing Node frontend test checks stale response cancellation
+browser network capture,NOT_RUN_ENVIRONMENT_LIMITATION,Interactive browser was unavailable

@@ -11,8 +11,8 @@ from typing import Any, Mapping
 from uuid import UUID
 
 from income_analytics.domain.entities.asset import Asset
-from income_analytics.domain.enums.capital_flow_type import CapitalFlowType
 from income_analytics.domain.entities.entity import Entity
+from income_analytics.domain.enums.capital_flow_type import CapitalFlowType
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.value_objects.money import Money
 from income_analytics.domain.value_objects.quantity import Quantity

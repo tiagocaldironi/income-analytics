@@ -29,8 +29,7 @@ def create_event(
         account_id=account_id,
         asset=build_asset(),
         event_type=FinancialEventType.BUY,
-        occurred_at=occurred_at
-        or datetime(2026, 1, 10, tzinfo=UTC),
+        occurred_at=occurred_at or datetime(2026, 1, 10, tzinfo=UTC),
         quantity=Quantity(Decimal("100")),
         unit_price=Money(Decimal("10")),
     )

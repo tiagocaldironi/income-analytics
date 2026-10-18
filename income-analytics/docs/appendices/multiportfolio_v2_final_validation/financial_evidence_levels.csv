@@ -1,0 +1,15 @@
+endpoint_or_output,evidence_level,result,notes
+/api/portfolio,LEVEL_A_HISTORICAL_GOLDEN + LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,Historical hash and legacy MAIN vs explicit MAIN
+/api/portfolio/dashboard,LEVEL_A_HISTORICAL_GOLDEN + LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,Golden match; scoped snapshot fix regression-tested
+/api/portfolio/holdings,LEVEL_A_HISTORICAL_GOLDEN + LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,Historical hash and semantic payload equality
+/api/portfolio/allocation,LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,Legacy MAIN vs explicit MAIN
+/api/portfolio/class-allocation,LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,Legacy MAIN vs explicit MAIN
+/api/operations and /api/operations/history,LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,Legacy MAIN vs explicit MAIN
+/api/analytics/wealth-evolution,LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,"Same base, period and semantic payload"
+/api/analytics/wealth-explanation,LEVEL_B_CONTROLLED_EQUIVALENCE,PREEXISTING_EQUIVALENT,Identical HTTP 422 for same legacy/explicit request
+/api/portfolio/performance,LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,TWR payload equivalent
+/api/analytics/performance-comparison,LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,Same request semantics and benchmark payload
+/api/portfolio/intelligence and allocation-analysis,LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,Legacy MAIN vs explicit MAIN
+/api/portfolio/configuration and targets,LEVEL_B_CONTROLLED_EQUIVALENCE,PASS,Configuration/target state equivalent
+cross-portfolio behavior,LEVEL_C_INVARIANT_AND_ISOLATION,PASS,"A/B isolation, same-asset shared market prices with independent ownership, empty wallet"
+B3 import apply,LEVEL_C_INVARIANT_AND_ISOLATION,PASS,"HTTP ownership reject, zero writes, owner apply/idempotency"

@@ -6,6 +6,7 @@ from decimal import Decimal
 from income_analytics.application.base_currency_valuation import BaseCurrencyValuationProjector
 from income_analytics.application.fx_data import FxRateObservation
 from income_analytics.application.market_data import MarketDataUnavailable, MarketPriceObservation
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
@@ -28,7 +29,10 @@ class BatchProvider:
                 effective_date=date(2026, 9, 23),
                 source=self.source,
                 retrieved_at=datetime(2026, 9, 23, 15, tzinfo=UTC),
-                provider_attempts=(("brapi", "NOT_FOUND", "not covered"), (self.source, "SUCCESS", None)),
+                provider_attempts=(
+                    ("brapi", "NOT_FOUND", "not covered"),
+                    (self.source, "SUCCESS", None),
+                ),
             )
             for symbol, (price, currency) in self.quotes.items()
             if symbol in symbols and symbol not in self.unavailable
@@ -36,7 +40,9 @@ class BatchProvider:
 
 
 def _mixed_session():
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     rows = (
         ("PETR4", AssetClass.BRAZILIAN_STOCK, "BRL", "BR", "2", "20"),
         ("KNRI11", AssetClass.FII, "BRL", "BR", "1", "100"),
@@ -145,7 +151,9 @@ def test_wrong_provider_currency_is_rejected_without_overwriting_asset_price():
 
 
 def test_assets_whose_valuation_does_not_use_market_quotes_are_skipped():
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="FI-2029-TEST",
@@ -230,9 +238,10 @@ def test_us_failure_preserves_last_quote_and_a_later_refresh_recovers():
     assert any(item["status"] == "SUCCESS" for item in recovered["providers"])
 
 
-
 def test_single_symbol_failure_does_not_interrupt_provider_group_and_records_error():
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     for ticker in ("AAA3", "BBB3"):
         session.register_trade(
             event_type=FinancialEventType.BUY,
@@ -280,6 +289,7 @@ def test_single_symbol_failure_does_not_interrupt_provider_group_and_records_err
         }
     ]
 
+
 def test_same_day_refresh_is_idempotent_without_economic_drift():
     session = _mixed_session()
     provider = BatchProvider("brapi", {"PETR4": (Decimal("30"), "BRL")})
@@ -323,9 +333,10 @@ def test_forced_refresh_rechecks_quotes_already_recorded_today():
     assert session._assets["PETR4"].current_price.amount == Decimal("31")
 
 
-
 def test_b3_etf_price_source_is_persisted_as_b3_etf():
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="AUPO11",
@@ -340,8 +351,11 @@ def test_b3_etf_price_source_is_persisted_as_b3_etf():
     class B3EtfProvider:
         def latest_price(self, symbol):
             return MarketPriceObservation(
-                symbol=symbol, price=Decimal("111.94"), currency_code="BRL",
-                effective_date=date(2026, 10, 6), source="b3_etf",
+                symbol=symbol,
+                price=Decimal("111.94"),
+                currency_code="BRL",
+                effective_date=date(2026, 10, 6),
+                source="b3_etf",
                 provider_attempts=(
                     ("brapi", "NOT_FOUND", "ticker unavailable"),
                     ("b3_etf", "SUCCESS", None),
@@ -360,8 +374,11 @@ def test_b3_etf_price_source_is_persisted_as_b3_etf():
     assert saved_attempts[1]["provider"] == "b3_etf"
     assert saved_attempts[1]["result"] == "SUCCESS"
 
+
 def test_importing_old_quote_history_does_not_downgrade_current_price():
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="AUPO11",

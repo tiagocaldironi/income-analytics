@@ -9,7 +9,8 @@ def test_normalizes_paid_jcp_with_decimal_and_dates() -> None:
     event = normalize_event(
         "TASA4",
         {
-            "label": "JCP", "rate": "0.1234",
+            "label": "JCP",
+            "rate": "0.1234",
             "lastDatePrior": "2026-01-03T03:00:00Z",
             "paymentDate": "2026-01-20T03:00:00Z",
         },

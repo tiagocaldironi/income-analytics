@@ -110,6 +110,7 @@ from income_analytics.infrastructure.sqlite_repositories import (
     SqlitePensionPlanDetailsRepository,
     SqlitePortfolioConfigurationRepository,
     SqlitePortfolioDataRepository,
+    SqlitePortfolioRepository,
     SqliteRealEstateDetailsRepository,
     SqliteRecurringRuleRepository,
 )
@@ -121,6 +122,7 @@ DEFAULT_EFFECTIVE_DATE = date(2026, 1, 1)
 class PortfolioSession:
     """Keeps a local, non-persistent event stream for the dashboard."""
 
+    portfolio_id: UUID
     account_id: UUID = field(default_factory=uuid4)
     persistent: bool = False
     _assets: dict[str, Asset] = field(default_factory=dict, init=False)
@@ -151,30 +153,45 @@ class PortfolioSession:
     def __post_init__(self) -> None:
         if self.persistent:
             initialize_database()
-            self._assets = {str(asset.ticker): asset for asset in SqliteAssetRepository().list()}
-            self._events = list(SqliteFinancialEventRepository().list())
-            self._market_prices = list(SqliteMarketPriceRepository().list())
-            self._rebuild_market_price_index()
+            if SqlitePortfolioRepository().get(self.portfolio_id) is None:
+                raise ValueError(f"Portfolio not found: {self.portfolio_id}")
+            self._assets = {
+                str(asset.ticker): asset
+                for asset in SqliteAssetRepository(self.portfolio_id).list()
+            }
+            self._events = list(SqliteFinancialEventRepository(self.portfolio_id).list())
+            market_prices = SqliteMarketPriceRepository()
+            self._market_prices = list(market_prices.list())
+            self._market_prices_by_asset = market_prices.list_by_asset()
+            self._market_prices_indexed_source = self._market_prices
+            self._market_prices_indexed_length = len(self._market_prices)
             self._benchmark_rates = list(SqliteBenchmarkRateRepository().list())
             observations = SqliteBenchmarkObservationRepository()
             self._benchmark_observations = {
                 name: list(observations.list(name))
                 for name in ("IPCA", "IBOV", "TR", "SELIC_TARGET")
             }
-            self._allocation_policy = SqliteAllocationPolicyRepository().get()
-            self._asset_allocation_policy = SqliteAssetAllocationPolicyRepository().get()
-            self._base_currency = SqlitePortfolioConfigurationRepository().get_base_currency()
+            self._allocation_policy = SqliteAllocationPolicyRepository(self.portfolio_id).get()
+            self._asset_allocation_policy = SqliteAssetAllocationPolicyRepository(
+                self.portfolio_id
+            ).get()
+            self._base_currency = SqlitePortfolioConfigurationRepository(
+                self.portfolio_id
+            ).get_base_currency()
             self._fixed_income_details = {
-                details.asset_id: details for details in SqliteFixedIncomeDetailsRepository().list()
+                details.asset_id: details
+                for details in SqliteFixedIncomeDetailsRepository(self.portfolio_id).list()
             }
             self._pension_plan_details = {
-                details.asset_id: details for details in SqlitePensionPlanDetailsRepository().list()
+                details.asset_id: details
+                for details in SqlitePensionPlanDetailsRepository(self.portfolio_id).list()
             }
             self._real_estate_details = {
-                details.asset_id: details for details in SqliteRealEstateDetailsRepository().list()
+                details.asset_id: details
+                for details in SqliteRealEstateDetailsRepository(self.portfolio_id).list()
             }
             self._recurring_rules = {
-                rule.id: rule for rule in SqliteRecurringRuleRepository().list()
+                rule.id: rule for rule in SqliteRecurringRuleRepository(self.portfolio_id).list()
             }
 
     def register_trade(
@@ -198,17 +215,25 @@ class PortfolioSession:
         normalized_ticker = ticker.strip().upper()
         asset = self._assets.get(normalized_ticker)
         if asset is None:
-            asset = self._create_asset(
-                normalized_ticker,
-                name=name or normalized_ticker,
-                asset_class=asset_class,
-                country=country,
-                currency_code=currency_code,
-                sector=sector,
+            asset = (
+                SqliteAssetRepository(self.portfolio_id).get_by_ticker(normalized_ticker)
+                if self.persistent
+                else None
             )
+            shared_asset = asset is not None
+            if asset is None:
+                asset = self._create_asset(
+                    normalized_ticker,
+                    name=name or normalized_ticker,
+                    asset_class=asset_class,
+                    country=country,
+                    currency_code=currency_code,
+                    sector=sector,
+                )
             self._assets[normalized_ticker] = asset
             if self.persistent:
-                SqliteAssetRepository().save(asset)
+                repository = SqliteAssetRepository(self.portfolio_id)
+                repository.link(asset.id) if shared_asset else repository.save(asset)
         elif event_type is FinancialEventType.BUY and asset.asset_class is not asset_class:
             self._reclassify_market_traded_asset(asset, asset_class)
 
@@ -237,7 +262,7 @@ class PortfolioSession:
         )
         self._events.append(event)
         if self.persistent:
-            SqliteFinancialEventRepository().save(event)
+            SqliteFinancialEventRepository(self.portfolio_id).save(event)
         return projection
 
     def project(self, *, as_of: date | None = None) -> PortfolioProjection:
@@ -268,7 +293,7 @@ class PortfolioSession:
         )
         self._events.append(event)
         if self.persistent:
-            SqliteFinancialEventRepository().save(event)
+            SqliteFinancialEventRepository(self.portfolio_id).save(event)
         return event
 
     def register_asset(
@@ -284,17 +309,25 @@ class PortfolioSession:
         normalized_ticker = ticker.strip().upper()
         if normalized_ticker in self._assets:
             return self._assets[normalized_ticker]
-        asset = self._create_asset(
-            normalized_ticker,
-            name=name,
-            asset_class=asset_class,
-            country=country,
-            currency_code=currency_code,
-            sector=sector,
+        asset = (
+            SqliteAssetRepository(self.portfolio_id).get_by_ticker(normalized_ticker)
+            if self.persistent
+            else None
         )
+        shared_asset = asset is not None
+        if asset is None:
+            asset = self._create_asset(
+                normalized_ticker,
+                name=name,
+                asset_class=asset_class,
+                country=country,
+                currency_code=currency_code,
+                sector=sector,
+            )
         self._assets[normalized_ticker] = asset
         if self.persistent:
-            SqliteAssetRepository().save(asset)
+            repository = SqliteAssetRepository(self.portfolio_id)
+            repository.link(asset.id) if shared_asset else repository.save(asset)
         return asset
 
     def register_fixed_income_asset(
@@ -322,6 +355,7 @@ class PortfolioSession:
         normalized_ticker = ticker.strip().upper()
         if normalized_ticker in self._assets:
             raise ValueError("Já existe um ativo com esse identificador.")
+        self._ensure_private_ticker_available(normalized_ticker)
         asset = self._create_asset(
             normalized_ticker,
             name=name,
@@ -361,9 +395,9 @@ class PortfolioSession:
         self._fixed_income_details[asset.id] = details
         self._events.append(event)
         if self.persistent:
-            SqliteAssetRepository().save(asset)
-            SqliteFixedIncomeDetailsRepository().save(details)
-            SqliteFinancialEventRepository().save(event)
+            SqliteAssetRepository(self.portfolio_id).save(asset)
+            SqliteFixedIncomeDetailsRepository(self.portfolio_id).save(details)
+            SqliteFinancialEventRepository(self.portfolio_id).save(event)
         return asset
 
     def fixed_income_details(self, ticker: str) -> FixedIncomeDetails:
@@ -407,6 +441,7 @@ class PortfolioSession:
         normalized_ticker = (ticker or f"PENSION-{uuid4().hex[:12]}").strip().upper()
         if normalized_ticker in self._assets:
             raise ValueError("Já existe um ativo com esse identificador.")
+        self._ensure_private_ticker_available(normalized_ticker)
         asset = self._create_asset(
             normalized_ticker,
             name=name or plan_name,
@@ -446,7 +481,7 @@ class PortfolioSession:
         self._register_balance_asset(asset, details.reported_balance, details.reported_balance_date)
         self._pension_plan_details[asset.id] = details
         if self.persistent:
-            SqlitePensionPlanDetailsRepository().save(details)
+            SqlitePensionPlanDetailsRepository(self.portfolio_id).save(details)
         return asset
 
     def register_real_estate(
@@ -469,6 +504,7 @@ class PortfolioSession:
         normalized_ticker = ticker.strip().upper()
         if normalized_ticker in self._assets:
             raise ValueError("Já existe um ativo com esse identificador.")
+        self._ensure_private_ticker_available(normalized_ticker)
         asset = self._create_asset(
             normalized_ticker,
             name=name,
@@ -509,7 +545,7 @@ class PortfolioSession:
                 SqliteMarketPriceRepository().save(current_value)
         self._real_estate_details[asset.id] = details
         if self.persistent:
-            SqliteRealEstateDetailsRepository().save(details)
+            SqliteRealEstateDetailsRepository(self.portfolio_id).save(details)
         return asset
 
     def _register_balance_asset(self, asset: Asset, value: Decimal, effective_date: date) -> None:
@@ -530,8 +566,8 @@ class PortfolioSession:
         self._market_prices.append(reference_value)
         self._remember_market_price(reference_value)
         if self.persistent:
-            SqliteAssetRepository().save(asset)
-            SqliteFinancialEventRepository().save(event)
+            SqliteAssetRepository(self.portfolio_id).save(asset)
+            SqliteFinancialEventRepository(self.portfolio_id).save(event)
             SqliteMarketPriceRepository().save(reference_value)
 
     def projection(self, *, as_of: date | None = None) -> PortfolioProjection:
@@ -570,7 +606,7 @@ class PortfolioSession:
         self._base_currency = normalized
         self._fx_rate_cache.clear()
         if self.persistent:
-            SqlitePortfolioConfigurationRepository().save_base_currency(normalized)
+            SqlitePortfolioConfigurationRepository(self.portfolio_id).save_base_currency(normalized)
         return normalized
 
     def refresh_fx_rate(
@@ -662,7 +698,7 @@ class PortfolioSession:
         )
         self._events.append(event)
         if self.persistent:
-            SqliteFinancialEventRepository().save(event)
+            SqliteFinancialEventRepository(self.portfolio_id).save(event)
         return projection
 
     def register_external_flow(
@@ -691,7 +727,7 @@ class PortfolioSession:
         )
         self._events.append(event)
         if self.persistent:
-            SqliteFinancialEventRepository().save(event)
+            SqliteFinancialEventRepository(self.portfolio_id).save(event)
         return projection
 
     def schedule_recurring_rule(self, rule: RecurringRule) -> None:
@@ -702,7 +738,7 @@ class PortfolioSession:
             raise ValueError("Ativo da recorrência não encontrado na carteira local.")
         self._recurring_rules[rule.id] = rule
         if self.persistent:
-            SqliteRecurringRuleRepository().save(rule)
+            SqliteRecurringRuleRepository(self.portfolio_id).save(rule)
 
     def execute_recurring_rules(self, *, through: date) -> tuple[UUID, ...]:
         """Execute each due occurrence exactly once by advancing its stored cursor."""
@@ -734,7 +770,7 @@ class PortfolioSession:
                 rule = rule.advance()
                 self._recurring_rules[rule.id] = rule
                 if self.persistent:
-                    SqliteRecurringRuleRepository().save(rule)
+                    SqliteRecurringRuleRepository(self.portfolio_id).save(rule)
                 executed.append(rule.id)
             if (
                 rule.active
@@ -744,7 +780,7 @@ class PortfolioSession:
                 rule = replace(rule, active=False)
                 self._recurring_rules[rule.id] = rule
                 if self.persistent:
-                    SqliteRecurringRuleRepository().save(rule)
+                    SqliteRecurringRuleRepository(self.portfolio_id).save(rule)
         return tuple(executed)
 
     def update_recurring_rule(
@@ -771,7 +807,7 @@ class PortfolioSession:
         )
         self._recurring_rules[rule_id] = updated
         if self.persistent:
-            SqliteRecurringRuleRepository().save(updated)
+            SqliteRecurringRuleRepository(self.portfolio_id).save(updated)
         return updated
 
     def delete_recurring_rule(self, rule_id: UUID) -> None:
@@ -779,7 +815,7 @@ class PortfolioSession:
             raise ValueError("Agendamento não encontrado.")
         del self._recurring_rules[rule_id]
         if self.persistent:
-            SqliteRecurringRuleRepository().delete(rule_id)
+            SqliteRecurringRuleRepository(self.portfolio_id).delete(rule_id)
 
     def recurring_rules(self) -> tuple[RecurringRule, ...]:
         return tuple(
@@ -805,13 +841,13 @@ class PortfolioSession:
         price = Money(current_price)
         asset.update_current_price(price)
         price = MarketPrice(
-                asset=asset,
-                price=price,
-                effective_date=effective_date,
-                provider=provider,
-                price_timestamp=price_timestamp,
-                registered_at=retrieved_at or datetime.now(UTC),
-            )
+            asset=asset,
+            price=price,
+            effective_date=effective_date,
+            provider=provider,
+            price_timestamp=price_timestamp,
+            registered_at=retrieved_at or datetime.now(UTC),
+        )
         self._market_prices.append(price)
         self._remember_market_price(price)
         if self.persistent:
@@ -1125,7 +1161,9 @@ class PortfolioSession:
         remaining = [event for event in self._events if str(event.id) != event_id]
         if len(remaining) == len(self._events):
             raise ValueError("Lançamento não encontrado.")
-        if self.persistent and not SqliteFinancialEventRepository().delete(event_id):
+        if self.persistent and not SqliteFinancialEventRepository(self.portfolio_id).delete(
+            event_id
+        ):
             raise ValueError("Lançamento não encontrado.")
         self._events = remaining
 
@@ -1269,9 +1307,7 @@ class PortfolioSession:
             asset_id
             for asset_id, details in self._fixed_income_details.items()
             if (
-                asset := next(
-                    (item for item in self._assets.values() if item.id == asset_id), None
-                )
+                asset := next((item for item in self._assets.values() if item.id == asset_id), None)
             )
             is not None
             and asset.valuation_method is ValuationMethod.CONTRACT_CURVE
@@ -1341,9 +1377,7 @@ class PortfolioSession:
                 rate
                 for currency in {asset.currency.code.upper() for asset in self._assets.values()}
                 - {self._base_currency}
-                for rate in (
-                    self._fx_rates(currency, self._base_currency)
-                )
+                for rate in (self._fx_rates(currency, self._base_currency))
                 if rate.effective_date <= end_date
             ),
             base_currency=self._base_currency,
@@ -1497,7 +1531,7 @@ class PortfolioSession:
     def set_allocation_policy(self, policy: AllocationPolicy) -> None:
         self._allocation_policy = policy
         if self.persistent:
-            SqliteAllocationPolicyRepository().save(policy)
+            SqliteAllocationPolicyRepository(self.portfolio_id).save(policy)
 
     def set_asset_allocation_policy(self, policy: AssetAllocationPolicy) -> None:
         active_assets = tuple(
@@ -1514,7 +1548,9 @@ class PortfolioSession:
         merged_targets = {**current_targets, **policy.targets}
         self._asset_allocation_policy = AssetAllocationPolicy(targets=merged_targets)
         if self.persistent:
-            SqliteAssetAllocationPolicyRepository().save(self._asset_allocation_policy)
+            SqliteAssetAllocationPolicyRepository(self.portfolio_id).save(
+                self._asset_allocation_policy
+            )
 
     @property
     def allocation_policy(self) -> AllocationPolicy | None:
@@ -1752,7 +1788,7 @@ class PortfolioSession:
             )
         asset.update_asset_class(asset_class)
         if self.persistent:
-            SqliteAssetRepository().save(asset)
+            SqliteAssetRepository(self.portfolio_id).save(asset)
 
     def clear(self) -> None:
         """Clear the local session without persisting any data."""
@@ -1771,7 +1807,7 @@ class PortfolioSession:
         self._asset_allocation_policy = None
         self._base_currency = "BRL"
         if self.persistent:
-            SqlitePortfolioDataRepository().clear()
+            SqlitePortfolioDataRepository(self.portfolio_id).clear()
 
     @staticmethod
     def _create_asset(
@@ -1808,3 +1844,10 @@ class PortfolioSession:
             ),
             institution=Institution(name="Cadastro local"),
         )
+
+    def _ensure_private_ticker_available(self, ticker: str) -> None:
+        if not self.persistent:
+            return
+        existing = SqliteAssetRepository(self.portfolio_id).get_by_ticker(ticker)
+        if existing is not None:
+            raise ValueError("Já existe um ativo com esse identificador nesta carteira.")

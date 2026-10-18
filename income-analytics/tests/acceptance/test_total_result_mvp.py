@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.value_objects.money import Money
@@ -24,7 +25,9 @@ def trade(
 
 
 def test_portfolio_consolidates_the_total_economic_result() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
     trade(session, FinancialEventType.BUY, "PETR4", "100", "40")
     trade(session, FinancialEventType.SELL, "PETR4", "50", "50")
@@ -49,7 +52,9 @@ def test_portfolio_consolidates_the_total_economic_result() -> None:
 
 
 def test_total_result_can_be_negative() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
     session.update_market_price(ticker="PETR4", current_price=Decimal("20"))
     portfolio = session.register_dividend(ticker="PETR4", amount=Decimal("100"))
@@ -60,7 +65,9 @@ def test_total_result_can_be_negative() -> None:
 
 
 def test_closed_position_keeps_historical_total_result_without_market_value() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
     trade(session, FinancialEventType.SELL, "PETR4", "100", "40")
     portfolio = session.register_dividend(ticker="PETR4", amount=Decimal("100"))
@@ -75,7 +82,9 @@ def test_closed_position_keeps_historical_total_result_without_market_value() ->
 
 
 def test_multiple_assets_sum_to_the_portfolio_total_result() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
     trade(session, FinancialEventType.BUY, "BBAS3", "100", "20")
     session.update_market_price(ticker="PETR4", current_price=Decimal("40"))
@@ -96,7 +105,9 @@ def test_multiple_assets_sum_to_the_portfolio_total_result() -> None:
 
 
 def test_open_position_without_quote_has_no_fictitious_market_value() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
 
     portfolio = session.projection()

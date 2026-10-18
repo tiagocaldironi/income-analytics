@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import pytest
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.value_objects.money import Money
@@ -25,7 +26,9 @@ def register_trade(
 
 
 def test_market_price_projects_value_without_changing_historical_results() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     register_trade(session, FinancialEventType.BUY, "100", "30")
     register_trade(session, FinancialEventType.BUY, "100", "40")
     register_trade(session, FinancialEventType.SELL, "50", "50")
@@ -58,7 +61,9 @@ def test_market_price_handles_gain_loss_and_break_even(
     unrealized_result: str,
     return_percentage: Decimal,
 ) -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     register_trade(session, FinancialEventType.BUY, "100", "30")
 
     position = session.update_market_price(
@@ -72,7 +77,9 @@ def test_market_price_handles_gain_loss_and_break_even(
 
 
 def test_successive_price_updates_only_change_valuation() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     register_trade(session, FinancialEventType.BUY, "100", "30")
 
     first = session.update_market_price(ticker="PETR4", current_price=Decimal("35")).positions[0]
@@ -88,7 +95,9 @@ def test_successive_price_updates_only_change_valuation() -> None:
 
 @pytest.mark.parametrize("current_price", [Decimal("0"), Decimal("-10")])
 def test_rejects_non_positive_market_price(current_price: Decimal) -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     register_trade(session, FinancialEventType.BUY, "100", "30")
 
     with pytest.raises(ValueError, match="preço atual"):
@@ -96,7 +105,9 @@ def test_rejects_non_positive_market_price(current_price: Decimal) -> None:
 
 
 def test_zero_position_has_zero_unrealized_values() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     register_trade(session, FinancialEventType.BUY, "100", "30")
     register_trade(session, FinancialEventType.SELL, "100", "50")
 

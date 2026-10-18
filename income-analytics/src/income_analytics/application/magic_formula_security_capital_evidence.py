@@ -119,11 +119,7 @@ class CvmFcaSecurityParser:
             raise ValueError("FCA oficial é obrigatória para a identidade de security.")
         with ZipFile(__import__("io").BytesIO(dataset.payload)) as archive:
             name = next(
-                (
-                    item
-                    for item in archive.namelist()
-                    if self.filename_fragment in item.casefold()
-                ),
+                (item for item in archive.namelist() if self.filename_fragment in item.casefold()),
                 None,
             )
             if name is None:
@@ -156,9 +152,9 @@ class CvmFcaSecurityParser:
                             form_version=(row["Versao"] or "").strip(),
                             form_id=form_id,
                             ticker=ticker,
-                            preferred_share_class=(
-                                row["Sigla_Classe_Acao_Preferencial"] or ""
-                            ).strip().upper(),
+                            preferred_share_class=(row["Sigla_Classe_Acao_Preferencial"] or "")
+                            .strip()
+                            .upper(),
                             security_type=(row["Valor_Mobiliario"] or "").strip(),
                             valid_from=self._optional_date(row["Data_Inicio_Negociacao"]),
                             valid_to=self._optional_date(row["Data_Fim_Negociacao"]),
@@ -334,5 +330,13 @@ class SecurityCapitalEvidenceAssembler:
             ("PN", "ISSUED_SHARES"): "QT_ACAO_PREF_CAP_INTEGR",
             ("PN", "TREASURY_SHARES"): "QT_ACAO_PREF_TESOURO",
         }.get((share_class, record_type), "DERIVED_OUTSTANDING")
-        return "|".join((composition.source_reference, composition.cnpj, composition.reference_date,
-                         share_class, record_type, column))
+        return "|".join(
+            (
+                composition.source_reference,
+                composition.cnpj,
+                composition.reference_date,
+                share_class,
+                record_type,
+                column,
+            )
+        )

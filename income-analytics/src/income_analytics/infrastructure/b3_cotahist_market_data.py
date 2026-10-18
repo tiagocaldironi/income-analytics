@@ -31,13 +31,9 @@ class B3CotahistMarketDataProvider:
     current_annual_archive_max_age = timedelta(hours=12)
     current_annual_archive_retry_interval = timedelta(minutes=15)
 
-    def __init__(
-        self, *, cache_directory: Path | None = None, timeout_seconds: float = 90
-    ) -> None:
+    def __init__(self, *, cache_directory: Path | None = None, timeout_seconds: float = 90) -> None:
         configured_directory = os.getenv("INCOME_ANALYTICS_COTAHIST_CACHE")
-        self._cache_directory = cache_directory or Path(
-            configured_directory or "data/cotahist"
-        )
+        self._cache_directory = cache_directory or Path(configured_directory or "data/cotahist")
         self._timeout_seconds = timeout_seconds
         self._cache_lock = RLock()
         self._current_annual_refresh_attempted_at: datetime | None = None
@@ -114,9 +110,7 @@ class B3CotahistMarketDataProvider:
                     f" A renovação do arquivo COTAHIST {effective_date.year} também falhou: "
                     f"{refresh_error}"
                 )
-            raise MarketDataUnavailable(
-                detail
-            )
+            raise MarketDataUnavailable(detail)
         observed_date, close = max(candidates, key=lambda item: item[0])
         return MarketPriceObservation(
             symbol=normalized_symbol,
@@ -174,16 +168,19 @@ class B3CotahistMarketDataProvider:
         self, symbol: str, *, start_date: date, end_date: date
     ) -> tuple[MarketPriceObservation, ...]:
         """Return the persisted-source daily close series for one B3 ticker."""
-        series = self.history_many(
-            (symbol,), start_date=start_date, end_date=end_date
-        ).get(symbol.strip().upper(), ())
+        series = self.history_many((symbol,), start_date=start_date, end_date=end_date).get(
+            symbol.strip().upper(), ()
+        )
         if not series:
             raise MarketDataUnavailable("Não foi encontrada série histórica B3 para este ativo.")
         return series
 
     def history_many(
-        self, symbols: tuple[str, ...] | list[str] | set[str], *,
-        start_date: date, end_date: date,
+        self,
+        symbols: tuple[str, ...] | list[str] | set[str],
+        *,
+        start_date: date,
+        end_date: date,
     ) -> dict[str, tuple[MarketPriceObservation, ...]]:
         """Read several tickers by scanning each cached archive only once."""
         if end_date < start_date:
@@ -194,23 +191,35 @@ class B3CotahistMarketDataProvider:
         by_symbol: dict[str, dict[date, Decimal]] = {symbol: {} for symbol in normalized}
         for archive in self._archives_for(start_date, end_date):
             self._prices_for_symbols_in_archive(
-                archive, symbols=normalized, start_date=start_date, end_date=end_date,
+                archive,
+                symbols=normalized,
+                start_date=start_date,
+                end_date=end_date,
                 result=by_symbol,
             )
         return {
             symbol: tuple(
                 MarketPriceObservation(
-                    symbol=symbol, price=close, currency_code="BRL",
-                    effective_date=quote_date, source="b3_cotahist",
+                    symbol=symbol,
+                    price=close,
+                    currency_code="BRL",
+                    effective_date=quote_date,
+                    source="b3_cotahist",
                 )
                 for quote_date, close in sorted(prices.items())
             )
-            for symbol, prices in by_symbol.items() if prices
+            for symbol, prices in by_symbol.items()
+            if prices
         }
 
     def _prices_for_symbols_in_archive(
-        self, archive_path: Path, *, symbols: set[str], start_date: date,
-        end_date: date, result: dict[str, dict[date, Decimal]],
+        self,
+        archive_path: Path,
+        *,
+        symbols: set[str],
+        start_date: date,
+        end_date: date,
+        result: dict[str, dict[date, Decimal]],
     ) -> None:
         try:
             with ZipFile(archive_path) as archive:
@@ -227,9 +236,7 @@ class B3CotahistMarketDataProvider:
                         if symbol not in symbols:
                             continue
                         raw_date = raw_record[2:10].decode("ascii")
-                        quote_date = date(
-                            int(raw_date[:4]), int(raw_date[4:6]), int(raw_date[6:8])
-                        )
+                        quote_date = date(int(raw_date[:4]), int(raw_date[4:6]), int(raw_date[6:8]))
                         if not start_date <= quote_date <= end_date:
                             continue
                         close = Decimal(raw_record[108:121].decode("ascii")) / Decimal("100")
@@ -276,9 +283,7 @@ class B3CotahistMarketDataProvider:
                     except MarketDataUnavailable as error:
                         cause = error.__cause__
                         self._annual_archive_refresh_errors[year] = (
-                            f"{type(cause).__name__}: {cause}"
-                            if cause
-                            else str(error)
+                            f"{type(cause).__name__}: {cause}" if cause else str(error)
                         )
                     else:
                         self._current_annual_refresh_attempted_at = None
@@ -322,9 +327,7 @@ class B3CotahistMarketDataProvider:
                         if raw_record[12:24].decode("latin-1").strip() != symbol:
                             continue
                         raw_date = raw_record[2:10].decode("ascii")
-                        quote_date = date(
-                            int(raw_date[:4]), int(raw_date[4:6]), int(raw_date[6:8])
-                        )
+                        quote_date = date(int(raw_date[:4]), int(raw_date[4:6]), int(raw_date[6:8]))
                         if not start_date <= quote_date <= end_date:
                             continue
                         close = Decimal(raw_record[108:121].decode("ascii")) / Decimal("100")
@@ -354,9 +357,7 @@ class B3CotahistMarketDataProvider:
                         if raw_record[12:24].decode("latin-1").strip() != symbol:
                             continue
                         raw_date = raw_record[2:10].decode("ascii")
-                        quote_date = date(
-                            int(raw_date[:4]), int(raw_date[4:6]), int(raw_date[6:8])
-                        )
+                        quote_date = date(int(raw_date[:4]), int(raw_date[4:6]), int(raw_date[6:8]))
                         if not start_date <= quote_date <= end_date:
                             continue
                         close = Decimal(raw_record[108:121].decode("ascii")) / Decimal("100")

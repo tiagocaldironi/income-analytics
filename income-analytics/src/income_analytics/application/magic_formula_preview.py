@@ -20,7 +20,8 @@ def build_preview(universe: dict) -> dict:
     if universe["tool_status"] != "VALIDATION_REQUIRED" or universe["ranking_status"] != "INACTIVE":
         raise ValueError("PREVIEW_REQUIRES_BLOCKED_PRODUCTION_RANKING")
     complete = [
-        issuer for issuer in universe["issuers"]
+        issuer
+        for issuer in universe["issuers"]
         if issuer["methodology_eligibility"] == "ELIGIBLE"
         and issuer["data_readiness_status"] == "FULL_DATA_READY"
     ]

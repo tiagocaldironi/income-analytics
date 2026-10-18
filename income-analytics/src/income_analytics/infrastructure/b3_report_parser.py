@@ -176,13 +176,23 @@ class B3NegotiationReportParser:
                 status, detail = B3RowStatus.INVALID, "Campos obrigatórios inválidos na negociação."
             elif quantity <= 0 or unit_price <= 0:
                 status, detail = B3RowStatus.INVALID, "Quantidade e preço devem ser positivos."
-            parsed.append(B3ParsedRow(
-                report_type=self.report_type, source_row=source_row, status=status,
-                source_symbol=source_symbol, normalized_symbol=normalized_symbol,
-                event_date=event_date, event_type=event_type,
-                institution=_cell(row, columns["institution"]) or None, market=market,
-                quantity=quantity, unit_price=unit_price, total_value=total_value, detail=detail,
-            ))
+            parsed.append(
+                B3ParsedRow(
+                    report_type=self.report_type,
+                    source_row=source_row,
+                    status=status,
+                    source_symbol=source_symbol,
+                    normalized_symbol=normalized_symbol,
+                    event_date=event_date,
+                    event_type=event_type,
+                    institution=_cell(row, columns["institution"]) or None,
+                    market=market,
+                    quantity=quantity,
+                    unit_price=unit_price,
+                    total_value=total_value,
+                    detail=detail,
+                )
+            )
         return tuple(parsed)
 
 
@@ -201,7 +211,9 @@ class B3MovementReportParser:
                 continue
             original_movement = _cell(row, columns["movement"]) or None
             movement = _normalized(original_movement or "")
-            direction = _normalized(_cell(row, direction_column)) if direction_column is not None else ""
+            direction = (
+                _normalized(_cell(row, direction_column)) if direction_column is not None else ""
+            )
             income_type = {
                 "DIVIDENDO": "DIVIDEND",
                 "JUROSSOBRECAPITALPROPRIO": "JCP",
@@ -220,7 +232,10 @@ class B3MovementReportParser:
             if movement == "TRANSFERENCIALIQUIDACAO":
                 event_type = {"CREDITO": "BUY", "DEBITO": "SELL"}.get(direction)
                 if not source_symbol or event_date is None or quantity is None or quantity <= 0:
-                    status, detail = B3RowStatus.INVALID, "Quantidade ou identificação inválida na liquidação."
+                    status, detail = (
+                        B3RowStatus.INVALID,
+                        "Quantidade ou identificação inválida na liquidação.",
+                    )
                 elif event_type is None:
                     status, detail = B3RowStatus.REVIEW_REQUIRED, "DIRECAO_LIQUIDACAO_DESCONHECIDA"
             elif event_type is not None:
@@ -234,7 +249,10 @@ class B3MovementReportParser:
                     or unit_price <= 0
                     or total_value <= 0
                 ):
-                    status, detail = B3RowStatus.INVALID, "Campos obrigatórios inválidos na operação."
+                    status, detail = (
+                        B3RowStatus.INVALID,
+                        "Campos obrigatórios inválidos na operação.",
+                    )
             elif income_type is None:
                 status, detail = (
                     (B3RowStatus.UNSUPPORTED, "CUSTODY_TRANSFER")
@@ -259,20 +277,37 @@ class B3MovementReportParser:
                         )
                     else:
                         withheld_tax = gross_amount - total_value
-            parsed.append(B3ParsedRow(
-                report_type=self.report_type, source_row=source_row, status=status,
-                source_symbol=source_symbol, normalized_symbol=source_symbol,
-                event_date=event_date, event_type=event_type, income_type=income_type,
-                institution=_cell(row, columns["institution"]) or None,
-                quantity=quantity, unit_price=unit_price, total_value=total_value,
-                gross_amount=gross_amount, withheld_tax=withheld_tax, detail=detail,
-                original_movement=original_movement, direction=direction or None,
-                source_date_type="SETTLEMENT_DATE" if movement == "TRANSFERENCIALIQUIDACAO" else None,
-                quantity_status=("COMPLETE" if movement == "TRANSFERENCIALIQUIDACAO" else None),
-                financial_status=(
-                    "DATA_GAP" if movement == "TRANSFERENCIALIQUIDACAO"
-                    and (unit_price is None or total_value is None)
-                    else "COMPLETE" if movement == "TRANSFERENCIALIQUIDACAO" else None
-                ),
-            ))
+            parsed.append(
+                B3ParsedRow(
+                    report_type=self.report_type,
+                    source_row=source_row,
+                    status=status,
+                    source_symbol=source_symbol,
+                    normalized_symbol=source_symbol,
+                    event_date=event_date,
+                    event_type=event_type,
+                    income_type=income_type,
+                    institution=_cell(row, columns["institution"]) or None,
+                    quantity=quantity,
+                    unit_price=unit_price,
+                    total_value=total_value,
+                    gross_amount=gross_amount,
+                    withheld_tax=withheld_tax,
+                    detail=detail,
+                    original_movement=original_movement,
+                    direction=direction or None,
+                    source_date_type="SETTLEMENT_DATE"
+                    if movement == "TRANSFERENCIALIQUIDACAO"
+                    else None,
+                    quantity_status=("COMPLETE" if movement == "TRANSFERENCIALIQUIDACAO" else None),
+                    financial_status=(
+                        "DATA_GAP"
+                        if movement == "TRANSFERENCIALIQUIDACAO"
+                        and (unit_price is None or total_value is None)
+                        else "COMPLETE"
+                        if movement == "TRANSFERENCIALIQUIDACAO"
+                        else None
+                    ),
+                )
+            )
         return tuple(parsed)

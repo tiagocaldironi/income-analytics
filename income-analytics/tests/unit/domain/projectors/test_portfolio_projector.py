@@ -43,17 +43,13 @@ def test_historical_projection_uses_latest_price_not_after_requested_date() -> N
     event = create_buy_event()
     valuation_date = date(2026, 1, 10)
     prices = (
-        MarketPrice(
-            asset=event.asset, price=Money(Decimal("9")), effective_date=date(2026, 1, 9)
-        ),
+        MarketPrice(asset=event.asset, price=Money(Decimal("9")), effective_date=date(2026, 1, 9)),
         MarketPrice(
             asset=event.asset, price=Money(Decimal("11")), effective_date=date(2026, 1, 11)
         ),
     )
 
-    projection = PortfolioProjector.project(
-        (event,), market_prices=prices, as_of=valuation_date
-    )
+    projection = PortfolioProjector.project((event,), market_prices=prices, as_of=valuation_date)
 
     assert projection.positions[0].current_price == Money(Decimal("9"))
 
@@ -105,17 +101,13 @@ def test_historical_price_lookup_respects_first_and_last_boundaries(
 ) -> None:
     event = create_buy_event()
     prices = (
-        MarketPrice(
-            asset=event.asset, price=Money(Decimal("9")), effective_date=date(2026, 1, 9)
-        ),
+        MarketPrice(asset=event.asset, price=Money(Decimal("9")), effective_date=date(2026, 1, 9)),
         MarketPrice(
             asset=event.asset, price=Money(Decimal("11")), effective_date=date(2026, 1, 11)
         ),
     )
 
-    projection = PortfolioProjector.project(
-        (event,), market_prices=prices, as_of=valuation_date
-    )
+    projection = PortfolioProjector.project((event,), market_prices=prices, as_of=valuation_date)
 
     actual = projection.positions[0].current_price
     assert actual == (Money(expected_price) if expected_price is not None else None)
@@ -132,9 +124,7 @@ def test_chronological_timeline_matches_independent_as_of_projection() -> None:
     )
     dates = (first_date, second_date, third_date)
 
-    actual = PortfolioProjector.project_timeline(
-        (event,), prices, dates, max_price_age_days=7
-    )
+    actual = PortfolioProjector.project_timeline((event,), prices, dates, max_price_age_days=7)
     expected = tuple(
         PortfolioProjector.project_as_of(
             (event,),
@@ -173,14 +163,22 @@ def test_chronological_timeline_applies_each_event_once(monkeypatch) -> None:
 def test_projects_sell_with_financial_data_gap_without_inventing_cash_or_result() -> None:
     asset = build_asset()
     buy = FinancialEvent(
-        account_id=uuid4(), asset=asset, event_type=FinancialEventType.BUY,
-        occurred_at=datetime(2026, 1, 9, tzinfo=UTC), quantity=Quantity(Decimal("50")),
-        unit_price=Money(Decimal("10")), effective_date=date(2026, 1, 9),
+        account_id=uuid4(),
+        asset=asset,
+        event_type=FinancialEventType.BUY,
+        occurred_at=datetime(2026, 1, 9, tzinfo=UTC),
+        quantity=Quantity(Decimal("50")),
+        unit_price=Money(Decimal("10")),
+        effective_date=date(2026, 1, 9),
     )
     sell = FinancialEvent(
-        account_id=buy.account_id, asset=asset, event_type=FinancialEventType.SELL,
-        occurred_at=datetime(2026, 1, 10, tzinfo=UTC), quantity=Quantity(Decimal("31")),
-        metadata={"financial_status": "DATA_GAP"}, effective_date=date(2026, 1, 10),
+        account_id=buy.account_id,
+        asset=asset,
+        event_type=FinancialEventType.SELL,
+        occurred_at=datetime(2026, 1, 10, tzinfo=UTC),
+        quantity=Quantity(Decimal("31")),
+        metadata={"financial_status": "DATA_GAP"},
+        effective_date=date(2026, 1, 10),
     )
 
     portfolio = PortfolioProjector.project([buy, sell])

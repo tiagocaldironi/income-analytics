@@ -138,7 +138,9 @@ def parse_b3_index_table(
 class B3BenchmarkDataProvider:
     """Fetch benchmark index history from B3's public daily-evolution API."""
 
-    _base_url = "https://sistemaswebb3-listados.b3.com.br/indexStatisticsProxy/IndexCall/GetPortfolioDay/"
+    _base_url = (
+        "https://sistemaswebb3-listados.b3.com.br/indexStatisticsProxy/IndexCall/GetPortfolioDay/"
+    )
 
     def __init__(self, *, timeout_seconds: float = 15) -> None:
         self._timeout_seconds = timeout_seconds
@@ -204,9 +206,7 @@ class IVVB11BenchmarkDataProvider:
         if benchmark.upper() != "IVVB11":
             raise BenchmarkDataUnavailable(f"Série comparativa não suportada: {benchmark}.")
         try:
-            prices = self._market_data.history(
-                "IVVB11", start_date=start_date, end_date=end_date
-            )
+            prices = self._market_data.history("IVVB11", start_date=start_date, end_date=end_date)
         except MarketDataUnavailable as error:
             raise BenchmarkDataUnavailable(
                 "Não foi possível consultar o histórico de IVVB11 na B3."

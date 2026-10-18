@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 from income_analytics.api.routers import dashboard
 
 
@@ -38,7 +39,6 @@ def test_b3_fallback_reports_both_source_errors(monkeypatch):
     assert "ticker not in B3 archive" in message
 
 
-
 def test_etf_fallback_uses_b3_category_provider_and_records_attempts(monkeypatch):
     class FailedProvider:
         def latest_price(self, _symbol):
@@ -48,10 +48,15 @@ def test_etf_fallback_uses_b3_category_provider_and_records_attempts(monkeypatch
         def latest_price(self, symbol):
             from datetime import date
             from decimal import Decimal
+
             from income_analytics.application.market_data import MarketPriceObservation
+
             return MarketPriceObservation(
-                symbol=symbol, price=Decimal("112.34"), currency_code="BRL",
-                effective_date=date(2026, 10, 6), source="b3_etf",
+                symbol=symbol,
+                price=Decimal("112.34"),
+                currency_code="BRL",
+                effective_date=date(2026, 10, 6),
+                source="b3_etf",
             )
 
     class ShouldNotBeCalled:
@@ -83,14 +88,14 @@ def test_brazilian_etf_uses_category_fallback_chain():
     assert provider._category_provider.source == "b3_etf"
 
 
-
-
-
-
 def test_batched_etf_fallback_keeps_b3_source_and_marks_later_provider_unused(monkeypatch):
     from datetime import date
     from decimal import Decimal
-    from income_analytics.application.market_data import MarketDataUnavailable, MarketPriceObservation
+
+    from income_analytics.application.market_data import (
+        MarketDataUnavailable,
+        MarketPriceObservation,
+    )
 
     class FailedBrapiBatch:
         def latest_prices(self, _symbols):
@@ -100,10 +105,14 @@ def test_batched_etf_fallback_keeps_b3_source_and_marks_later_provider_unused(mo
         def latest_prices(self, symbols):
             return {
                 symbol: MarketPriceObservation(
-                    symbol=symbol, price=Decimal("112.34"), currency_code="BRL",
-                    effective_date=date(2026, 10, 6), source="b3_etf",
+                    symbol=symbol,
+                    price=Decimal("112.34"),
+                    currency_code="BRL",
+                    effective_date=date(2026, 10, 6),
+                    source="b3_etf",
                 )
-                for symbol in symbols if symbol in {"AUPO11", "FIXA11"}
+                for symbol in symbols
+                if symbol in {"AUPO11", "FIXA11"}
             }
 
     class HistoryMustNotRun:
@@ -125,19 +134,23 @@ def test_batched_etf_fallback_keeps_b3_source_and_marks_later_provider_unused(mo
     )
 
 
-
 def test_batched_fallback_preserves_single_quote_brapi_for_missing_batch_rows(monkeypatch):
     from datetime import date
     from decimal import Decimal
+
     from income_analytics.application.market_data import MarketPriceObservation
 
     class Brapi:
         def latest_prices(self, _symbols):
             return {}
+
         def latest_price(self, symbol):
             return MarketPriceObservation(
-                symbol=symbol, price=Decimal("10"), currency_code="BRL",
-                effective_date=date(2026, 10, 6), source="brapi_public",
+                symbol=symbol,
+                price=Decimal("10"),
+                currency_code="BRL",
+                effective_date=date(2026, 10, 6),
+                source="brapi_public",
             )
 
     class CategoryMustNotRun:

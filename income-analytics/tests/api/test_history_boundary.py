@@ -3,15 +3,19 @@ from decimal import Decimal
 
 import pytest
 from fastapi import HTTPException
+from starlette.requests import Request
 
 from income_analytics.api.routers import dashboard
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 
 
 def _session_without_a_confirmed_opening_balance() -> PortfolioSession:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="PETR4",
@@ -57,15 +61,28 @@ def test_compact_dashboard_payload_omits_unused_history(monkeypatch) -> None:
 
 
 def test_dashboard_get_never_rebuilds_a_missing_read_model(monkeypatch) -> None:
-    monkeypatch.setattr(dashboard.dashboard_snapshot_repository, "get", lambda: None)
+    repository_factory = dashboard.dashboard_snapshot_repository._factory
+    monkeypatch.setattr(repository_factory, "get", lambda _repository: None)
     monkeypatch.setattr(
         dashboard,
         "rebuild_portfolio_dashboard_snapshot",
         lambda: pytest.fail("GET must not rebuild the dashboard read model"),
     )
 
+    request = Request(
+        {
+            "type": "http",
+            "method": "GET",
+            "path": "/api/portfolio/dashboard",
+            "headers": [],
+            "query_string": b"",
+            "server": ("test", 80),
+            "client": ("test", 1),
+            "scheme": "http",
+        }
+    )
     with pytest.raises(HTTPException) as error:
-        dashboard.get_portfolio_dashboard()
+        dashboard.get_portfolio_dashboard(request)
 
     assert error.value.status_code == 503
 
@@ -95,6 +112,5 @@ def test_portfolio_history_does_not_publish_reconstructed_cash_as_balance(monkey
     assert payload["history_boundary"]["source"] == "FIRST_OBSERVED_FINANCIAL_EVENT"
     assert all(point["cash"] is None for point in payload["snapshots"])
     assert all(
-        point["reconstructed_cash_effect"] == Decimal("-1000")
-        for point in payload["snapshots"]
+        point["reconstructed_cash_effect"] == Decimal("-1000") for point in payload["snapshots"]
     )

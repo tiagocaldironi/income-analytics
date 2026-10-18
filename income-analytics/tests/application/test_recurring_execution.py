@@ -1,13 +1,16 @@
 from datetime import date
 from decimal import Decimal
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.recurring_rule import RecurrenceFrequency, RecurringRule
 
 
 def test_due_recurring_flow_executes_once_and_advances_cursor() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     rule = RecurringRule(
         event_type=FinancialEventType.DEPOSIT,
         amount=Decimal("100"),
@@ -26,7 +29,9 @@ def test_due_recurring_flow_executes_once_and_advances_cursor() -> None:
 
 
 def test_past_rule_executes_only_until_its_end_date_and_never_creates_future_events() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     rule = RecurringRule(
         event_type=FinancialEventType.DEPOSIT,
         amount=Decimal("100"),
@@ -49,7 +54,9 @@ def test_past_rule_executes_only_until_its_end_date_and_never_creates_future_eve
 
 
 def test_deleting_rule_preserves_financial_events_already_created() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     rule = RecurringRule(
         event_type=FinancialEventType.DEPOSIT,
         amount=Decimal("100"),

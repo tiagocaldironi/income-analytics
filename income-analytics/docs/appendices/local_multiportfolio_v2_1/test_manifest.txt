@@ -1,0 +1,28 @@
+Certification run (2026-10-18)
+
+Full suite:
+  py -3.14 -m pytest -q
+  882 passed, 6 deprecation warnings, 221.89s
+
+Portfolio context browser-independent contract:
+  node tests/frontend/multiportfolio_context_v2.mjs
+  passed
+
+Static checks:
+  py -3.14 -m ruff check <109 changed Python files relative to origin/develop>
+  passed
+  py -3.14 -m ruff check .
+  35 diagnostics in 8 files, all outside the 109 V2-changed Python files
+
+Local real database (read-only):
+  revision 0020_shared_pension_quota_identity
+  integrity_check=ok; foreign_key_check=0; MAIN count=1; portfolio orphans=0
+  source checksum unchanged after evidence collection; test writes=0
+  backup verified logically by integrity, revision, schema and table row counts
+
+Read-only local HTTP:
+  legacy headerless equals explicit MAIN; malformed=400; nonexistent=404
+  /api/portfolio, /api/portfolio/dashboard, /api/portfolio/holdings: 200 and stored raw hashes match
+
+Browser desktop/mobile: NOT_RUN (tool policy limitation).
+Dedicated isolated HTTP server: NOT_RUN (process-launch policy limitation).

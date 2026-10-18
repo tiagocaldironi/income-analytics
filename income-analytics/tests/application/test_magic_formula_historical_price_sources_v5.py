@@ -115,8 +115,7 @@ def test_correct_isin_with_historical_ticker_is_validated_by_identity():
 def test_wrong_class_is_rejected_even_when_ticker_is_present():
     wrong_class = {**IDENTITY, "security_class": "PN"}
     assert (
-        exact_price_candidate(wrong_class, [], "2025-12-30")["reason"]
-        == "CLASS_OR_ISIN_MISMATCH"
+        exact_price_candidate(wrong_class, [], "2025-12-30")["reason"] == "CLASS_OR_ISIN_MISMATCH"
     )
     wrong_spec = {
         "ticker": "TEST3",

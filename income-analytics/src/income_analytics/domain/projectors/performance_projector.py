@@ -92,9 +92,7 @@ class PerformanceProjector:
         valuation_dates = cls._coverage_dates(start_date, end_date, price_stream)
         valuation_dates.update((start_date, end_date))
         period_start = start_date
-        for flow_date in sorted(
-            item for item in twr_flow_dates if start_date <= item <= end_date
-        ):
+        for flow_date in sorted(item for item in twr_flow_dates if start_date <= item <= end_date):
             before_date = flow_date - timedelta(days=1)
             if before_date >= period_start:
                 valuation_dates.add(before_date)
@@ -115,12 +113,22 @@ class PerformanceProjector:
             )
         )
         beginning = cls._equity_from_projection(
-            event_stream, portfolio_series[start_date], start_date, rate_stream, base_currency,
-            fx_index=fx_index, funding_ledger=funding_ledger
+            event_stream,
+            portfolio_series[start_date],
+            start_date,
+            rate_stream,
+            base_currency,
+            fx_index=fx_index,
+            funding_ledger=funding_ledger,
         )
         ending = cls._equity_from_projection(
-            event_stream, portfolio_series[end_date], end_date, rate_stream, base_currency,
-            fx_index=fx_index, funding_ledger=funding_ledger
+            event_stream,
+            portfolio_series[end_date],
+            end_date,
+            rate_stream,
+            base_currency,
+            fx_index=fx_index,
+            funding_ledger=funding_ledger,
         )
         coverage_ratio, missing_assets, missing_value, missing_periods = cls._coverage(
             event_stream,
@@ -264,8 +272,12 @@ class PerformanceProjector:
             )
         opening = cls._equity_from_projection(
             events,
-            portfolio_series[start_date], start_date, fx_rates, base_currency,
-            fx_index=fx_index, funding_ledger=funding_ledger
+            portfolio_series[start_date],
+            start_date,
+            fx_rates,
+            base_currency,
+            fx_index=fx_index,
+            funding_ledger=funding_ledger,
         )
         period_start = start_date
         for flow_date in ordered_flow_dates:
@@ -273,8 +285,12 @@ class PerformanceProjector:
             if before_date >= period_start:
                 closing = cls._equity_from_projection(
                     events,
-                    portfolio_series[before_date], before_date, fx_rates, base_currency,
-                    fx_index=fx_index, funding_ledger=funding_ledger
+                    portfolio_series[before_date],
+                    before_date,
+                    fx_rates,
+                    base_currency,
+                    fx_index=fx_index,
+                    funding_ledger=funding_ledger,
                 )
                 if opening is None or closing is None or opening.is_zero:
                     return None, tuple(periods)
@@ -288,15 +304,23 @@ class PerformanceProjector:
             opening, period_start = (
                 cls._equity_from_projection(
                     events,
-                    portfolio_series[flow_date], flow_date, fx_rates, base_currency,
-                    fx_index=fx_index, funding_ledger=funding_ledger
+                    portfolio_series[flow_date],
+                    flow_date,
+                    fx_rates,
+                    base_currency,
+                    fx_index=fx_index,
+                    funding_ledger=funding_ledger,
                 ),
                 flow_date,
             )
         ending = cls._equity_from_projection(
             events,
-            portfolio_series[end_date], end_date, fx_rates, base_currency,
-            fx_index=fx_index, funding_ledger=funding_ledger
+            portfolio_series[end_date],
+            end_date,
+            fx_rates,
+            base_currency,
+            fx_index=fx_index,
+            funding_ledger=funding_ledger,
         )
         if opening is None or ending is None or opening.is_zero:
             return None, tuple(periods)

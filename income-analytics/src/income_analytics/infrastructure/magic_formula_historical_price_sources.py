@@ -118,9 +118,7 @@ def exact_price_candidate(identity: dict, records: list[dict], reference_date: s
     if not same_isin:
         return {"status": "MISSING", "reason": "NO_MATCHING_ISIN"}
     same_class = [
-        record
-        for record in same_isin
-        if record.get("security_class") == identity["security_class"]
+        record for record in same_isin if record.get("security_class") == identity["security_class"]
     ]
     if not same_class:
         return {"status": "REJECTED", "reason": "CLASS_MISMATCH"}

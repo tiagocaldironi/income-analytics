@@ -62,8 +62,6 @@ class RecurringRule:
             frequency=self.frequency,
             next_execution_date=next_execution_date,
             end_execution_date=self.end_execution_date,
-            active=self.active and (
-                self.end_execution_date is None
-                or next_execution_date <= self.end_execution_date
-            ),
+            active=self.active
+            and (self.end_execution_date is None or next_execution_date <= self.end_execution_date),
         )

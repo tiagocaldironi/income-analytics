@@ -7,8 +7,10 @@ from income_analytics.domain.recurring_rule import RecurrenceFrequency, Recurrin
 
 def test_monthly_rule_advances_on_short_months_without_duplicate_date() -> None:
     rule = RecurringRule(
-        event_type=FinancialEventType.DEPOSIT, amount=Decimal("100"),
-        frequency=RecurrenceFrequency.MONTHLY, next_execution_date=date(2026, 1, 31),
+        event_type=FinancialEventType.DEPOSIT,
+        amount=Decimal("100"),
+        frequency=RecurrenceFrequency.MONTHLY,
+        next_execution_date=date(2026, 1, 31),
     )
 
     assert rule.advance().next_execution_date == date(2026, 2, 28)
