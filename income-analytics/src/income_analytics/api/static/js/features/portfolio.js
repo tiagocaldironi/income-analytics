@@ -231,10 +231,10 @@ function renderHoldingRow(asset, fixedIncome, assetClass) {
   const title = fixedIncome ? (asset.display_name || asset.name) : asset.ticker;
   const applicationCount = asset.lot_count || 1;
   const subtitle = fixedIncome
-    ? `${asset.instrument || "Renda fixa"} · ${asset.indexer || "Condição informada"}${asset.condition ? ` · ${asset.condition}` : ""} · ${applicationCount === 1 ? "1 aplicação" : `${applicationCount} aplicações`}`
+    ? `${asset.instrument || "Renda fixa"} · ${asset.indexer || "Condição informada"}${asset.condition ? ` · ${asset.condition}` : ""}`
     : asset.price_as_of ? `Cotação de ${new Date(`${asset.price_as_of}T00:00:00`).toLocaleDateString("pt-BR")}` : "";
-  const quantity = fixedIncome && asset.lot_count > 1
-    ? `${asset.lot_count} aplicações`
+  const quantity = fixedIncome
+    ? applicationCount
     : asset.quantity;
   const tradeActions = !fixedIncome && !["PENSION", "REAL_ESTATE"].includes(assetClass)
     ? ["BUY", "SELL"].map(type => `<button type="button" role="menuitem" data-open-operation data-operation-type="${type}" data-operation-class="${assetClass}" data-operation-ticker="${escapeHtml(asset.ticker)}" data-operation-name="${escapeHtml(asset.name)}" data-operation-country="${escapeHtml(asset.country || "")}" data-operation-currency="${escapeHtml(asset.currency_code || "BRL")}" data-operation-sector="${escapeHtml(asset.sector || "")}">${type === "BUY" ? "Nova compra" : "Registrar venda"}</button>`).join("")
