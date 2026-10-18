@@ -35,7 +35,7 @@ def test_magic_formula_page_uses_persisted_ranking_and_transparent_screening() -
     assert "informações públicas disponíveis até ${financialCutoff}" in tools
     assert 'data.status === "NO_PUBLISHED_RANKING"' in tools
     assert "O ranking ainda não está disponível." in tools
-    assert 'data-mf-retry' in tools and "Tentar novamente" in tools
+    assert "data-mf-retry" in tools and "Tentar novamente" in tools
     assert "INVALID_MAGIC_FORMULA_RESPONSE" in tools
     assert "controller.abort()" in (STATIC / "js/api.js").read_text(encoding="utf-8")
     assert "exclude_retail" in client and "exclude_aviation" in client
@@ -314,11 +314,11 @@ def test_portfolio_history_chart_uses_economic_result_and_preserves_negative_ret
     assert (
         'event.target.matches("#portfolio-history-period, #portfolio-history-class")' in portfolio
     )
-    assert 'data: points.map(point => Number(point.total_result))' in portfolio
-    assert 'data: points.map(point => Number(point.capital_gain))' not in portfolio
-    assert 'item.market_value !== null && Number(item.market_value) > 0' in portfolio
-    assert 'Number(item.market_value) / total' in portfolio
-    assert 'value: Number(group.market_value)' in portfolio
+    assert "data: points.map(point => Number(point.total_result))" in portfolio
+    assert "data: points.map(point => Number(point.capital_gain))" not in portfolio
+    assert "item.market_value !== null && Number(item.market_value) > 0" in portfolio
+    assert "Number(item.market_value) / total" in portfolio
+    assert "value: Number(group.market_value)" in portfolio
     assert "id='history-period'" in operations
 
 

@@ -9,9 +9,7 @@ from income_analytics.api.routers.dashboard import _effective_analysis_end_date
 def test_effective_analysis_end_date_caps_future_periods_at_today() -> None:
     today = date.today()
 
-    result = _effective_analysis_end_date(
-        today - timedelta(days=1), today + timedelta(days=30)
-    )
+    result = _effective_analysis_end_date(today - timedelta(days=1), today + timedelta(days=30))
 
     assert result == today
 

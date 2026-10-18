@@ -3,6 +3,7 @@
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.application.wealth_explanation import WealthExplanationService
 from income_analytics.domain.enums.asset_class import AssetClass
@@ -24,7 +25,9 @@ def _explanation(session: PortfolioSession) -> WealthExplanationService:
 
 
 def test_retroactive_buy_and_sell_are_projected_by_effective_date() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="PETR4",
@@ -52,8 +55,12 @@ def test_retroactive_buy_and_sell_are_projected_by_effective_date() -> None:
 
 
 def test_registration_timestamp_does_not_change_historical_economics() -> None:
-    first = PortfolioSession()
-    second = PortfolioSession()
+    first = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
+    second = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     for session in (first, second):
         session.register_trade(
             event_type=FinancialEventType.BUY,
@@ -72,7 +79,9 @@ def test_registration_timestamp_does_not_change_historical_economics() -> None:
 
 
 def test_late_historical_market_price_is_eligible_at_its_reference_date() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="PETR4",
@@ -93,7 +102,9 @@ def test_late_historical_market_price_is_eligible_at_its_reference_date() -> Non
 
 
 def test_retroactive_fixed_income_uses_application_date_not_creation_time() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_fixed_income_asset(
         ticker="CDB-RETRO",
         name="CDB retroativo",
@@ -110,7 +121,9 @@ def test_retroactive_fixed_income_uses_application_date_not_creation_time() -> N
 
 
 def test_pension_and_real_estate_preserve_their_report_and_valuation_dates() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_pension_plan(
         ticker="PGBL-RETRO",
         name="Previdência",
@@ -155,7 +168,9 @@ def test_pension_and_real_estate_preserve_their_report_and_valuation_dates() -> 
 
 
 def test_recurring_occurrence_keeps_the_scheduled_economic_date() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     rule = RecurringRule(
         event_type=FinancialEventType.DEPOSIT,
         amount=Decimal("100"),
@@ -169,7 +184,9 @@ def test_recurring_occurrence_keeps_the_scheduled_economic_date() -> None:
 
 
 def test_entender_and_twr_use_retroactive_event_dates_and_rebuild_on_demand() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_external_flow(
         event_type=FinancialEventType.DEPOSIT,
         amount=Decimal("100"),

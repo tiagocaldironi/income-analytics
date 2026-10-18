@@ -89,7 +89,7 @@ class CvmStatementParser:
     def _decimal(value: str) -> Decimal | None:
         try:
             return Decimal(value.replace(",", "."))
-        except (AttributeError, InvalidOperation):
+        except AttributeError, InvalidOperation:
             return None
 
 

@@ -6,6 +6,7 @@ import pytest
 from fastapi import HTTPException
 
 from income_analytics.api.routers import dashboard
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.entities.currency import Currency
 from income_analytics.domain.entities.financial_event import FinancialEvent
@@ -46,7 +47,9 @@ def test_asset_transactions_use_canonical_asset_id_and_preserve_event_facts(monk
         event(weg, FinancialEventType.DIVIDEND, 4, source="B3", amount="12.50"),
         event(other, FinancialEventType.BUY, 5, quantity="1", unit_price="99"),
     ]
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session._assets = {"WEGE3": weg, "VALE3": other}
     session._events = events
     monkeypatch.setattr(dashboard, "session", session)
@@ -70,7 +73,9 @@ def test_asset_transactions_paginate_in_deterministic_descending_order(monkeypat
         event(asset, FinancialEventType.BUY, day, quantity="1", unit_price=str(day))
         for day in range(1, 13)
     ]
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session._assets = {"WEGE3": asset}
     session._events = events
     monkeypatch.setattr(dashboard, "session", session)
@@ -87,7 +92,9 @@ def test_asset_transactions_paginate_in_deterministic_descending_order(monkeypat
 
 def test_asset_transactions_return_empty_for_known_asset_without_events(monkeypatch):
     asset = build_brl_asset()
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session._assets = {"WEGE3": asset}
     monkeypatch.setattr(dashboard, "session", session)
 
@@ -98,7 +105,9 @@ def test_asset_transactions_return_empty_for_known_asset_without_events(monkeypa
 
 
 def test_asset_transactions_reject_unknown_identity_and_invalid_pagination(monkeypatch):
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     monkeypatch.setattr(dashboard, "session", session)
 
     with pytest.raises(HTTPException, match="Ativo não encontrado") as unknown:

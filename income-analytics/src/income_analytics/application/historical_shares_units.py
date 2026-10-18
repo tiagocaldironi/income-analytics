@@ -68,7 +68,7 @@ def resolve(issuer, capital, evidence):
                 normalized = amount * multiplier
                 if normalized != normalized.to_integral_value():
                     raise ValueError("NON_INTEGRAL_NORMALIZED_QUANTITY")
-            except (ValueError, InvalidOperation, KeyError):
+            except ValueError, InvalidOperation, KeyError:
                 result.update(
                     status="REVIEW_REQUIRED", reason_code="INVALID_OR_CONFLICTING_QUANTITY"
                 )

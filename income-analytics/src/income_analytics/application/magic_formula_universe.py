@@ -64,7 +64,7 @@ def decimal_or_none(value):
 def valid_date(value):
     try:
         return date.fromisoformat(value)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return None
 
 
@@ -145,7 +145,7 @@ def classify_candidates(candidates, canonical, reference):
                 if matches
                 else str(uuid5(NAMESPACE_URL, f"income-analytics:issuer:cvm:{code}:cnpj:{cnpj}"))
             )
-        except (ValueError, KeyError):
+        except ValueError, KeyError:
             identity = "UNRESOLVED"
         result.append(
             dict(

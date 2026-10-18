@@ -71,15 +71,17 @@ def test_sector_metadata_covers_the_165_ranked_companies_without_changing_hash(
     assert len(rows) == 165
     assert all(row.get("sector") for row in rows)
     assert all(
-        row["sector_source_reference"].startswith("fca_cia_aberta_2025.zip|")
-        for row in rows
+        row["sector_source_reference"].startswith("fca_cia_aberta_2025.zip|") for row in rows
     )
     assert published_point_in_time_ranking["ranking_snapshot_id"] == "mf-f1ee50809c83979ba221d84e"
-    assert published_point_in_time_ranking["ranking_hash"] == json.loads(
-        Path("docs/appendices/magic_formula_v12_2/ranking_snapshot.json").read_text(
-            encoding="utf-8"
-        )
-    )["ranking_hash"]
+    assert (
+        published_point_in_time_ranking["ranking_hash"]
+        == json.loads(
+            Path("docs/appendices/magic_formula_v12_2/ranking_snapshot.json").read_text(
+                encoding="utf-8"
+            )
+        )["ranking_hash"]
+    )
 
 
 def test_tools_catalog_marks_available_magic_formula_as_partial(
@@ -231,9 +233,7 @@ def test_controlled_runtime_can_disable_startup_background_jobs(monkeypatch) -> 
             raise AssertionError("Background job thread must not start in controlled mode")
 
     monkeypatch.setenv("INCOME_ANALYTICS_DISABLE_BACKGROUND_JOBS", "1")
-    monkeypatch.setattr(
-        application_main, "ensure_portfolio_dashboard_snapshot_current", lambda: {}
-    )
+    monkeypatch.setattr(application_main, "ensure_portfolio_dashboard_snapshot_current", lambda: {})
     monkeypatch.setattr(application_main, "Thread", UnexpectedThread)
 
     application_main.start_daily_data_refresh()

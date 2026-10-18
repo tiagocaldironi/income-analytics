@@ -93,14 +93,27 @@ def test_financial_investments_are_excluded_from_operating_working_capital() -> 
 def test_lineage_keeps_each_component_value_not_the_aggregate() -> None:
     records = tuple(
         CvmRawAccount(
-            "issuer", "1", "2025-12-31", "DFP", "CONSOLIDATED", statement,
-            code, code, Decimal(value), "fixture", currency_scale="UNIDADE",
+            "issuer",
+            "1",
+            "2025-12-31",
+            "DFP",
+            "CONSOLIDATED",
+            statement,
+            code,
+            code,
+            Decimal(value),
+            "fixture",
+            currency_scale="UNIDADE",
         )
         for statement, code, value in (
-            ("DRE", "3.05", "50"), ("BPA", "1.01.01", "10"),
-            ("BPP", "2.01.04", "7"), ("BPP", "2.02.01", "9"),
-            ("BPA", "1.01.03", "30"), ("BPA", "1.01.04", "20"),
-            ("BPP", "2.01.02", "15"), ("BPA", "1.02.03", "40"),
+            ("DRE", "3.05", "50"),
+            ("BPA", "1.01.01", "10"),
+            ("BPP", "2.01.04", "7"),
+            ("BPP", "2.02.01", "9"),
+            ("BPA", "1.01.03", "30"),
+            ("BPA", "1.01.04", "20"),
+            ("BPP", "2.01.02", "15"),
+            ("BPA", "1.02.03", "40"),
         )
     )
 

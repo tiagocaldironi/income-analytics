@@ -2,6 +2,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from income_analytics.api.routers import dashboard
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
@@ -20,7 +21,9 @@ def _quotes(session: PortfolioSession, start: date, end: date, *, final: Decimal
 
 
 def test_class_coverage_reports_the_actual_twr(monkeypatch) -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     start, end = date(2026, 1, 2), date(2026, 1, 30)
     session.register_trade(
         event_type=FinancialEventType.BUY,
@@ -41,7 +44,9 @@ def test_class_coverage_reports_the_actual_twr(monkeypatch) -> None:
 
 
 def test_performance_payload_income_is_limited_to_requested_period(monkeypatch) -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     start, end = date(2026, 1, 2), date(2026, 1, 30)
     session.register_trade(
         event_type=FinancialEventType.BUY,

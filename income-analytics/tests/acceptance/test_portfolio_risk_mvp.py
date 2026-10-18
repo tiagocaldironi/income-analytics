@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.benchmark_rate import BenchmarkRate
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
@@ -11,7 +12,9 @@ from income_analytics.domain.read_models.risk_projection import PortfolioReturn
 
 
 def test_risk_series_neutralizes_contribution_and_calculates_drawdown() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_external_flow(
         event_type=FinancialEventType.DEPOSIT,
         amount=Decimal("10000"),

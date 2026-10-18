@@ -59,7 +59,11 @@ class WealthExplanationService:
         converted: dict[int, Decimal] = {}
         unconverted_events = 0
         for event in events:
-            if event.event_type not in {FinancialEventType.BUY, FinancialEventType.SELL, *INCOME_EVENTS}:
+            if event.event_type not in {
+                FinancialEventType.BUY,
+                FinancialEventType.SELL,
+                *INCOME_EVENTS,
+            }:
                 continue
             amount = self._event_amount_in_base(event, closing.base_currency)
             if amount is None:
@@ -76,9 +80,21 @@ class WealthExplanationService:
         )
         rows = contributors["rows"]
         acquisitions = sum((r["flows"] for r in rows), Decimal("0"))
-        fixed_income = sum((r["valuation_change"] for r in rows if r["asset_class"] == "FIXED_INCOME"), Decimal("0"))
-        valuation_adjustments = sum((r["valuation_change"] for r in rows if not r["valuation_available"]), Decimal("0"))
-        appreciation = sum((r["valuation_change"] for r in rows if r["valuation_available"] and r["asset_class"] != "FIXED_INCOME"), Decimal("0"))
+        fixed_income = sum(
+            (r["valuation_change"] for r in rows if r["asset_class"] == "FIXED_INCOME"),
+            Decimal("0"),
+        )
+        valuation_adjustments = sum(
+            (r["valuation_change"] for r in rows if not r["valuation_available"]), Decimal("0")
+        )
+        appreciation = sum(
+            (
+                r["valuation_change"]
+                for r in rows
+                if r["valuation_available"] and r["asset_class"] != "FIXED_INCOME"
+            ),
+            Decimal("0"),
+        )
         residual = change - acquisitions - fixed_income - valuation_adjustments - appreciation
         if abs(residual) < Decimal("0.00000001"):
             residual = Decimal("0")
@@ -87,15 +103,47 @@ class WealthExplanationService:
 
         income_children = self._income_children(events, closing.base_currency, converted)
         income_total = sum((x["signed_amount"] for x in income_children), Decimal("0"))
-        dividends = sum((x["signed_amount"] for x in income_children if x["event_type"] == "DIVIDEND"), Decimal("0"))
-        jcp = sum((x["signed_amount"] for x in income_children if x["event_type"] == "INTEREST_ON_EQUITY"), Decimal("0"))
-        fii_income = sum((x["signed_amount"] for x in income_children if x["event_type"] == "FII_INCOME"), Decimal("0"))
+        dividends = sum(
+            (x["signed_amount"] for x in income_children if x["event_type"] == "DIVIDEND"),
+            Decimal("0"),
+        )
+        jcp = sum(
+            (
+                x["signed_amount"]
+                for x in income_children
+                if x["event_type"] == "INTEREST_ON_EQUITY"
+            ),
+            Decimal("0"),
+        )
+        fii_income = sum(
+            (x["signed_amount"] for x in income_children if x["event_type"] == "FII_INCOME"),
+            Decimal("0"),
+        )
         acquisition_children = self._flow_children(rows)
         components = [
-            self._component("NET_ACQUISITIONS", "Aquisições líquidas", acquisitions, acquisition_children),
-            self._component("MARKET_VALUATION", "Valorização dos ativos", appreciation, self._children(rows, lambda r: r["valuation_available"] and r["asset_class"] != "FIXED_INCOME")),
-            self._component("FIXED_INCOME_ACCRUAL", "Rentabilidade da renda fixa", fixed_income, self._children(rows, lambda r: r["asset_class"] == "FIXED_INCOME")),
-            self._component("VALUATION_ADJUSTMENTS", "Ajustes de valuation", valuation_adjustments, self._children(rows, lambda r: not r["valuation_available"])),
+            self._component(
+                "NET_ACQUISITIONS", "Aquisições líquidas", acquisitions, acquisition_children
+            ),
+            self._component(
+                "MARKET_VALUATION",
+                "Valorização dos ativos",
+                appreciation,
+                self._children(
+                    rows, lambda r: r["valuation_available"] and r["asset_class"] != "FIXED_INCOME"
+                ),
+            ),
+            self._component(
+                "FIXED_INCOME_ACCRUAL",
+                "Rentabilidade da renda fixa",
+                fixed_income,
+                self._children(rows, lambda r: r["asset_class"] == "FIXED_INCOME"),
+            ),
+            self._component(
+                "VALUATION_ADJUSTMENTS",
+                "Ajustes de valuation",
+                valuation_adjustments,
+                self._children(rows, lambda r: not r["valuation_available"]),
+            ),
             self._component("UNEXPLAINED", "Variação não explicada", residual),
         ]
         components = [x for x in components if x["signed_amount"] != 0]
@@ -103,60 +151,109 @@ class WealthExplanationService:
         reconciliation_difference = end_value - expected_end
         if abs(reconciliation_difference) < Decimal("0.00000001"):
             reconciliation_difference = Decimal("0")
-        status = "COMPLETE" if opening.complete and closing.complete and residual == 0 and not unconverted_events else "PARTIAL"
+        status = (
+            "COMPLETE"
+            if opening.complete and closing.complete and residual == 0 and not unconverted_events
+            else "PARTIAL"
+        )
         performance = self._performance_at(start_date, end_date)
         implicit_funding = PerformanceProjector._implicit_funding_events(self._events, end_date)
-        return WealthExplanation(payload={
-            "period": {"start_date": start_date, "end_date": end_date},
-            "base_currency": closing.base_currency,
-            "asset_balance": {"start": start_value, "end": end_value, "change": change,
-                              "change_percentage": change / start_value if start_value > 0 else None},
-            "bridge": {"net_acquisitions": acquisitions, "market_appreciation": appreciation,
-                       "fixed_income_return": fixed_income, "fx_effect": None,
-                       "valuation_adjustments": valuation_adjustments, "other_asset_effect": Decimal("0"),
-                       "unexplained": residual},
-            "income_generated": {"total": income_total, "dividends": dividends, "jcp": jcp,
-                                 "fii_income": fii_income,
-                                 "other_distributed_income": income_total-dividends-jcp-fii_income},
-            "summary": {"opening_wealth": start_value, "closing_wealth": end_value,
-                        "absolute_change": change,
-                        "percentage_wealth_change": change / start_value if start_value > 0 else None,
-                        "percentage_return_status": "AVAILABLE" if start_value > 0 else "RETURN_PERCENTAGE_UNAVAILABLE",
-                        "percentage_return_reason": None if start_value > 0 else "INVALID_OPENING_ASSET_VALUE"},
-            "reconciliation": {"net_acquisitions": acquisitions, "market_appreciation": appreciation,
-                               "asset_appreciation": appreciation, "fixed_income_return": fixed_income,
-                               "paid_income": income_total, "other_explained_changes": valuation_adjustments+residual,
-                               "unexplained_change": residual, "economic_result": None,
-                               "expected_closing_wealth": expected_end,
-                               "reconciliation_difference": reconciliation_difference,
-                               "reconstructed_opening_equity": None, "reconstructed_closing_equity": None,
-                               "reconstructed_equity_change": None, "reconstructed_reconciliation_difference": None},
-            "components": components,
-            "by_asset_class": contributors["classes"],
-            "top_contributors": contributors["top"],
-            "performance": self._performance_payload(performance),
-            "data_quality": {"coverage_status": status, "coverage_percentage": explanation_coverage,
-                             "explanation_coverage_percentage": explanation_coverage,
-                             "valuation_coverage_percentage": valuation_coverage,
-                             "valuation_complete": opening.complete and closing.complete,
-                             "opening_known_market_value": start_value, "closing_known_market_value": end_value,
-                             "implicit_cash_used_in_asset_balance": False,
-                             "twr_boundary_compatibility": "IMPLICIT_BUY_FUNDING_PRESENT" if implicit_funding else "NO_IMPLICIT_BUY_FUNDING",
-                             "twr_algorithm_changed": False, "unknown_market_value": closing.unknown_market_value,
-                             "unknown_fx_effect": closing.unknown_fx_effect,
-                             "unconverted_event_count": unconverted_events,
-                             "attention_codes": [] if status == "COMPLETE" else ["PARTIAL_VALUATION_COVERAGE"]},
-        })
+        return WealthExplanation(
+            payload={
+                "period": {"start_date": start_date, "end_date": end_date},
+                "base_currency": closing.base_currency,
+                "asset_balance": {
+                    "start": start_value,
+                    "end": end_value,
+                    "change": change,
+                    "change_percentage": change / start_value if start_value > 0 else None,
+                },
+                "bridge": {
+                    "net_acquisitions": acquisitions,
+                    "market_appreciation": appreciation,
+                    "fixed_income_return": fixed_income,
+                    "fx_effect": None,
+                    "valuation_adjustments": valuation_adjustments,
+                    "other_asset_effect": Decimal("0"),
+                    "unexplained": residual,
+                },
+                "income_generated": {
+                    "total": income_total,
+                    "dividends": dividends,
+                    "jcp": jcp,
+                    "fii_income": fii_income,
+                    "other_distributed_income": income_total - dividends - jcp - fii_income,
+                },
+                "summary": {
+                    "opening_wealth": start_value,
+                    "closing_wealth": end_value,
+                    "absolute_change": change,
+                    "percentage_wealth_change": change / start_value if start_value > 0 else None,
+                    "percentage_return_status": "AVAILABLE"
+                    if start_value > 0
+                    else "RETURN_PERCENTAGE_UNAVAILABLE",
+                    "percentage_return_reason": None
+                    if start_value > 0
+                    else "INVALID_OPENING_ASSET_VALUE",
+                },
+                "reconciliation": {
+                    "net_acquisitions": acquisitions,
+                    "market_appreciation": appreciation,
+                    "asset_appreciation": appreciation,
+                    "fixed_income_return": fixed_income,
+                    "paid_income": income_total,
+                    "other_explained_changes": valuation_adjustments + residual,
+                    "unexplained_change": residual,
+                    "economic_result": None,
+                    "expected_closing_wealth": expected_end,
+                    "reconciliation_difference": reconciliation_difference,
+                    "reconstructed_opening_equity": None,
+                    "reconstructed_closing_equity": None,
+                    "reconstructed_equity_change": None,
+                    "reconstructed_reconciliation_difference": None,
+                },
+                "components": components,
+                "by_asset_class": contributors["classes"],
+                "top_contributors": contributors["top"],
+                "performance": self._performance_payload(performance),
+                "data_quality": {
+                    "coverage_status": status,
+                    "coverage_percentage": explanation_coverage,
+                    "explanation_coverage_percentage": explanation_coverage,
+                    "valuation_coverage_percentage": valuation_coverage,
+                    "valuation_complete": opening.complete and closing.complete,
+                    "opening_known_market_value": start_value,
+                    "closing_known_market_value": end_value,
+                    "implicit_cash_used_in_asset_balance": False,
+                    "twr_boundary_compatibility": "IMPLICIT_BUY_FUNDING_PRESENT"
+                    if implicit_funding
+                    else "NO_IMPLICIT_BUY_FUNDING",
+                    "twr_algorithm_changed": False,
+                    "unknown_market_value": closing.unknown_market_value,
+                    "unknown_fx_effect": closing.unknown_fx_effect,
+                    "unconverted_event_count": unconverted_events,
+                    "attention_codes": []
+                    if status == "COMPLETE"
+                    else ["PARTIAL_VALUATION_COVERAGE"],
+                },
+            }
+        )
 
     def _event_amount_in_base(self, event: FinancialEvent, base_currency: str) -> Decimal | None:
         amount = event.total_amount.amount
-        currency = event.asset.currency.code.upper() if event.asset is not None else base_currency.upper()
+        currency = (
+            event.asset.currency.code.upper() if event.asset is not None else base_currency.upper()
+        )
         if currency == base_currency.upper():
             return amount
         valuation = self._valuation_at(event.effective_date)
         ticker = str(event.asset.ticker) if event.asset is not None else None
         position = next((p for p in valuation.positions if p.ticker == ticker), None)
-        return amount * position.fx_rate if position is not None and position.fx_rate is not None else None
+        return (
+            amount * position.fx_rate
+            if position is not None and position.fx_rate is not None
+            else None
+        )
 
     @staticmethod
     def _component(
@@ -202,9 +299,16 @@ class WealthExplanationService:
     @staticmethod
     def _flow_children(rows):
         return [
-            {"asset_class": row["asset_class"], "ticker": row["ticker"], "label": row["name"],
-             "signed_amount": row["flows"], "valuation_available": row["valuation_available"], "source_count": 1}
-            for row in rows if row["flows"] != 0
+            {
+                "asset_class": row["asset_class"],
+                "ticker": row["ticker"],
+                "label": row["name"],
+                "signed_amount": row["flows"],
+                "valuation_available": row["valuation_available"],
+                "source_count": 1,
+            }
+            for row in rows
+            if row["flows"] != 0
         ]
 
     @staticmethod

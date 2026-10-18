@@ -42,8 +42,11 @@ class B3EtfPriceProvider:
                 price = prices.get(symbol)
                 if price is not None:
                     observations[symbol] = MarketPriceObservation(
-                        symbol=symbol, price=price, currency_code="BRL",
-                        effective_date=reference, source=self.source,
+                        symbol=symbol,
+                        price=price,
+                        currency_code="BRL",
+                        effective_date=reference,
+                        source=self.source,
                     )
                     pending.remove(symbol)
             if not pending:
@@ -131,9 +134,7 @@ class B3EtfPriceProvider:
         if not isinstance(columns, list) or not isinstance(values, list):
             raise MarketDataUnavailable("Resposta B3 BDI sem colunas ou linhas válidas.")
         names = [
-            self._normalize_column(column.get("name", ""))
-            if isinstance(column, dict)
-            else ""
+            self._normalize_column(column.get("name", "")) if isinstance(column, dict) else ""
             for column in columns
         ]
         ticker_index = self._column_index(
@@ -249,4 +250,3 @@ class B3EtfPriceProvider:
         except InvalidOperation:
             return None
         return price if price > 0 else None
-

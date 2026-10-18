@@ -107,7 +107,7 @@ def build_performance_comparison(
                 ),
                 "last_observation": latest.effective_date if latest else None,
                 "status": status,
-            "frequency": "MONTHLY" if code == "IPCA" else "DAILY",
+                "frequency": "MONTHLY" if code == "IPCA" else "DAILY",
             }
         )
 

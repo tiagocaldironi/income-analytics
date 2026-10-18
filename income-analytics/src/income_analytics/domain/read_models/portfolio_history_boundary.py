@@ -100,9 +100,7 @@ class PortfolioHistoryBoundary:
         }
 
     @classmethod
-    def from_observed_events(
-        cls, events: Iterable[FinancialEvent]
-    ) -> PortfolioHistoryBoundary:
+    def from_observed_events(cls, events: Iterable[FinancialEvent]) -> PortfolioHistoryBoundary:
         """Describe available history without claiming its first event is inception."""
         observed = tuple(events)
         if not observed:

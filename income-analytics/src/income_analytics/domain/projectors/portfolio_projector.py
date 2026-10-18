@@ -75,9 +75,7 @@ class PortfolioProjector:
         )
         current_prices = cls._current_prices(available_prices)
         has_market_data = (
-            bool(market_price_stream)
-            if market_data_available is None
-            else market_data_available
+            bool(market_price_stream) if market_data_available is None else market_data_available
         )
 
         state = _PortfolioProjectionState()
@@ -113,9 +111,7 @@ class PortfolioProjector:
             price_stream, key=lambda price: (price.effective_date, price.registered_at)
         )
         has_market_data = (
-            bool(price_stream)
-            if market_data_available is None
-            else market_data_available
+            bool(price_stream) if market_data_available is None else market_data_available
         )
         event_index = 0
         price_index = 0
@@ -161,9 +157,7 @@ class PortfolioProjector:
             and event.asset is not None
             and event.quantity is not None
             and event.quantity.value
-            > state.positions.get(
-                event.asset.id, PositionAccumulator(asset=event.asset)
-            ).quantity
+            > state.positions.get(event.asset.id, PositionAccumulator(asset=event.asset)).quantity
             and (
                 event.financial_status == "DATA_GAP"
                 or event.capital_flow_type is CapitalFlowType.INTERNAL_TRANSFER
@@ -283,9 +277,7 @@ class PortfolioProjector:
                     portfolio=portfolio,
                 )
             )
-        return PortfolioHistory(
-            snapshots=tuple(snapshots)
-        )
+        return PortfolioHistory(snapshots=tuple(snapshots))
 
     @staticmethod
     def _current_prices(market_prices: Iterable[MarketPrice]) -> dict[UUID, Money]:

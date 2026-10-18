@@ -39,7 +39,9 @@ class IndependentGoldenValidator:
                     value,
                     actual_value,
                     difference,
-                    GoldenMetricStatus.PASS if difference == Decimal("0") else GoldenMetricStatus.FAIL,
+                    GoldenMetricStatus.PASS
+                    if difference == Decimal("0")
+                    else GoldenMetricStatus.FAIL,
                     evidence[metric],
                 )
             )

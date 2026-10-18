@@ -47,6 +47,11 @@ from income_analytics.application.paid_income import (
     PaidIncomeSyncService,
 )
 from income_analytics.application.pension_market_data import PensionMarketDataUnavailable
+from income_analytics.application.portfolio_context import (
+    MAIN_PORTFOLIO_ID,
+    current_portfolio_id,
+    get_request_session,
+)
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.application.provider_health import ProviderHealthRegistry
 from income_analytics.application.wealth_explanation import WealthExplanationService
@@ -116,8 +121,26 @@ router = APIRouter(prefix="/api", tags=["Portfolio"])
 logger = logging.getLogger(__name__)
 B3_COMPARISON_BENCHMARKS = frozenset({"IBOV", "IFIX", "SMLL", "IDIV", "IVVB11"})
 b3_import_router = APIRouter(tags=["B3 imports"])
-session = PortfolioSession(persistent=True)
-_b3_preview_cache: dict[UUID, tuple[object, tuple[object, ...]]] = {}
+
+
+class _PortfolioSessionProxy:
+    """Compatibility resolver; a PortfolioSession lives only in request context."""
+
+    def _target(self) -> PortfolioSession:
+        current = get_request_session()
+        if current is None:
+            current = PortfolioSession(portfolio_id=current_portfolio_id(), persistent=True)
+        return current  # type: ignore[return-value]
+
+    def __getattr__(self, name: str):
+        return getattr(self._target(), name)
+
+    def __setattr__(self, name: str, value: object) -> None:
+        setattr(self._target(), name, value)
+
+
+session = _PortfolioSessionProxy()
+_b3_preview_cache: dict[tuple[UUID, UUID], tuple[object, tuple[object, ...]]] = {}
 asset_discovery = BrapiAssetDiscoveryProvider()
 market_data = BrapiMarketDataProvider()
 historical_market_data = B3CotahistMarketDataProvider()
@@ -130,9 +153,11 @@ ivvb11_benchmark_data = IVVB11BenchmarkDataProvider(historical_market_data)
 fx_data = BcbFxRateProvider()
 provider_health = ProviderHealthRegistry(SqliteProviderHealthRepository())
 paid_income_settings = SqlitePaidIncomeSettingsRepository()
-paid_income_sync = PaidIncomeSyncService(paid_income_settings, SqliteImportedPaidIncomeRepository())
-dashboard_snapshot_repository = SqlitePortfolioDashboardSnapshotRepository()
-market_price_refresh_runs = SqliteMarketPriceRefreshRunRepository()
+paid_income_sync = PaidIncomeSyncService(
+    paid_income_settings, SqliteImportedPaidIncomeRepository(MAIN_PORTFOLIO_ID)
+)
+dashboard_snapshot_repository = SqlitePortfolioDashboardSnapshotRepository(MAIN_PORTFOLIO_ID)
+market_price_refresh_runs = SqliteMarketPriceRefreshRunRepository(MAIN_PORTFOLIO_ID)
 PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 1
 
 
@@ -915,7 +940,7 @@ def associate_pension_vehicle(ticker: str, payload: PensionVehicleInput) -> dict
         vehicle_name=payload.vehicle_name or reference.vehicle_name,
         vehicle_type=payload.vehicle_type,
     )
-    SqlitePensionInvestmentVehicleRepository().save(vehicle)
+    SqlitePensionInvestmentVehicleRepository(current_portfolio_id()).save(vehicle)
     return {
         "status": "ASSOCIATED",
         "vehicle": {"name": vehicle.vehicle_name, "cnpj": vehicle.vehicle_cnpj},
@@ -930,7 +955,7 @@ def refresh_pension_vehicle(ticker: str) -> dict[str, object]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plano não encontrado.")
     if details.pension_system_type != "OPEN":
         return {"status": "NOT_SUPPORTED"}
-    vehicles = SqlitePensionInvestmentVehicleRepository().list_for(asset.id)
+    vehicles = SqlitePensionInvestmentVehicleRepository(current_portfolio_id()).list_for(asset.id)
     if not vehicles:
         return {"status": "NO_VEHICLE"}
     vehicle = max(vehicles, key=lambda item: item.valid_from or date.min)
@@ -961,7 +986,7 @@ def pension_fund_return(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plano não encontrado.")
     if details.pension_system_type != "OPEN":
         return {"status": "NOT_SUPPORTED"}
-    vehicles = SqlitePensionInvestmentVehicleRepository().list_for(asset.id)
+    vehicles = SqlitePensionInvestmentVehicleRepository(current_portfolio_id()).list_for(asset.id)
     if not vehicles:
         return {"status": "NO_VEHICLE"}
     vehicle = max(vehicles, key=lambda item: item.valid_from or date.min)
@@ -2380,7 +2405,9 @@ def list_b3_import_history(offset: int = 0, page_size: int = 20) -> dict[str, ob
     """List persisted B3 import batches for the import audit history."""
     if offset < 0 or not 1 <= page_size <= 100:
         raise HTTPException(status_code=422, detail="Paginação inválida.")
-    batches, total = SqliteB3ImportRepository().list_batches(offset=offset, limit=page_size)
+    batches, total = SqliteB3ImportRepository(current_portfolio_id()).list_batches(
+        offset=offset, limit=page_size
+    )
     next_cursor = offset + len(batches) if offset + len(batches) < total else None
     return {
         "items": [
@@ -2432,7 +2459,7 @@ def preview_b3_import(payload: B3ImportPreviewInput) -> dict[str, object]:
             status_code=422, detail={"code": error.code, "message": str(error)}
         ) from error
     batch, records = B3ImportService(
-        SqliteB3ImportRepository(), session._assets, session._events
+        SqliteB3ImportRepository(current_portfolio_id()), session._assets, session._events
     ).preview(
         workbook=workbook,
         file_name=payload.file_name,
@@ -2440,7 +2467,7 @@ def preview_b3_import(payload: B3ImportPreviewInput) -> dict[str, object]:
         rows=rows,
         persist=False,
     )
-    _b3_preview_cache[batch.id] = (batch, records)
+    _b3_preview_cache[(current_portfolio_id(), batch.id)] = (batch, records)
     return _serialize_b3_batch(batch, records)
 
 
@@ -2448,10 +2475,9 @@ def preview_b3_import(payload: B3ImportPreviewInput) -> dict[str, object]:
 @b3_import_router.post("/imports/b3/{batch_id}/apply")
 def apply_b3_import(batch_id: UUID) -> dict[str, object]:
     """Apply only previewed, resolved rows in chronological source order atomically."""
-    global session
-    repository = SqliteB3ImportRepository()
+    repository = SqliteB3ImportRepository(current_portfolio_id())
     batch = repository.get_batch(batch_id)
-    cached = _b3_preview_cache.pop(batch_id, None)
+    cached = _b3_preview_cache.pop((current_portfolio_id(), batch_id), None)
     if batch is None and cached is not None:
         batch, records = cached
         repository.create_batch(batch)
@@ -2517,6 +2543,7 @@ def apply_b3_import(batch_id: UUID) -> dict[str, object]:
             db.add(
                 FinancialEventRecord(
                     id=str(event_id),
+                    portfolio_id=str(current_portfolio_id()),
                     account_id=str(session.account_id),
                     event_type=event_type.value,
                     asset_id=str(record.asset_id),
@@ -2545,7 +2572,6 @@ def apply_b3_import(batch_id: UUID) -> dict[str, object]:
         completed = repository.apply_batch(batch_id, operation)
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
-    session = PortfolioSession(persistent=True)
     rebuild_portfolio_dashboard_snapshot()
     return {
         "batch_id": str(completed.id),
@@ -3502,9 +3528,7 @@ def get_wealth_explanation(start_date: date, end_date: date) -> dict[str, object
     def valuation_at(as_of: date):
         valuation = valuation_by_date.get(as_of)
         if valuation is None:
-            valuation = session.base_currency_valuation(
-                as_of=as_of, projection=portfolio_at(as_of)
-            )
+            valuation = session.base_currency_valuation(as_of=as_of, projection=portfolio_at(as_of))
             valuation_by_date[as_of] = valuation
         return valuation
 
@@ -3608,9 +3632,12 @@ def _performance_read_model_revision() -> tuple[object, ...]:
 
 @lru_cache(maxsize=32)
 def _cached_performance_comparison(
-    start_date: date, end_date: date, revision: tuple[object, ...]
+    portfolio_id: UUID, start_date: date, end_date: date, revision: tuple[object, ...]
 ) -> dict[str, object]:
-    del revision  # The immutable revision is the cache key and invalidation token.
+    del (
+        portfolio_id,
+        revision,
+    )  # Immutable ownership/revision values are cache keys and invalidation tokens.
     stored = {
         name: session.benchmark_observations(name)
         for name in ("IBOV", "IFIX", "IPCA", "SMLL", "IDIV", "IVVB11")
@@ -3640,7 +3667,9 @@ def get_performance_comparison(start_date: date, end_date: date) -> dict[str, ob
         raise HTTPException(
             status_code=422, detail="A data final deve ser posterior à data inicial."
         )
-    return _cached_performance_comparison(start_date, end_date, _performance_read_model_revision())
+    return _cached_performance_comparison(
+        current_portfolio_id(), start_date, end_date, _performance_read_model_revision()
+    )
 
 
 @router.get("/portfolio/benchmark-comparison")
@@ -4253,9 +4282,7 @@ def get_portfolio_history(
     buckets = {}
     for effective_date in observed_dates:
         key = (
-            str(effective_date.year)
-            if granularity == "year"
-            else effective_date.strftime("%Y-%m")
+            str(effective_date.year) if granularity == "year" else effective_date.strftime("%Y-%m")
         )
         buckets[key] = effective_date
 

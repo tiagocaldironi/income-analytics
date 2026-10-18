@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal
 
 from income_analytics.application.market_data import MarketPriceObservation
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
@@ -23,7 +24,9 @@ class FakeMarketProvider:
 
 
 def test_daily_refresh_only_updates_open_position_once_per_day() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="PETR4",

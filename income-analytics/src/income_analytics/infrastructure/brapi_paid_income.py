@@ -59,7 +59,7 @@ class BrapiPaidIncomeProvider:
             if error.code == 403 or (error.code == 400 and "requiredPlan" in body):
                 state = PaidIncomeIntegrationStatus.PLAN_NOT_SUPPORTED
             return PaidIncomeProviderResponse(state, detail="BRAPI rejected the request.")
-        except (URLError, KeyError, IndexError, TypeError, ValueError, InvalidOperation):
+        except URLError, KeyError, IndexError, TypeError, ValueError, InvalidOperation:
             return PaidIncomeProviderResponse(
                 PaidIncomeIntegrationStatus.PROVIDER_ERROR, detail="BRAPI payload or network error."
             )

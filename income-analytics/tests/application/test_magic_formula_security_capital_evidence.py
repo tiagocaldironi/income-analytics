@@ -53,11 +53,7 @@ def test_sec_evid_builds_complete_on_component_with_deterministic_references() -
         issuer=_issuer(),
         composition=_composition(),
         fca_records=_fca(),
-        requests=(
-            SecurityClassEvidenceRequest(
-                "teste-on", "TEST3", "ON", "SHARES", Decimal("1")
-            ),
-        ),
+        requests=(SecurityClassEvidenceRequest("teste-on", "TEST3", "ON", "SHARES", Decimal("1")),),
     )
 
     assert bundle.status is SecurityCapitalEvidenceStatus.RESOLVED
@@ -93,11 +89,7 @@ def test_sec_evid_requires_unique_active_fca_security_identity() -> None:
         issuer=_issuer(),
         composition=_composition(),
         fca_records=(_fca()[0], duplicate),
-        requests=(
-            SecurityClassEvidenceRequest(
-                "teste-on", "TEST3", "ON", "SHARES", Decimal("1")
-            ),
-        ),
+        requests=(SecurityClassEvidenceRequest("teste-on", "TEST3", "ON", "SHARES", Decimal("1")),),
     )
 
     assert bundle.status is SecurityCapitalEvidenceStatus.REVIEW_REQUIRED

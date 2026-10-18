@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal
 
 from income_analytics.application.fx_data import FxRateObservation
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
@@ -9,7 +10,9 @@ from income_analytics.domain.projectors.performance_projector import Performance
 
 
 def test_usd_position_twr_includes_fx_return_in_brl() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="IVV",
@@ -62,7 +65,9 @@ def test_usd_position_twr_includes_fx_return_in_brl() -> None:
 
 
 def test_future_fx_is_not_used_for_valuation() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="IVV",
@@ -96,7 +101,9 @@ def test_future_fx_is_not_used_for_valuation() -> None:
 
 
 def test_fx_older_than_five_calendar_days_is_not_eligible() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="IVV",

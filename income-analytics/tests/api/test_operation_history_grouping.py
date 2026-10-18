@@ -14,6 +14,7 @@ from income_analytics.application.base_currency_valuation import (
     BaseCurrencyPosition,
     BaseCurrencyValuation,
 )
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.entities.financial_event import FinancialEvent
 from income_analytics.domain.enums.asset_class import AssetClass
@@ -129,7 +130,9 @@ def test_fixed_income_condition_includes_percentage_and_spread_for_cdi_plus() ->
 def test_holdings_class_aggregates_the_result_of_its_positions(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    portfolio = PortfolioSession()
+    portfolio = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     portfolio.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="PETR4",
@@ -147,7 +150,9 @@ def test_holdings_class_aggregates_the_result_of_its_positions(
 def test_holdings_class_converts_foreign_result_to_the_base_currency(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    portfolio = PortfolioSession()
+    portfolio = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     portfolio.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="MCD",
@@ -187,11 +192,12 @@ def test_holdings_class_converts_foreign_result_to_the_base_currency(
     assert holdings["classes"][0]["total_result"] == Decimal("50")
 
 
-
 def test_operations_history_filters_income_and_movements_independently(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    portfolio = PortfolioSession()
+    portfolio = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     portfolio.register_trade(
         event_type=FinancialEventType.BUY,
         ticker="PETR4",
@@ -214,39 +220,59 @@ def test_operations_history_filters_income_and_movements_independently(
         movement_type="INCOME", asset_class=AssetClass.BRAZILIAN_STOCK.value
     )
 
-    assert [item["event_type"] for group in movements["groups"] for item in group["events"]] == ["BUY"]
-    assert [item["event_type"] for group in income["groups"] for item in group["events"]] == ["DIVIDEND"]
+    assert [item["event_type"] for group in movements["groups"] for item in group["events"]] == [
+        "BUY"
+    ]
+    assert [item["event_type"] for group in income["groups"] for item in group["events"]] == [
+        "DIVIDEND"
+    ]
     assert [item["event_type"] for group in buys["groups"] for item in group["events"]] == ["BUY"]
-    assert [item["event_type"] for group in stock_income["groups"] for item in group["events"]] == ["DIVIDEND"]
-    assert any(item["key"] == AssetClass.BRAZILIAN_STOCK.value for item in stock_income["available_classes"])
-
+    assert [item["event_type"] for group in stock_income["groups"] for item in group["events"]] == [
+        "DIVIDEND"
+    ]
+    assert any(
+        item["key"] == AssetClass.BRAZILIAN_STOCK.value
+        for item in stock_income["available_classes"]
+    )
 
 
 def test_operations_history_returns_independent_event_type_cursors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    portfolio = PortfolioSession()
-    portfolio.register_trade(
-        event_type=FinancialEventType.BUY, ticker="PETR4",
-        asset_class=AssetClass.BRAZILIAN_STOCK, quantity=Decimal("1"),
-        unit_price=Decimal("30"), effective_date=datetime(2026, 9, 29, tzinfo=UTC).date(),
+    portfolio = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
     )
     portfolio.register_trade(
-        event_type=FinancialEventType.BUY, ticker="WEGE3",
-        asset_class=AssetClass.BRAZILIAN_STOCK, quantity=Decimal("2"),
-        unit_price=Decimal("50"), effective_date=datetime(2026, 9, 28, tzinfo=UTC).date(),
+        event_type=FinancialEventType.BUY,
+        ticker="PETR4",
+        asset_class=AssetClass.BRAZILIAN_STOCK,
+        quantity=Decimal("1"),
+        unit_price=Decimal("30"),
+        effective_date=datetime(2026, 9, 29, tzinfo=UTC).date(),
+    )
+    portfolio.register_trade(
+        event_type=FinancialEventType.BUY,
+        ticker="WEGE3",
+        asset_class=AssetClass.BRAZILIAN_STOCK,
+        quantity=Decimal("2"),
+        unit_price=Decimal("50"),
+        effective_date=datetime(2026, 9, 28, tzinfo=UTC).date(),
     )
     portfolio.register_external_flow(
-        event_type=FinancialEventType.DEPOSIT, amount=Decimal("100"),
+        event_type=FinancialEventType.DEPOSIT,
+        amount=Decimal("100"),
         effective_date=datetime(2026, 9, 27, tzinfo=UTC).date(),
     )
     portfolio.register_external_flow(
-        event_type=FinancialEventType.WITHDRAWAL, amount=Decimal("20"),
+        event_type=FinancialEventType.WITHDRAWAL,
+        amount=Decimal("20"),
         effective_date=datetime(2026, 9, 26, tzinfo=UTC).date(),
     )
     monkeypatch.setattr(dashboard, "session", portfolio)
 
-    grouped = dashboard.get_operations_history(group_by="TYPE", movement_type="MOVEMENTS", page_size=1)
+    grouped = dashboard.get_operations_history(
+        group_by="TYPE", movement_type="MOVEMENTS", page_size=1
+    )
     groups = {group["key"]: group for group in grouped["groups"]}
     buy_more = dashboard.get_operations_history(
         group_by="TYPE", movement_type="MOVEMENTS", group_key="BUY", offset=1, page_size=1
@@ -261,20 +287,40 @@ def test_operations_history_returns_independent_event_type_cursors(
     assert [item["ticker"] for item in buy_more["groups"][0]["events"]] == ["WEGE3"]
     assert timeline_first["groups"][0]["has_more"] is True
     assert len(timeline_first["groups"][0]["events"]) == 2
-    assert timeline_next["groups"][0]["events"][0]["effective_date"] < timeline_first["groups"][0]["events"][-1]["effective_date"]
+    assert (
+        timeline_next["groups"][0]["events"][0]["effective_date"]
+        < timeline_first["groups"][0]["events"][-1]["effective_date"]
+    )
 
 
-
-def test_b3_import_history_exposes_persisted_batch_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
-    from income_analytics.application.b3_import import B3ImportBatch, B3ImportBatchStatus, B3ImportReportType
+def test_b3_import_history_exposes_persisted_batch_metadata(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from income_analytics.application.b3_import import (
+        B3ImportBatch,
+        B3ImportBatchStatus,
+        B3ImportReportType,
+    )
 
     batch = B3ImportBatch(
-        id=uuid4(), file_name="movimentacao.xlsx", file_hash="abc", report_type=B3ImportReportType.MOVEMENT,
-        total_rows=25, new_rows=4, duplicate_rows=10, review_rows=3, unsupported_rows=6,
-        invalid_rows=2, status=B3ImportBatchStatus.COMPLETED, created_at=datetime(2026, 10, 1, tzinfo=UTC),
+        id=uuid4(),
+        file_name="movimentacao.xlsx",
+        file_hash="abc",
+        report_type=B3ImportReportType.MOVEMENT,
+        total_rows=25,
+        new_rows=4,
+        duplicate_rows=10,
+        review_rows=3,
+        unsupported_rows=6,
+        invalid_rows=2,
+        status=B3ImportBatchStatus.COMPLETED,
+        created_at=datetime(2026, 10, 1, tzinfo=UTC),
     )
 
     class Repository:
+        def __init__(self, portfolio_id):
+            self.portfolio_id = portfolio_id
+
         def list_batches(self, *, offset: int, limit: int):
             return ((batch,), 21)
 

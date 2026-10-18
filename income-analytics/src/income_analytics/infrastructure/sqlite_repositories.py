@@ -6,6 +6,7 @@ import json
 from collections.abc import Callable
 from datetime import UTC, date, datetime
 from decimal import Decimal
+from functools import lru_cache
 from typing import cast
 from uuid import UUID
 
@@ -29,6 +30,7 @@ from income_analytics.domain.entities.asset import Asset
 from income_analytics.domain.entities.currency import Currency
 from income_analytics.domain.entities.financial_event import FinancialEvent
 from income_analytics.domain.entities.institution import Institution
+from income_analytics.domain.entities.portfolio import Portfolio
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.asset_type import AssetType
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
@@ -45,7 +47,11 @@ from income_analytics.domain.value_objects.money import Money
 from income_analytics.domain.value_objects.quantity import Quantity
 from income_analytics.domain.value_objects.ticker import Ticker
 from income_analytics.domain.wealth_details import PensionPlanDetails, RealEstateDetails
-from income_analytics.infrastructure.database import SessionFactory, initialize_database
+from income_analytics.infrastructure.database import (
+    SessionFactory,
+    database_url,
+    initialize_database,
+)
 from income_analytics.infrastructure.models import (
     AllocationTargetRecord,
     AssetRecord,
@@ -63,8 +69,10 @@ from income_analytics.infrastructure.models import (
     PensionFundQuotaRecord,
     PensionInvestmentVehicleRecord,
     PensionPlanDetailsRecord,
+    PortfolioAssetRecord,
     PortfolioConfigurationRecord,
     PortfolioDashboardSnapshotRecord,
+    PortfolioRecord,
     ProviderHealthRecord,
     RealEstateDetailsRecord,
     RecurringRuleRecord,
@@ -74,15 +82,101 @@ from income_analytics.infrastructure.models import (
 )
 
 
-class SqliteB3ImportRepository:
-    """Audit store for B3 source rows and their cross-file identities.
+@lru_cache(maxsize=2)
+def _cached_market_prices(_database: str) -> tuple[MarketPrice, ...]:
+    """Cache global reference prices shared by every portfolio request."""
+    assets = {str(asset.id): asset for asset in SqliteAssetRepository.list_all()}
+    with SessionFactory() as session:
+        rows = (
+            session.query(MarketPriceRecord)
+            .order_by(
+                MarketPriceRecord.effective_date,
+                MarketPriceRecord.registered_at,
+                MarketPriceRecord.id,
+            )
+            .all()
+        )
+    return tuple(
+        MarketPrice(
+            id=UUID(row.id),
+            asset=assets[row.asset_id],
+            price=Money(Decimal(row.price)),
+            effective_date=row.effective_date,
+            registered_at=SqliteAssetRepository._utc(row.registered_at),
+            provider=row.provider,
+            price_timestamp=(
+                SqliteAssetRepository._utc(row.price_timestamp) if row.price_timestamp else None
+            ),
+        )
+        for row in rows
+        if row.asset_id in assets
+    )
 
-    A row identity is globally unique, rather than unique per batch, so an
-    overlapping export naturally resolves to the original imported row.  The
-    ``apply_batch`` callback exposes the same SQLAlchemy transaction used to
-    persist audit metadata, allowing the import use case to save a financial
-    event and its B3 record atomically.
-    """
+
+@lru_cache(maxsize=2)
+def _cached_market_prices_by_asset(
+    database: str,
+) -> dict[UUID, tuple[MarketPrice, ...]]:
+    grouped: dict[UUID, list[MarketPrice]] = {}
+    for price in _cached_market_prices(database):
+        grouped.setdefault(price.asset.id, []).append(price)
+    return {
+        asset_id: tuple(sorted(prices, key=lambda item: (item.effective_date, item.registered_at)))
+        for asset_id, prices in grouped.items()
+    }
+
+
+@lru_cache(maxsize=2)
+def _cached_benchmark_rates(_database: str) -> tuple[BenchmarkRate, ...]:
+    with SessionFactory() as session:
+        rows = (
+            session.query(BenchmarkRateRecord)
+            .order_by(BenchmarkRateRecord.name, BenchmarkRateRecord.effective_date)
+            .all()
+        )
+    return tuple(
+        BenchmarkRate(
+            name=row.name,
+            effective_date=row.effective_date,
+            return_percentage=Decimal(row.return_percentage),
+        )
+        for row in rows
+    )
+
+
+@lru_cache(maxsize=128)
+def _cached_benchmark_observations(
+    _database: str, benchmark: str
+) -> tuple[BenchmarkObservation, ...]:
+    with SessionFactory() as session:
+        rows = (
+            session.query(BenchmarkObservationRecord)
+            .filter(BenchmarkObservationRecord.benchmark == benchmark)
+            .order_by(BenchmarkObservationRecord.effective_date)
+            .all()
+        )
+    return tuple(
+        BenchmarkObservation(
+            benchmark=row.benchmark,
+            effective_date=row.effective_date,
+            value=Decimal(row.value),
+            nature=cast("BenchmarkNature", row.nature),
+            source=row.source,
+        )
+        for row in rows
+    )
+
+
+@lru_cache(maxsize=16)
+def _cached_financial_events(database: str, portfolio_id: str) -> tuple[FinancialEvent, ...]:
+    return SqliteFinancialEventRepository(UUID(portfolio_id))._list_uncached()
+
+
+class SqliteB3ImportRepository:
+    """Audit store for B3 source rows, scoped to one portfolio."""
+
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
 
     def create_batch(self, batch: B3ImportBatch) -> None:
         initialize_database()
@@ -92,7 +186,11 @@ class SqliteB3ImportRepository:
     def get_batch(self, batch_id: UUID) -> B3ImportBatch | None:
         initialize_database()
         with SessionFactory() as session:
-            record = session.get(B3ImportBatchRecord, str(batch_id))
+            record = (
+                session.query(B3ImportBatchRecord)
+                .filter_by(id=str(batch_id), portfolio_id=self.portfolio_id)
+                .one_or_none()
+            )
             return self._to_batch(record) if record else None
 
     def list_batches(
@@ -100,7 +198,7 @@ class SqliteB3ImportRepository:
     ) -> tuple[tuple[B3ImportBatch, ...], int]:
         initialize_database()
         with SessionFactory() as session:
-            query = session.query(B3ImportBatchRecord)
+            query = session.query(B3ImportBatchRecord).filter_by(portfolio_id=self.portfolio_id)
             total = query.count()
             records = (
                 query.order_by(B3ImportBatchRecord.created_at.desc(), B3ImportBatchRecord.id.desc())
@@ -115,7 +213,7 @@ class SqliteB3ImportRepository:
         with SessionFactory() as session:
             records = (
                 session.query(B3ImportedRecordRow)
-                .filter_by(batch_id=str(batch_id))
+                .filter_by(batch_id=str(batch_id), portfolio_id=self.portfolio_id)
                 .order_by(B3ImportedRecordRow.source_row, B3ImportedRecordRow.id)
                 .all()
             )
@@ -128,7 +226,12 @@ class SqliteB3ImportRepository:
         with SessionFactory() as session:
             record = (
                 session.query(B3ImportedRecordRow)
-                .filter_by(source="B3", fingerprint=fingerprint, occurrence_index=occurrence_index)
+                .filter_by(
+                    source="B3",
+                    fingerprint=fingerprint,
+                    occurrence_index=occurrence_index,
+                    portfolio_id=self.portfolio_id,
+                )
                 .one_or_none()
             )
             return self._to_imported_record(record) if record else None
@@ -152,18 +255,26 @@ class SqliteB3ImportRepository:
         """
         initialize_database()
         now = datetime.now(UTC)
+        changed = False
         with SessionFactory.begin() as session:
-            batch = session.get(B3ImportBatchRecord, str(batch_id))
+            batch = (
+                session.query(B3ImportBatchRecord)
+                .filter_by(id=str(batch_id), portfolio_id=self.portfolio_id)
+                .one_or_none()
+            )
             if batch is None:
                 raise ValueError(f"B3 import batch not found: {batch_id}")
             if batch.status == B3ImportBatchStatus.COMPLETED.value:
                 return self._to_batch(batch)
             batch.status = B3ImportBatchStatus.APPLYING.value
             operation(session, self)
+            changed = True
             batch.status = B3ImportBatchStatus.COMPLETED.value
             batch.completed_at = now
             session.flush()
             result = self._to_batch(batch)
+        if changed:
+            _cached_financial_events.cache_clear()
         return result
 
     def save_record_in_session(self, session: Session, record: B3ImportedRecord) -> None:
@@ -172,10 +283,10 @@ class SqliteB3ImportRepository:
         # domain.  This adapter method is only for the infrastructure use case.
         session.merge(self._imported_record(record))
 
-    @staticmethod
-    def _batch_record(batch: B3ImportBatch) -> B3ImportBatchRecord:
+    def _batch_record(self, batch: B3ImportBatch) -> B3ImportBatchRecord:
         return B3ImportBatchRecord(
             id=str(batch.id),
+            portfolio_id=self.portfolio_id,
             source="B3",
             file_name=batch.file_name,
             file_hash=batch.file_hash,
@@ -191,10 +302,10 @@ class SqliteB3ImportRepository:
             completed_at=batch.completed_at,
         )
 
-    @staticmethod
-    def _imported_record(record: B3ImportedRecord) -> B3ImportedRecordRow:
+    def _imported_record(self, record: B3ImportedRecord) -> B3ImportedRecordRow:
         return B3ImportedRecordRow(
             id=str(record.id),
+            portfolio_id=self.portfolio_id,
             batch_id=str(record.batch_id),
             source="B3",
             fingerprint=record.fingerprint,
@@ -269,13 +380,53 @@ class SqliteB3ImportRepository:
         )
 
 
+class SqlitePortfolioRepository:
+    """Persistence adapter for explicitly identified portfolio records."""
+
+    def get(self, portfolio_id: UUID) -> Portfolio | None:
+        initialize_database()
+        with SessionFactory() as session:
+            row = session.get(PortfolioRecord, str(portfolio_id))
+        if row is None:
+            return None
+        return Portfolio(
+            id=UUID(row.id),
+            name=row.name,
+            base_currency=row.base_currency,
+            status=row.status,
+            created_at=SqliteAssetRepository._utc(row.created_at),
+            updated_at=SqliteAssetRepository._utc(row.updated_at),
+        )
+
+    def save(self, portfolio: Portfolio) -> None:
+        initialize_database()
+        with SessionFactory.begin() as session:
+            session.merge(
+                PortfolioRecord(
+                    id=str(portfolio.id),
+                    name=portfolio.name,
+                    base_currency=portfolio.base_currency.upper(),
+                    status=portfolio.status,
+                    created_at=portfolio.created_at,
+                    updated_at=portfolio.updated_at,
+                )
+            )
+
+
 class SqlitePortfolioDashboardSnapshotRepository:
     """Persistent JSON read model; source transactions stay in their own tables."""
+
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
 
     def get(self) -> dict[str, object] | None:
         initialize_database()
         with SessionFactory() as session:
-            record = session.get(PortfolioDashboardSnapshotRecord, 1)
+            record = (
+                session.query(PortfolioDashboardSnapshotRecord)
+                .filter_by(portfolio_id=self.portfolio_id)
+                .one_or_none()
+            )
         if record is None:
             return None
         payload = json.loads(record.payload)
@@ -294,11 +445,16 @@ class SqlitePortfolioDashboardSnapshotRepository:
         now = datetime.now(UTC)
         encoded = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=str)
         with SessionFactory.begin() as session:
-            current = session.get(PortfolioDashboardSnapshotRecord, 1)
+            current = (
+                session.query(PortfolioDashboardSnapshotRecord)
+                .filter_by(portfolio_id=self.portfolio_id)
+                .one_or_none()
+            )
             version = (current.version if current else 0) + 1
             session.merge(
                 PortfolioDashboardSnapshotRecord(
-                    id=1,
+                    id=current.id if current else None,
+                    portfolio_id=self.portfolio_id,
                     status="VALID",
                     version=version,
                     calculated_at=now,
@@ -314,6 +470,9 @@ class SqlitePortfolioDashboardSnapshotRepository:
 
 
 class SqliteAssetRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, asset: Asset) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
@@ -331,6 +490,12 @@ class SqliteAssetRepository:
                     created_at=asset.created_at,
                 )
             )
+            session.merge(
+                PortfolioAssetRecord(portfolio_id=self.portfolio_id, asset_id=str(asset.id))
+            )
+        _cached_market_prices.cache_clear()
+        _cached_market_prices_by_asset.cache_clear()
+        _cached_financial_events.cache_clear()
 
     def get_by_ticker(self, ticker: str) -> Asset | None:
         with SessionFactory() as session:
@@ -339,9 +504,32 @@ class SqliteAssetRepository:
             )
             return self._to_domain(record) if record else None
 
+    def link(self, asset_id: UUID) -> None:
+        initialize_database()
+        with SessionFactory.begin() as session:
+            if session.get(AssetRecord, str(asset_id)) is None:
+                raise ValueError(f"Canonical asset not found: {asset_id}")
+            session.merge(
+                PortfolioAssetRecord(portfolio_id=self.portfolio_id, asset_id=str(asset_id))
+            )
+
     def list(self) -> tuple[Asset, ...]:
         with SessionFactory() as session:
-            return tuple(self._to_domain(record) for record in session.query(AssetRecord).all())
+            records = (
+                session.query(AssetRecord)
+                .join(PortfolioAssetRecord, PortfolioAssetRecord.asset_id == AssetRecord.id)
+                .filter(PortfolioAssetRecord.portfolio_id == self.portfolio_id)
+                .all()
+            )
+            return tuple(self._to_domain(record) for record in records)
+
+    @staticmethod
+    def list_all() -> tuple[Asset, ...]:
+        with SessionFactory() as session:
+            return tuple(
+                SqliteAssetRepository._to_domain(record)
+                for record in session.query(AssetRecord).all()
+            )
 
     @staticmethod
     def _to_domain(record: AssetRecord) -> Asset:
@@ -376,12 +564,16 @@ class SqliteAssetRepository:
 class SqliteFixedIncomeDetailsRepository:
     """Persistence adapter for the fixed-income aggregate extension."""
 
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, details: FixedIncomeDetails) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
             session.merge(
                 FixedIncomeDetailsRecord(
                     asset_id=str(details.asset_id),
+                    portfolio_id=self.portfolio_id,
                     instrument_type=details.instrument_type.value,
                     issuer=details.issuer,
                     indexer_type=details.indexer_type.value,
@@ -404,7 +596,11 @@ class SqliteFixedIncomeDetailsRepository:
     def list(self) -> tuple[FixedIncomeDetails, ...]:
         initialize_database()
         with SessionFactory() as session:
-            rows = session.query(FixedIncomeDetailsRecord).all()
+            rows = (
+                session.query(FixedIncomeDetailsRecord)
+                .filter_by(portfolio_id=self.portfolio_id)
+                .all()
+            )
         return tuple(
             FixedIncomeDetails(
                 asset_id=UUID(row.asset_id),
@@ -428,12 +624,16 @@ class SqliteFixedIncomeDetailsRepository:
 
 
 class SqliteRecurringRuleRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, rule: RecurringRule) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
             session.merge(
                 RecurringRuleRecord(
                     id=str(rule.id),
+                    portfolio_id=self.portfolio_id,
                     event_type=rule.event_type.value,
                     amount=str(rule.amount),
                     asset_id=str(rule.asset_id) if rule.asset_id else None,
@@ -447,7 +647,9 @@ class SqliteRecurringRuleRepository:
     def list(self) -> tuple[RecurringRule, ...]:
         initialize_database()
         with SessionFactory() as session:
-            rows = session.query(RecurringRuleRecord).all()
+            rows = (
+                session.query(RecurringRuleRecord).filter_by(portfolio_id=self.portfolio_id).all()
+            )
         return tuple(
             RecurringRule(
                 id=UUID(row.id),
@@ -465,16 +667,22 @@ class SqliteRecurringRuleRepository:
     def delete(self, rule_id: UUID) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
-            session.query(RecurringRuleRecord).filter_by(id=str(rule_id)).delete()
+            session.query(RecurringRuleRecord).filter_by(
+                id=str(rule_id), portfolio_id=self.portfolio_id
+            ).delete()
 
 
 class SqlitePensionPlanDetailsRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, details: PensionPlanDetails) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
             session.merge(
                 PensionPlanDetailsRecord(
                     asset_id=str(details.asset_id),
+                    portfolio_id=self.portfolio_id,
                     pension_type=details.pension_type,
                     institution=details.institution,
                     institution_cnpj=details.institution_cnpj,
@@ -517,7 +725,11 @@ class SqlitePensionPlanDetailsRepository:
     def list(self) -> tuple[PensionPlanDetails, ...]:
         initialize_database()
         with SessionFactory() as session:
-            rows = session.query(PensionPlanDetailsRecord).all()
+            rows = (
+                session.query(PensionPlanDetailsRecord)
+                .filter_by(portfolio_id=self.portfolio_id)
+                .all()
+            )
         return tuple(
             PensionPlanDetails(
                 asset_id=UUID(row.asset_id),
@@ -563,12 +775,16 @@ class SqlitePensionPlanDetailsRepository:
 
 
 class SqlitePensionInvestmentVehicleRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, vehicle: PensionInvestmentVehicle) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
             session.merge(
                 PensionInvestmentVehicleRecord(
                     id=str(vehicle.id),
+                    portfolio_id=self.portfolio_id,
                     pension_asset_id=str(vehicle.pension_asset_id),
                     vehicle_name=vehicle.vehicle_name,
                     vehicle_cnpj=vehicle.vehicle_cnpj,
@@ -584,7 +800,7 @@ class SqlitePensionInvestmentVehicleRepository:
         with SessionFactory() as session:
             rows = (
                 session.query(PensionInvestmentVehicleRecord)
-                .filter_by(pension_asset_id=str(asset_id))
+                .filter_by(pension_asset_id=str(asset_id), portfolio_id=self.portfolio_id)
                 .all()
             )
         return tuple(
@@ -639,12 +855,16 @@ class SqlitePensionFundQuotaRepository:
 
 
 class SqliteRealEstateDetailsRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, details: RealEstateDetails) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
             session.merge(
                 RealEstateDetailsRecord(
                     asset_id=str(details.asset_id),
+                    portfolio_id=self.portfolio_id,
                     property_type=details.property_type,
                     country=details.country,
                     description=details.description,
@@ -670,7 +890,11 @@ class SqliteRealEstateDetailsRepository:
     def list(self) -> tuple[RealEstateDetails, ...]:
         initialize_database()
         with SessionFactory() as session:
-            rows = session.query(RealEstateDetailsRecord).all()
+            rows = (
+                session.query(RealEstateDetailsRecord)
+                .filter_by(portfolio_id=self.portfolio_id)
+                .all()
+            )
         return tuple(
             RealEstateDetails(
                 asset_id=UUID(row.asset_id),
@@ -695,12 +919,16 @@ class SqliteRealEstateDetailsRepository:
 
 
 class SqliteFinancialEventRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, event: FinancialEvent) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
             session.merge(
                 FinancialEventRecord(
                     id=str(event.id),
+                    portfolio_id=self.portfolio_id,
                     account_id=str(event.account_id),
                     event_type=event.event_type.value,
                     asset_id=str(event.asset.id) if event.asset else None,
@@ -714,17 +942,30 @@ class SqliteFinancialEventRepository:
                     metadata_json=json.dumps(dict(event.metadata)),
                 )
             )
+        _cached_financial_events.cache_clear()
 
     def delete(self, event_id: str) -> bool:
         initialize_database()
         with SessionFactory.begin() as session:
-            return session.query(FinancialEventRecord).filter_by(id=event_id).delete() == 1
+            deleted = (
+                session.query(FinancialEventRecord)
+                .filter_by(id=event_id, portfolio_id=self.portfolio_id)
+                .delete()
+                == 1
+            )
+        if deleted:
+            _cached_financial_events.cache_clear()
+        return deleted
 
     def list(self) -> tuple[FinancialEvent, ...]:
-        assets = {str(asset.id): asset for asset in SqliteAssetRepository().list()}
+        return _cached_financial_events(database_url(), self.portfolio_id)
+
+    def _list_uncached(self) -> tuple[FinancialEvent, ...]:
+        assets = {str(asset.id): asset for asset in SqliteAssetRepository.list_all()}
         with SessionFactory() as session:
             rows = (
                 session.query(FinancialEventRecord)
+                .filter_by(portfolio_id=self.portfolio_id)
                 .order_by(
                     FinancialEventRecord.effective_date,
                     FinancialEventRecord.registered_at,
@@ -780,6 +1021,8 @@ class SqliteMarketPriceRepository:
                     for price in prices
                 ],
             )
+        _cached_market_prices.cache_clear()
+        _cached_market_prices_by_asset.cache_clear()
 
     def save(self, price: MarketPrice) -> None:
         initialize_database()
@@ -795,43 +1038,28 @@ class SqliteMarketPriceRepository:
                     price_timestamp=price.price_timestamp,
                 )
             )
+        _cached_market_prices.cache_clear()
+        _cached_market_prices_by_asset.cache_clear()
 
     def list(self) -> tuple[MarketPrice, ...]:
-        assets = {str(asset.id): asset for asset in SqliteAssetRepository().list()}
-        with SessionFactory() as session:
-            rows = (
-                session.query(MarketPriceRecord)
-                .order_by(
-                    MarketPriceRecord.effective_date,
-                    MarketPriceRecord.registered_at,
-                    MarketPriceRecord.id,
-                )
-                .all()
-            )
-        rows = [row for row in rows if row.asset_id in assets]
-        return tuple(
-            MarketPrice(
-                id=UUID(row.id),
-                asset=assets[row.asset_id],
-                price=Money(Decimal(row.price)),
-                effective_date=row.effective_date,
-                registered_at=SqliteAssetRepository._utc(row.registered_at),
-                provider=row.provider,
-                price_timestamp=(
-                    SqliteAssetRepository._utc(row.price_timestamp) if row.price_timestamp else None
-                ),
-            )
-            for row in rows
-        )
+        return _cached_market_prices(database_url())
+
+    def list_by_asset(self) -> dict[UUID, tuple[MarketPrice, ...]]:
+        """Return a portfolio-local copy of the cached global quote index."""
+        return dict(_cached_market_prices_by_asset(database_url()))
 
 
 class SqliteMarketPriceRefreshRunRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, run: dict[str, object]) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
             session.add(
                 MarketPriceRefreshRunRecord(
                     id=str(run["id"]),
+                    portfolio_id=self.portfolio_id,
                     started_at=cast(datetime, run["started_at"]),
                     finished_at=cast(datetime, run["finished_at"]),
                     status=str(run["status"]),
@@ -845,6 +1073,7 @@ class SqliteMarketPriceRefreshRunRepository:
         with SessionFactory() as session:
             rows = (
                 session.query(MarketPriceRefreshRunRecord)
+                .filter_by(portfolio_id=self.portfolio_id)
                 .order_by(MarketPriceRefreshRunRecord.started_at.desc())
                 .limit(bounded_limit)
                 .all()
@@ -872,22 +1101,10 @@ class SqliteBenchmarkRateRepository:
                     return_percentage=str(rate.return_percentage),
                 )
             )
+        _cached_benchmark_rates.cache_clear()
 
     def list(self) -> tuple[BenchmarkRate, ...]:
-        with SessionFactory() as session:
-            rows = (
-                session.query(BenchmarkRateRecord)
-                .order_by(BenchmarkRateRecord.name, BenchmarkRateRecord.effective_date)
-                .all()
-            )
-        return tuple(
-            BenchmarkRate(
-                name=row.name,
-                effective_date=row.effective_date,
-                return_percentage=Decimal(row.return_percentage),
-            )
-            for row in rows
-        )
+        return _cached_benchmark_rates(database_url())
 
 
 class SqliteBenchmarkObservationRepository:
@@ -903,26 +1120,11 @@ class SqliteBenchmarkObservationRepository:
                     source=observation.source,
                 )
             )
+        _cached_benchmark_observations.cache_clear()
 
     def list(self, benchmark: str) -> tuple[BenchmarkObservation, ...]:
         initialize_database()
-        with SessionFactory() as session:
-            rows = (
-                session.query(BenchmarkObservationRecord)
-                .filter(BenchmarkObservationRecord.benchmark == benchmark.upper())
-                .order_by(BenchmarkObservationRecord.effective_date)
-                .all()
-            )
-        return tuple(
-            BenchmarkObservation(
-                benchmark=row.benchmark,
-                effective_date=row.effective_date,
-                value=Decimal(row.value),
-                nature=cast("BenchmarkNature", row.nature),
-                source=row.source,
-            )
-            for row in rows
-        )
+        return _cached_benchmark_observations(database_url(), benchmark.upper())
 
 
 class SqliteFxRateRepository:
@@ -1020,18 +1222,24 @@ class SqliteFxRateRepository:
 class SqlitePortfolioConfigurationRepository:
     BASE_CURRENCY_KEY = "portfolio_base_currency"
 
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def get_base_currency(self) -> str:
         initialize_database()
         with SessionFactory() as session:
-            row = session.get(PortfolioConfigurationRecord, self.BASE_CURRENCY_KEY)
-        return row.value.upper() if row else "BRL"
+            row = session.get(PortfolioRecord, self.portfolio_id)
+        if row is None:
+            raise ValueError(f"Portfolio not found: {self.portfolio_id}")
+        return row.base_currency.upper()
 
     def save_base_currency(self, currency: str) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
-            session.merge(
-                PortfolioConfigurationRecord(key=self.BASE_CURRENCY_KEY, value=currency.upper())
-            )
+            row = session.get(PortfolioRecord, self.portfolio_id)
+            if row is None:
+                raise ValueError(f"Portfolio not found: {self.portfolio_id}")
+            row.base_currency = currency.upper()
 
 
 class SqliteProviderHealthRepository:
@@ -1105,12 +1313,15 @@ class SqlitePaidIncomeSettingsRepository:
 
 
 class SqliteImportedPaidIncomeRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def find_by_fingerprint(self, fingerprint: str):
         initialize_database()
         with SessionFactory() as session:
             return (
                 session.query(ImportedPaidIncomeRecord)
-                .filter_by(raw_fingerprint=fingerprint)
+                .filter_by(raw_fingerprint=fingerprint, portfolio_id=self.portfolio_id)
                 .one_or_none()
             )
 
@@ -1130,11 +1341,12 @@ class SqliteImportedPaidIncomeRepository:
         with SessionFactory.begin() as session:
             current = (
                 session.query(ImportedPaidIncomeRecord)
-                .filter_by(raw_fingerprint=event.fingerprint)
+                .filter_by(raw_fingerprint=event.fingerprint, portfolio_id=self.portfolio_id)
                 .one_or_none()
             )
             record = ImportedPaidIncomeRecord(
                 id=current.id if current else str(__import__("uuid").uuid4()),
+                portfolio_id=self.portfolio_id,
                 provider=event.provider,
                 provider_event_id=event.provider_event_id,
                 raw_fingerprint=event.fingerprint,
@@ -1158,33 +1370,46 @@ class SqliteImportedPaidIncomeRepository:
 class SqlitePortfolioDataRepository:
     """Deletes user portfolio data in dependency order."""
 
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def clear(self) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
-            session.query(FinancialEventRecord).delete()
-            session.query(ImportedPaidIncomeRecord).delete()
-            session.query(PaidIncomeProviderSettingsRecord).delete()
-            session.query(MarketPriceRecord).delete()
-            session.query(RecurringRuleRecord).delete()
-            session.query(FixedIncomeDetailsRecord).delete()
-            session.query(PensionPlanDetailsRecord).delete()
-            session.query(RealEstateDetailsRecord).delete()
-            session.query(AssetTargetRecord).delete()
-            session.query(AllocationTargetRecord).delete()
-            session.query(AssetRecord).delete()
-            session.query(BenchmarkRateRecord).delete()
-            session.query(BenchmarkObservationRecord).delete()
-            session.query(FxRateRecord).delete()
-            session.query(PortfolioConfigurationRecord).delete()
+            for model in (
+                ImportedPaidIncomeRecord,
+                B3ImportedRecordRow,
+                FinancialEventRecord,
+                RecurringRuleRecord,
+                FixedIncomeDetailsRecord,
+                PensionPlanDetailsRecord,
+                RealEstateDetailsRecord,
+                AssetTargetRecord,
+                AllocationTargetRecord,
+                B3ImportBatchRecord,
+                MarketPriceRefreshRunRecord,
+                PortfolioDashboardSnapshotRecord,
+                PortfolioConfigurationRecord,
+            ):
+                session.query(model).filter_by(portfolio_id=self.portfolio_id).delete()
+            session.query(PortfolioAssetRecord).filter_by(portfolio_id=self.portfolio_id).delete()
+            portfolio = session.get(PortfolioRecord, self.portfolio_id)
+            if portfolio is not None:
+                portfolio.base_currency = "BRL"
 
 
 class SqliteAllocationPolicyRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, policy: AllocationPolicy) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
-            session.query(AllocationTargetRecord).delete()
+            session.query(AllocationTargetRecord).filter_by(portfolio_id=self.portfolio_id).delete()
             session.add_all(
-                AllocationTargetRecord(asset_class=key.value, target=str(value))
+                AllocationTargetRecord(
+                    portfolio_id=self.portfolio_id, asset_class=key.value, target=str(value)
+                )
                 for key, value in policy.targets.items()
             )
 
@@ -1192,7 +1417,11 @@ class SqliteAllocationPolicyRepository:
         from income_analytics.domain.enums.asset_class import AssetClass
 
         with SessionFactory() as session:
-            rows = session.query(AllocationTargetRecord).all()
+            rows = (
+                session.query(AllocationTargetRecord)
+                .filter_by(portfolio_id=self.portfolio_id)
+                .all()
+            )
         return (
             AllocationPolicy(
                 targets={AssetClass(row.asset_class): Decimal(row.target) for row in rows}
@@ -1203,21 +1432,30 @@ class SqliteAllocationPolicyRepository:
 
 
 class SqliteAssetAllocationPolicyRepository:
+    def __init__(self, portfolio_id: UUID) -> None:
+        self.portfolio_id = str(portfolio_id)
+
     def save(self, policy: AssetAllocationPolicy) -> None:
         initialize_database()
-        assets = {str(asset.ticker): asset for asset in SqliteAssetRepository().list()}
+        assets = {
+            str(asset.ticker): asset for asset in SqliteAssetRepository(self.portfolio_id).list()
+        }
         with SessionFactory.begin() as session:
-            session.query(AssetTargetRecord).delete()
+            session.query(AssetTargetRecord).filter_by(portfolio_id=self.portfolio_id).delete()
             for targets in policy.targets.values():
                 for ticker, target in targets.items():
                     session.add(
-                        AssetTargetRecord(asset_id=str(assets[ticker].id), target=str(target))
+                        AssetTargetRecord(
+                            portfolio_id=self.portfolio_id,
+                            asset_id=str(assets[ticker].id),
+                            target=str(target),
+                        )
                     )
 
     def get(self) -> AssetAllocationPolicy | None:
-        assets = {str(asset.id): asset for asset in SqliteAssetRepository().list()}
+        assets = {str(asset.id): asset for asset in SqliteAssetRepository(self.portfolio_id).list()}
         with SessionFactory() as session:
-            rows = session.query(AssetTargetRecord).all()
+            rows = session.query(AssetTargetRecord).filter_by(portfolio_id=self.portfolio_id).all()
         if not rows:
             return None
         targets: dict[AssetClass, dict[str, Decimal]] = {}

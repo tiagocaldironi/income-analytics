@@ -269,8 +269,7 @@ class PortfolioDiagnosticEngine:
             category = "RISK"
             current = Decimal(str(finding.evidence["risk_contribution_share"]))
             threshold = (
-                Decimal(str(finding.evidence["weight"]))
-                * thresholds.max_risk_contribution_multiple
+                Decimal(str(finding.evidence["weight"])) * thresholds.max_risk_contribution_multiple
             )
         labels = {
             "BR": "Brasil",

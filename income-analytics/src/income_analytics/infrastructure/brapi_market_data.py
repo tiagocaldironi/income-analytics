@@ -46,15 +46,13 @@ class BrapiMarketDataProvider:
             raw_price = data.get("regularMarketPrice") or data.get("lastPrice")
             try:
                 price = Decimal(str(raw_price))
-            except (InvalidOperation, TypeError):
+            except InvalidOperation, TypeError:
                 continue
             if price <= 0:
                 continue
             timestamp = data.get("regularMarketTime")
             observed_at = (
-                datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-                if timestamp
-                else None
+                datetime.fromisoformat(timestamp.replace("Z", "+00:00")) if timestamp else None
             )
             observations[ticker] = MarketPriceObservation(
                 symbol=ticker,
@@ -90,12 +88,19 @@ class BrapiMarketDataProvider:
                 effective_date=effective_date,
                 source="brapi",
             )
-        except (IndexError, KeyError, OSError, TypeError, URLError, ValueError) as error:
+        except IndexError, KeyError, OSError, TypeError, URLError, ValueError:
             # Some BRAPI plans require a token for the quote endpoint, while
             # public ticker search still provides the delayed last price.
             try:
                 return self._public_latest_price(symbol)
-            except (IndexError, KeyError, OSError, TypeError, URLError, ValueError) as fallback_error:
+            except (
+                IndexError,
+                KeyError,
+                OSError,
+                TypeError,
+                URLError,
+                ValueError,
+            ) as fallback_error:
                 raise MarketDataUnavailable(
                     "Cotação automática indisponível para este ativo."
                 ) from fallback_error
@@ -109,7 +114,8 @@ class BrapiMarketDataProvider:
         with urlopen(request, timeout=self._timeout_seconds) as response:
             payload = json.loads(response.read().decode("utf-8"))
         item = next(
-            candidate for candidate in payload.get("results", [])
+            candidate
+            for candidate in payload.get("results", [])
             if str(candidate.get("symbol", "")).strip().upper() == normalized_symbol
         )
         quote = item.get("quote") or {}
@@ -161,9 +167,7 @@ class BrapiMarketDataProvider:
                 source="brapi",
             )
         except (IndexError, KeyError, OSError, TypeError, URLError, ValueError) as error:
-            raise MarketDataUnavailable(
-                "Cotação histórica indisponível na brapi."
-            ) from error
+            raise MarketDataUnavailable("Cotação histórica indisponível na brapi.") from error
 
     def _yahoo_price_on(self, symbol: str, effective_date: date) -> MarketPriceObservation:
         start = datetime.combine(effective_date - timedelta(days=7), datetime.min.time(), UTC)
@@ -198,4 +202,3 @@ class BrapiMarketDataProvider:
             raise MarketDataUnavailable(
                 "Não há cotação automática para a data escolhida."
             ) from error
-

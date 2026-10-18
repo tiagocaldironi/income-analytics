@@ -96,6 +96,6 @@ def read_unit_evidence(path):
             unit_label=label,
             quantities=quantities,
         )
-    except (AttributeError, TypeError, ValueError, InvalidOperation):
+    except AttributeError, TypeError, ValueError, InvalidOperation:
         return result
     return result

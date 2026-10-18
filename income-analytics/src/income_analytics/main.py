@@ -23,6 +23,12 @@ from income_analytics.api.routers.dashboard import (
     router as dashboard_router,
 )
 from income_analytics.api.routers.health import router as health_router
+from income_analytics.application.portfolio_context import (
+    current_portfolio_id,
+    reset_request_session,
+    set_request_session,
+)
+from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.infrastructure.database import engine, initialize_database
 from income_analytics.infrastructure.request_profiling import (
     current_request_metrics,
@@ -40,6 +46,17 @@ performance_logger = logging.getLogger("uvicorn.error")
 if os.environ.get("INCOME_ANALYTICS_PERF_LOG", "").strip().lower() in {"1", "true", "yes"}:
     install_sql_timing(engine)
     logging.getLogger().setLevel(logging.INFO)
+
+
+@app.middleware("http")
+async def portfolio_request_context(request, call_next):
+    token = set_request_session(
+        PortfolioSession(portfolio_id=current_portfolio_id(), persistent=True)
+    )
+    try:
+        return await call_next(request)
+    finally:
+        reset_request_session(token)
 
 
 @app.middleware("http")
@@ -78,6 +95,7 @@ async def profile_request(request, call_next):
         max(0.0, duration_ms - metrics["db_time_ms"]),
     )
     return response
+
 
 initialize_database()
 

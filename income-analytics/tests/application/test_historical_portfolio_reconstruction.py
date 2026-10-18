@@ -4,6 +4,7 @@ from decimal import Decimal
 from income_analytics.application.historical_portfolio_reconstruction import (
     HistoricalPortfolioReconstructionService,
 )
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
@@ -31,7 +32,9 @@ def _buy_petr4(session: PortfolioSession, when: date) -> None:
 
 
 def test_reconstruction_keeps_unvalued_positions_out_of_valued_wealth() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_external_flow(
         event_type=FinancialEventType.DEPOSIT,
         amount=Decimal("200"),
@@ -60,7 +63,9 @@ def test_reconstruction_keeps_unvalued_positions_out_of_valued_wealth() -> None:
 
 
 def test_reconstruction_never_uses_a_future_quote() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     session.register_external_flow(
         event_type=FinancialEventType.DEPOSIT,
         amount=Decimal("100"),
@@ -81,7 +86,9 @@ def test_reconstruction_never_uses_a_future_quote() -> None:
 
 
 def test_evolution_includes_economic_price_and_event_boundaries() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     _buy_petr4(session, date(2026, 1, 5))
     session.update_market_price(
         ticker="PETR4", current_price=Decimal("12"), effective_date=date(2026, 1, 10)
@@ -100,7 +107,9 @@ def test_evolution_includes_economic_price_and_event_boundaries() -> None:
 
 
 def test_reconstruction_reuses_each_point_projection_for_valuation() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     _buy_petr4(session, date(2026, 1, 5))
     session.update_market_price(
         ticker="PETR4", current_price=Decimal("12"), effective_date=date(2026, 1, 10)
@@ -121,15 +130,15 @@ def test_reconstruction_reuses_each_point_projection_for_valuation() -> None:
         ),
     )
 
-    points = service.wealth_series(
-        start_date=date(2026, 1, 1), end_date=date(2026, 1, 31)
-    )
+    points = service.wealth_series(start_date=date(2026, 1, 1), end_date=date(2026, 1, 31))
 
     assert projection_dates == [point.as_of_date for point in points]
 
 
 def test_reused_projection_preserves_historical_results() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     _buy_petr4(session, date(2026, 1, 5))
     session.update_market_price(
         ticker="PETR4", current_price=Decimal("12"), effective_date=date(2026, 1, 10)

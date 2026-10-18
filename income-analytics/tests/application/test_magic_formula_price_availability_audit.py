@@ -174,11 +174,7 @@ def test_csna3_and_v3_recoveries_survive_current_snapshot():
         "022055": ("AMAR3", "1.01"),
     }
     for cvm_code, (ticker, price) in expected.items():
-        issuer = next(
-            item for item in snapshot["issuers"] if item["cvm_code"] == cvm_code
-        )
-        security = next(
-            item for item in issuer["securities"] if item["ticker"] == ticker
-        )
+        issuer = next(item for item in snapshot["issuers"] if item["cvm_code"] == cvm_code)
+        security = next(item for item in issuer["securities"] if item["ticker"] == ticker)
         assert security["price"] == price
         assert security["effective_market_date"] == "2025-12-30"

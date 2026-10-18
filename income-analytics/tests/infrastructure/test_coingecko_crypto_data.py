@@ -26,9 +26,7 @@ def test_price_on_normalizes_usd_quote_as_decimal(monkeypatch) -> None:
     monkeypatch.setattr(provider, "_coin_id", lambda _symbol: "solana")
     monkeypatch.setattr(
         "income_analytics.infrastructure.coingecko_crypto_data.urlopen",
-        lambda *_args, **_kwargs: _Response(
-            {"market_data": {"current_price": {"usd": 82.98}}}
-        ),
+        lambda *_args, **_kwargs: _Response({"market_data": {"current_price": {"usd": 82.98}}}),
     )
 
     observation = provider.price_on("SOL", date(2026, 2, 11))

@@ -46,8 +46,7 @@ def test_acc_evid_builds_complete_evidence_and_independent_totals() -> None:
     assert bundle.lineage_complete is True
     assert bundle.component("ebit").rule_id == "EBIT_RULE_002"
     assert bundle.component("ebit").sources[0].source_reference == (
-        "dfp_cia_aberta_2025.zip|005410|2025-12-31|CONSOLIDATED|DRE|3.05|"
-        "2025-01-01|2025-12-31"
+        "dfp_cia_aberta_2025.zip|005410|2025-12-31|CONSOLIDATED|DRE|3.05|2025-01-01|2025-12-31"
     )
     assert bundle.component("operating_current_assets").normalized_value == Decimal("50000")
     assert bundle.value("financial_debt_total") == Decimal("16000")

@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import uuid4
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.allocation_policy import AllocationPolicy
 from income_analytics.domain.enums.asset_class import AssetClass
@@ -16,7 +17,7 @@ from income_analytics.domain.enums.fixed_income import (
 
 def test_persistent_session_reconstructs_asset_event_price_benchmark_and_policy() -> None:
     ticker = f"T{uuid4().hex[:8]}"
-    first = PortfolioSession(persistent=True)
+    first = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=True)
     first.register_trade(
         event_type=FinancialEventType.BUY,
         ticker=ticker,
@@ -35,7 +36,7 @@ def test_persistent_session_reconstructs_asset_event_price_benchmark_and_policy(
         AllocationPolicy(targets={AssetClass.BRAZILIAN_STOCK: Decimal("1")})
     )
 
-    rebuilt = PortfolioSession(persistent=True)
+    rebuilt = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=True)
 
     tickers = {str(position.asset.ticker) for position in rebuilt.projection().positions}
     assert ticker.upper() in tickers
@@ -45,7 +46,7 @@ def test_persistent_session_reconstructs_asset_event_price_benchmark_and_policy(
 
 def test_persistent_clear_removes_data_after_session_reconstruction() -> None:
     ticker = f"C{uuid4().hex[:8]}"
-    first = PortfolioSession(persistent=True)
+    first = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=True)
     first.register_trade(
         event_type=FinancialEventType.BUY,
         ticker=ticker,
@@ -62,7 +63,7 @@ def test_persistent_clear_removes_data_after_session_reconstruction() -> None:
     )
 
     first.clear()
-    rebuilt = PortfolioSession(persistent=True)
+    rebuilt = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=True)
 
     assert rebuilt.projection().positions == ()
     assert rebuilt.history() == ()
@@ -70,7 +71,7 @@ def test_persistent_clear_removes_data_after_session_reconstruction() -> None:
 
 
 def test_fixed_income_contract_survives_persistent_reconstruction() -> None:
-    first = PortfolioSession(persistent=True)
+    first = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=True)
     first.clear()
     first.register_fixed_income_asset(
         ticker="CDB-REBUILD",
@@ -82,7 +83,7 @@ def test_fixed_income_contract_survives_persistent_reconstruction() -> None:
         contracted_rate=Decimal("10"),
     )
 
-    rebuilt = PortfolioSession(persistent=True)
+    rebuilt = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=True)
 
     assert rebuilt.fixed_income_details("CDB-REBUILD").contracted_rate == Decimal("10")
     assert rebuilt.projection(as_of=date(2027, 1, 1)).positions[0].market_value.amount == Decimal(
@@ -91,21 +92,30 @@ def test_fixed_income_contract_survives_persistent_reconstruction() -> None:
 
 
 def test_non_listed_wealth_survives_persistent_reconstruction() -> None:
-    first = PortfolioSession(persistent=True)
+    first = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=True)
     first.clear()
     first.register_pension_plan(
-        ticker="PGBL-REBUILD", name="Previdência", pension_type="PGBL",
-        institution="Instituição", plan_name="Plano", tax_regime="REGRESSIVO",
-        start_date=date(2020, 1, 1), reported_balance=Decimal("1000"),
+        ticker="PGBL-REBUILD",
+        name="Previdência",
+        pension_type="PGBL",
+        institution="Instituição",
+        plan_name="Plano",
+        tax_regime="REGRESSIVO",
+        start_date=date(2020, 1, 1),
+        reported_balance=Decimal("1000"),
         reported_balance_date=date(2026, 1, 1),
     )
     first.register_real_estate(
-        ticker="IMOVEL-REBUILD", name="Imóvel", property_type="CASA",
-        description="Casa residencial", cep="01001-000",
-        current_manual_value=Decimal("500000"), valuation_date=date(2026, 1, 1),
+        ticker="IMOVEL-REBUILD",
+        name="Imóvel",
+        property_type="CASA",
+        description="Casa residencial",
+        cep="01001-000",
+        current_manual_value=Decimal("500000"),
+        valuation_date=date(2026, 1, 1),
     )
 
-    rebuilt = PortfolioSession(persistent=True)
+    rebuilt = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=True)
     values = {
         str(position.asset.ticker): position.market_value.amount
         for position in rebuilt.projection().positions

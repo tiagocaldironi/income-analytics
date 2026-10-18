@@ -24,9 +24,14 @@ class _Provider:
 def test_mkt_evid_returns_auditable_cotahist_bundle() -> None:
     requested = date(2025, 12, 31)
     evidence = CotahistPriceEvidence(
-        ticker="WEGE3", requested_reference_date=requested, effective_date=date(2025, 12, 30),
-        price=Decimal("48.51"), currency="BRL", source="B3_COTAHIST",
-        source_file="COTAHIST_A2025.ZIP", record_reference="COTAHIST_A2025.ZIP|line=1",
+        ticker="WEGE3",
+        requested_reference_date=requested,
+        effective_date=date(2025, 12, 30),
+        price=Decimal("48.51"),
+        currency="BRL",
+        source="B3_COTAHIST",
+        source_file="COTAHIST_A2025.ZIP",
+        record_reference="COTAHIST_A2025.ZIP|line=1",
         status=MarketEvidenceStatus.VALID,
     )
 
@@ -52,9 +57,15 @@ def test_mkt_evid_missing_quote_is_explicit_and_never_zero() -> None:
 def test_mkt_evid_rejects_provider_record_without_raw_locator() -> None:
     requested = date(2025, 12, 31)
     malformed = CotahistPriceEvidence(
-        ticker="WEGE3", requested_reference_date=requested, effective_date=date(2025, 12, 30),
-        price=Decimal("48.51"), currency="BRL", source="B3_COTAHIST", source_file=None,
-        record_reference=None, status=MarketEvidenceStatus.VALID,
+        ticker="WEGE3",
+        requested_reference_date=requested,
+        effective_date=date(2025, 12, 30),
+        price=Decimal("48.51"),
+        currency="BRL",
+        source="B3_COTAHIST",
+        source_file=None,
+        record_reference=None,
+        status=MarketEvidenceStatus.VALID,
     )
 
     result = MagicFormulaMarketEvidenceAgent(_Provider(malformed)).obtain(

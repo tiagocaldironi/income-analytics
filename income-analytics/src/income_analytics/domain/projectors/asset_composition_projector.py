@@ -53,9 +53,18 @@ class AssetCompositionProjector:
                 asset_id=item.asset_id,
                 label=item.label,
                 current_value=item.current_value,
-                current_weight=(item.current_value / total) if item.current_value is not None else Decimal("0"),
+                current_weight=(item.current_value / total)
+                if item.current_value is not None
+                else Decimal("0"),
                 target_weight=item.target_weight,
-                gap_pp=(item.target_weight - (item.current_value / total if item.current_value is not None else Decimal("0")))
+                gap_pp=(
+                    item.target_weight
+                    - (
+                        item.current_value / total
+                        if item.current_value is not None
+                        else Decimal("0")
+                    )
+                )
                 if item.target_weight is not None
                 else None,
             )
@@ -71,9 +80,16 @@ class AssetCompositionProjector:
         return AssetCompositionProjection(result, total, distance, "COMPLETE")
 
     @staticmethod
-    def _unavailable(items: tuple[AssetCompositionInput, ...], reason: str) -> AssetCompositionProjection:
+    def _unavailable(
+        items: tuple[AssetCompositionInput, ...], reason: str
+    ) -> AssetCompositionProjection:
         return AssetCompositionProjection(
-            tuple(AssetCompositionItem(item.asset_id, item.label, item.current_value, None, item.target_weight, None) for item in items),
+            tuple(
+                AssetCompositionItem(
+                    item.asset_id, item.label, item.current_value, None, item.target_weight, None
+                )
+                for item in items
+            ),
             None,
             None,
             "PARTIAL",

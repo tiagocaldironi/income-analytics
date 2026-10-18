@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import pytest
 
+from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.value_objects.money import Money
@@ -26,7 +27,9 @@ def trade(
 
 
 def test_dividend_adds_income_and_cash_without_changing_position_or_valuation() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
     trade(session, FinancialEventType.BUY, "PETR4", "100", "40")
     trade(session, FinancialEventType.SELL, "PETR4", "50", "50")
@@ -47,7 +50,9 @@ def test_dividend_adds_income_and_cash_without_changing_position_or_valuation() 
 
 
 def test_dividends_accumulate_for_an_asset_and_cash() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
 
     for amount in ("120", "80", "50"):
@@ -59,7 +64,9 @@ def test_dividends_accumulate_for_an_asset_and_cash() -> None:
 
 
 def test_dividend_is_allowed_after_the_position_has_been_fully_sold() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
     trade(session, FinancialEventType.SELL, "PETR4", "100", "40")
 
@@ -73,7 +80,9 @@ def test_dividend_is_allowed_after_the_position_has_been_fully_sold() -> None:
 
 
 def test_dividends_are_attributed_to_their_respective_assets() -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
     trade(session, FinancialEventType.BUY, "BBAS3", "100", "20")
     session.register_dividend(ticker="PETR4", amount=Decimal("100"))
@@ -87,7 +96,9 @@ def test_dividends_are_attributed_to_their_respective_assets() -> None:
 
 @pytest.mark.parametrize("amount", [Decimal("0"), Decimal("-50")])
 def test_rejects_non_positive_dividend_amount(amount: Decimal) -> None:
-    session = PortfolioSession()
+    session = PortfolioSession(
+        portfolio_id=MAIN_PORTFOLIO_ID,
+    )
     trade(session, FinancialEventType.BUY, "PETR4", "100", "30")
 
     with pytest.raises(ValueError, match="provento"):

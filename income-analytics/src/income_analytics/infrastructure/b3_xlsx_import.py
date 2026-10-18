@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
-import re
 from zipfile import BadZipFile, ZipFile
 
 from income_analytics.infrastructure.irpf_xlsx_import import (
     _column_for,
     _normalized,
-    _sheet_path,
     _shared_strings,
+    _sheet_path,
     _worksheet_rows,
 )
 
@@ -57,13 +57,18 @@ def parse_b3_brazilian_stock_trades(workbook: bytes) -> tuple[B3BrazilianStockTr
             quantity = Decimal(row.get(quantity_column, ""))
             price = Decimal(row.get(price_column, ""))
             effective_date = datetime.strptime(row.get(date_column, ""), "%d/%m/%Y")
-        except (InvalidOperation, ValueError):
+        except InvalidOperation, ValueError:
             continue
         if quantity > 0 and price > 0:
-            trades.append(B3BrazilianStockTrade(
-                ticker=raw_ticker.removesuffix("F"), event_type="BUY" if movement == "COMPRA" else "SELL",
-                quantity=quantity, unit_price=price, effective_date=effective_date,
-            ))
+            trades.append(
+                B3BrazilianStockTrade(
+                    ticker=raw_ticker.removesuffix("F"),
+                    event_type="BUY" if movement == "COMPRA" else "SELL",
+                    quantity=quantity,
+                    unit_price=price,
+                    effective_date=effective_date,
+                )
+            )
     if not trades:
         raise ValueError("Não encontrei negociações de ações brasileiras na planilha B3.")
     return tuple(trades)
