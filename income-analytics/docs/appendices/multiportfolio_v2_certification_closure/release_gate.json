@@ -37,7 +37,9 @@
     "main_exists_exactly_once": true,
     "portfolio_orphans": 0,
     "real_db_test_writes": 0,
-    "v3_migrations_present": false
+    "v3_migrations_present": false,
+    "source_checksum_stable_during_closure": "NOT_ASSERTED_ACTIVE_LOCAL_PROCESS",
+    "current_snapshot_integrity": "PASS_READ_ONLY"
   },
   "financial": {
     "level_a_goldens": "PASS",

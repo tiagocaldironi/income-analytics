@@ -12,3 +12,4 @@ docs/appendices/multiportfolio_v2_final_validation/defect_classification.csv,One
 User-provided closure specification (2026-10-18),Reports manual desktop/mobile validation as approved; no per-action log or viewport,MANUAL_USER_VALIDATION
 Current closure run,Full suite 882 passed/1 preexisting failure; focused V2 20 passed; frontend Node PASS,TEST_SUITE/AUTOMATED
 Current closure run,Ruff relevant files PASS; DB read-only integrity/revision/MAIN/orphans PASS,AUTOMATED/LOCAL_ONLY
+Current DB during closure,Existing local app process held DB open; timestamp advanced vs earlier local-only manifest. Current read-only integrity passed; live checksum stability not asserted.,AUTOMATED_LOCAL_ONLY / ACTIVE_RUNTIME_CAVEAT
