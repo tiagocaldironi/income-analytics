@@ -1,0 +1,36 @@
+{
+  "snapshot": "verified isolated database copy",
+  "warm_pairs_per_endpoint": 30,
+  "method": "same process, same DB snapshot, paired legacy headerless MAIN and explicit X-Portfolio-Id MAIN",
+  "results": {
+    "dashboard": {
+      "legacy_median_s": 0.035888,
+      "explicit_median_s": 0.035121,
+      "legacy_p95_s": 0.122399,
+      "explicit_p95_s": 0.071828,
+      "paired_delta_median_s": -0.000306
+    },
+    "holdings": {
+      "legacy_median_s": 0.034092,
+      "explicit_median_s": 0.033879,
+      "legacy_p95_s": 0.040213,
+      "explicit_p95_s": 0.04293,
+      "paired_delta_median_s": 1.1e-05
+    },
+    "twr": {
+      "legacy_median_s": 1.34106,
+      "explicit_median_s": 1.365449,
+      "legacy_p95_s": 4.766806,
+      "explicit_p95_s": 3.896226,
+      "paired_delta_median_s": 0.010721
+    },
+    "wealth_evolution": "Legacy 4.827s vs explicit 4.879s median; p95 8.812s vs 7.488s",
+    "performance_comparison": "Legacy 0.070s vs explicit 0.068s median; warm paired comparison only (cold first request cache-order contaminated)",
+    "findings": "Legacy 0.248s vs explicit 0.246s median"
+  },
+  "material_v2_regression": false,
+  "conclusion": "No consistent/material V2 context overhead. TWR has variable slow tails on both paths; no semantic/staleness tradeoff introduced.",
+  "paired_validation": "PASS",
+  "material_v2_overhead": "NO",
+  "evidence_type": "AUTOMATED_PAIRED_BENCHMARK"
+}

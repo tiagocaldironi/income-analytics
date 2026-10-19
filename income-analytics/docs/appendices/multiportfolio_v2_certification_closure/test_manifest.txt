@@ -1,0 +1,13 @@
+Runtime: Python 3.14.
+Source branch: develop @ 11c110bc96fe20cc05be880265ad6306923777b7.
+Alembic current/heads: 0020_shared_pension_quota_identity.
+
+Full suite: py -3.14 -m pytest -q --basetemp C:\Temp\income-v2-closure-pytest
+Result: 882 passed, 1 failed, 6 warnings (131.49s). Single failure: tests/application/test_historical_shares_units.py::test_shares_unit_020_frozen_engine; frozen manifest hashes disagree with two Magic Formula files unchanged from the V2 base. Classified PREEXISTING_DEFECT, not a V2 regression.
+
+Focused V2 suite: py -3.14 -m pytest -q tests/api/test_local_multiportfolio_v2.py tests/infrastructure/test_portfolio_scope.py tests/api/test_history_boundary.py tests/unit/application/test_portfolio_session.py
+Result: 20 passed, 3 warnings.
+Frontend race/context: node tests/frontend/multiportfolio_context_v2.mjs — PASS.
+Ruff: 13 V2-relevant production/test Python files — PASS.
+Database: read-only SQLite integrity_check=ok, foreign_key_check=0, revision 0020, MAIN ID count 1, ownership-orphan count 0. pytest conftest redirects every run to a UUID-named temp database with INCOME_ANALYTICS_TESTING=1; no tests are configured to write the user's database.
+No V3 migration or code is present.

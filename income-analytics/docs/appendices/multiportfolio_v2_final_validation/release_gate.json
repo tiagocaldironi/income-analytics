@@ -77,5 +77,8 @@
   "ruff_touched_python": "PASS",
   "runtime_http": "PASS",
   "desktop_browser": "NOT_RUN_ENVIRONMENT_LIMITATION",
-  "mobile_browser": "NOT_RUN_ENVIRONMENT_LIMITATION"
+  "mobile_browser": "NOT_RUN_ENVIRONMENT_LIMITATION",
+  "historical_checkpoint_status": "INCOMPLETE",
+  "superseded_by": "docs/appendices/multiportfolio_v2_certification_closure/release_gate.json",
+  "superseded_on": "2026-10-18"
 }

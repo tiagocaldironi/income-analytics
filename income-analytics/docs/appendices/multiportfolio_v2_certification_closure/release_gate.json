@@ -1,0 +1,94 @@
+{
+  "spec": "INCOME_ANALYTICS_MULTIPORTFOLIO_V2_CERTIFICATION_CLOSURE",
+  "canonical": true,
+  "status": "INCOMPLETE",
+  "decision": "V2 implementation and V2-specific evidence are complete; current full suite has one pre-existing Magic Formula frozen-hash failure (CERT_48).",
+  "source_branch": "develop",
+  "source_revision": "11c110bc96fe20cc05be880265ad6306923777b7",
+  "alembic_revision": "0020_shared_pension_quota_identity",
+  "main_portfolio_id": "7a54eeb7-542a-5832-8544-8be7dcb0237e",
+  "historical_v2_1_status": "INCOMPLETE",
+  "historical_v2_1_superseded_by": "docs/appendices/multiportfolio_v2_certification_closure/release_gate.json",
+  "old_v2_final_validation_status": "INCOMPLETE",
+  "old_v2_final_validation_superseded_by": "docs/appendices/multiportfolio_v2_certification_closure/release_gate.json",
+  "pre_closure_historical_suite": "883 passed",
+  "current_full_suite": "882 passed, 1 failed, 6 warnings",
+  "remaining_unsupported_gates": [
+    "CERT_48"
+  ],
+  "implementation_status": "COMPLETE",
+  "backend_certification": "PASS",
+  "financial_certification": "PASS",
+  "isolation_certification": "PASS",
+  "b3_certification": "PASS",
+  "magic_formula_certification": "PASS",
+  "performance_certification": "PASS",
+  "desktop_browser_certification": "PASS_MANUAL",
+  "mobile_browser_certification": "PASS_MANUAL",
+  "automated_browser_e2e": "NOT_RUN_ENVIRONMENT_LIMITATION",
+  "manual_browser_exception_scope": "LOCAL_MULTIPORTFOLIO_V2_ONLY",
+  "unresolved_v2_defects": 0,
+  "verified_v2_defects_found": 1,
+  "verified_v2_defects_fixed": 1,
+  "test_infrastructure_defects_fixed": 2,
+  "database": {
+    "integrity": "PASS",
+    "foreign_keys": "PASS",
+    "main_exists_exactly_once": true,
+    "portfolio_orphans": 0,
+    "real_db_test_writes": 0,
+    "v3_migrations_present": false
+  },
+  "financial": {
+    "level_a_goldens": "PASS",
+    "level_b_controlled_equivalence": "PASS",
+    "wealth_explanation": "PREEXISTING_EQUIVALENT",
+    "unexplained_mismatches": 0
+  },
+  "isolation": {
+    "a_b_a": "PASS",
+    "b_a_b": "PASS",
+    "empty_portfolio_main_leak": "FIXED",
+    "regression_test": "PASS",
+    "cache_isolation": "PASS",
+    "private_asset_isolation": "PASS",
+    "pension_isolation": "PASS"
+  },
+  "b3": {
+    "cross_portfolio_http": "PASS",
+    "rejected_writes": 0,
+    "owner_apply": "PASS",
+    "idempotent_reapply": "PASS"
+  },
+  "magic_formula": {
+    "policy": "MF_BR_2027_V1",
+    "policy_hash": "UNCHANGED",
+    "ranking_hash": "UNCHANGED",
+    "active_snapshot": "UNCHANGED",
+    "ranked_companies": 165,
+    "portfolio_independence": "PASS"
+  },
+  "performance": {
+    "paired_validation": "PASS",
+    "twr_legacy_median_s": 1.34106,
+    "twr_explicit_median_s": 1.365449,
+    "material_v2_overhead": "NO"
+  },
+  "quality": {
+    "focused_v2_tests": "20 passed",
+    "frontend_node_test": "PASS",
+    "ruff_relevant_files": "PASS",
+    "private_financial_data_committed": "NO"
+  },
+  "final_certification": "INCOMPLETE",
+  "local_multiportfolio_ready": "NO_PENDING_CERT_48",
+  "ready_for_user_membership_foundation_v3": "NO",
+  "v3_implemented": false,
+  "old_gate_superseded": "YES",
+  "cert_10_39_reconciled": "YES",
+  "cert_42_reconciled": "YES",
+  "main_preserved": "YES",
+  "v3_migrations_present": "NO",
+  "ruff_relevant_files": "PASS",
+  "private_financial_data_committed": "NO"
+}

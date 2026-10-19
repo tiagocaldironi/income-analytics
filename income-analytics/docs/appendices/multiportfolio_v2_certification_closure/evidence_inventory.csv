@@ -1,0 +1,14 @@
+﻿EVIDENCE_SOURCE,SUMMARY,EVIDENCE_TYPE
+docs/appendices/local_multiportfolio_v2_1/release_gate.json,Preserved historical INCOMPLETE checkpoint; superseded,HISTORICAL_GATE
+docs/appendices/multiportfolio_v2_final_validation/release_gate.json,Preserved historical INCOMPLETE checkpoint; superseded,HISTORICAL_GATE
+docs/appendices/multiportfolio_v2_final_validation/validation_matrix.csv,FINAL_01–58 mappings,AUTOMATED/MANUAL/INVARIANT
+docs/appendices/multiportfolio_v2_final_validation/financial_evidence_levels.csv,Three Level A goldens and 17 endpoint-pair Level B comparisons,HISTORICAL_GOLDEN/CONTROLLED_EQUIVALENCE
+docs/appendices/multiportfolio_v2_final_validation/performance_paired_results.json,30 warm paired measurements,AUTOMATED
+docs/appendices/multiportfolio_v2_final_validation/magic_formula_reconciliation.json,MF_BR_2027_V1 hashes/snapshot/count/independence,HISTORICAL_GOLDEN/INVARIANT
+docs/appendices/multiportfolio_v2_final_validation/b3_cross_portfolio_result.json,"Cross-portfolio 404, zero writes, owner success, idempotency",RUNTIME_HTTP/INVARIANT
+docs/appendices/multiportfolio_v2_final_validation/defect_classification.csv,One fixed V2 defect and two test-infrastructure fixes,REGRESSION_TEST
+~/.codex/local-evidence/income-analytics-v2-1/database_reconciliation.json,Local-only DB reconciliation; no private values copied to repo,AUTOMATED_LOCAL_ONLY
+~/.codex/local-evidence/income-analytics-v2-1/real_db_backup_manifest.json,Local-only 2026-10-18 backup snapshot manifest,AUTOMATED_LOCAL_ONLY
+User-provided closure specification (2026-10-18),Reports manual desktop/mobile validation as approved; no per-action log or viewport,MANUAL_USER_VALIDATION
+Current closure run,Full suite 882 passed/1 preexisting failure; focused V2 20 passed; frontend Node PASS,TEST_SUITE/AUTOMATED
+Current closure run,Ruff relevant files PASS; DB read-only integrity/revision/MAIN/orphans PASS,AUTOMATED/LOCAL_ONLY
