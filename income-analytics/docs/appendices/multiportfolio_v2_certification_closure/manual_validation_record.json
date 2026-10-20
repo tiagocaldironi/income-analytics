@@ -1,0 +1,22 @@
+{
+  "recorded_at": "2026-10-18",
+  "evidence_type": "MANUAL_USER_VALIDATION",
+  "source": "The user-provided certification closure specification states desktop and mobile manual validations were executed and approved.",
+  "desktop": {
+    "status": "PASS",
+    "scope": "MANUAL_MULTI_PORTFOLIO_DESKTOP_SMOKE",
+    "evidence_type": "MANUAL_USER_VALIDATION"
+  },
+  "mobile": {
+    "status": "PASS",
+    "scope": "MANUAL_MOBILE_SMOKE",
+    "evidence_type": "MANUAL_USER_VALIDATION"
+  },
+  "automated_browser_e2e": "NOT_RUN_ENVIRONMENT_LIMITATION",
+  "scope_limits": [
+    "Per-click flow was not itemized; no individual click is asserted as observed.",
+    "No viewport dimensions were supplied; 390x844/360x800/430x932 are not claimed."
+  ],
+  "release_policy": "Manual smoke is accepted for visual gates for this LOCAL single-installation V2 because user approval is reported, backend isolation is automated, and frontend portfolio-switch tests pass. No authenticated multiuser security is implied.",
+  "exception_scope": "LOCAL_MULTIPORTFOLIO_V2_ONLY"
+}

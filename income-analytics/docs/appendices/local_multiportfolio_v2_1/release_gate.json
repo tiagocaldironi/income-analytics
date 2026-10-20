@@ -75,5 +75,8 @@
     "CERT_53": "PARTIAL_THREE_ENDPOINTS_MATCH",
     "CERT_54": "PASS"
   },
-  "decision": "INCOMPLETE; no verified V2 regression; do not advance to V3"
+  "decision": "INCOMPLETE; no verified V2 regression; do not advance to V3",
+  "historical_checkpoint_status": "INCOMPLETE",
+  "superseded_by": "docs/appendices/multiportfolio_v2_certification_closure/release_gate.json",
+  "superseded_on": "2026-10-18"
 }

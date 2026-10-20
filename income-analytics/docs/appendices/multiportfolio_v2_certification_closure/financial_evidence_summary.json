@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "level_a_historical_goldens": {
+    "status": "PASS",
+    "count": 3,
+    "endpoints": [
+      "/api/portfolio",
+      "/api/portfolio/dashboard",
+      "/api/portfolio/holdings"
+    ]
+  },
+  "level_b_controlled_equivalence": {
+    "status": "PASS",
+    "pair_count": 17,
+    "method": "legacy MAIN vs explicit X-Portfolio-Id MAIN; semantic comparison"
+  },
+  "wealth_explanation": {
+    "status": "PREEXISTING_EQUIVALENT",
+    "legacy_http": 422,
+    "explicit_http": 422
+  },
+  "unexplained_mismatches": 0,
+  "private_financial_values_included": false,
+  "sources": [
+    "docs/appendices/multiportfolio_v2_final_validation/financial_evidence_levels.csv",
+    "docs/appendices/multiportfolio_v2_final_validation/validation_matrix.csv"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "verified_v2_defects_found": 1,
+  "verified_v2_defects_fixed": 1,
+  "unresolved_v2_defects": 0,
+  "v2_defect": {
+    "id": "V2-01",
+    "name": "NEW PORTFOLIO READ MODEL COULD FALL BACK TO MAIN SNAPSHOT",
+    "root_cause": "Dashboard snapshot resolution used worker context rather than the validated request portfolio; empty portfolio lifecycle had not prepared scoped read models.",
+    "fix": "Prepare scoped snapshot during creation and resolve dashboard/holdings snapshot from validated X-Portfolio-Id.",
+    "regression_test": "test_new_empty_portfolio_has_dashboard_and_holdings_read_models",
+    "current_result": "PASS"
+  },
+  "test_infrastructure_defects_fixed": [
+    {
+      "id": "TEST-01",
+      "classification": "TEST_INFRASTRUCTURE_DEFECT",
+      "name": "monkeypatch bound-method leak",
+      "current_result": "PASS"
+    },
+    {
+      "id": "TEST-02",
+      "classification": "TEST_INFRASTRUCTURE_DEFECT",
+      "name": "PID-only SQLite filename reuse",
+      "current_result": "PASS"
+    }
+  ],
+  "preexisting_unrelated_issue": {
+    "classification": "PREEXISTING_DEFECT",
+    "gate": "CERT_48",
+    "name": "stale Magic Formula frozen-code hashes",
+    "source_files": [
+      "src/income_analytics/application/magic_formula_ranking_validation.py",
+      "src/income_analytics/application/magic_formula_contract.py"
+    ],
+    "manifest": "tests/fixtures/cvm/shares_unit_v1/manifest.json",
+    "current_full_suite_result": "One hash assertion failed; source files unchanged from the V2 base.",
+    "action": "Not changed in V2 certification scope."
+  }
+}

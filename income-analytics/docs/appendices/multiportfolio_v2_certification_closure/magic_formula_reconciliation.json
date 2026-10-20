@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "methodology_id": "MF_BR_2027_V1",
+  "policy_id": "MF_BR_2027_V1",
+  "policy_hash": "96d5d54ab1b1320ddc14f1a3c9cd6764b1bf8d68f1e6d79ffd0faa6d1b72cbac",
+  "snapshot_id": "mf-f1ee50809c83979ba221d84e",
+  "ranking_hash": "f1ee50809c83979ba221d84ebb48150b9470331240940f89a8cb745f2a4ee8f3",
+  "ranked_company_count": 165,
+  "canonical_result_sha256": "162c1b2f8856ae7d88cf5809d9418395464d0b2042bf6177fb48141e5b4fcf6a",
+  "portfolio_context_independent": true,
+  "comparison": "matches docs/appendices/magic_formula_v12_2 release gate and ranking snapshot",
+  "portfolio_context_independence": "PASS",
+  "ranking_policy_and_hashes": "UNCHANGED",
+  "full_suite_frozen_hash_guard": {
+    "status": "PREEXISTING_FAILURE",
+    "note": "Two current source hashes differ from frozen manifest; both files are unchanged from the V2 base. Canonical ranking reconciliation still matches."
+  }
+}
