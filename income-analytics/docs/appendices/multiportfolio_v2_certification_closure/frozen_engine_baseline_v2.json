@@ -1,0 +1,298 @@
+{
+  "creation_metadata": {
+    "created_at_utc": "2026-10-21T01:04:24.404567+00:00",
+    "timestamp_excluded_from_payload_hash": true
+  },
+  "payload": {
+    "baseline_id": "MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2",
+    "generator": {
+      "path": "scripts/generate_magic_formula_frozen_engine_baseline.py",
+      "sha256": "e58db8d94359dd4199f6720ffa9574f322a88e40704b9bd32d13bdfded28e3d5"
+    },
+    "git_commit": "f44986095aa72b26703cc0b866e4c343648669cf",
+    "golden_test_manifest": {
+      "cases": [
+        {
+          "rule_id": "MF-FE-010-MARKET",
+          "test_node_id": "tests/application/test_magic_formula_frozen_engine_semantics.py::test_frozen_engine_semantic_golden[MF-FE-010-MARKET]"
+        },
+        {
+          "rule_id": "MF-FE-020-NO-MARKET-SUBSTITUTION",
+          "test_node_id": "tests/application/test_magic_formula_frozen_engine_semantics.py::test_frozen_engine_semantic_golden[MF-FE-020-NO-MARKET-SUBSTITUTION]"
+        },
+        {
+          "rule_id": "MF-FE-UNIT-ONE-SECURITY",
+          "test_node_id": "tests/application/test_magic_formula_frozen_engine_semantics.py::test_frozen_engine_semantic_golden[MF-FE-UNIT-ONE-SECURITY]"
+        },
+        {
+          "rule_id": "MF-FE-CLASS-AGGREGATION",
+          "test_node_id": "tests/application/test_magic_formula_frozen_engine_semantics.py::test_frozen_engine_semantic_golden[MF-FE-CLASS-AGGREGATION]"
+        },
+        {
+          "rule_id": "MF-FE-TREASURY-AND-UNIT-SCALE",
+          "test_node_id": "tests/application/test_magic_formula_frozen_engine_semantics.py::test_frozen_engine_semantic_golden[MF-FE-TREASURY-AND-UNIT-SCALE]"
+        },
+        {
+          "rule_id": "MF-FE-MISSING-CLASS-PRICE",
+          "test_node_id": "tests/application/test_magic_formula_frozen_engine_semantics.py::test_frozen_engine_semantic_golden[MF-FE-MISSING-CLASS-PRICE]"
+        },
+        {
+          "rule_id": "MF-FE-S4-INDEPENDENCE",
+          "test_node_id": "tests/application/test_magic_formula_frozen_engine_semantics.py::test_frozen_engine_semantic_golden[MF-FE-S4-INDEPENDENCE]"
+        },
+        {
+          "rule_id": "MF-FE-POLICY-AND-RANKING-INVARIANTS",
+          "test_node_id": "tests/application/test_magic_formula_frozen_engine_semantics.py::test_frozen_engine_semantic_golden[MF-FE-POLICY-AND-RANKING-INVARIANTS]"
+        }
+      ],
+      "golden_file": "docs/appendices/multiportfolio_v2_certification_closure/frozen_engine_semantic_goldens.json",
+      "golden_file_sha256": "b445a4b6f18f197791030ea19b774ed1bea46db94fb005e3a1c30e659bb0b6a2",
+      "test_file": "tests/application/test_magic_formula_frozen_engine_semantics.py",
+      "test_file_sha256": "a5318b3c6b18f46ede167e4b05453b96968520e5ba00c98e70cb77083f36b93f"
+    },
+    "golden_test_manifest_sha256": "2c7314ac8b651d940e3e14af31f7baa7e9744fe0bbb7e6feca6146e889f8336b",
+    "methodology": {
+      "active_snapshot_id": "mf-f1ee50809c83979ba221d84e",
+      "canonical_result_sha256": "162c1b2f8856ae7d88cf5809d9418395464d0b2042bf6177fb48141e5b4fcf6a",
+      "policy_hash": "96d5d54ab1b1320ddc14f1a3c9cd6764b1bf8d68f1e6d79ffd0faa6d1b72cbac",
+      "policy_id": "MF_BR_2027_V1",
+      "ranked_company_count": 165,
+      "ranking_hash": "f1ee50809c83979ba221d84ebb48150b9470331240940f89a8cb745f2a4ee8f3",
+      "snapshot_artifact_sha256": "08d8776ee27af53c54c36efd9768fbc40e190f6f0ea0e0c18ec549199ff7cad0"
+    },
+    "policy_artifacts": [
+      {
+        "path": "docs/appendices/magic_formula_v12_2/ranking_snapshot.json",
+        "sha256": "08d8776ee27af53c54c36efd9768fbc40e190f6f0ea0e0c18ec549199ff7cad0"
+      },
+      {
+        "path": "docs/appendices/magic_formula_v12_2/release_gate.json",
+        "sha256": "f89e67c80cf5ca7010adc9f51d1bdc65e8be92ee27dcfa77f412923222012325"
+      },
+      {
+        "path": "docs/appendices/magic_formula_v9_2/activation_gates.json",
+        "sha256": "4bc5655ad4d34cccbd1288096e54142c2a333e4d02c4ff562413b6242aa339a4"
+      },
+      {
+        "path": "docs/appendices/magic_formula_v9_2/activation_record.json",
+        "sha256": "e45675474a37d9d8e78c3d960772bef0271ee221f620ae25996c4d7d442c36c2"
+      },
+      {
+        "path": "docs/appendices/magic_formula_v9_2/policy_definition.json",
+        "sha256": "88a55a9a2671f77f1caf90027ad95456b0f611a31cbe07ebe86146449e2d0f54"
+      },
+      {
+        "path": "docs/appendices/magic_formula_v9_2/policy_fingerprint.json",
+        "sha256": "d993b1decd9abbcf31a572486dcc6d67d3d7dad4f29d43aecb1d804e896e4a11"
+      }
+    ],
+    "protected_files": [
+      {
+        "path": "src/income_analytics/application/cvm_magic_formula_normalization.py",
+        "sha256": "6a9fa890598ff9adc479e3fb3c83b28d1ad34225192aa78dfbff20fab629ce01"
+      },
+      {
+        "path": "src/income_analytics/application/historical_shares_units.py",
+        "sha256": "431756906077933c95faae48f6e0b863f4bd4bf6f7284a4498a73b5be87659ee"
+      },
+      {
+        "path": "src/income_analytics/application/issuer_market_cap.py",
+        "sha256": "9e8043bd1a7e27dae69016fa8132ec4f77b924deae2626586c0617bc0e90560b"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_canonical_ranking.py",
+        "sha256": "32a4f8a636e25efc57f4d345186f3eac19d9aeec83aea16aa05f959b7b2ffbc9"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_contract.py",
+        "sha256": "40b1def756c8cde12f556835ac7e989adab18907b1a0d7364aff3bfd6aa032f9"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_eligibility_policy_v7.py",
+        "sha256": "800394727b4ca14319513c0f8596a2d59ac23430b17b894d003b907f747a88a4"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_formal_qa.py",
+        "sha256": "49b0647fee18e68675572ec4c56437ee7cc325518d6aa46210d9b918ae1ff6bc"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_fundamentals_assembler.py",
+        "sha256": "0bf5b22d0b4dec5f6c8f2298ea2dd348bb298f31552a56048311164372859f7a"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_investable_universe.py",
+        "sha256": "7b4a405e96a89a29ea51360f0e402d160f8c13823f95fcad5a29feaba49e6492"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_preview.py",
+        "sha256": "47a587b7b4f0dd19f8f204dfd85026f214a34d2046e491622ea0a43bee2acc5c"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_ranking_validation.py",
+        "sha256": "039656c877d516ce2e2cdcf5d6bba7efadf948a92958875ecd140a16349ce83d"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_screening.py",
+        "sha256": "666adf13b8814c9fc44ce31a65a5d9a39200c292bdd3da3af19cb644be01b6e4"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_security_capital_evidence.py",
+        "sha256": "70675833b4be0b23d0c6692807debdeb95886c80d07f437b507d3fb698bcbb82"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_stocks.py",
+        "sha256": "27b58d132b461afe867ca2af05757b1309739c40156549ac0bf1785ae5ad27a4"
+      },
+      {
+        "path": "src/income_analytics/application/magic_formula_universe.py",
+        "sha256": "2077d8081d9d84b6f11164d2a31a6aba06ce6db3aaf107961d2396cae8279196"
+      },
+      {
+        "path": "src/income_analytics/application/market_data.py",
+        "sha256": "0800eaf407224cf4dca66e2ca472ce607036c056f563c4e5d33861801315e291"
+      },
+      {
+        "path": "src/income_analytics/application/monetary_amount.py",
+        "sha256": "d8187e6e46cdb488238cd6c925820db09ad07a18e719a79b58d0c4cf7664e7eb"
+      },
+      {
+        "path": "src/income_analytics/infrastructure/cvm_capital_structure.py",
+        "sha256": "a57ca80486192e0b70efc71da595a63e2aac6dfe885d52420b4931b596df379e"
+      },
+      {
+        "path": "src/income_analytics/infrastructure/cvm_fundamentals_data.py",
+        "sha256": "a4195b20c512bdb58a1aac15ef7082fb18dc5217c487871f43062bcbffdbc08c"
+      },
+      {
+        "path": "src/income_analytics/infrastructure/cvm_historical_shares_document.py",
+        "sha256": "ba1aa767698f0a4d4b4a006798a30866f3d1892208a057967491262dfe5a80ef"
+      },
+      {
+        "path": "src/income_analytics/infrastructure/magic_formula_historical_price_sources.py",
+        "sha256": "c133d763507d3fdc5ed99fa938cb5abe0e419cf0ff6e08fe1f4cd0642b523f5c"
+      },
+      {
+        "path": "src/income_analytics/infrastructure/magic_formula_universe_repository.py",
+        "sha256": "66700d9cf496d787dfeb3c647ba3c3d0f3467dea2ca89b18a79871d9b6f2a677"
+      },
+      {
+        "path": "src/income_analytics/infrastructure/magic_formula_universe_sources.py",
+        "sha256": "8ddd0aedc9a80866e779f66eee9a36d021bff1807acdfb985a665da03c18fa1d"
+      }
+    ],
+    "runtime": {
+      "file_hash_algorithm": "SHA-256 raw bytes",
+      "payload_hash_encoding": "UTF-8 compact sorted-key JSON",
+      "pytest_version": "9.1.1",
+      "python_implementation": "CPython",
+      "python_version": "3.14.7"
+    },
+    "schema_version": "1.0",
+    "semantic_contract_sha256": "dcf3014e69b8921f7ce194fd678cd9382006b3186d850284c8c81f9d036e9039",
+    "semantic_contract_version": "MF_BR_2027_V1_FROZEN_ENGINE_SEMANTICS_V1",
+    "test_manifest": [
+      {
+        "path": "tests/api/test_magic_formula_product_api.py",
+        "sha256": "7da6ba7a8676727fa1b27852437bfb8b38b936646d8566a07d3c8d6cb68592ed"
+      },
+      {
+        "path": "tests/application/test_cvm_magic_formula_normalization.py",
+        "sha256": "4b821a879031f9bdebda1f6dab837c933a60c0e12d0b29b3bffc2dacb0d2344c"
+      },
+      {
+        "path": "tests/application/test_historical_shares_units.py",
+        "sha256": "c80513d7d90b09dec4e3072c47f768f177c7db562471d167ef6e414e4ad252f2"
+      },
+      {
+        "path": "tests/application/test_issuer_market_cap.py",
+        "sha256": "9fe5fb5d082c4f4f775e029e84d6699804b50e63985fa7ae0379e6c6eeca2990"
+      },
+      {
+        "path": "tests/application/test_magic_formula_accounting_evidence.py",
+        "sha256": "9c5263e866a63f5b829291974b55327ab287dcc8e455fe720401b6b8597be5d0"
+      },
+      {
+        "path": "tests/application/test_magic_formula_activation_gate.py",
+        "sha256": "f72192387e1bbe0054d4756571cc28856ae0d6eab61691e6ad2dd31827deba1d"
+      },
+      {
+        "path": "tests/application/test_magic_formula_canonical_contract.py",
+        "sha256": "ca54376f81f35309871190ba4ebf8dfbb48629a7bb76dd655d6212aa19191993"
+      },
+      {
+        "path": "tests/application/test_magic_formula_canonical_ranking.py",
+        "sha256": "14c2c1dd2cfed488b430b354bebe7366b0bcb31f8273b121d291bcf891ac6ccc"
+      },
+      {
+        "path": "tests/application/test_magic_formula_component_validation.py",
+        "sha256": "552184c6ca247ae1b7086fa41983d42fede234900b2c51f19445409295051f17"
+      },
+      {
+        "path": "tests/application/test_magic_formula_eligibility_policy_v7.py",
+        "sha256": "091ca7c7918317085d3e5b0c49a4b5926414799998041234d0e465af38044fdd"
+      },
+      {
+        "path": "tests/application/test_magic_formula_frozen_engine_semantics.py",
+        "sha256": "a5318b3c6b18f46ede167e4b05453b96968520e5ba00c98e70cb77083f36b93f"
+      },
+      {
+        "path": "tests/application/test_magic_formula_historical_price_sources_v5.py",
+        "sha256": "d0e524a2ad09259938468a0a5e9677362a6fdd18c736614db56e1c4b50edd2a2"
+      },
+      {
+        "path": "tests/application/test_magic_formula_investable_universe_v6.py",
+        "sha256": "76b255580f6349bbdd8b29420c26c8de80969f5d1b59dac3b324baac5e136c4f"
+      },
+      {
+        "path": "tests/application/test_magic_formula_investable_universe_v6_audit.py",
+        "sha256": "b5f422c738772b0fee4b97d40c3a77594eb89c39bf2d4dc31f72d1dba175e3a4"
+      },
+      {
+        "path": "tests/application/test_magic_formula_market_evidence.py",
+        "sha256": "94356b0192551b42b5b845e79a7282da73e2bd2b13a226e36aaebc2bce02b49c"
+      },
+      {
+        "path": "tests/application/test_magic_formula_methodology_policy_v1.py",
+        "sha256": "5f3e259c09fe85f51b12ca1258feb45be95d0703fd31a564dd05899d36933699"
+      },
+      {
+        "path": "tests/application/test_magic_formula_phase2_integration.py",
+        "sha256": "7a48b16b849dd882b3192d58107d618b055bd2b6e9533491860d1664b9dcfd34"
+      },
+      {
+        "path": "tests/application/test_magic_formula_point_in_time.py",
+        "sha256": "b3d6befedf055832d3597b9e521bcef5694a245500029ef8222cdbd24f7dabd3"
+      },
+      {
+        "path": "tests/application/test_magic_formula_preview.py",
+        "sha256": "9ebbc3aeab5545321618f30ba9d3850b67998e47238cdf36ba79939d0a446bc4"
+      },
+      {
+        "path": "tests/application/test_magic_formula_price_availability_audit.py",
+        "sha256": "ca2024f84ad631c840bc630cfeb33925cd0d8274dd99f8bc5ba5cbfe2f31dce2"
+      },
+      {
+        "path": "tests/application/test_magic_formula_ranking_engine.py",
+        "sha256": "5c787ac662e3c30c6374007437b62561f66e594c405919967700fa54d05ce63f"
+      },
+      {
+        "path": "tests/application/test_magic_formula_screening_v8.py",
+        "sha256": "cb51921b97a3cb8d63380513d7ceb72ea3422bb07f8300d3f4173ad9a0750f61"
+      },
+      {
+        "path": "tests/application/test_magic_formula_security_capital_evidence.py",
+        "sha256": "37f6438a77cdaa4b17f9dbf3933f67bac780b89649eb55886d822e3a73f704c8"
+      },
+      {
+        "path": "tests/application/test_magic_formula_universe.py",
+        "sha256": "ac1e1505f992f2467a419d3aa6a4d9bc9fa6eb4e3130715fc165e0dad7d67ef0"
+      },
+      {
+        "path": "tests/application/test_petrobras_canonical_e2e.py",
+        "sha256": "f6b224d7080689498fefcde4e0099fbda8384e4cc4dbb79a3842598fdc598a05"
+      }
+    ],
+    "test_manifest_sha256": "77461fea826d3cc1a329e851a7cb93335e5447092a15f8355ba412fe8cc95012"
+  },
+  "payload_sha256": "8e6868cb13a70f57867264a00c62c6d11589945b0bb2fab3a8cbd05214b4212e"
+}

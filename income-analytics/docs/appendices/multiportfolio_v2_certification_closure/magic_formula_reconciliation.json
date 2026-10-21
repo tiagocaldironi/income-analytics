@@ -12,7 +12,11 @@
   "portfolio_context_independence": "PASS",
   "ranking_policy_and_hashes": "UNCHANGED",
   "full_suite_frozen_hash_guard": {
-    "status": "PREEXISTING_FAILURE",
-    "note": "Two current source hashes differ from frozen manifest; both files are unchanged from the V2 base. Canonical ranking reconciliation still matches."
+    "status": "HISTORICAL_BASELINE_UNRESOLVABLE_PROSPECTIVE_GATE_PENDING",
+    "historical_manifest": "UNRESOLVED_LEGACY_BASELINE",
+    "historical_hash_equivalence_proven": false,
+    "prospective_baseline_id": "MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2",
+    "prospective_semantic_contract": "MF_BR_2027_V1_FROZEN_ENGINE_SEMANTICS_V1",
+    "note": "The historical hashes remain preserved as evidence and are no longer asserted as current truth. CERT_48 closes only after prospective-baseline verification and full-suite certification. Canonical ranking reconciliation still matches."
   }
 }

@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "semantic_contract_version": "MF_BR_2027_V1_FROZEN_ENGINE_SEMANTICS_V1",
+  "goldens": [
+    {
+      "rule_id": "MF-FE-010-MARKET",
+      "source_of_rule": "docs/appendices/magic_formula_v9_2/policy_definition.json; docs/appendices/magic_formula_v9_2/policy_fingerprint.json; infrastructure exact_price_candidate contract",
+      "input": {
+        "reference_date": "2025-12-30",
+        "identity": {"ticker": "TEST3", "isin": "BRTESTACNOR0", "security_class": "ON"},
+        "records": [
+          {"date": "2025-12-30", "ticker": "TEST3", "isin": "BRTESTACNOR0", "security_class": "ON", "market_type": "010", "price": "10.00"},
+          {"date": "2025-12-30", "ticker": "TEST3", "isin": "BRTESTACNOR0", "security_class": "ON", "market_type": "020", "price": "9.00"}
+        ]
+      },
+      "expected_behavior": {"status": "CANDIDATE", "market_type": "010", "price": "10.00"},
+      "rationale": "Canonical methodology prices use market 010; a lower market-020 price cannot replace it."
+    },
+    {
+      "rule_id": "MF-FE-020-NO-MARKET-SUBSTITUTION",
+      "source_of_rule": "docs/appendices/magic_formula_v9_2/policy_definition.json; tests/application/test_magic_formula_historical_price_sources_v5.py",
+      "input": {
+        "reference_date": "2025-12-30",
+        "identity": {"ticker": "TEST3", "isin": "BRTESTACNOR0", "security_class": "ON"},
+        "records": [
+          {"date": "2025-12-30", "ticker": "TEST3", "isin": "BRTESTACNOR0", "security_class": "ON", "market_type": "020", "price": "9.00"}
+        ]
+      },
+      "expected_behavior": {"status": "MISSING", "reason": "PRICE_EXISTS_BUT_POLICY_INCOMPATIBLE"},
+      "rationale": "When market 010 is absent, market 020 is not a fallback."
+    },
+    {
+      "rule_id": "MF-FE-UNIT-ONE-SECURITY",
+      "source_of_rule": "docs/appendices/magic_formula_v9_2/policy_definition.json; tests/application/test_magic_formula_eligibility_policy_v7.py::test_unit_is_one_security_candidate_not_duplicate_components",
+      "input": {
+        "candidates": [
+          {"ticker": "TEST11", "isin": "BRTESTACUNT0", "security_id": "unit-1", "share_class": "UNIT", "market_type": "010", "valid_listing": true, "liquidity_evidence_complete": true, "traded_days_ratio_30d": "0.80", "median_daily_financial_volume_30d": "0"}
+        ]
+      },
+      "expected_behavior": {"status": "RESOLVED", "selected_ticker": "TEST11", "selected_security_count": 1},
+      "rationale": "A UNIT is one tradable security candidate; it is not duplicated as another issuer or capital component."
+    },
+    {
+      "rule_id": "MF-FE-CLASS-AGGREGATION",
+      "source_of_rule": "src/income_analytics/application/issuer_market_cap.py::IssuerMarketCapService.calculate; tests/application/test_issuer_market_cap.py::test_market_cap_sums_on_and_pn_without_using_one_class_as_proxy",
+      "input": {
+        "capital": [{"class": "ON", "shares_outstanding": "100", "price": "10"}, {"class": "PN", "shares_outstanding": "50", "price": "8"}]
+      },
+      "expected_behavior": {"issuer_market_cap": "1400", "components": 2, "class_prices_used_independently": true},
+      "rationale": "Issuer-level market-cap diagnostics sum each positive share class using its own price; one class is never a proxy for another."
+    },
+    {
+      "rule_id": "MF-FE-TREASURY-AND-UNIT-SCALE",
+      "source_of_rule": "docs/MAGIC_FORMULA_PUBLISHABLE_UNIVERSE_GATE.md; src/income_analytics/application/historical_shares_units.py; tests/application/test_historical_shares_units.py::test_shares_unit_013_treasury_subtracted",
+      "input": {
+        "quantity_unit": "Mil",
+        "multiplier": "1000",
+        "issued_raw": {"ON": "1000", "PN": "500"},
+        "treasury_raw": {"ON": "100", "PN": "50"}
+      },
+      "expected_behavior": {"outstanding": {"ON": "900000", "PN": "450000"}, "unit_inferred_from_magnitude": false},
+      "rationale": "Only explicit same-document unit evidence selects the multiplier; treasury shares are subtracted class by class."
+    },
+    {
+      "rule_id": "MF-FE-MISSING-CLASS-PRICE",
+      "source_of_rule": "src/income_analytics/application/issuer_market_cap.py::IssuerMarketCapService.calculate; tests/application/test_issuer_market_cap.py::test_market_cap_rejects_missing_security_price",
+      "input": {
+        "capital": [{"class": "ON", "shares_outstanding": "100", "price": "10"}, {"class": "PN", "shares_outstanding": "50", "price": null}]
+      },
+      "expected_behavior": {"status": "INSUFFICIENT_MARKET_DATA", "partial_issuer_market_cap_published": false},
+      "rationale": "Missing price for a positive class fails the issuer aggregate closed instead of silently omitting that class."
+    },
+    {
+      "rule_id": "MF-FE-S4-INDEPENDENCE",
+      "source_of_rule": "docs/appendices/magic_formula_v9_2/policy_definition.json; tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_06_s4_chooses_highest_trading_frequency; test_v1_08_s4_ignores_price_availability; test_v1_09_s4_ignores_earnings_yield; test_v1_10_s4_ignores_return_on_capital",
+      "input": {
+        "candidates": [
+          {"ticker": "TEST3", "isin": "BRTESTACNOR0", "security_id": "on", "share_class": "ON", "market_type": "010", "valid_listing": true, "liquidity_evidence_complete": true, "traded_days_ratio_30d": "0.90", "median_daily_financial_volume_30d": "1", "price_available": false, "earnings_yield": "0.90", "return_on_capital": "0.90", "global_rank": 1},
+          {"ticker": "TEST4", "isin": "BRTESTACPR0", "security_id": "pn", "share_class": "PN", "market_type": "010", "valid_listing": true, "liquidity_evidence_complete": true, "traded_days_ratio_30d": "0.80", "median_daily_financial_volume_30d": "999999", "price_available": true, "earnings_yield": "0.01", "return_on_capital": "0.01", "global_rank": 99}
+        ]
+      },
+      "expected_behavior": {"selected_ticker": "TEST3", "selection_metric": "traded_days_ratio_30d", "price_ey_roc_rank_inputs_used": false},
+      "rationale": "S4 prioritizes 30-session trade frequency; price availability, financial metrics, ranking, and personal preferences are forbidden inputs."
+    },
+    {
+      "rule_id": "MF-FE-POLICY-AND-RANKING-INVARIANTS",
+      "source_of_rule": "docs/appendices/magic_formula_v9_2/policy_definition.json; docs/appendices/magic_formula_v9_2/policy_fingerprint.json; docs/appendices/magic_formula_v12_2/ranking_snapshot.json; docs/appendices/multiportfolio_v2_certification_closure/magic_formula_reconciliation.json",
+      "input": {"policy_id": "MF_BR_2027_V1", "canonical_snapshot": "mf-f1ee50809c83979ba221d84e"},
+      "expected_behavior": {"market_type": "010", "security_selection": "S4", "liquidity_policy": "L3", "minimum_market_cap_brl": null, "volume_is_minimum_threshold": false, "retail_exclusion": false, "aviation_exclusion": false, "new_utilities_exclusion": false, "financial_sector_exclusion": true, "ranked_issuers": 165, "ey_roc_ranks_and_global_ranks_bound_to_existing_ranking_hash": true},
+      "rationale": "The policy fingerprint and published canonical snapshot are the authority; market-cap coverage is diagnostic, not an eligibility filter."
+    }
+  ]
+}

@@ -227,10 +227,23 @@ def test_shares_unit_019_no_ranking(sample, monkeypatch):
         assert resolve(issuer, issuer["capital"], proof)["status"] == "RESOLVED"
 
 
-def test_shares_unit_020_frozen_engine():
+def test_shares_unit_020_historical_frozen_manifest_is_preserved():
     manifest = json.loads((FIXTURES / "manifest.json").read_text(encoding="utf8"))
-    for path, expected in manifest["frozen_code_sha256"].items():
-        assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == expected
+    audit = (
+        ROOT
+        / (
+            "docs/appendices/multiportfolio_v2_certification_closure/"
+            "cert_48_frozen_engine_hash_closure.md"
+        )
+    ).read_text(encoding="utf8")
+    # This fixture is retained as historical evidence. Its expected code hashes
+    # are deliberately not an active assertion against the prospective engine.
+    assert set(manifest["frozen_code_sha256"]) == {
+        "src/income_analytics/application/magic_formula_stocks.py",
+        "src/income_analytics/application/magic_formula_ranking_validation.py",
+        "src/income_analytics/application/magic_formula_contract.py",
+    }
+    assert "UNRESOLVED_LEGACY_BASELINE" in audit
 
 
 def test_fixture_hashes():

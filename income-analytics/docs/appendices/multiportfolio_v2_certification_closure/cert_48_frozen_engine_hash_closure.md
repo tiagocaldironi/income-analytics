@@ -1,6 +1,6 @@
 # CERT_48 frozen-engine hash closure
 
-**Decision: INCOMPLETE — CASE D.** CERT_48 remains unresolved. The expected hashes were not changed, and no Magic Formula or V2 production code was modified.
+**Historical decision: UNRESOLVABLE — CASE D.** The expected historical hashes were not changed. This file and the diff CSV remain the record of the old baseline investigation; the old manifest is classified as `UNRESOLVED_LEGACY_BASELINE` and is no longer the active engine gate.
 
 ## Reproduction and hash contract
 
