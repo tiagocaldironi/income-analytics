@@ -19,6 +19,24 @@ from income_analytics.infrastructure.models import (
 
 PORTFOLIO_A = "7a54eeb7-542a-5832-8544-8be7dcb0237e"
 PORTFOLIO_B = "11111111-1111-4111-8111-111111111111"
+ALLOCATION_SOURCES = [
+    {
+        "type": "ALLOCATION",
+        "title": "Synthetic test source",
+        "supports": "Test fixture only; not a real allocation basis.",
+        "url": "https://example.org/test-only",
+    }
+]
+
+
+def submit_to_review(repository, allocations=None, allocation_sources=None):
+    return repository.submit_for_review(
+        "conservadora",
+        1,
+        actor_id="Reviewer",
+        allocations=allocations or {"FIXED_INCOME": "1"},
+        allocation_sources=allocation_sources or ALLOCATION_SOURCES,
+    )
 
 
 @pytest.fixture
@@ -57,7 +75,7 @@ def repository(tmp_path):
                 not_suitable_json="[]",
                 author="Income Analytics",
                 methodology="Sem alocações definidas.",
-                methodology_sources_json="[]",
+                methodology_sources_json='[{"type":"CONCEPTUAL","title":"Test method"}]',
                 allocation_sources_json="[]",
                 allocations_json=None,
                 allocations_validated=False,
@@ -66,7 +84,18 @@ def repository(tmp_path):
                 created_at=now,
             )
         )
-    yield IncomeStarterRepository(sessions, initialize=lambda: None)
+    yield IncomeStarterRepository(
+        sessions,
+        initialize=lambda: None,
+        transition_authorizer=lambda action, actor_id: (
+            actor_id
+            in {
+                "Reviewer",
+                "FinancialReviewer",
+                "RegulatoryReviewer",
+            }
+        ),
+    )
     engine.dispose()
 
 
@@ -78,6 +107,21 @@ def test_draft_persists_without_any_allocation(repository):
     assert model["allocations"] is None
     assert model["adoption_available"] is False
     assert repository.list_catalog()[0]["name"] == "Conservadora"
+
+
+def test_draft_cannot_enter_review_without_complete_supported_proposal(repository):
+    with pytest.raises(IncomeStarterError, match="totalizar exatamente 100%"):
+        submit_to_review(repository, {"FIXED_INCOME": ".8"})
+    with pytest.raises(IncomeStarterError, match="classe ou percentual inválido"):
+        submit_to_review(repository, {"UNKNOWN_CLASS": "1"})
+    with pytest.raises(IncomeStarterError, match="fontes específicas de alocação"):
+        submit_to_review(repository, {"FIXED_INCOME": "1"}, [{"type": "CONCEPTUAL"}])
+
+    assert repository.get_version("conservadora", 1)["status"] == "DRAFT"
+
+    submitted = submit_to_review(repository)
+    assert submitted["status"] == "IN_REVIEW"
+    assert submitted["adoption_available"] is False
 
 
 def test_new_version_is_independent_and_returns_to_draft(repository):
@@ -106,71 +150,84 @@ def test_draft_adoption_is_blocked_before_any_portfolio_metadata_is_written(repo
         assert session.get(PortfolioStrategyMetadataRecord, PORTFOLIO_A) is None
 
 
+def test_state_transitions_fail_closed_without_an_admin_authorizer(repository):
+    locked = IncomeStarterRepository(repository._session_factory, initialize=lambda: None)
+
+    with pytest.raises(IncomeStarterError, match="AUTHENTICATION_UNAVAILABLE"):
+        locked.submit_for_review(
+            "conservadora",
+            1,
+            actor_id="Reviewer",
+            allocations={"FIXED_INCOME": "1"},
+            allocation_sources=ALLOCATION_SOURCES,
+        )
+    with pytest.raises(IncomeStarterError, match="AUTHENTICATION_UNAVAILABLE"):
+        locked.publish(
+            "conservadora",
+            1,
+            allocations={"FIXED_INCOME": "1"},
+            allocation_sources=ALLOCATION_SOURCES,
+            publisher_id="Reviewer",
+        )
+
+    assert locked.get_version("conservadora", 1)["status"] == "DRAFT"
+
+
 def test_publication_requires_sources_100_percent_and_both_reviews(repository):
-    repository.submit_for_review("conservadora", 1)
+    submit_to_review(repository)
     with pytest.raises(IncomeStarterError, match="fontes específicas"):
         repository.publish(
             "conservadora",
             1,
             allocations={"FIXED_INCOME": "1"},
             allocation_sources=[],
-            financial_review_status="APPROVED",
-            regulatory_review_status="APPROVED",
-            reviewed_by="Reviewer",
+            publisher_id="Reviewer",
         )
     with pytest.raises(IncomeStarterError, match="totalizar exatamente 100%"):
         repository.publish(
             "conservadora",
             1,
             allocations={"FIXED_INCOME": ".8"},
-            allocation_sources=[
-                {
-                    "type": "ALLOCATION",
-                    "title": "Metodologia",
-                    "supports": "Faixas e critério de alocação.",
-                    "url": "https://example.org/method",
-                }
-            ],
-            financial_review_status="APPROVED",
-            regulatory_review_status="APPROVED",
-            reviewed_by="Reviewer",
+            allocation_sources=ALLOCATION_SOURCES,
+            publisher_id="Reviewer",
         )
-    with pytest.raises(IncomeStarterError, match="financeira e regulatória"):
+    with pytest.raises(IncomeStarterError, match="aprovações financeira e regulatória"):
         repository.publish(
             "conservadora",
             1,
             allocations={"FIXED_INCOME": "1"},
-            allocation_sources=[
-                {
-                    "type": "ALLOCATION",
-                    "title": "Metodologia",
-                    "supports": "Faixas e critério de alocação.",
-                    "url": "https://example.org/method",
-                }
-            ],
-            financial_review_status="PENDING",
-            regulatory_review_status="APPROVED",
-            reviewed_by="Reviewer",
+            allocation_sources=ALLOCATION_SOURCES,
+            publisher_id="Reviewer",
+        )
+
+    repository.record_review_approval(
+        "conservadora", 1, review_type="FINANCIAL", actor_id="FinancialReviewer"
+    )
+    with pytest.raises(IncomeStarterError, match="aprovações financeira e regulatória"):
+        repository.publish(
+            "conservadora",
+            1,
+            allocations={"FIXED_INCOME": "1"},
+            allocation_sources=ALLOCATION_SOURCES,
+            publisher_id="Reviewer",
         )
 
 
 def test_adoption_metadata_is_isolated_per_portfolio_and_keeps_catalog_version(repository):
-    repository.submit_for_review("conservadora", 1)
+    proposal = {"FIXED_INCOME": ".7", "BRAZILIAN_STOCK": ".3"}
+    submit_to_review(repository, proposal)
+    repository.record_review_approval(
+        "conservadora", 1, review_type="FINANCIAL", actor_id="FinancialReviewer"
+    )
+    repository.record_review_approval(
+        "conservadora", 1, review_type="REGULATORY", actor_id="RegulatoryReviewer"
+    )
     published = repository.publish(
         "conservadora",
         1,
-        allocations={"FIXED_INCOME": ".7", "BRAZILIAN_STOCK": ".3"},
-        allocation_sources=[
-            {
-                "type": "ALLOCATION",
-                "title": "Approved allocation basis",
-                "supports": "Critério documentado de alocação.",
-                "url": "https://example.org/model",
-            }
-        ],
-        financial_review_status="APPROVED",
-        regulatory_review_status="APPROVED",
-        reviewed_by="Reviewer",
+        allocations=proposal,
+        allocation_sources=ALLOCATION_SOURCES,
+        publisher_id="Reviewer",
     )
     assert published["status"] == "PUBLISHED"
     assert published["adoption_available"] is True
@@ -204,6 +261,18 @@ def test_adoption_metadata_is_isolated_per_portfolio_and_keeps_catalog_version(r
         "BRAZILIAN_STOCK": "0.3",
         "FIXED_INCOME": "0.7",
     }
+    with pytest.raises(IncomeStarterError, match="Somente um rascunho pode ser editado"):
+        repository.update_draft_metadata(
+            "conservadora", 1, {"description": "Edição retroativa proibida."}
+        )
+
+    next_version = repository.create_next_draft_version("conservadora")
+    assert next_version["version"] == 2
+    assert next_version["status"] == "DRAFT"
+    assert next_version["allocations"] is None
+    assert next_version["financial_approved_by"] is None
+    assert next_version["regulatory_approved_by"] is None
+    assert repository.get_portfolio_strategy(UUID(PORTFOLIO_B))["template_version"] == 1
     assert (
         by_portfolio[PORTFOLIO_A].template_version
         == by_portfolio[PORTFOLIO_B].template_version

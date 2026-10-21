@@ -351,12 +351,17 @@ class IncomeStarterTemplateVersionRecord(Base):
     financial_review_status: Mapped[str] = mapped_column(
         String(16), nullable=False, default="PENDING"
     )
+    financial_approved_by: Mapped[str | None] = mapped_column(String(120))
+    financial_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     regulatory_review_status: Mapped[str] = mapped_column(
         String(16), nullable=False, default="PENDING"
     )
+    regulatory_approved_by: Mapped[str | None] = mapped_column(String(120))
+    regulatory_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     reviewed_by: Mapped[str | None] = mapped_column(String(120))
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    published_by: Mapped[str | None] = mapped_column(String(120))
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 

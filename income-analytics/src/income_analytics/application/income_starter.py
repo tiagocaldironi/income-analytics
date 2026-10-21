@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import Any, Callable
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -35,10 +35,21 @@ class IncomeStarterRepository:
     """Persistence adapter; the session factory is injectable for isolated tests."""
 
     def __init__(
-        self, session_factory: sessionmaker = SessionFactory, *, initialize=initialize_database
+        self,
+        session_factory: sessionmaker = SessionFactory,
+        *,
+        initialize=initialize_database,
+        transition_authorizer: Callable[[str, str], bool] | None = None,
     ):
         self._session_factory = session_factory
         self._initialize = initialize
+        self._transition_authorizer = transition_authorizer
+
+    def _authorize_transition(self, action: str, actor_id: str) -> None:
+        if not actor_id or not actor_id.strip() or self._transition_authorizer is None:
+            raise IncomeStarterError("PUBLICATION_BLOCKED_AUTHENTICATION_UNAVAILABLE")
+        if not self._transition_authorizer(action, actor_id.strip()):
+            raise IncomeStarterError("PUBLICATION_BLOCKED_UNAUTHORIZED")
 
     def _ready(self) -> None:
         self._initialize()
@@ -52,7 +63,9 @@ class IncomeStarterRepository:
             and row.allocations_validated
             and row.financial_review_status == "APPROVED"
             and row.regulatory_review_status == "APPROVED"
-            and bool(row.reviewed_by and row.reviewed_at and row.published_at)
+            and bool(row.financial_approved_by and row.financial_approved_at)
+            and bool(row.regulatory_approved_by and row.regulatory_approved_at)
+            and bool(row.published_by and row.published_at)
             and bool(allocation_sources)
             and all(
                 source.get("type") == "ALLOCATION"
@@ -89,10 +102,19 @@ class IncomeStarterRepository:
             "allocations": allocations,
             "allocations_validated": row.allocations_validated,
             "financial_review_status": row.financial_review_status,
+            "financial_approved_by": row.financial_approved_by,
+            "financial_approved_at": row.financial_approved_at.isoformat()
+            if row.financial_approved_at
+            else None,
             "regulatory_review_status": row.regulatory_review_status,
+            "regulatory_approved_by": row.regulatory_approved_by,
+            "regulatory_approved_at": row.regulatory_approved_at.isoformat()
+            if row.regulatory_approved_at
+            else None,
             "reviewed_by": row.reviewed_by,
             "reviewed_at": row.reviewed_at.isoformat() if row.reviewed_at else None,
             "created_at": row.created_at.isoformat(),
+            "published_by": row.published_by,
             "published_at": row.published_at.isoformat() if row.published_at else None,
             "educational_notice": EDUCATIONAL_NOTICE,
             "adoption_available": adoption_available,
@@ -140,13 +162,65 @@ class IncomeStarterRepository:
             row = session.execute(statement.limit(1)).scalar_one_or_none()
             return self._view(row) if row else None
 
-    def submit_for_review(self, template_key: str, version: int) -> dict[str, Any]:
+    def submit_for_review(
+        self,
+        template_key: str,
+        version: int,
+        *,
+        actor_id: str,
+        allocations: dict[str, str | Decimal],
+        allocation_sources: list[dict[str, str]],
+    ) -> dict[str, Any]:
+        self._authorize_transition("SUBMIT_FOR_REVIEW", actor_id)
+        parsed = self._validate_proposal(allocations, allocation_sources)
         self._ready()
         with self._session_factory.begin() as session:
             row = self._required(session, template_key, version)
             if row.status != "DRAFT":
                 raise IncomeStarterError("Somente um rascunho pode entrar em revisão.")
+            if not row.methodology.strip() or not row.author.strip():
+                raise IncomeStarterError(
+                    "Metodologia e responsável pela elaboração são obrigatórios."
+                )
+            if not json.loads(row.methodology_sources_json):
+                raise IncomeStarterError("Documente as fontes conceituais e metodológicas.")
+            row.allocations_json = json.dumps(parsed, ensure_ascii=False, sort_keys=True)
+            row.allocation_sources_json = json.dumps(allocation_sources, ensure_ascii=False)
             row.status = "IN_REVIEW"
+            return self._view(row)
+
+    def record_review_approval(
+        self,
+        template_key: str,
+        version: int,
+        *,
+        review_type: str,
+        actor_id: str,
+        decision: str = "APPROVED",
+    ) -> dict[str, Any]:
+        action_by_type = {
+            "FINANCIAL": "APPROVE_FINANCIAL",
+            "REGULATORY": "APPROVE_REGULATORY",
+        }
+        action = action_by_type.get(review_type)
+        if action is None or decision != "APPROVED":
+            raise IncomeStarterError("Tipo de revisão ou decisão inválida.")
+        self._authorize_transition(action, actor_id)
+        self._ready()
+        with self._session_factory.begin() as session:
+            row = self._required(session, template_key, version)
+            if row.status != "IN_REVIEW":
+                raise IncomeStarterError("A aprovação exige um modelo em revisão.")
+            if review_type == "FINANCIAL":
+                row.financial_review_status = "APPROVED"
+                row.financial_approved_by = actor_id.strip()
+                row.financial_approved_at = datetime.now(UTC)
+            else:
+                row.regulatory_review_status = "APPROVED"
+                row.regulatory_approved_by = actor_id.strip()
+                row.regulatory_approved_at = datetime.now(UTC)
+            row.reviewed_by = actor_id.strip()
+            row.reviewed_at = datetime.now(UTC)
             return self._view(row)
 
     def publish(
@@ -156,30 +230,38 @@ class IncomeStarterRepository:
         *,
         allocations: dict[str, str | Decimal],
         allocation_sources: list[dict[str, str]],
-        financial_review_status: str,
-        regulatory_review_status: str,
-        reviewed_by: str,
+        publisher_id: str,
     ) -> dict[str, Any]:
-        parsed = self._validate_publication(
-            allocations,
-            allocation_sources,
-            financial_review_status,
-            regulatory_review_status,
-            reviewed_by,
-        )
+        self._authorize_transition("PUBLISH", publisher_id)
+        parsed = self._validate_allocations(allocations)
+        self._validate_allocation_sources(allocation_sources)
         self._ready()
         with self._session_factory.begin() as session:
             row = self._required(session, template_key, version)
             if row.status != "IN_REVIEW":
                 raise IncomeStarterError("O modelo precisa estar em revisão antes da publicação.")
+            if (
+                row.financial_review_status != "APPROVED"
+                or not row.financial_approved_by
+                or not row.financial_approved_at
+                or row.regulatory_review_status != "APPROVED"
+                or not row.regulatory_approved_by
+                or not row.regulatory_approved_at
+            ):
+                raise IncomeStarterError(
+                    "As aprovações financeira e regulatória identificadas são obrigatórias."
+                )
+            proposed_allocations = self._validate_allocations(
+                json.loads(row.allocations_json or "{}")
+            )
+            proposed_sources = json.loads(row.allocation_sources_json)
+            if parsed != proposed_allocations or allocation_sources != proposed_sources:
+                raise IncomeStarterError("A publicação deve preservar a proposta revisada.")
             now = datetime.now(UTC)
             row.allocations_json = json.dumps(parsed, ensure_ascii=False, sort_keys=True)
             row.allocations_validated = True
             row.allocation_sources_json = json.dumps(allocation_sources, ensure_ascii=False)
-            row.financial_review_status = financial_review_status
-            row.regulatory_review_status = regulatory_review_status
-            row.reviewed_by = reviewed_by.strip()
-            row.reviewed_at = now
+            row.published_by = publisher_id.strip()
             row.published_at = now
             row.status = "PUBLISHED"
             return self._view(row)
@@ -219,10 +301,15 @@ class IncomeStarterRepository:
                 allocations_json=None,
                 allocations_validated=False,
                 financial_review_status="PENDING",
+                financial_approved_by=None,
+                financial_approved_at=None,
                 regulatory_review_status="PENDING",
+                regulatory_approved_by=None,
+                regulatory_approved_at=None,
                 reviewed_by=None,
                 reviewed_at=None,
                 created_at=datetime.now(UTC),
+                published_by=None,
                 published_at=None,
             )
             session.add(row)
@@ -381,22 +468,31 @@ class IncomeStarterRepository:
         return row
 
     @classmethod
-    def _validate_publication(cls, allocations, sources, financial, regulatory, reviewer):
-        if financial != "APPROVED" or regulatory != "APPROVED" or not reviewer.strip():
-            raise IncomeStarterError(
-                "A revisão financeira e regulatória precisa estar aprovada e identificada."
+    def _validate_proposal(cls, allocations, sources):
+        parsed = cls._validate_allocations(allocations)
+        cls._validate_allocation_sources(sources)
+        return parsed
+
+    @staticmethod
+    def _validate_allocation_sources(sources):
+        if (
+            not isinstance(sources, list)
+            or not sources
+            or any(
+                not isinstance(item, dict)
+                or item.get("type") != "ALLOCATION"
+                or not isinstance(item.get("title"), str)
+                or not item["title"].strip()
+                or not isinstance(item.get("supports"), str)
+                or not item["supports"].strip()
+                or not isinstance(item.get("url"), str)
+                or not item["url"].startswith("https://")
+                for item in sources
             )
-        if not sources or any(
-            item.get("type") != "ALLOCATION"
-            or not item.get("title", "").strip()
-            or not item.get("supports", "").strip()
-            or not item.get("url", "").startswith("https://")
-            for item in sources
         ):
             raise IncomeStarterError(
                 "Documente fontes específicas de alocação com links verificáveis."
             )
-        return cls._validate_allocations(allocations)
 
     @staticmethod
     def _validate_allocations(allocations):
