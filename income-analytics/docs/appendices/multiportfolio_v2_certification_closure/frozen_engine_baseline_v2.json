@@ -1,6 +1,6 @@
 {
   "creation_metadata": {
-    "created_at_utc": "2026-10-21T01:04:24.404567+00:00",
+    "created_at_utc": "2026-10-21T01:08:50.984828+00:00",
     "timestamp_excluded_from_payload_hash": true
   },
   "payload": {
@@ -9,7 +9,7 @@
       "path": "scripts/generate_magic_formula_frozen_engine_baseline.py",
       "sha256": "e58db8d94359dd4199f6720ffa9574f322a88e40704b9bd32d13bdfded28e3d5"
     },
-    "git_commit": "f44986095aa72b26703cc0b866e4c343648669cf",
+    "git_commit": "2355292cfc8027133539ac88e9a84746b2816289",
     "golden_test_manifest": {
       "cases": [
         {
@@ -48,9 +48,9 @@
       "golden_file": "docs/appendices/multiportfolio_v2_certification_closure/frozen_engine_semantic_goldens.json",
       "golden_file_sha256": "b445a4b6f18f197791030ea19b774ed1bea46db94fb005e3a1c30e659bb0b6a2",
       "test_file": "tests/application/test_magic_formula_frozen_engine_semantics.py",
-      "test_file_sha256": "a5318b3c6b18f46ede167e4b05453b96968520e5ba00c98e70cb77083f36b93f"
+      "test_file_sha256": "05b58a688dc11b2faba8d6825c56316b3d45418d1f4ab6edeff105dfd9b7beb0"
     },
-    "golden_test_manifest_sha256": "2c7314ac8b651d940e3e14af31f7baa7e9744fe0bbb7e6feca6146e889f8336b",
+    "golden_test_manifest_sha256": "e68f38ab42d3c9e80af41866a82f4087f3a6f54eca2111acc9b5b160dd6741e2",
     "methodology": {
       "active_snapshot_id": "mf-f1ee50809c83979ba221d84e",
       "canonical_result_sha256": "162c1b2f8856ae7d88cf5809d9418395464d0b2042bf6177fb48141e5b4fcf6a",
@@ -233,7 +233,7 @@
       },
       {
         "path": "tests/application/test_magic_formula_frozen_engine_semantics.py",
-        "sha256": "a5318b3c6b18f46ede167e4b05453b96968520e5ba00c98e70cb77083f36b93f"
+        "sha256": "05b58a688dc11b2faba8d6825c56316b3d45418d1f4ab6edeff105dfd9b7beb0"
       },
       {
         "path": "tests/application/test_magic_formula_historical_price_sources_v5.py",
@@ -292,7 +292,7 @@
         "sha256": "f6b224d7080689498fefcde4e0099fbda8384e4cc4dbb79a3842598fdc598a05"
       }
     ],
-    "test_manifest_sha256": "77461fea826d3cc1a329e851a7cb93335e5447092a15f8355ba412fe8cc95012"
+    "test_manifest_sha256": "b47cbb0eb2a0d1d7d135a082d9a33b0953fad6151c7f92284311fa48fdf8a95b"
   },
-  "payload_sha256": "8e6868cb13a70f57867264a00c62c6d11589945b0bb2fab3a8cbd05214b4212e"
+  "payload_sha256": "9fdab31bb097a0f03f67c68fe20283dcb723127268cc5f43cb5e920419d4c9d4"
 }

@@ -12,11 +12,16 @@
   "portfolio_context_independence": "PASS",
   "ranking_policy_and_hashes": "UNCHANGED",
   "full_suite_frozen_hash_guard": {
-    "status": "HISTORICAL_BASELINE_UNRESOLVABLE_PROSPECTIVE_GATE_PENDING",
+    "status": "PASS_WITH_HISTORICAL_LIMITATION_ACCEPTED",
     "historical_manifest": "UNRESOLVED_LEGACY_BASELINE",
     "historical_hash_equivalence_proven": false,
     "prospective_baseline_id": "MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2",
     "prospective_semantic_contract": "MF_BR_2027_V1_FROZEN_ENGINE_SEMANTICS_V1",
-    "note": "The historical hashes remain preserved as evidence and are no longer asserted as current truth. CERT_48 closes only after prospective-baseline verification and full-suite certification. Canonical ranking reconciliation still matches."
+    "prospective_baseline_payload_sha256": "9fdab31bb097a0f03f67c68fe20283dcb723127268cc5f43cb5e920419d4c9d4",
+    "semantic_goldens": "8/8 PASS",
+    "magic_formula_regression": "370 passed, 0 failed",
+    "full_suite": "893 passed, 0 failed, 0 skipped, 6 warnings",
+    "v2_isolation": "20 passed",
+    "note": "The historical hashes remain preserved as evidence and are not asserted as current truth. The prospective baseline and semantic contract passed, all current regression gates passed, and the canonical ranking reconciliation still matches."
   }
 }
