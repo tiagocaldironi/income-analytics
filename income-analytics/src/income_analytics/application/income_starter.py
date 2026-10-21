@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any, Callable
 from uuid import UUID
@@ -601,7 +601,16 @@ class ReserveJourneyRepository:
             row.reserve_goal = str(goal) if goal is not None else None
             row.declared_reserved_amount = str(declared_reserved_amount)
             row.current_step = current_step
-            row.updated_at = datetime.now(UTC)
+            saved_at = datetime.now(UTC)
+            previous_update = row.updated_at
+            if previous_update is not None:
+                if previous_update.tzinfo is None:
+                    previous_update = previous_update.replace(tzinfo=UTC)
+                else:
+                    previous_update = previous_update.astimezone(UTC)
+                if saved_at <= previous_update:
+                    saved_at = previous_update + timedelta(microseconds=1)
+            row.updated_at = saved_at
             session.flush()
             return self._view(row, portfolio_id)
 
