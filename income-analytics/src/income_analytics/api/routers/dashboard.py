@@ -26,6 +26,7 @@ from income_analytics.application.b3_import import (
 )
 from income_analytics.application.benchmark_comparison import build_performance_comparison
 from income_analytics.application.benchmark_data import BenchmarkDataUnavailable
+from income_analytics.application.capital_applied import calculate_capital_applied
 from income_analytics.application.fx_data import FxRateUnavailable
 from income_analytics.application.historical_portfolio_reconstruction import (
     HistoricalPortfolioReconstructionService,
@@ -170,7 +171,7 @@ dashboard_snapshot_repository = _PortfolioRepositoryProxy(
     SqlitePortfolioDashboardSnapshotRepository
 )
 market_price_refresh_runs = _PortfolioRepositoryProxy(SqliteMarketPriceRefreshRunRepository)
-PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 1
+PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 4
 
 
 def _effective_analysis_end_date(start_date: date, end_date: date) -> date:
@@ -1166,6 +1167,15 @@ def serialize_portfolio(
     boundary = PortfolioHistoryBoundary.from_observed_events(events)
     opening_equity_reliable = boundary.has_reliable_opening_equity
     implicit_capital = PerformanceProjector._implicit_capital(events, effective_date).amount
+    capital_applied = calculate_capital_applied(
+        projection,
+        base_currency=valuation.base_currency,
+        events=events,
+        fx_rates=session.historical_fx_rates(
+            (position.asset.currency.code for position in projection.positions),
+            valuation.base_currency,
+        ),
+    )
     payload: dict[str, object] = {
         "cash": valuation.cash if opening_equity_reliable else None,
         "confirmed_cash": boundary.opening_cash if opening_equity_reliable else None,
@@ -1173,6 +1183,7 @@ def serialize_portfolio(
         "reconstructed_cash_effect": valuation.known_cash,
         "history_boundary": boundary.as_payload(),
         "total_cost": projection.total_cost.amount,
+        **capital_applied.as_payload(),
         "realized_result": projection.total_realized_result.amount,
         "income_received": projection.income_received.amount,
         "total_contributions": projection.total_contributions.amount,
@@ -3393,7 +3404,10 @@ def backfill_us_market_price_history() -> dict[str, object]:
     events = tuple(
         event
         for event in session.history()
-        if event.asset is not None and event.asset.currency.code.upper() == "USD"
+        if event.asset is not None
+        and event.asset.currency.code.upper() == "USD"
+        and event.asset.asset_class
+        in {AssetClass.INTERNATIONAL, AssetClass.INTERNATIONAL_ETF, AssetClass.US_REIT}
     )
     by_ticker: dict[str, date] = {}
     for event in events:
@@ -3799,11 +3813,19 @@ def _cached_performance_comparison(
 
 @router.get("/analytics/performance-comparison")
 def get_performance_comparison(
-    start_date: date,
     end_date: date,
+    start_date: date | None = None,
     asset_class: AssetClass | None = None,
 ) -> dict[str, object]:
     """Serve the Entender comparison from persisted streams without provider calls."""
+    if start_date is None:
+        event_dates = [
+            event.effective_date
+            for event in session._events
+            if event.asset is not None
+            and (asset_class is None or event.asset.asset_class is asset_class)
+        ]
+        start_date = min(event_dates) if event_dates else end_date
     if end_date < start_date:
         raise HTTPException(
             status_code=422, detail="A data final deve ser posterior à data inicial."

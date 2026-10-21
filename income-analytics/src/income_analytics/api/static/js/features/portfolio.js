@@ -14,9 +14,15 @@ let portfolioInteractionsBound = false;
 let groupDistributionTrigger = null;
 let groupDistributionChart = null;
 let portfolioFiltersBound = false;
+let incomeChartInstances = [];
+let portfolioPerformanceChart = null;
+let portfolioPerformanceResizeObserver = null;
+let portfolioPerformanceRequestId = 0;
+let portfolioPerformancePeriod = "MAX";
+const portfolioBenchmarkSelection = new Set(["portfolio", "CDI", "IBOV", "IFIX"]);
 
 export async function loadPortfolio(asOf = "", { refreshAttention = true } = {}) {
-  const containers = ["#positions", "#understand-history", "#allocation", "#class-allocation", "#portfolio-evolution"];
+  const containers = ["#positions", "#understand-history", "#allocation", "#class-allocation", "#portfolio-evolution", "#portfolio-performance-chart"];
   containers.forEach(selector => {
     const container = document.querySelector(selector);
     if (container) container.innerHTML = loadingState;
@@ -27,9 +33,15 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
     const dashboard = await portfolioApi.dashboard();
     const { portfolio, performance, history, allocation, class_allocation: classes, holdings } = dashboard;
     renderPortfolio(portfolio, holdings, performance);
-    renderHistory(history);
+    renderHistory(history, holdings.base_currency || portfolio.base_currency || "BRL");
     renderAllocation(allocation);
     renderClasses(holdings, classes);
+    loadPortfolioPerformanceChart();
+    portfolioApi.operations().then(renderMonthlyIncome).catch(error => {
+      console.error("Falha ao carregar rendimentos mensais", error);
+      const target = document.querySelector("#monthly-income-chart");
+      if (target) target.innerHTML = errorState("Não foi possível carregar os rendimentos mensais.");
+    });
     if (refreshAttention) document.dispatchEvent(new Event("portfolio:intelligence-refresh"));
   } catch (error) {
     console.error("Falha ao renderizar Minha Carteira", error);
@@ -44,12 +56,24 @@ export function bindPortfolioFilters() {
   if (portfolioFiltersBound) return;
   portfolioFiltersBound = true;
   document.addEventListener("change", async event => {
+    if (event.target.matches("#portfolio-performance-period")) {
+      portfolioPerformancePeriod = event.target.value;
+      loadPortfolioPerformanceChart();
+      return;
+    }
+    if (event.target.matches("[data-portfolio-benchmark]")) {
+      const code = event.target.dataset.portfolioBenchmark;
+      if (event.target.checked) portfolioBenchmarkSelection.add(code);
+      else portfolioBenchmarkSelection.delete(code);
+      updatePortfolioPerformanceLegend();
+      return;
+    }
     if (!event.target.matches("#portfolio-history-period, #portfolio-history-class")) return;
     const period = document.querySelector("#portfolio-history-period")?.value || "12";
     const assetClass = document.querySelector("#portfolio-history-class")?.value || "";
     const chart = document.querySelector("#portfolio-evolution");
     chart.innerHTML = loadingState;
-    try { renderHistory(await portfolioApi.history(period, assetClass)); }
+    try { renderHistory(await portfolioApi.history(period, assetClass), currentHoldings?.base_currency || "BRL"); }
     catch (error) { chart.innerHTML = errorState(error.message); }
   });
   document.addEventListener("click", event => {
@@ -62,6 +86,125 @@ export function bindPortfolioFilters() {
     }
   });
   bindPortfolioInteractions();
+}
+
+const portfolioBenchmarkSeries = [
+  { code: "portfolio", label: "Minha carteira (TWR)", color: "#829cf3", type: "TWR" },
+  { code: "CDI", label: "CDI", color: "#ffbd45", type: "Retorno total acumulado" },
+  { code: "IBOV", label: "Ibovespa", color: "#5b9cff", type: "Índice de preços" },
+  { code: "IFIX", label: "IFIX", color: "#9e4a18", type: "Índice de preços" },
+  { code: "IVVB11", label: "IVVB11 · proxy em BRL", color: "#9b59b6", type: "Preço de ETF em BRL" },
+  { code: "SP500", label: "S&P 500 em BRL", color: "#c9c9c9", type: "Indisponível" },
+];
+
+function localDateString(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function portfolioComparisonRange(period) {
+  const end = new Date();
+  const endDate = localDateString(end);
+  if (period === "MAX") return { startDate: "", endDate };
+  const start = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+  if (period === "YTD") start.setMonth(0, 1);
+  else {
+    const day = start.getDate();
+    start.setDate(1);
+    start.setMonth(start.getMonth() - Number(period));
+    start.setDate(Math.min(day, new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate()));
+  }
+  return { startDate: localDateString(start), endDate };
+}
+
+function portfolioPerformanceControls(data, available) {
+  const periodOptions = [["1", "1M"], ["3", "3M"], ["6", "6M"], ["12", "12M"], ["YTD", "YTD"], ["MAX", "Máximo"]]
+    .map(([value, label]) => `<option value="${value}"${portfolioPerformancePeriod === value ? " selected" : ""}>${label}</option>`).join("");
+  const codes = new Set(data.benchmarks.map(item => item.code));
+  const choices = portfolioBenchmarkSeries.map(item => {
+    const exists = item.code === "portfolio" ? available : codes.has(item.code) && data.benchmarks.some(row => row.code === item.code && row.return !== null && row.status !== "UNAVAILABLE");
+    const selected = portfolioBenchmarkSelection.has(item.code);
+    return `<label${exists ? "" : ' aria-disabled="true"'}><input type="checkbox" data-portfolio-benchmark="${item.code}"${selected && exists ? " checked" : ""}${exists ? "" : " disabled"}><i style="background:${item.color}"></i>${item.label}</label>`;
+  }).join("");
+  return `<div class="portfolio-performance-controls"><label>Período<select id="portfolio-performance-period">${periodOptions}</select></label><div class="portfolio-benchmark-options" aria-label="Séries exibidas">${choices}</div></div>`;
+}
+
+async function loadPortfolioPerformanceChart() {
+  const target = document.querySelector("#portfolio-performance-chart");
+  if (!target) return;
+  const requestId = ++portfolioPerformanceRequestId;
+  target.innerHTML = loadingState;
+  try {
+    const { startDate, endDate } = portfolioComparisonRange(portfolioPerformancePeriod);
+    const data = await portfolioApi.performanceComparison(startDate, endDate);
+    if (requestId !== portfolioPerformanceRequestId || !target.isConnected) return;
+    renderPortfolioPerformanceChart(data, requestId);
+  } catch (error) {
+    if (requestId === portfolioPerformanceRequestId && target.isConnected) target.innerHTML = errorState("Não foi possível carregar a comparação de rentabilidade.");
+    console.error("Falha ao carregar comparação de rentabilidade", error);
+  }
+}
+
+async function renderPortfolioPerformanceChart(data, requestId) {
+  const target = document.querySelector("#portfolio-performance-chart");
+  if (!target) return;
+  const available = data.portfolio.return !== null && ["AVAILABLE", "PARTIAL"].includes(data.portfolio.status);
+  const rows = data.series || [];
+  if (!rows.length) {
+    target.innerHTML = emptyState("Série indisponível", "Não há observações históricas suficientes no período selecionado.");
+    return;
+  }
+  const controls = portfolioPerformanceControls(data, available);
+  const range = data.period || {};
+  const baseDate = range.start ? new Date(`${range.start}T00:00:00`).toLocaleDateString("pt-BR") : "data inicial disponível";
+  const note = `Base comparável: ${baseDate}. CDI: retorno acumulado; Ibovespa e IFIX: índices de preços; IVVB11: preço de mercado do ETF em BRL, usado apenas como proxy. S&P 500 em BRL indisponível: ainda não há série histórica integrada com câmbio.`;
+  const hasBenchmarkData = data.benchmarks.some(item => item.return !== null && item.return !== undefined && item.status !== "UNAVAILABLE");
+  if (!available && !hasBenchmarkData) {
+    target.innerHTML = `${controls}${emptyState("Comparação indisponível", "Não há TWR validado nem séries de índices suficientes no período selecionado.")}<p class="portfolio-chart-note">${note}</p>`;
+    return;
+  }
+  target.innerHTML = `${controls}<div id="portfolio-performance-echarts" class="portfolio-performance-chart" aria-label="Rentabilidade acumulada comparada"></div><p class="portfolio-chart-note">${note}</p>${!available ? `<p class="coverage" role="status">TWR da carteira indisponível para este período. As séries de mercado disponíveis são exibidas separadamente, sem estimar a rentabilidade da carteira.</p>` : data.portfolio.status === "PARTIAL" ? `<p class="coverage" role="status">TWR parcial, com cobertura de ${percentage(Number(data.portfolio.coverage) * 100)} do patrimônio.</p>` : ""}`;
+  const chartTarget = target.querySelector("#portfolio-performance-echarts");
+  const echarts = await loadECharts();
+  if (!chartTarget?.isConnected || requestId !== portfolioPerformanceRequestId) return;
+  portfolioPerformanceResizeObserver?.disconnect();
+  if (portfolioPerformanceChart && !portfolioPerformanceChart.isDisposed()) portfolioPerformanceChart.dispose();
+  portfolioPerformanceChart = echarts.init(chartTarget, null, { renderer: "svg" });
+  const series = portfolioBenchmarkSeries.slice(0, 5).map(item => ({
+    name: item.code === "portfolio" ? "Minha carteira (TWR)" : item.label,
+    type: "line",
+    smooth: false,
+    connectNulls: false,
+    showSymbol: false,
+    data: rows.map(point => item.code === "portfolio" ? (available ? point.portfolio : null) : point[item.code.toLowerCase()]),
+    lineStyle: { color: item.color, width: 2 },
+    itemStyle: { color: item.color },
+  }));
+  const option = {
+    backgroundColor: "transparent",
+    tooltip: { trigger: "axis", valueFormatter: amount => amount === null || amount === undefined ? "Indisponível" : percentage(Number(amount) * 100) },
+    legend: { show: false, selectedMode: true },
+    grid: { left: 58, right: 18, top: 40, bottom: 34 },
+    xAxis: { type: "category", data: rows.map(point => point.date), axisLabel: { color: "#93a4b8" }, axisLine: { lineStyle: { color: "#24364d" } } },
+    yAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: value => `${(Number(value) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` }, splitLine: { lineStyle: { color: "#203247" } } },
+    series,
+  };
+  portfolioPerformanceChart.setOption(option, true);
+  portfolioBenchmarkSeries.slice(0, 5).forEach(item => {
+    const input = target.querySelector(`[data-portfolio-benchmark="${item.code}"]`);
+    if (!input) return;
+    portfolioPerformanceChart.dispatchAction({ type: input.checked ? "legendSelect" : "legendUnSelect", name: item.code === "portfolio" ? "Minha carteira (TWR)" : item.label });
+  });
+  portfolioPerformanceResizeObserver = new ResizeObserver(() => portfolioPerformanceChart?.resize());
+  portfolioPerformanceResizeObserver.observe(chartTarget);
+  portfolioPerformanceChart.resize();
+}
+
+function updatePortfolioPerformanceLegend() {
+  if (!portfolioPerformanceChart || portfolioPerformanceChart.isDisposed()) return;
+  portfolioBenchmarkSeries.slice(0, 5).forEach(item => {
+    const name = item.code === "portfolio" ? "Minha carteira (TWR)" : item.label;
+    portfolioPerformanceChart.dispatchAction({ type: portfolioBenchmarkSelection.has(item.code) ? "legendSelect" : "legendUnSelect", name });
+  });
 }
 
 function bindPortfolioInteractions() {
@@ -165,7 +308,8 @@ function openAllocationPolicy() {
 
 function renderPerformanceSummary(performance) {
   const performanceTarget = document.querySelector("#home-performance");
-  if (!performanceTarget) return;
+  const returnTarget = document.querySelector("#home-return");
+  if (!performanceTarget && !returnTarget) return;
   const value = period => period?.twr !== null && period?.twr !== undefined
     && ["AVAILABLE", "PARTIAL"].includes(period.status)
     ? `${percentage(Number(period.twr) * 100)}${period.status === "PARTIAL" ? " · parcial" : ""}`
@@ -173,9 +317,17 @@ function renderPerformanceSummary(performance) {
   const range = period => period?.effective_start_date
     ? `Desde ${new Date(`${period.effective_start_date}T00:00:00`).toLocaleDateString("pt-BR")}`
     : financialConcepts.returnPeriodTotal;
-  performanceTarget.innerHTML = performance
+  if (performanceTarget) performanceTarget.innerHTML = performance
     ? `<span title="${escapeHtml(periodTooltip(performance.twelve_months))}"><small>${financialConcepts.returnPeriod12Months}</small>${value(performance.twelve_months)}</span><span title="${escapeHtml(periodTooltip(performance.total))}"><small>${range(performance.total)}</small>${value(performance.total)}</span>`
     : '<span class="unavailable">Indisponível</span>';
+  if (returnTarget) {
+    const period = performance?.twelve_months;
+    returnTarget.textContent = period?.twr !== null && period?.twr !== undefined
+      && ["AVAILABLE", "PARTIAL"].includes(period.status)
+      ? `${percentage(Number(period.twr) * 100)}${period.status === "PARTIAL" ? " · parcial" : ""}`
+      : "Indisponível";
+    returnTarget.title = periodTooltip(period);
+  }
 }
 
 function periodTooltip(period) {
@@ -253,6 +405,29 @@ function renderPortfolio(data, holdings, performance) {
     const target = document.querySelector(`#${id}`);
     if (target) target.textContent = value === null ? "—" : money(value);
   });
+  const netInvested = document.querySelector("#net-invested");
+  const capitalAppliedNote = document.querySelector("#capital-applied-note");
+  const capitalStatus = data.capital_applied_status;
+  if (netInvested) {
+    netInvested.textContent = capitalStatus === "AVAILABLE" || capitalStatus === "ZERO"
+      ? money(data.capital_applied, data.base_currency || holdings.base_currency)
+      : capitalStatus === "PARTIAL"
+        ? money(data.capital_applied_partial_amount, data.base_currency || holdings.base_currency)
+        : "Indisponível";
+  }
+  if (capitalAppliedNote) {
+    if (capitalStatus === "PARTIAL" || capitalStatus === "UNAVAILABLE") {
+      const assets = (data.capital_applied_incomplete_reasons || [])
+        .map(item => `${item.ticker} (${item.reason})`).join(", ");
+      capitalAppliedNote.textContent = assets
+        ? `${capitalStatus === "PARTIAL" ? `Parcial (${data.capital_applied_included_position_count}/${data.capital_applied_position_count} posições). ` : ""}Custo incompleto: ${assets}`
+        : "Não foi possível determinar o custo de todas as posições.";
+    } else if (capitalStatus === "ZERO") {
+      capitalAppliedNote.textContent = "Não há posições abertas com capital aplicado.";
+    } else {
+      capitalAppliedNote.textContent = "Custo de aquisição das posições atuais";
+    }
+  }
   if (data.total_market_value === null) {
     const equity = document.querySelector("#equity");
     if (equity) equity.textContent = "Valuation parcial";
@@ -465,7 +640,7 @@ function distributionColors(count) {
   return Array.from({ length: count }, (_, index) => palette[index % palette.length]);
 }
 
-function renderHistory(data) {
+function renderHistory(data, baseCurrency = "BRL") {
   const history = document.querySelector("#understand-history");
   if (history) history.innerHTML = data.snapshots.length ? table(["Data", "Patrimônio", "Resultado"], data.snapshots.map(s => `<tr><td>${s.effective_date}</td><td>${s.market_value === null ? "—" : money(s.market_value)}</td><td>${money(s.total_result)}</td></tr>`)) : "Nenhum evento datado registrado.";
   const chart = document.querySelector("#portfolio-evolution");
@@ -477,11 +652,11 @@ function renderHistory(data) {
   const selectedClass = value => (data.asset_class || "") === value ? " selected" : "";
   const controls = `<div class="chart-controls"><label>Período <select id="portfolio-history-period"><option value="1"${selected(1)}>1M</option><option value="3"${selected(3)}>3M</option><option value="6"${selected(6)}>6M</option><option value="12"${selected(12)}>12M</option><option value="36"${selected(36)}>3 anos</option><option value="60"${selected(60)}>5 anos</option><option value="120"${selected(120)}>10 anos</option><option value="0"${selected(0)}>Tudo</option></select></label><label>Classe <select id="portfolio-history-class"><option value=""${selectedClass("")}>Todas as classes</option><option value="BRAZILIAN_STOCK"${selectedClass("BRAZILIAN_STOCK")}>Ações Brasil</option><option value="BRAZILIAN_ETF"${selectedClass("BRAZILIAN_ETF")}>ETF Brasil</option><option value="FII"${selectedClass("FII")}>FIIs</option><option value="FIXED_INCOME"${selectedClass("FIXED_INCOME")}>Renda Fixa</option><option value="INTERNATIONAL"${selectedClass("INTERNATIONAL")}>Ações Exterior</option><option value="INTERNATIONAL_ETF"${selectedClass("INTERNATIONAL_ETF")}>ETF Internacional</option><option value="CRYPTO"${selectedClass("CRYPTO")}>Cripto</option><option value="OTHER"${selectedClass("OTHER")}>Outros</option></select></label></div>`;
   if (points.length < 2) {
-    chart.innerHTML = `${controls}${emptyState("Evolução indisponível", "Registre preços em pelo menos duas datas para acompanhar o patrimônio.")}`;
+    chart.innerHTML = `${controls}${emptyState("Evolução indisponível", "Ainda não há dois pontos de histórico para mostrar o saldo patrimonial.")}`;
     return;
   }
   chart.innerHTML = `${controls}<div id="equity-echarts" class="equity-echarts" aria-label="Evolução patrimonial"></div>`;
-  renderEquityChart(points, equityChartRequestId);
+  renderEquityChart(points, equityChartRequestId, baseCurrency);
 }
 
 function disposeEquityChart() {
@@ -495,7 +670,7 @@ function afterLayout() {
   return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
-async function renderEquityChart(points, requestId) {
+async function renderEquityChart(points, requestId, baseCurrency) {
   const target = document.querySelector("#equity-echarts");
   const echarts = await loadECharts();
   // ECharts measures its container at initialization. On the initial dashboard
@@ -505,20 +680,15 @@ async function renderEquityChart(points, requestId) {
   await afterLayout();
   if (requestId !== equityChartRequestId || !target?.isConnected) return;
   equityChart = echarts.init(target, null, { renderer: "svg" });
+  const wealth = points.map(point => point.total_cost === null || point.total_result === null
+    ? null : Number(point.total_cost) + Number(point.total_result));
   equityChart.setOption({
     backgroundColor: "transparent",
-    tooltip: { trigger: "axis", valueFormatter: value => money(value) },
-    legend: { top: 4, textStyle: { color: "#93a4b8" }, data: ["Custo registrado", "Resultado econômico"] },
-    grid: { left: 58, right: 16, top: 44, bottom: 36 },
+    tooltip: { trigger: "axis", formatter: params => `${formatDate(params[0]?.axisValue)}<br><strong>${money(params[0]?.value, baseCurrency)}</strong>` },
+    grid: { left: 66, right: 16, top: 20, bottom: 36 },
     xAxis: { type: "category", data: points.map(point => point.effective_date), axisLabel: { color: "#93a4b8" }, axisLine: { lineStyle: { color: "#24364d" } } },
-    yAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: value => `R$ ${Number(value).toLocaleString("pt-BR")}` }, splitLine: { lineStyle: { color: "#203247" } } },
-    series: [
-      { name: "Custo registrado", type: "bar", stack: "patrimonio", data: points.map(point => Number(point.total_cost)), itemStyle: { color: "#46c98b", borderRadius: [4, 4, 0, 0] } },
-      // Include dividends and interest as economic return. Plotting capital_gain
-      // alone made a profitable portfolio look negative when income exceeded
-      // realized/unrealized capital losses.
-      { name: "Resultado econômico", type: "bar", stack: "patrimonio", data: points.map(point => Number(point.total_result)), itemStyle: { color: "#9ee7c8", borderRadius: [4, 4, 0, 0] } },
-    ],
+    yAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: value => money(value, baseCurrency) }, splitLine: { lineStyle: { color: "#203247" } } },
+    series: [{ name: "Patrimônio", type: "line", smooth: true, connectNulls: false, data: wealth, symbol: "circle", symbolSize: 5, lineStyle: { color: "#27c7a8", width: 3 }, itemStyle: { color: "#27c7a8" }, areaStyle: { color: "rgba(39, 199, 168, .18)" } }],
   });
   equityChartResizeObserver = new ResizeObserver(() => equityChart?.resize());
   equityChartResizeObserver.observe(target);
@@ -537,22 +707,81 @@ function renderClasses(holdings, fallback) {
   // while market_value has already been converted to BRL.
   const valued = holdings.classes.filter(item => item.market_value !== null && Number(item.market_value) > 0);
   const total = valued.reduce((sum, item) => sum + Number(item.market_value), 0);
-  const colors = ["#27c7a8", "#5b9cff", "#8a6ce8", "#e7b65a", "#e26f95", "#5fc5e6"];
+  const colors = { BRAZILIAN_STOCK: "#27c7a8", BRAZILIAN_ETF: "#5b9cff", FII: "#8a6ce8", FIXED_INCOME: "#e7b65a", INTERNATIONAL: "#e26f95", INTERNATIONAL_ETF: "#5fc5e6", CRYPTO: "#d983ff", PENSION: "#9acb5a", REAL_ESTATE: "#f28e6b", CASH: "#6f95c8", OTHER: "#a3afbf" };
   let cursor = 0;
-  const stops = valued.map((item, index) => { const start = cursor; cursor += total ? Number(item.market_value) / total * 100 : 0; return `${colors[index % colors.length]} ${start}% ${cursor}%`; }).join(", ");
-  const content = valued.length ? `<div class="allocation-content"><div id="allocation-chart" class="allocation-chart" aria-label="Distribuição atual por classe"></div><div class="allocation-legend">${holdings.classes.map((item, index) => `<div><i style="background:${colors[index % colors.length]}"></i><span>${item.label}</span><strong>${item.market_value === null || !total ? "—" : percentage(Number(item.market_value) / total * 100)}</strong></div>`).join("")}</div></div>` : "Nenhuma posição disponível.";
+  const stops = valued.map(item => { const start = cursor; cursor += Number(item.market_value) / total * 100; return `${colors[item.asset_class] || colors.OTHER} ${start}% ${cursor}%`; }).join(", ");
+  const content = valued.length ? `<div class="allocation-segmented" role="img" aria-label="Composição por classe: ${holdings.classes.map(item => `${item.label} ${item.market_value === null || !total ? "sem valuation" : percentage(Math.max(Number(item.market_value), 0) / total * 100)}`).join(", ")}"><div class="allocation-segmented-bar">${valued.map(item => `<span title="${escapeHtml(item.label)} · ${money(item.market_value, holdings.base_currency)} · ${percentage(Number(item.market_value) / total * 100)}" style="width:${Math.max(Number(item.market_value) / total * 100, 0.5)}%;background:${colors[item.asset_class] || colors.OTHER}"></span>`).join("")}</div><div class="allocation-legend">${holdings.classes.map(item => { const amount = item.market_value === null ? null : Number(item.market_value); const share = amount === null || !total ? null : Math.max(amount, 0) / total * 100; const detail = amount === null ? "Valuation indisponível" : amount < 0 ? `Saldo negativo · ${money(amount, holdings.base_currency)} · fora da barra` : money(amount, holdings.base_currency); return `<div><i style="background:${colors[item.asset_class] || colors.OTHER}"></i><span>${escapeHtml(item.label)}<small>${detail}</small></span><strong>${share === null ? "—" : percentage(share)}</strong></div>`; }).join("")}</div></div>` : emptyState("Composição indisponível", "Não há saldos positivos avaliados para compor a distribuição.");
   const dashboardTarget = document.querySelector("#class-allocation");
   const legacyStrategyTarget = document.querySelector("#strategy-class-allocation");
   if (dashboardTarget) dashboardTarget.innerHTML = content;
-  if (legacyStrategyTarget) legacyStrategyTarget.innerHTML = content;
+  if (legacyStrategyTarget) {
+    legacyStrategyTarget.innerHTML = valued.length
+      ? `<div class="allocation-content"><div id="strategy-allocation-chart" class="allocation-chart" aria-label="Distribuição atual por classe"></div><div class="allocation-legend">${holdings.classes.map(item => `<div><i style="background:${colors[item.asset_class] || colors.OTHER}"></i><span>${escapeHtml(item.label)}</span><strong>${item.market_value === null || !total ? "—" : percentage(Number(item.market_value) / total * 100)}</strong></div>`).join("")}</div></div>`
+      : emptyState("Composição indisponível", "Não há saldos avaliados para compor a distribuição.");
+  }
   const drift = document.querySelector("#portfolio-drift");
   if (drift) drift.textContent = holdings.portfolio_drift === null ? "Estratégia ainda não definida" : `Desvio total ${percentage(holdings.portfolio_drift * 100)}`;
-  if (valued.length) renderAllocationChart(valued, colors);
+  if (valued.length && legacyStrategyTarget) renderAllocationChart(valued, colors);
+}
+
+function renderMonthlyIncome(data) {
+  const target = document.querySelector("#monthly-income-chart");
+  if (!target) return;
+  incomeChartInstances.forEach(chart => chart.dispose());
+  incomeChartInstances = [];
+  const { months, byCurrency } = aggregateMonthlyIncome(data.operations || []);
+  if (!byCurrency.size) {
+    target.innerHTML = emptyState("Sem rendimentos no período", "Dividendos, juros e outros proventos aparecerão aqui quando forem registrados.");
+    return;
+  }
+  target.innerHTML = [...byCurrency.keys()].sort().map((currency, index) => `<div class="monthly-income-unit"><div class="monthly-income-unit-heading"><strong>${escapeHtml(currency)}</strong><small>Valores mantidos na moeda do lançamento</small></div><div class="income-month-chart" data-income-currency="${escapeHtml(currency)}" data-income-index="${index}" aria-label="Rendimentos mensais em ${escapeHtml(currency)}"></div></div>`).join("");
+  loadECharts().then(echarts => {
+    target.querySelectorAll(".income-month-chart").forEach(chartTarget => {
+      if (!chartTarget.isConnected) return;
+      const currency = chartTarget.dataset.incomeCurrency;
+      const values = byCurrency.get(currency);
+      const chart = echarts.init(chartTarget, null, { renderer: "svg" });
+      chart.setOption({
+        backgroundColor: "transparent",
+        tooltip: { trigger: "axis", formatter: params => `${params[0]?.axisValue}<br><strong>${money(params[0]?.value, currency)}</strong>` },
+        grid: { left: 62, right: 14, top: 12, bottom: 34 },
+        xAxis: { type: "category", data: months.map(month => month.label), axisLabel: { color: "#93a4b8", hideOverlap: true }, axisLine: { lineStyle: { color: "#24364d" } } },
+        yAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: value => money(value, currency) }, splitLine: { lineStyle: { color: "#203247" } } },
+        series: [{ type: "bar", data: months.map(month => Number(values[month.key] || 0)), barMaxWidth: 32, itemStyle: { color: "#46c98b", borderRadius: [4, 4, 0, 0] } }],
+      });
+      const observer = new ResizeObserver(() => chart.resize());
+      observer.observe(chartTarget);
+      incomeChartInstances.push({ dispose: () => { observer.disconnect(); chart.dispose(); } });
+    });
+  }).catch(error => {
+    console.error("Falha ao desenhar rendimentos mensais", error);
+    if (target.isConnected) target.innerHTML = errorState("Não foi possível desenhar o gráfico de rendimentos.");
+  });
+}
+
+function aggregateMonthlyIncome(operations, now = new Date()) {
+  const incomeTypes = new Set(["DIVIDEND", "INTEREST_ON_EQUITY", "FII_INCOME", "FIXED_INCOME_INTEREST", "STAKING_REWARD"]);
+  const months = Array.from({ length: 12 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - 11 + index, 1);
+    return { key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`, label: date.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }) };
+  });
+  const monthKeys = new Set(months.map(month => month.key));
+  const byCurrency = new Map();
+  operations.filter(item => incomeTypes.has(item.type)).forEach(item => {
+    const key = String(item.effective_date || "").slice(0, 7);
+    if (!monthKeys.has(key)) return;
+    const currency = item.currency_code || "BRL";
+    const values = byCurrency.get(currency) || Object.fromEntries(months.map(month => [month.key, 0]));
+    values[key] += Number(item.amount || 0);
+    byCurrency.set(currency, values);
+  });
+  return { months, byCurrency };
 }
 
 async function renderAllocationChart(groups, colors) {
-  const target = document.querySelector("#allocation-chart");
+  const target = document.querySelector("#strategy-allocation-chart");
+  if (!target) return;
   const echarts = await loadECharts();
   const chart = echarts.init(target, null, { renderer: "svg" });
-  chart.setOption({ tooltip: { trigger: "item", valueFormatter: value => money(value) }, series: [{ type: "pie", radius: ["48%", "76%"], label: { show: false }, data: groups.map((group, index) => ({ name: group.label, value: Number(group.market_value), itemStyle: { color: colors[index % colors.length] } })) }] });
+  chart.setOption({ tooltip: { trigger: "item", formatter: item => `${escapeHtml(item.name)}<br>${money(item.value, currentHoldings?.base_currency || "BRL")}<br>${percentage(item.percent)}` }, series: [{ type: "pie", radius: ["48%", "76%"], label: { show: false }, data: groups.map(group => ({ name: group.label, value: Number(group.market_value), itemStyle: { color: colors[group.asset_class] || colors.OTHER } })) }] });
 }

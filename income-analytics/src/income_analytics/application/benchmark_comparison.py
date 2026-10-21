@@ -27,7 +27,12 @@ def _benchmark_return(
         return None
     nature = selected[0].nature
     if nature == "INDEX_LEVEL":
-        base = before[-1].value if before else selected[0].value
+        # An index without an observation on or before the selected base date
+        # cannot be compared for the same period. Starting it at its first
+        # in-period quote would silently shorten its measurement window.
+        if not before:
+            return None
+        base = before[-1].value
         ending = selected[-1].value
         return ending / base - Decimal("1") if base > 0 else None
     factor = Decimal("1")
@@ -85,12 +90,16 @@ def build_performance_comparison(
         if rate.name.upper() == "CDI"
     )
     performance = performance_at(start_date, end_date)
+    benchmark_results = {
+        code: _benchmark_return(normalized[code], start_date=start_date, end_date=end_date)
+        for code in BENCHMARKS
+    }
     benchmarks: list[dict[str, object]] = []
     for code in BENCHMARKS:
         series = normalized[code]
         eligible = [item for item in series if item.effective_date <= end_date]
         latest = eligible[-1] if eligible else None
-        result = _benchmark_return(series, start_date=start_date, end_date=end_date)
+        result = benchmark_results[code]
         status = "UNAVAILABLE" if result is None else "OK"
         if latest is not None and (end_date - latest.effective_date).days > (
             45 if code == "IPCA" else 7
@@ -127,11 +136,19 @@ def build_performance_comparison(
         )
         row: dict[str, object] = {
             "date": observed_date,
-            "portfolio": Decimal("0") if portfolio_result is None else portfolio_result.twr,
+            "portfolio": (
+                Decimal("0")
+                if observed_date == start_date and performance.twr is not None
+                else None
+                if observed_date == start_date or portfolio_result is None
+                else portfolio_result.twr
+            ),
         }
         for code in BENCHMARKS:
             row[code.lower()] = (
                 Decimal("0")
+                if observed_date == start_date and benchmark_results[code] is not None
+                else None
                 if observed_date == start_date
                 else _benchmark_return(
                     normalized[code], start_date=start_date, end_date=observed_date

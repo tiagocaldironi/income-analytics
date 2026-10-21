@@ -105,6 +105,97 @@ p { color: var(--ia-text-secondary); line-height: 1.55; }
 .section-heading h2 + p { margin: 6px 0 0; }
 .text-link, .section-heading a { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--ia-info); font-size: .91rem; font-weight: 750; text-decoration: none; }
 .section-heading a { margin-top: 0; }
+.portfolio-overview { align-items: stretch; }
+.portfolio-evolution-card, .portfolio-performance-card { min-width: 0; }
+.allocation-segmented { display: grid; gap: 18px; padding-top: 26px; }
+.allocation-segmented-bar { display: flex; width: 100%; height: 18px; overflow: hidden; border-radius: 999px; background: var(--ia-surface-elevated); }
+.allocation-segmented-bar span { min-width: 2px; height: 100%; border-right: 1px solid var(--ia-bg-secondary); }
+.allocation-legend { display: grid; gap: 11px; }
+.allocation-legend div { display: grid; grid-template-columns: 12px minmax(0,1fr) auto; align-items: center; gap: 9px; color: var(--ia-text-secondary); font-size: .86rem; }
+.allocation-legend i { width: 9px; height: 9px; border-radius: 50%; }
+.allocation-legend span { display: grid; gap: 3px; }
+.allocation-legend span small, .monthly-income-unit-heading small { color: var(--ia-text-secondary); font-size: .74rem; font-weight: 500; }
+.allocation-legend strong { color: var(--ia-text-primary); }
+.monthly-income-unit + .monthly-income-unit { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--ia-border); }
+.monthly-income-unit-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.monthly-income-unit-heading strong { color: var(--ia-text-primary); font-size: .85rem; }
+.income-month-chart { min-width: 0; height: 174px; margin-top: 7px; }
+.contribution-chart-card .section-heading { align-items: center; }
+.contribution-controls { display: flex; flex-wrap: wrap; gap: 12px; }
+.contribution-controls label { display: grid; gap: 4px; margin: 0; color: var(--ia-text-secondary); font-size: .75rem; }
+.contribution-controls select { min-width: 150px; }
+.wealth-contribution-chart { min-width: 0; margin-top: 14px; }
+.diverging-chart { width: 100%; min-width: 0; }
+
+.understand-period-summary { margin: 0 0 16px; }
+.understand-summary-card { margin-bottom: 0; }
+.understand-summary-heading, .understand-answer-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.understand-summary-heading .eyebrow, .understand-answer-heading .eyebrow { margin-bottom:.3rem; }
+.coverage-pill { padding:.35rem .65rem; border:1px solid var(--ia-border); border-radius:999px; color:var(--ia-text-secondary); font-size:.72rem; white-space:nowrap; }
+.coverage-pill.complete { border-color:#296051; color:var(--ia-positive); }
+.coverage-pill.partial { border-color:#805e27; color:var(--ia-warning); }
+.understand-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:17px; }
+.understand-metric { display:grid; min-width:0; gap:7px; padding:12px; border:1px solid var(--ia-border); border-radius:9px; background:#0b1727a8; }
+.understand-metric small, .analysis-totals small, .fixed-income-big-number small { color:var(--ia-text-secondary); font-size:.72rem; font-weight:700; }
+.understand-metric strong { overflow-wrap:anywhere; font-size:1rem; }
+.understand-metric span { color:var(--ia-text-secondary); font-size:.72rem; line-height:1.35; }
+.understand-metric.primary { grid-column:span 2; border-color:#296051; background:#12333788; }
+.understand-metric.primary strong { color:var(--ia-brand); font-size:1.3rem; }
+.understand-questions { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; margin-bottom:16px; }
+.understand-question { display:flex; align-items:flex-start; gap:10px; min-height:72px; margin:0; padding:12px; border:1px solid var(--ia-border); background:var(--ia-surface); color:var(--ia-text-primary); text-align:left; font-size:.83rem; line-height:1.35; }
+.understand-question > span { flex:0 0 auto; color:var(--ia-text-secondary); font-size:.7rem; font-weight:800; }
+.understand-question:hover, .understand-question.selected { border-color:var(--ia-brand); background:#123337; }
+.understand-question.selected > span { color:var(--ia-brand); }
+.understand-answer .card { margin-bottom:0; }
+.understand-answer-heading { display:block; margin-bottom:16px; }
+.understand-answer-heading h2 { font-size:1.2rem; }
+.analysis-conclusion { margin:0 0 16px; color:var(--ia-text-primary); font-size:1rem; font-weight:650; }
+.analysis-totals { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0 0 16px; }
+.analysis-totals > div { display:grid; gap:7px; padding:12px; border:1px solid var(--ia-border); border-radius:9px; }
+.analysis-totals strong { font-size:1.05rem; }
+.positive-text { color:var(--ia-positive)!important; }
+.negative-text { color:var(--ia-negative)!important; }
+.analysis-filters { display:flex; align-items:end; flex-wrap:wrap; gap:10px; margin:14px 0; }
+.analysis-filters label { display:grid; gap:5px; margin:0; color:var(--ia-text-secondary); font-size:.75rem; }
+.analysis-filters select { min-width:190px; }
+.segmented-control, .metric-switch { display:flex; align-items:center; gap:3px; min-height:42px; padding:3px; border:1px solid var(--ia-border); border-radius:9px; background:#0b1727; }
+.segmented-control button, .metric-switch button { width:auto; min-width:55px; min-height:34px; margin:0; padding:6px 10px; border:0; background:transparent; color:var(--ia-text-secondary); font-size:.8rem; }
+.segmented-control button[aria-pressed="true"], .metric-switch button.active { background:var(--ia-surface-elevated); color:var(--ia-text-primary); }
+.metric-switch button:disabled { cursor:help; opacity:.5; }
+.metric-unavailable { margin:-5px 0 12px; font-size:.77rem; }
+.analysis-quality { margin:12px 0; padding:10px 12px; border-left:3px solid var(--ia-warning); border-radius:5px; background:#392e1b80; color:#e8d2a5; font-size:.82rem; line-height:1.45; }
+.asset-ranking, .income-ranking, .wealth-bridge-answer { display:grid; gap:7px; }
+.asset-ranking-row, .income-ranking-row, .bridge-answer-row { border:1px solid var(--ia-border); border-radius:8px; background:#0b1727a8; }
+.asset-ranking-row summary, .income-ranking-row summary, .bridge-answer-row summary { display:flex; align-items:center; gap:10px; min-height:54px; padding:9px 11px; cursor:pointer; list-style:none; }
+.asset-ranking-row summary::-webkit-details-marker, .income-ranking-row summary::-webkit-details-marker, .bridge-answer-row summary::-webkit-details-marker { display:none; }
+.ranking-position { display:grid; flex:0 0 26px; width:26px; height:26px; place-items:center; border-radius:50%; background:var(--ia-surface-elevated); color:var(--ia-text-secondary); font-size:.7rem; font-weight:800; }
+.ranking-identity { display:grid; flex:1 1 auto; min-width:0; gap:3px; }
+.ranking-identity small { overflow:hidden; color:var(--ia-text-secondary); font-size:.72rem; text-overflow:ellipsis; white-space:nowrap; }
+.ranking-bar { flex:0 1 18%; height:6px; overflow:hidden; border-radius:5px; background:#24364d; }
+.ranking-bar i { display:block; height:100%; border-radius:inherit; }
+.ranking-bar i.positive { background:var(--ia-positive); }
+.ranking-bar i.negative { background:var(--ia-negative); }
+.ranking-value { flex:0 0 auto; min-width:110px; text-align:right; }
+.asset-ranking-detail, .bridge-answer-children { display:grid; gap:5px; padding:0 12px 11px 48px; }
+.asset-ranking-detail > div, .bridge-answer-children > div { display:flex; justify-content:space-between; gap:10px; padding-top:7px; border-top:1px solid var(--ia-border); color:var(--ia-text-secondary); font-size:.8rem; }
+.asset-ranking-detail strong, .bridge-answer-children strong { color:var(--ia-text-primary); }
+.ranking-expand { width:auto; min-height:38px; margin:12px 0 0; }
+.analysis-evidence { margin-top:14px; padding-top:11px; border-top:1px solid var(--ia-border); color:var(--ia-text-secondary); font-size:.82rem; }
+.analysis-evidence summary { color:#b9c8d8; cursor:pointer; font-weight:700; }
+.analysis-evidence p { margin-bottom:0; }
+.bridge-answer-total { display:flex; justify-content:space-between; gap:12px; padding:12px; border:1px solid var(--ia-brand); border-radius:8px; background:#12333766; }
+.bridge-answer-row > summary { justify-content:space-between; }
+.movement-value { display:inline-flex; align-items:center; gap:5px; padding:2px 7px; border-radius:999px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.movement-value svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.movement-up, .bridge-answer-children .movement-up { color:var(--ia-positive); background:rgba(44,190,135,.12); }
+.movement-down, .bridge-answer-children .movement-down { color:var(--ia-negative); background:rgba(238,91,108,.14); }
+.movement-flat, .bridge-answer-children .movement-flat { color:var(--ia-text-secondary); background:rgba(148,163,184,.12); }
+.income-ranking-row { display:flex; align-items:center; gap:10px; min-height:54px; padding:9px 11px; }
+.income-ranking-row > strong { margin-left:auto; }
+.fixed-income-big-number { display:grid; gap:7px; margin-bottom:15px; padding:16px; border:1px solid #296051; border-radius:10px; background:#12333788; }
+.fixed-income-big-number strong { color:var(--ia-brand); font-size:1.7rem; }
+.fixed-income-big-number p { margin:0; font-size:.8rem; }
+.fixed-income-ranking { display:block; }
 .text-link::after, .section-heading a::after { content: "→"; }
 
 label { display: block; margin: 15px 0 6px; color: #c2cfde; font-size: .83rem; font-weight: 700; }
@@ -198,6 +289,14 @@ tbody tr:hover { background: #17283a80; }
 .chart-legend .legend-gain { background: #9ee7c8; }
 .equity-chart { display: block; width: 100%; height: 174px; overflow: visible; border-bottom: 1px solid var(--ia-border); background: repeating-linear-gradient(to bottom, transparent 0 34px, #20324770 35px 36px); }
 .equity-echarts { width: 100%; height: 250px; margin-top: 10px; }
+.portfolio-performance-chart { width: 100%; min-width: 0; height: 250px; margin-top: 10px; }
+.portfolio-performance-controls { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; margin-top: 14px; }
+.portfolio-performance-controls label { display: grid; gap: 4px; margin: 0; color: var(--ia-text-secondary); font-size: .75rem; }
+.portfolio-benchmark-options { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; }
+.portfolio-benchmark-options label { display: inline-flex; align-items: center; gap: 5px; margin: 0; color: var(--ia-text-secondary); font-size: .75rem; font-weight: 600; }
+.portfolio-benchmark-options input { width: 15px; min-height: 15px; margin: 0; accent-color: var(--ia-brand); }
+.portfolio-benchmark-options label[aria-disabled="true"] { opacity: .55; }
+.portfolio-chart-note { margin: 10px 0 0; color: var(--ia-text-secondary); font-size: .75rem; line-height: 1.45; }
 .equity-chart path { fill: none; stroke: var(--ia-brand); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2; vector-effect: non-scaling-stroke; }
 .equity-chart .chart-bar-cost { fill: var(--ia-positive); }
 .equity-chart .chart-bar-gain { fill: #9ee7c8; }
@@ -211,8 +310,7 @@ tbody tr:hover { background: #17283a80; }
 .allocation-legend i { width: 9px; height: 9px; border-radius: 50%; }
 .allocation-legend strong { color: var(--ia-text-primary); }
 .allocation-note { display: block; margin-top: 12px; color: var(--ia-text-secondary); }
-.portfolio-overview .card:first-child { min-height: 360px; }
-.portfolio-overview .card:last-child { min-height: 360px; }
+.portfolio-overview > .card { min-height: 360px; }
 .portfolio-overview .allocation-legend { padding-top: 0; }
 .allocation-policy-trigger { float: right; width: auto; min-height: 34px; margin: -26px 0 12px; padding: 6px 10px; font-size: .78rem; }
 .allocation-policy-dialog { width: min(720px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--ia-border); border-radius: 14px; background: var(--ia-surface); color: var(--ia-text-primary); box-shadow: 0 24px 80px #000a; }
@@ -643,8 +741,9 @@ tbody tr:hover { background: #17283a80; }
   .metric { min-height: 0; padding: 17px; }
   .metric-primary strong, .metric strong { overflow-wrap: anywhere; font-size: clamp(1.25rem, 6vw, 1.8rem); }
   .portfolio-overview { grid-template-columns: minmax(0, 1fr); gap: var(--mobile-card-gap); }
-  .portfolio-overview .card:first-child, .portfolio-overview .card:last-child { min-height: 0; }
+  .portfolio-overview > .card { min-height: 0; }
   .equity-echarts { height: 270px; }
+  .portfolio-performance-chart { height: 270px; }
   .allocation-content { grid-template-columns: minmax(0, 1fr); justify-items: center; }
   .allocation-legend { width: 100%; }
   .holding-class summary { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 14px; }
@@ -877,3 +976,30 @@ html[data-theme="light"] tr:hover { background:#f7f9fc; }
 html[data-theme="light"] button.secondary,html[data-theme="light"] .secondary { border-color:#cbd6e2; background:#f7f9fc; color:#33445a; }
 html[data-theme="light"] button.secondary:hover,html[data-theme="light"] .secondary:hover { background:#edf2f7; }
 html[data-theme="light"] .page-intro .eyebrow { color:#138b76; }
+html[data-theme="light"] .understand-metric,html[data-theme="light"] .understand-question,html[data-theme="light"] .asset-ranking-row,html[data-theme="light"] .income-ranking-row,html[data-theme="light"] .bridge-answer-row { background:#f8fafc; }
+html[data-theme="light"] .understand-question { color:#263448; }
+html[data-theme="light"] .understand-question:hover,html[data-theme="light"] .understand-question.selected { background:#e8f6f2; }
+html[data-theme="light"] .analysis-totals > div,html[data-theme="light"] .segmented-control,html[data-theme="light"] .metric-switch { background:#fff; }
+html[data-theme="light"] .segmented-control button[aria-pressed="true"],html[data-theme="light"] .metric-switch button.active { background:#e9eef4; color:#263448; }
+html[data-theme="light"] .analysis-quality { background:#fff8e8; color:#725319; }
+html[data-theme="light"] .fixed-income-big-number,html[data-theme="light"] .understand-metric.primary { background:#eaf7f3; }
+@media (max-width: 900px) {
+  .understand-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .understand-questions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 680px) {
+  .understand-summary-heading { align-items:flex-start; }
+  .understand-metrics { gap:8px; }
+  .understand-metric { padding:10px; }
+  .understand-metric.primary { grid-column:1 / -1; }
+  .understand-question { min-height:78px; padding:10px; font-size:.78rem; }
+  .analysis-totals { grid-template-columns:1fr; }
+  .analysis-filters { display:grid; grid-template-columns:1fr; align-items:stretch; }
+  .analysis-filters select { width:100%; min-width:0; }
+  .segmented-control { width:max-content; max-width:100%; }
+  .ranking-bar { display:none; }
+  .ranking-value { min-width:0; font-size:.82rem; }
+  .asset-ranking-row summary { gap:7px; padding-inline:8px; }
+  .asset-ranking-detail, .bridge-answer-children { padding-left:12px; }
+  .understand-answer-heading h2 { font-size:1.05rem; }
+}

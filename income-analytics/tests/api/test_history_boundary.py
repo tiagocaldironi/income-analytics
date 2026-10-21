@@ -44,6 +44,8 @@ def test_portfolio_payload_hides_unconfirmed_negative_cash(monkeypatch) -> None:
     assert payload["reconstructed_cash_effect"] == Decimal("-1000")
     assert payload["portfolio_equity"] is None
     assert payload["reconstructed_portfolio_equity"] == Decimal("0")
+    assert payload["capital_applied"] == Decimal("1000")
+    assert payload["capital_applied_status"] == "AVAILABLE"
     assert payload["history_boundary"]["boundary_date"] == date(2026, 1, 1)
     assert [event.event_type for event in session.history()] == [FinancialEventType.BUY]
 

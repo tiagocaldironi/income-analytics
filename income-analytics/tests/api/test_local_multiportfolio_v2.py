@@ -91,6 +91,38 @@ def test_new_empty_portfolio_has_dashboard_and_holdings_read_models() -> None:
     assert holdings.json()["classes"] == []
 
 
+def test_performance_comparison_uses_selected_portfolio_start_when_start_is_omitted() -> None:
+    client = TestClient(app)
+    created = client.post("/api/portfolios", json={"name": "Comparison range"})
+    assert created.status_code == 201
+    portfolio_id = created.json()["id"]
+    headers = {"X-Portfolio-Id": portfolio_id}
+    trade_date = date(2025, 7, 14)
+    trade = client.post(
+        "/api/trades",
+        headers=headers,
+        json={
+            "event_type": "BUY",
+            "ticker": "RANGE1",
+            "name": "Range test asset",
+            "quantity": "1",
+            "unit_price": "10",
+            "effective_date": trade_date.isoformat(),
+            "asset_class": "BRAZILIAN_STOCK",
+        },
+    )
+    assert trade.status_code == 201, trade.text
+
+    result = client.get(
+        "/api/analytics/performance-comparison",
+        headers=headers,
+        params={"end_date": date.today().isoformat()},
+    )
+
+    assert result.status_code == 200, result.text
+    assert result.json()["period"]["start"] == trade_date.isoformat()
+
+
 def test_archived_portfolio_is_read_only_and_can_be_restored() -> None:
     client = TestClient(app)
     created = client.post("/api/portfolios", json={"name": "Archive test"})

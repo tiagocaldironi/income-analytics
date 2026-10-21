@@ -93,21 +93,27 @@ def test_dashboard_has_loading_and_error_states_for_initial_loading() -> None:
 
 def test_entender_explains_partial_historical_valuation_without_hiding_positions() -> None:
     performance = (STATIC / "js/features/performance.js").read_text(encoding="utf-8")
-    assert "Valuation histórico incompleto" in performance
-    assert "não representa ausência desses ativos" in performance
-    assert "data-quality-notice" in performance
+    assert "Ranking parcial." in performance
+    assert "sem contribuição calculável foram separados" in performance
+    assert "Valores pendentes não foram tratados como zero." in performance
 
 
-def test_entender_v3_keeps_a_single_explanation_evolution_and_performance_journey() -> None:
+def test_entender_v4_uses_the_question_led_wealth_analysis_journey() -> None:
     page = (STATIC / "index.html").read_text(encoding="utf-8")
     performance = (STATIC / "js/features/performance.js").read_text(encoding="utf-8")
     client = (STATIC / "js/api.js").read_text(encoding="utf-8")
-    assert "Como o patrimônio evoluiu?" in page
+    assert 'id="wealth-period-summary"' in page
+    assert 'id="understand-questions"' in page
+    assert 'id="wealth-explanation"' in page
+    assert "Quanto minha renda fixa valorizou?" in performance
+    assert "O que fez meu patrimônio aumentar ou diminuir?" in performance
+    assert "Quais investimentos geraram mais renda?" in performance
+    assert "Quais investimentos mais ganharam ou perderam valor?" in performance
     assert "Risco no período" not in page
-    assert "Contribuição por classe</h2>" not in performance
-    assert "Principais contribuições</h2>" not in performance
+    assert "portfolioApi.wealthExplanation(start, end)" in performance
+    assert "portfolioApi.performanceComparison" not in performance
     assert "historyRange" in client
-    assert "portfolioApi.historyRange(start, end)" in performance
+    assert "portfolioApi.historyRange(start, end)" not in performance
 
 
 def test_holdings_offer_a_lazy_accessible_asset_transactions_modal() -> None:
@@ -170,7 +176,8 @@ def test_holdings_experience_uses_one_aggregate_projection_and_strategy_context(
     assert '"Alvo classe"' in portfolio
     assert "#portfolio-evolution" in portfolio
     assert "Custo registrado" in dashboard
-    assert "Resultado econômico" in portfolio
+    assert "resultado econômico" in dashboard
+    assert "Number(point.total_cost) + Number(point.total_result)" in portfolio
     assert "Rendimentos recebidos" in dashboard
     assert '"capital-gain": capitalGain' in portfolio
     assert "afterLayout" in portfolio
@@ -341,7 +348,9 @@ def test_portfolio_history_chart_uses_economic_result_and_preserves_negative_ret
     assert (
         'event.target.matches("#portfolio-history-period, #portfolio-history-class")' in portfolio
     )
-    assert "data: points.map(point => Number(point.total_result))" in portfolio
+    assert "Number(point.total_cost) + Number(point.total_result)" in portfolio
+    assert 'type: "line"' in portfolio
+    assert "Math.max(Number(point.total_result)" not in portfolio
     assert "data: points.map(point => Number(point.capital_gain))" not in portfolio
     assert "item.market_value !== null && Number(item.market_value) > 0" in portfolio
     assert "Number(item.market_value) / total" in portfolio

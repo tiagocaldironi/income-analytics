@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bisect import bisect_right
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field, replace
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
@@ -664,6 +664,19 @@ class PortfolioSession:
                 SqliteFxRateRepository().list(*key) if self.persistent else ()
             )
         return self._fx_rate_cache[key]
+
+    def historical_fx_rates(
+        self, base_currencies: Iterable[str], quote_currency: str
+    ) -> tuple[FxRateObservation, ...]:
+        """Return persisted FX history needed to express costs in portfolio currency."""
+        if not self.persistent:
+            return ()
+        return tuple(
+            observation
+            for currency in sorted({item.upper() for item in base_currencies})
+            if currency.upper() != quote_currency.upper()
+            for observation in self._fx_rates(currency, quote_currency)
+        )
 
     def _remember_fx_rate(self, observation: FxRateObservation) -> None:
         key = (observation.base_currency.upper(), observation.quote_currency.upper())

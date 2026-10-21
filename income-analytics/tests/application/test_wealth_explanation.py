@@ -181,6 +181,14 @@ def test_income_breakdown_reconciles_independently():
         == income["total"]
         == Decimal("5")
     )
+    income_items = {
+        (item["ticker"], item["event_type"], item["signed_amount"])
+        for item in income["items"]
+    }
+    assert income_items == {
+        ("PETR4", "DIVIDEND", Decimal("3")),
+        ("PETR4", "INTEREST_ON_EQUITY", Decimal("2")),
+    }
 
 
 def test_twr_remains_a_separate_existing_performance_result():
