@@ -21,7 +21,7 @@
   "financial_certification": "PASS",
   "isolation_certification": "PASS",
   "b3_certification": "PASS",
-  "magic_formula_certification": "PASS",
+  "magic_formula_certification": "INCOMPLETE_CERT_48_FROZEN_ENGINE_HASH",
   "performance_certification": "PASS",
   "desktop_browser_certification": "PASS_MANUAL",
   "mobile_browser_certification": "PASS_MANUAL",
@@ -68,7 +68,10 @@
     "ranking_hash": "UNCHANGED",
     "active_snapshot": "UNCHANGED",
     "ranked_companies": 165,
-    "portfolio_independence": "PASS"
+    "portfolio_independence": "PASS",
+    "canonical_reconciliation": "PASS",
+    "frozen_engine_hash_gate": "INCOMPLETE_CASE_D_PROVENANCE_UNAVAILABLE",
+    "frozen_engine_hash_evidence": "docs/appendices/multiportfolio_v2_certification_closure/cert_48_frozen_engine_hash_closure.md"
   },
   "performance": {
     "paired_validation": "PASS",
@@ -83,6 +86,16 @@
     "private_financial_data_committed": "NO"
   },
   "final_certification": "INCOMPLETE",
+  "cert_48": {
+    "status": "INCOMPLETE",
+    "test": "test_shares_unit_020_frozen_engine",
+    "isolated_reproduction": "FAIL_DETERMINISTIC",
+    "semantic_classification": "UNKNOWN",
+    "decision": "CASE_D_KEEP_EXPECTED_HASHES_UNCHANGED",
+    "reason": "The mismatching source files and fixture manifest first appear together in the same reachable commit; no earlier hash-matching source or canonical hash generator is available.",
+    "magic_formula_regression": "326 passed, 1 failed (sole failure CERT_48)",
+    "focused_v2_isolation": "20 passed"
+  },
   "local_multiportfolio_ready": "NO_PENDING_CERT_48",
   "ready_for_user_membership_foundation_v3": "NO",
   "v3_implemented": false,
