@@ -185,6 +185,11 @@ p { color: var(--ia-text-secondary); line-height: 1.55; }
 .analysis-evidence p { margin-bottom:0; }
 .bridge-answer-total { display:flex; justify-content:space-between; gap:12px; padding:12px; border:1px solid var(--ia-brand); border-radius:8px; background:#12333766; }
 .bridge-answer-row > summary { justify-content:space-between; }
+.movement-value { display:inline-flex; align-items:center; gap:5px; padding:2px 7px; border-radius:999px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.movement-value svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.movement-up, .bridge-answer-children .movement-up { color:var(--ia-positive); background:rgba(44,190,135,.12); }
+.movement-down, .bridge-answer-children .movement-down { color:var(--ia-negative); background:rgba(238,91,108,.14); }
+.movement-flat, .bridge-answer-children .movement-flat { color:var(--ia-text-secondary); background:rgba(148,163,184,.12); }
 .income-ranking-row { display:flex; align-items:center; gap:10px; min-height:54px; padding:9px 11px; }
 .income-ranking-row > strong { margin-left:auto; }
 .fixed-income-big-number { display:grid; gap:7px; margin-bottom:15px; padding:16px; border:1px solid #296051; border-radius:10px; background:#12333788; }

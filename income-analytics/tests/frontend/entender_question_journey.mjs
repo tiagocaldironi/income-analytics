@@ -4,7 +4,7 @@ import vm from "node:vm";
 
 let source = fs.readFileSync("src/income_analytics/api/static/js/features/performance.js", "utf8");
 source = source.replace(/^import .*;\r?\n/gm, "").replaceAll("export async function", "async function").replaceAll("export function", "function");
-source += "\nglobalThis.__buildContributionRows = buildContributionRows; globalThis.__filterAndSortContributions = filterAndSortContributions; globalThis.__renderFixedIncomeAnswer = renderFixedIncomeAnswer; globalThis.__analyses = understandAnalyses;";
+source += "\nglobalThis.__buildContributionRows = buildContributionRows; globalThis.__filterAndSortContributions = filterAndSortContributions; globalThis.__renderFixedIncomeAnswer = renderFixedIncomeAnswer; globalThis.__renderWealthBridgeAnswer = renderWealthBridgeAnswer; globalThis.__analyses = understandAnalyses;";
 const context = vm.createContext({ money: value => String(value), percentage: value => `${value}%` });
 vm.runInContext(source, context);
 
@@ -46,4 +46,19 @@ assert.deepEqual(
   ["CDB-B", "CDB-A", "CDB-C"],
   "fixed-income investments are ordered by highest to lowest accrued return amount",
 );
-console.log("Entender: question catalog, financial row attribution, class filters, gain/loss filters, and fixed-income return ranking passed.");
+
+const bridgeAnswer = context.__renderWealthBridgeAnswer({
+  base_currency: "BRL",
+  summary: { opening_wealth: 1000, closing_wealth: 950, absolute_change: -50 },
+  data_quality: { explanation_coverage_percentage: 100, valuation_coverage_percentage: 100, unconverted_event_count: 0 },
+  components: [{ component_type: "MARKET_VALUATION", label: "Valorização dos ativos", signed_amount: -50, children: [
+    { ticker: "GAIN", signed_amount: 100 },
+    { ticker: "LOSS", signed_amount: -150 },
+  ] }],
+  reconciliation: { unexplained_change: 0 },
+});
+assert.match(bridgeAnswer, /movement-up/);
+assert.match(bridgeAnswer, /movement-down/);
+assert.match(bridgeAnswer, /aria-label="Valorização negativa"/);
+assert.match(bridgeAnswer, /<span>150<\/span>/, "negative valuation displays the absolute amount alongside its direction icon");
+console.log("Entender: question catalog, financial row attribution, class and gain/loss filters, fixed-income return ranking, and valuation direction indicators passed.");

@@ -118,10 +118,25 @@ function renderWealthBridgeAnswer(data) {
   const summary = data.summary || {};
   const quality = data.data_quality || {};
   const rows = (data.components || []).filter(item => item.component_type !== "UNEXPLAINED" || Number(item.signed_amount) !== 0);
-  const bridge = rows.map(item => `<details class="bridge-answer-row"><summary><span>${item.label}</span><strong>${signedMoney(item.signed_amount, data.base_currency)}</strong></summary>${item.children?.length ? `<div class="bridge-answer-children">${[...item.children].sort((a, b) => Math.abs(Number(b.signed_amount)) - Math.abs(Number(a.signed_amount))).map(child => `<div><span>${escapeChartText(child.ticker || child.label || "Ativo")}${child.valuation_available === false ? " · valuation pendente" : ""}</span><strong>${signedMoney(child.signed_amount, data.base_currency)}</strong></div>`).join("")}</div>` : ""}</details>`).join("");
+  const bridge = rows.map(item => {
+    const marketValuation = item.component_type === "MARKET_VALUATION";
+    const totalValue = marketValuation ? movementIndicator(item.signed_amount, data.base_currency) : signedMoney(item.signed_amount, data.base_currency);
+    const children = item.children?.length
+      ? `<div class="bridge-answer-children">${[...item.children].sort((a, b) => Math.abs(Number(b.signed_amount)) - Math.abs(Number(a.signed_amount))).map(child => `<div><span>${escapeChartText(child.ticker || child.label || "Ativo")}${child.valuation_available === false ? " · valuation pendente" : ""}</span><strong>${marketValuation ? movementIndicator(child.signed_amount, data.base_currency) : signedMoney(child.signed_amount, data.base_currency)}</strong></div>`).join("")}</div>`
+      : "";
+    return `<details class="bridge-answer-row"><summary><span>${item.label}</span><strong>${totalValue}</strong></summary>${children}</details>`;
+  }).join("");
   const residual = Number(data.reconciliation?.unexplained_change || 0);
   const conclusion = `O saldo de ativos ${Number(summary.absolute_change) >= 0 ? "aumentou" : "diminuiu"} ${signedMoney(summary.absolute_change, data.base_currency)} no período.`;
   return `<p class="analysis-conclusion">${conclusion}</p><div class="wealth-bridge-answer"><div class="bridge-answer-total"><span>Saldo inicial</span><strong>${money(summary.opening_wealth, data.base_currency)}</strong></div>${bridge}<div class="bridge-answer-total"><span>Saldo final</span><strong>${money(summary.closing_wealth, data.base_currency)}</strong></div></div><p class="coverage">${quality.explanation_coverage_percentage === null ? "Cobertura da reconciliação indisponível." : `Cobertura da explicação: ${percentage(Number(quality.explanation_coverage_percentage))}.`} ${residual ? `Variação sem causa identificada: ${signedMoney(residual, data.base_currency)}.` : "Os componentes conhecidos reconciliam a variação."}</p><details class="analysis-evidence"><summary>Limites desta reconciliação</summary><p>Valuation parcial: ${percentage(Number(quality.valuation_coverage_percentage || 0))}. Efeito cambial detalhado não está disponível neste relatório. ${quality.unconverted_event_count ? `${quality.unconverted_event_count} evento(s) não foram convertidos para a moeda-base.` : ""}</p></details>`;
+}
+
+function movementIndicator(value, currency) {
+  const amount = Number(value);
+  const direction = amount > 0 ? "up" : amount < 0 ? "down" : "flat";
+  const description = amount > 0 ? "Valorização positiva" : amount < 0 ? "Valorização negativa" : "Sem variação";
+  const path = direction === "up" ? "M5 17 17 5M7 5h10v10" : direction === "down" ? "M5 7 17 19M17 9v10H7" : "M5 12h14";
+  return `<span class="movement-value movement-${direction}" aria-label="${description}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${path}" /></svg><span>${money(Math.abs(amount), currency)}</span></span>`;
 }
 
 function renderIncomeAnswer(data) {

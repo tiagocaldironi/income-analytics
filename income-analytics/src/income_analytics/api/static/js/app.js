@@ -1,6 +1,6 @@
 import { bindPortfolioFilters, loadPortfolio } from "./features/portfolio.js?v=20261021-performance-benchmarks-v1";
 import { bindOperations, loadOperationsRoute } from "./features/operations.js?v=20261018-fixed-income-sale-v2";
-import { bindPerformance, loadExplanation } from "./features/performance.js?v=20261021-understand-journey-v3";
+import { bindPerformance, loadExplanation } from "./features/performance.js?v=20261021-understand-journey-v4";
 import { bindSimulation } from "./features/simulation.js?v=20260924-experience-v2";
 import { bindBenchmark } from "./features/benchmark.js?v=20260924-route-scoped-v1";
 import { bindAttentionCenter, loadAttentionCenter } from "./features/attention-center.js?v=20261018-v1-mobile-mp-merge";
