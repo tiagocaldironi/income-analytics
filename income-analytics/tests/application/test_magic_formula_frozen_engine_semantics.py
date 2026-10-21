@@ -228,8 +228,16 @@ def test_prospective_baseline_matches_current_engine_and_generator() -> None:
     document = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
     payload = document["payload"]
     assert payload["baseline_id"] == "MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2"
-    first = build_document(ROOT, generated_at="2026-10-20T00:00:00+00:00")
-    second = build_document(ROOT, generated_at="2026-10-20T00:00:00+00:00")
+    first = build_document(
+        ROOT,
+        git_commit=payload["git_commit"],
+        generated_at="2026-10-20T00:00:00+00:00",
+    )
+    second = build_document(
+        ROOT,
+        git_commit=payload["git_commit"],
+        generated_at="2026-10-20T00:00:00+00:00",
+    )
     assert first == second
     assert first["payload"] == payload
     assert first["payload_sha256"] == document["payload_sha256"]

@@ -246,8 +246,10 @@ def build_payload(root: Path, *, git_commit: str | None = None) -> dict:
     }
 
 
-def build_document(root: Path, *, generated_at: str | None = None) -> dict:
-    payload = build_payload(root)
+def build_document(
+    root: Path, *, git_commit: str | None = None, generated_at: str | None = None
+) -> dict:
+    payload = build_payload(root, git_commit=git_commit)
     return {
         "payload": payload,
         "payload_sha256": _sha256(_canonical_json(payload)),
