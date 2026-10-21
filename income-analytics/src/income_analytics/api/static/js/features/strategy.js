@@ -77,13 +77,17 @@ function assetTargets(classes) {
 
 function render(target, state) {
   const classes = [...state.classes].sort((a, b) => number(b.current_weight) - number(a.current_weight) || a.label.localeCompare(b.label));
+  const strategyOrigin = state.strategy?.source === "TEMPLATE"
+    ? `<small class="strategy-source-badge">Baseada em ${html(state.strategy.strategy_name)} · v${state.strategy.template_version}${state.strategy.customized ? " · personalizada" : ""}</small>`
+    : state.strategy?.source === "MANUAL" ? `<small class="strategy-source-badge">Estratégia manual</small>` : "";
   const targetTotal = classes.reduce((total, item) => total + number(item.target_weight), 0);
   const targetValid = Math.abs(targetTotal - 1) < .000001;
   const targetComposition = targetValid ? composition(classes, "target_weight", "Carteira-alvo") : `<div class="strategy-composition strategy-composition-unavailable"><small>Carteira-alvo</small><div class="strategy-composition-message">A distribuição-alvo soma ${pct(targetTotal)}. Revise a estratégia para completar 100%.</div></div>`;
-  target.innerHTML = `<section class="strategy-hero"><div class="strategy-hero-heading"><div><p>Minha estratégia</p><h2>Carteira atual × Carteira-alvo</h2></div><button class="secondary" type="button" data-edit-strategy>Editar estratégia</button></div><div class="strategy-compositions">${composition(classes, "current_weight", "Carteira atual", state.valuationComplete !== false)}${targetComposition}</div>${strategyLegend(classes)}<div class="strategy-drift"><div><small>Distância da estratégia</small><strong>${pct(state.analysis.portfolio_drift)}</strong><span>Distância da distribuição-alvo</span></div><p>Representa a diferença agregada entre a distribuição atual e a política cadastrada.</p></div>${strategyDifferences(classes)}</section>${zeroTargetContext(classes)}${assetTargets(classes)}`;
+  target.innerHTML = `<section class="strategy-hero"><div class="strategy-hero-heading"><div><p>Minha estratégia</p><h2>Carteira atual × Carteira-alvo</h2>${strategyOrigin}</div><div class="strategy-hero-actions"><button class="secondary" type="button" data-explore-starter>Explorar Income Starter</button><button class="secondary" type="button" data-edit-strategy>Editar estratégia</button></div></div><div class="strategy-compositions">${composition(classes, "current_weight", "Carteira atual", state.valuationComplete !== false)}${targetComposition}</div>${strategyLegend(classes)}<div class="strategy-drift"><div><small>Distância da estratégia</small><strong>${pct(state.analysis.portfolio_drift)}</strong><span>Distância da distribuição-alvo</span></div><p>Representa a diferença agregada entre a distribuição atual e a política cadastrada.</p></div>${strategyDifferences(classes)}</section>${zeroTargetContext(classes)}${assetTargets(classes)}`;
   const details = target.querySelector?.("[data-strategy-differences]");
   details?.addEventListener("toggle", () => { strategyDifferencesOpen = details.open; details.querySelector("summary")?.setAttribute("aria-expanded", String(details.open)); });
   target.querySelectorAll("[data-edit-strategy]").forEach(button => button.addEventListener("click", () => openEditor(state, button)));
+  target.querySelectorAll("[data-explore-starter]").forEach(button => button.addEventListener("click", () => openStarterCatalog(state, button)));
   target.querySelectorAll("[data-edit-asset-target]").forEach(button => button.addEventListener("click", () => openAssetEditor(state, button.dataset.editAssetTarget, button)));
   target.querySelectorAll("[data-choose-asset-class]").forEach(button => button.addEventListener("click", () => openAssetClassChooser(state, button)));
   target.querySelectorAll("[data-view-composition]").forEach(button => button.addEventListener("click", () => openCompositionDrawer(state, button.dataset.viewComposition, button)));
@@ -135,17 +139,117 @@ function dialog() {
   node = document.createElement("dialog"); node.id = "strategy-editor-dialog"; node.className = "strategy-editor-dialog"; node.innerHTML = `<form method="dialog"><div class="dialog-heading"><div><p>Minha estratégia</p><h2>Editar estratégia</h2><p>Distribua 100% entre as classes que fazem parte do seu plano.</p></div><button class="dialog-close" value="cancel" aria-label="Fechar editor de estratégia">×</button></div><div class="strategy-editor-content"><div data-strategy-total></div><div data-strategy-fields></div><p class="message" data-strategy-message role="alert"></p></div><div class="dialog-actions"><button class="secondary" value="cancel">Cancelar</button><button type="submit" data-save-strategy>Salvar estratégia</button></div></form>`; node.addEventListener("close", () => node._trigger?.focus()); document.body.append(node); return node;
 }
 
-function openEditor(state, trigger) {
+function openEditor(state, trigger, template = null) {
   const node = dialog(); node._trigger = trigger; const fields = node.querySelector("[data-strategy-fields]"); const total = node.querySelector("[data-strategy-total]"); const save = node.querySelector("[data-save-strategy]"); const message = node.querySelector("[data-strategy-message]");
+  node.querySelector(".dialog-heading h2").textContent = template ? `Personalizar · ${template.name}` : "Editar estratégia";
+  node.querySelector(".dialog-heading p:last-child").textContent = template ? `Modelo Income Starter v${template.version}. Revise a proposta e salve somente se desejar usá-la.` : "Distribua 100% entre as classes que fazem parte do seu plano.";
+  save.textContent = template ? "Confirmar estratégia" : "Salvar estratégia";
+  node.querySelector("[data-income-starter-comparison]")?.remove();
+  const previousTargets = template ? state.classes.filter(item => item.previous_target_weight !== undefined) : [];
+  const comparison = previousTargets.length ? `<section class="income-starter-change-preview" data-income-starter-comparison><h3>Estratégia atual × proposta</h3><div>${previousTargets.map(item => `<p><span>${html(item.label)}</span><b>${pct(item.previous_target_weight)} → ${pct(item.target_weight)}</b></p>`).join("")}</div><small>Salvar substitui as metas de classe atuais desta carteira. Isso não compra nem vende ativos.</small></section>` : "";
+  node.querySelector("[data-strategy-fields]").parentElement.insertAdjacentHTML("afterbegin", comparison);
   fields.innerHTML = state.classes.map(item => `<label class="strategy-editor-row"><span><b>${html(item.label)}</b>${number(item.current_weight) > 0 && number(item.target_weight) === 0 ? `<small>Atual ${pct(item.current_weight)} · Você possui posição nesta classe.</small>` : ""}</span><input aria-label="Objetivo para ${html(item.label)}" type="number" inputmode="decimal" name="${html(item.asset_class)}" min="0" max="100" step="0.1" value="${(number(item.target_weight) * 100).toFixed(1)}"><b>%</b></label>`).join("");
   const refresh = () => { const values = [...fields.querySelectorAll("input")].map(input => Number(input.value)); const valid = values.every(item => Number.isFinite(item) && item >= 0 && item <= 100); const sum = values.reduce((total, item) => total + (Number.isFinite(item) ? item : 0), 0); const remaining = 100 - sum; total.innerHTML = `<strong>${sum.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}% definidos${valid && Math.abs(remaining) < .000001 ? " ✓" : ""}</strong><span>${!valid ? "Informe valores entre 0% e 100%." : Math.abs(remaining) < .000001 ? "Sua distribuição está completa." : remaining > 0 ? `Faltam ${remaining.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}% para completar sua estratégia.` : `Reduza ${Math.abs(remaining).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%.`}</span>`; save.disabled = !valid || Math.abs(remaining) >= .000001; };
-  fields.addEventListener("input", refresh); node.querySelector("form").onsubmit = async event => { if (!event.submitter.matches("[data-save-strategy]")) return; event.preventDefault(); const targets = Object.fromEntries([...fields.querySelectorAll("input")].map(input => [input.name, Number(input.value) / 100])); try { save.disabled = true; save.textContent = "Salvando…"; await portfolioApi.allocationPolicy(targets); invalidateSharedIntelligence(); node.close(); await loadStrategy(); } catch (error) { message.textContent = friendlyError(error); save.textContent = "Salvar estratégia"; refresh(); } }; refresh(); node.showModal();
+  fields.addEventListener("input", refresh); node.querySelector("form").onsubmit = async event => { if (!event.submitter.matches("[data-save-strategy]")) return; event.preventDefault(); const targets = Object.fromEntries([...fields.querySelectorAll("input")].map(input => [input.name, Number(input.value) / 100])); try { save.disabled = true; save.textContent = "Salvando…"; if (template) await portfolioApi.adoptIncomeStarterModel(template.template_key, template.version, targets); else await portfolioApi.allocationPolicy(targets); invalidateSharedIntelligence(); node.close(); await loadStrategy(); } catch (error) { message.textContent = friendlyError(error); save.textContent = template ? "Confirmar estratégia" : "Salvar estratégia"; refresh(); } }; refresh(); node.showModal();
 }
 
-function noPolicy(target, holdings) { const classes = holdings.classes || []; target.innerHTML = `<section class="strategy-empty"><p>Minha estratégia</p><h2>Defina como você quer distribuir seu patrimônio.</h2><p>Uma estratégia permite comparar sua carteira atual com a distribuição que você deseja manter.</p><button type="button" data-create-strategy>Criar estratégia</button></section>`; target.querySelector("[data-create-strategy]").addEventListener("click", event => openEditor({ classes: classes.map(group => ({ ...group, current_weight: group.weight || 0, target_weight: 0 })) }, event.currentTarget)); }
+function starterDialog() {
+  let node = document.querySelector("#income-starter-dialog");
+  if (node) return node;
+  node = document.createElement("dialog"); node.id = "income-starter-dialog"; node.className = "income-starter-dialog";
+  node.innerHTML = `<div class="income-starter-content"><header><div><p>Income Starter · catálogo educacional</p><h2>Modelos em validação</h2><small>Conheça objetivo, contexto e limitações. Nenhum modelo pode ser adotado antes da homologação.</small></div><button type="button" data-starter-close aria-label="Fechar catálogo">×</button></header><div data-starter-catalog></div><p class="income-starter-notice">${html("Este catálogo não é recomendação individualizada, avaliação de adequação ao seu perfil nem promessa de rentabilidade.")}</p></div>`;
+  node.querySelector("[data-starter-close]").addEventListener("click", () => node.close());
+  document.body.append(node); return node;
+}
+
+function starterCard(model) {
+  const status = model.status === "DRAFT" ? "Rascunho" : model.status === "IN_REVIEW" ? "Em revisão" : "Publicado";
+  return `<article class="income-starter-card"><div><span class="income-starter-status">${status} · v${model.version}</span><h3>${html(model.name)}</h3><p>${html(model.description)}</p></div><button class="secondary" type="button" data-starter-detail="${html(model.template_key)}" data-starter-version="${model.version}">Conhecer modelo</button></article>`;
+}
+
+async function openStarterCatalog(state, trigger) {
+  const node = starterDialog(); node._trigger = trigger;
+  const content = node.querySelector("[data-starter-catalog]");
+  content.innerHTML = `<p class="income-starter-loading">Carregando catálogo…</p>`;
+  if (!node.open) node.showModal();
+  try {
+    const response = await portfolioApi.incomeStarterCatalog();
+    const models = response.models || [];
+    content.innerHTML = `<div class="income-starter-grid">${models.map(starterCard).join("")}</div>`;
+    content.querySelectorAll("[data-starter-detail]").forEach(button => button.addEventListener("click", async () => {
+      try {
+        const model = await portfolioApi.incomeStarterModel(button.dataset.starterDetail, Number(button.dataset.starterVersion));
+        showStarterDetails(node, model, state);
+      } catch (error) { content.innerHTML = `<p role="alert">${html(friendlyError(error))}</p>`; }
+    }));
+  } catch (error) { content.innerHTML = `<p role="alert">Não foi possível carregar o catálogo: ${html(friendlyError(error))}</p>`; }
+}
+
+function showStarterDetails(node, model, state) {
+  const content = node.querySelector("[data-starter-catalog]");
+  const status = model.status === "DRAFT" ? "Rascunho" : model.status === "IN_REVIEW" ? "Em revisão" : "Publicado";
+  const allocations = model.allocations ? `<section><h3>Distribuição validada</h3><div class="income-starter-allocations">${Object.entries(model.allocations).map(([key, value]) => `<span>${html(assetClassLabel(key))}<b>${pct(value)}</b></span>`).join("")}</div></section>` : `<section class="income-starter-no-allocation"><h3>Distribuição</h3><p>Nenhum percentual foi definido. Este conteúdo é um rascunho, não um modelo aprovado.</p></section>`;
+  const methodologySources = model.methodology_sources || [];
+  const allocationSources = model.allocation_sources || [];
+  const sourceList = sources => `<ul>${sources.map(source => `<li><a href="${html(source.url)}" target="_blank" rel="noreferrer">${html(source.title)}</a> — ${html(source.supports)}</li>`).join("")}</ul>`;
+  const reviewDate = model.reviewed_at ? new Date(model.reviewed_at).toLocaleDateString("pt-BR") : "Pendente";
+  const publishedDate = model.published_at ? new Date(model.published_at).toLocaleDateString("pt-BR") : "Não publicado";
+  content.innerHTML = `<button type="button" class="income-starter-back" data-starter-back>← Voltar ao catálogo</button><article class="income-starter-detail"><span class="income-starter-status">${status} · versão ${model.version}</span><h2>${html(model.name)}</h2><p>${html(model.description)}</p><div class="income-starter-facts"><section><h3>Objetivo</h3><p>${html(model.objective)}</p></section><section><h3>Perfil típico</h3><p>${html(model.typical_profile)}</p></section><section><h3>Risco e horizonte</h3><p>${html(model.risk_profile)} · ${html(model.horizon)}</p></section><section><h3>Tolerância a oscilações e conhecimento</h3><p>${html(model.volatility_tolerance)} ${html(model.knowledge)}</p></section><section><h3>Características</h3><ul>${model.characteristics.map(item => `<li>${html(item)}</li>`).join("")}</ul></section><section><h3>Quando pode não fazer sentido</h3><ul>${model.not_suitable.map(item => `<li>${html(item)}</li>`).join("")}</ul></section>${allocations}<section><h3>Origem e metodologia</h3><p>${html(model.methodology)}</p><p>Autoria: ${html(model.author)}</p><p>Revisão: ${html(reviewDate)} · Publicação: ${html(publishedDate)}</p><h4>Fontes conceituais e regulatórias</h4>${sourceList(methodologySources)}<h4>Fontes de alocação</h4>${allocationSources.length ? sourceList(allocationSources) : "<p>Nenhuma fonte de percentuais foi documentada. As referências conceituais não comprovam alocações.</p>"}</section></div><p class="income-starter-notice">${html(model.educational_notice)}</p><button type="button" class="secondary" data-starter-adopt ${model.adoption_available ? "" : "disabled"}>${model.adoption_available ? "Personalizar no editor" : "Aguardando validação"}</button></article>`;
+  content.querySelector("[data-starter-back]").addEventListener("click", () => openStarterCatalog(state, node._trigger));
+  const adopt = content.querySelector("[data-starter-adopt]");
+  if (model.adoption_available) adopt.addEventListener("click", () => {
+    const merged = new Map(state.classes.map(item => [item.asset_class, { ...item, previous_target_weight: number(item.target_weight) }]));
+    for (const [assetClass, targetWeight] of Object.entries(model.allocations || {})) {
+      if (!merged.has(assetClass)) merged.set(assetClass, { asset_class: assetClass, label: assetClassLabel(assetClass), current_weight: 0, target_weight: 0, previous_target_weight: 0, assets: [] });
+      merged.get(assetClass).target_weight = Number(targetWeight);
+    }
+    node.close(); openEditor({ classes: [...merged.values()] }, node._trigger, model);
+  });
+}
+
+function noPolicy(target, holdings) { const classes = holdings.classes || []; target.innerHTML = `<section class="strategy-empty"><p>Minha estratégia</p><h2>Defina como você quer distribuir seu patrimônio.</h2><p>Uma estratégia permite comparar sua carteira atual com a distribuição que você deseja manter.</p><div class="strategy-empty-actions"><button type="button" data-create-strategy>Criar estratégia</button><button class="secondary" type="button" data-explore-starter>Explorar Income Starter</button></div></section>`; target.querySelector("[data-create-strategy]").addEventListener("click", event => openEditor({ classes: classes.map(group => ({ ...group, current_weight: group.weight || 0, target_weight: 0 })) }, event.currentTarget)); target.querySelector("[data-explore-starter]").addEventListener("click", event => openStarterCatalog({ classes: classes.map(group => ({ ...group, current_weight: group.weight || 0, target_weight: 0 })) }, event.currentTarget)); }
 
 export async function loadStrategy() {
   const target = document.querySelector("#strategy-workspace"); if (!target) return; target.innerHTML = `<div class="strategy-skeleton" aria-busy="true"><span></span><span></span></div>`;
-  try { const [holdings, intelligence] = await Promise.all([portfolioApi.holdings(), sharedIntelligence()]); const drift = intelligence.findings?.find(finding => finding.code === "PORTFOLIO_DRIFT"); try { const analysis = drift ? { portfolio_drift: drift.current_value, comparisons: drift.decomposition.map(item => ({ asset_class: item.asset_class, current_weight: item.current_weight, target_weight: item.target_weight, deviation: Number(item.deviation_pp) / 100 })) } : await portfolioApi.allocationAnalysis(); const groups = new Map(holdings.classes.map(group => [group.asset_class, group])); const classes = analysis.comparisons.map((comparison, index) => ({ ...comparison, ...(groups.get(comparison.asset_class) || {}), label: groups.get(comparison.asset_class)?.label || assetClassLabel(comparison.asset_class), market_value: groups.get(comparison.asset_class)?.market_value ?? null, assets: groups.get(comparison.asset_class)?.assets || [], color: colors[index % colors.length] })); render(target, { analysis, classes, valuationComplete: holdings.valuation_complete }); } catch (error) { if (String(error.message || error).includes("política")) noPolicy(target, holdings); else throw error; } } catch { target.innerHTML = `<div class="strategy-error" role="alert"><p>Não foi possível carregar sua estratégia agora.</p><button class="secondary" type="button" data-retry-strategy>Tentar novamente</button></div>`; target.querySelector("[data-retry-strategy]").addEventListener("click", loadStrategy); }
+  try {
+    const [holdings, intelligence, strategyMetadata] = await Promise.all([
+      portfolioApi.holdings(), sharedIntelligence(), portfolioApi.activeStrategyMetadata(),
+    ]);
+    const drift = intelligence.findings?.find(finding => finding.code === "PORTFOLIO_DRIFT");
+    try {
+      const analysis = drift
+        ? {
+          portfolio_drift: drift.current_value,
+          comparisons: drift.decomposition.map(item => ({
+            asset_class: item.asset_class,
+            current_weight: item.current_weight,
+            target_weight: item.target_weight,
+            deviation: Number(item.deviation_pp) / 100,
+          })),
+        }
+        : await portfolioApi.allocationAnalysis();
+      const groups = new Map(holdings.classes.map(group => [group.asset_class, group]));
+      const classes = analysis.comparisons.map((comparison, index) => ({
+        ...comparison,
+        ...(groups.get(comparison.asset_class) || {}),
+        label: groups.get(comparison.asset_class)?.label || assetClassLabel(comparison.asset_class),
+        market_value: groups.get(comparison.asset_class)?.market_value ?? null,
+        assets: groups.get(comparison.asset_class)?.assets || [],
+        color: colors[index % colors.length],
+      }));
+      render(target, {
+        analysis,
+        classes,
+        valuationComplete: holdings.valuation_complete,
+        strategy: strategyMetadata.strategy,
+      });
+    } catch (error) {
+      if (String(error.message || error).includes("política")) noPolicy(target, holdings);
+      else throw error;
+    }
+  } catch {
+    target.innerHTML = `<div class="strategy-error" role="alert"><p>Não foi possível carregar sua estratégia agora.</p><button class="secondary" type="button" data-retry-strategy>Tentar novamente</button></div>`;
+    target.querySelector("[data-retry-strategy]").addEventListener("click", loadStrategy);
+  }
 }
 export function bindStrategy() { loadStrategy(); }
