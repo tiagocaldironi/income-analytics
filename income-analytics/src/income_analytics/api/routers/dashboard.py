@@ -1168,7 +1168,13 @@ def serialize_portfolio(
     opening_equity_reliable = boundary.has_reliable_opening_equity
     implicit_capital = PerformanceProjector._implicit_capital(events, effective_date).amount
     capital_applied = calculate_capital_applied(
-        projection, base_currency=valuation.base_currency
+        projection,
+        base_currency=valuation.base_currency,
+        events=events,
+        fx_rates=session.historical_fx_rates(
+            (position.asset.currency.code for position in projection.positions),
+            valuation.base_currency,
+        ),
     )
     payload: dict[str, object] = {
         "cash": valuation.cash if opening_equity_reliable else None,

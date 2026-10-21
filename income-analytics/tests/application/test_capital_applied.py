@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 from income_analytics.application.capital_applied import calculate_capital_applied
+from income_analytics.application.fx_data import FxRateObservation
 from income_analytics.domain.entities.financial_event import FinancialEvent
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.enums.asset_type import AssetType
@@ -99,6 +100,65 @@ def test_foreign_or_special_model_positions_block_a_misleading_partial_total():
     assert result.incomplete_assets == ("MCD",)
     assert result.incomplete_reasons == (("MCD", "custo não convertido pela taxa histórica"),)
     assert result.included_position_count == 1
+
+
+def test_brl_fixed_income_position_uses_recorded_principal_cost():
+    asset = build_asset(
+        ticker=type(build_asset().ticker)("CDB-TEST"),
+        name="CDB test",
+        currency=SimpleNamespace(code="BRL"),
+        asset_class=AssetClass.FIXED_INCOME,
+        asset_type=AssetType.FIXED_INCOME,
+    )
+    event = _event(asset, FinancialEventType.BUY, "1", "10000", date(2026, 1, 1))
+
+    result = calculate_capital_applied(
+        PortfolioProjector.project((event,)), base_currency="BRL", events=(event,)
+    )
+
+    assert result.status == "AVAILABLE"
+    assert result.amount == Decimal("10000")
+
+
+def test_foreign_open_cost_uses_historical_fx_for_buys_and_average_basis_for_sales():
+    asset = build_asset(
+        ticker=type(build_asset().ticker)("MCD"),
+        name="McDonald's",
+        currency=SimpleNamespace(code="USD"),
+        asset_class=AssetClass.INTERNATIONAL,
+        asset_type=AssetType.STOCK,
+    )
+    buys_and_sale = (
+        _event(asset, FinancialEventType.BUY, "10", "10", date(2026, 1, 1)),
+        _event(asset, FinancialEventType.BUY, "10", "20", date(2026, 1, 2)),
+        _event(asset, FinancialEventType.SELL, "5", "30", date(2026, 1, 3)),
+    )
+    rates = (
+        FxRateObservation(
+            base_currency="USD",
+            quote_currency="BRL",
+            rate=Decimal("5"),
+            effective_date=date(2026, 1, 1),
+            source="test",
+        ),
+        FxRateObservation(
+            base_currency="USD",
+            quote_currency="BRL",
+            rate=Decimal("6"),
+            effective_date=date(2026, 1, 2),
+            source="test",
+        ),
+    )
+
+    result = calculate_capital_applied(
+        PortfolioProjector.project(buys_and_sale),
+        base_currency="BRL",
+        events=buys_and_sale,
+        fx_rates=rates,
+    )
+
+    assert result.status == "AVAILABLE"
+    assert result.amount == Decimal("1275")
 
 
 def test_no_open_positions_is_reported_as_real_zero():
