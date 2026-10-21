@@ -171,7 +171,7 @@ dashboard_snapshot_repository = _PortfolioRepositoryProxy(
     SqlitePortfolioDashboardSnapshotRepository
 )
 market_price_refresh_runs = _PortfolioRepositoryProxy(SqliteMarketPriceRefreshRunRepository)
-PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 3
+PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 4
 
 
 def _effective_analysis_end_date(start_date: date, end_date: date) -> date:
