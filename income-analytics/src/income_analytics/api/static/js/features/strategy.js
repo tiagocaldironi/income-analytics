@@ -199,7 +199,11 @@ async function openStarterCatalog(state, trigger) {
         showStarterDetails(node, model, state);
       } catch (error) { content.innerHTML = `<p role="alert">${html(friendlyError(error))}</p>`; }
     }));
-  } catch (error) { content.innerHTML = `<p role="alert">Não foi possível carregar o catálogo: ${html(friendlyError(error))}</p>`; }
+  } catch (error) {
+    console.error("Falha ao carregar o catálogo Income Starter", error);
+    content.innerHTML = `<div class="income-starter-load-error" role="alert"><p>Não foi possível carregar o catálogo Income Starter.</p><small>${html(friendlyError(error))}</small><button class="secondary" type="button" data-starter-retry>Tentar novamente</button></div>`;
+    content.querySelector("[data-starter-retry]").addEventListener("click", () => openStarterCatalog(state, trigger));
+  }
 }
 
 function showStarterDetails(node, model, state) {

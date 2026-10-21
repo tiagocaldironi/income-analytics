@@ -2,6 +2,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
 
+const html = fs.readFileSync("src/income_analytics/api/static/index.html", "utf8");
+assert.match(html, /<details id="understand-period" class="card understand-period">/);
+assert.match(html, /<span class="secondary understand-period-action">Alterar período<\/span>/);
+assert.match(html, /<div class="understand-period-editor"><form id="wealth-explanation-form"/);
+assert.doesNotMatch(html, /<section class="card understand-period">/);
+
 const source = fs
   .readFileSync("src/income_analytics/api/static/js/shared/dates.js", "utf8")
   .replace(/export /g, "");

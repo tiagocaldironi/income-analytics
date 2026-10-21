@@ -23,8 +23,53 @@ export function bindPerformance() {
   const form = document.querySelector("#wealth-explanation-form");
   if (!form) return;
   performanceBound = true;
+  const period = document.querySelector("#understand-period");
+  const startInput = document.querySelector("#wealth-start-date");
+  const endInput = document.querySelector("#wealth-end-date");
+  const validation = document.querySelector("#understand-period-validation");
+  const status = document.querySelector("#understand-period-status");
+  const cancel = document.querySelector("#cancel-understand-period");
+  const updateLabel = () => {
+    const label = document.querySelector("#understand-period-value");
+    if (label && startInput.value && endInput.value) label.textContent = `${formatPeriodDate(startInput.value)} — ${formatPeriodDate(endInput.value)}`;
+  };
+  const clearValidation = () => {
+    validation.hidden = true;
+    validation.textContent = "";
+    startInput.removeAttribute("aria-invalid");
+    endInput.removeAttribute("aria-invalid");
+  };
+  updateLabel();
+  period?.addEventListener("toggle", () => {
+    if (period.open) {
+      period.dataset.originalStart = startInput.value;
+      period.dataset.originalEnd = endInput.value;
+      clearValidation();
+      status.hidden = true;
+    }
+  });
+  cancel?.addEventListener("click", () => {
+    startInput.value = period.dataset.originalStart || startInput.value;
+    endInput.value = period.dataset.originalEnd || endInput.value;
+    clearValidation();
+    period.open = false;
+  });
+  startInput.addEventListener("input", clearValidation);
+  endInput.addEventListener("input", clearValidation);
   form.addEventListener("submit", event => {
     event.preventDefault();
+    if (!startInput.value || !endInput.value || startInput.value > endInput.value) {
+      validation.textContent = "Informe datas válidas e confirme que a data inicial não é posterior à final.";
+      validation.hidden = false;
+      startInput.setAttribute("aria-invalid", String(!startInput.value || startInput.value > endInput.value));
+      endInput.setAttribute("aria-invalid", String(!endInput.value));
+      return;
+    }
+    clearValidation();
+    status.hidden = true;
+    const apply = document.querySelector("#apply-understand-period");
+    apply.disabled = true;
+    apply.textContent = "Atualizando…";
     loadExplanation();
   });
   document.querySelector("#understand-questions")?.addEventListener("click", event => {
@@ -45,12 +90,48 @@ export async function loadExplanation() {
     const data = await portfolioApi.wealthExplanation(start, end);
     if (requestId !== explanationRequestId) return;
     document.querySelector("#wealth-end-date").value = data.period.end_date;
+    const periodLabel = document.querySelector("#understand-period-value");
+    if (periodLabel) periodLabel.textContent = `${formatPeriodDate(data.period.start_date)} — ${formatPeriodDate(data.period.end_date)}`;
+    const period = document.querySelector("#understand-period");
+    if (period) period.open = false;
+    const status = document.querySelector("#understand-period-status");
+    if (status) { status.hidden = true; status.classList.remove("error"); }
     const domStarted = performance.now();
     renderExplanation(data);
     performance.measure("income:entender-dom-render", { start: domStarted, end: performance.now() });
   } catch (error) {
-    if (requestId === explanationRequestId) target.innerHTML = errorState(error.message);
+    if (requestId === explanationRequestId) {
+      target.innerHTML = errorState(error.message);
+      const period = document.querySelector("#understand-period");
+      const startInput = document.querySelector("#wealth-start-date");
+      const endInput = document.querySelector("#wealth-end-date");
+      if (period && period.dataset.originalStart && period.dataset.originalEnd) {
+        startInput.value = period.dataset.originalStart;
+        endInput.value = period.dataset.originalEnd;
+        const label = document.querySelector("#understand-period-value");
+        if (label) label.textContent = `${formatPeriodDate(startInput.value)} — ${formatPeriodDate(endInput.value)}`;
+      }
+      const status = document.querySelector("#understand-period-status");
+      if (status) {
+        status.textContent = contributionData
+          ? "Não foi possível atualizar o período. O intervalo anterior continua aplicado."
+          : "Não foi possível carregar a análise para este período. Tente novamente.";
+        status.classList.add("error");
+        status.hidden = false;
+      }
+      if (period) period.open = true;
+    }
+  } finally {
+    if (requestId === explanationRequestId) {
+      const apply = document.querySelector("#apply-understand-period");
+      if (apply) { apply.disabled = false; apply.textContent = "Aplicar período"; }
+    }
   }
+}
+
+function formatPeriodDate(value) {
+  const [year, month, day] = String(value).split("-");
+  return year && month && day ? `${day}/${month}/${year}` : String(value || "");
 }
 
 function renderExplanation(data) {
