@@ -183,6 +183,11 @@ class WealthExplanationService:
                     "jcp": jcp,
                     "fii_income": fii_income,
                     "other_distributed_income": income_total - dividends - jcp - fii_income,
+                    # The same converted event amounts power the income totals
+                    # above; exposing their existing asset identity lets the UI
+                    # explain contributions without recalculating or duplicating
+                    # financial events.
+                    "items": income_children,
                 },
                 "summary": {
                     "opening_wealth": start_value,

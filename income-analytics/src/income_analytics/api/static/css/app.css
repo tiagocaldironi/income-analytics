@@ -105,6 +105,27 @@ p { color: var(--ia-text-secondary); line-height: 1.55; }
 .section-heading h2 + p { margin: 6px 0 0; }
 .text-link, .section-heading a { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--ia-info); font-size: .91rem; font-weight: 750; text-decoration: none; }
 .section-heading a { margin-top: 0; }
+.portfolio-overview { align-items: stretch; }
+.portfolio-evolution-card { grid-row: span 2; }
+.allocation-segmented { display: grid; gap: 18px; padding-top: 26px; }
+.allocation-segmented-bar { display: flex; width: 100%; height: 18px; overflow: hidden; border-radius: 999px; background: var(--ia-surface-elevated); }
+.allocation-segmented-bar span { min-width: 2px; height: 100%; border-right: 1px solid var(--ia-bg-secondary); }
+.allocation-legend { display: grid; gap: 11px; }
+.allocation-legend div { display: grid; grid-template-columns: 12px minmax(0,1fr) auto; align-items: center; gap: 9px; color: var(--ia-text-secondary); font-size: .86rem; }
+.allocation-legend i { width: 9px; height: 9px; border-radius: 50%; }
+.allocation-legend span { display: grid; gap: 3px; }
+.allocation-legend span small, .monthly-income-unit-heading small { color: var(--ia-text-secondary); font-size: .74rem; font-weight: 500; }
+.allocation-legend strong { color: var(--ia-text-primary); }
+.monthly-income-unit + .monthly-income-unit { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--ia-border); }
+.monthly-income-unit-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.monthly-income-unit-heading strong { color: var(--ia-text-primary); font-size: .85rem; }
+.income-month-chart { min-width: 0; height: 174px; margin-top: 7px; }
+.contribution-chart-card .section-heading { align-items: center; }
+.contribution-controls { display: flex; flex-wrap: wrap; gap: 12px; }
+.contribution-controls label { display: grid; gap: 4px; margin: 0; color: var(--ia-text-secondary); font-size: .75rem; }
+.contribution-controls select { min-width: 150px; }
+.wealth-contribution-chart { min-width: 0; margin-top: 14px; }
+.diverging-chart { width: 100%; min-width: 0; }
 .text-link::after, .section-heading a::after { content: "→"; }
 
 label { display: block; margin: 15px 0 6px; color: #c2cfde; font-size: .83rem; font-weight: 700; }
@@ -643,6 +664,7 @@ tbody tr:hover { background: #17283a80; }
   .metric { min-height: 0; padding: 17px; }
   .metric-primary strong, .metric strong { overflow-wrap: anywhere; font-size: clamp(1.25rem, 6vw, 1.8rem); }
   .portfolio-overview { grid-template-columns: minmax(0, 1fr); gap: var(--mobile-card-gap); }
+  .portfolio-evolution-card { grid-row: auto; }
   .portfolio-overview .card:first-child, .portfolio-overview .card:last-child { min-height: 0; }
   .equity-echarts { height: 270px; }
   .allocation-content { grid-template-columns: minmax(0, 1fr); justify-items: center; }

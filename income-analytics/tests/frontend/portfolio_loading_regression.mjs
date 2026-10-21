@@ -22,11 +22,12 @@ const nodes = new Map([
   ["#understand-history", element()],
   ["#class-allocation", element()],
   ["#portfolio-evolution", element()],
+  ["#monthly-income-chart", element()],
   ["#portfolio-drift", element()],
   ["#home-performance", element()],
 ]);
 const dashboard = {
-  portfolio: { cash: 0, total_cost: 0, total_market_value: 0, total_result: 0, portfolio_equity: 0, total_contributions: 0, total_withdrawals: 0, realized_result: 0, unrealized_result: 0, income_received: 0 },
+  portfolio: { cash: 0, total_cost: 0, total_market_value: 0, total_result: 0, portfolio_equity: 0, total_contributions: 0, total_withdrawals: 0, net_external_flow: 0, realized_result: 0, unrealized_result: 0, income_received: 0 },
   performance: null,
   history: { snapshots: [], period_months: 12, asset_class: "" },
   allocation: { assets: [] },
@@ -41,7 +42,7 @@ const document = {
 const context = vm.createContext({
   console,
   document,
-  portfolioApi: { dashboard: async () => dashboard },
+  portfolioApi: { dashboard: async () => dashboard, operations: async () => ({ operations: [] }) },
   loadingState: "Carregando…",
   errorState: message => `Erro: ${message}`,
   emptyState: message => message,
@@ -58,11 +59,11 @@ vm.runInContext(source, context);
 // #strategy-class-allocation. Their absence must not stop the dashboard.
 await context.loadPortfolio();
 assert.match(nodes.get("#positions").innerHTML, /Sua carteira ainda está vazia/);
-assert.equal(nodes.get("#class-allocation").innerHTML, "Nenhuma posição disponível.");
+assert.equal(nodes.get("#class-allocation").innerHTML, "Composição indisponível");
 assert(!nodes.get("#portfolio-evolution").innerHTML.includes("Carregando"));
 assert.equal(title.textContent, "Meus ativos");
 
 assert.match(source, /if \(container\) container\.innerHTML = loadingState/);
 assert.match(source, /if \(dashboardTarget\) dashboardTarget\.innerHTML = content/);
-assert.match(source, /if \(legacyStrategyTarget\) legacyStrategyTarget\.innerHTML = content/);
+assert.match(source, /if \(legacyStrategyTarget\) \{/);
 console.log("Portfolio loading regression checks passed.");

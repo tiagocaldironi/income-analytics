@@ -9,6 +9,11 @@ let understandChartResizeObserver = null;
 let explanationRequestId = 0;
 let selectedComparisonPeriod = "ALL";
 let selectedComparisonAssetClass = "";
+let contributionChart = null;
+let contributionResizeObserver = null;
+let contributionData = null;
+let contributionLevel = "CLASSES";
+let contributionAssetClass = "";
 
 export function bindPerformance() {
   if (performanceBound) return;
@@ -92,7 +97,123 @@ function renderExplanation(data, comparison) {
   const incomeRows = [["Dividendos", income.dividends], ["JCP", income.jcp], ["FIIs", income.fii_income], ["Outros rendimentos", income.other_distributed_income]]
     .filter(([, amount]) => Number(amount) !== 0)
     .map(([label, amount]) => `<div class="bridge-row"><span>${label}</span><strong>${signedMoney(amount)}</strong></div>`).join("");
-  target.innerHTML = `<section class="card explanation-headline"><p class="eyebrow">Patrimônio investido</p><h2>${signedMoney(summary.absolute_change)} no saldo de ativos no período</h2><div class="explanation-summary">${summaryRows}</div><p class="coverage">O percentual representa variação do saldo dos ativos e inclui aquisições e vendas; não é rentabilidade da carteira.</p>${valuationNotice}</section><section class="card"><h2>O que fez seu patrimônio mudar?</h2><div class="wealth-bridge"><div class="bridge-row bridge-total"><span>Ativos no início</span><strong>${money(summary.opening_wealth, data.base_currency)}</strong></div>${bridge}<div class="bridge-row bridge-total"><span>Variação dos ativos</span><strong>${signedMoney(summary.absolute_change)}</strong></div></div><p class="coverage">Cobertura da explicação: ${quality.explanation_coverage_percentage === null ? "não aplicável" : percentage(Number(quality.explanation_coverage_percentage))}. Cobertura do valuation: ${percentage(Number(quality.valuation_coverage_percentage || 0))}. ${Number(r.unexplained_change || 0) === 0 ? "A variação foi reconciliada pelos efeitos conhecidos." : `Residual sem causa identificada: ${signedMoney(r.unexplained_change)}.`}</p></section><section class="card"><h2>Rendimentos recebidos no período</h2><div class="explanation-summary"><div><small>Total gerado</small><strong>${money(income.total, data.base_currency)}</strong></div></div><div class="wealth-bridge">${incomeRows}</div><p class="coverage">Rendimentos gerados pelos investimentos. Não são somados ao patrimônio investido quando não permanecem aplicados.</p></section>`;
+  target.innerHTML = `<section class="card explanation-headline"><p class="eyebrow">Patrimônio investido</p><h2>${signedMoney(summary.absolute_change)} no saldo de ativos no período</h2><div class="explanation-summary">${summaryRows}</div><p class="coverage">O percentual representa variação do saldo dos ativos e inclui aquisições e vendas; não é rentabilidade da carteira.</p>${valuationNotice}</section><section class="card contribution-chart-card"><div class="section-heading"><div><h2>Contribuição para o resultado</h2><p>Explore o resultado por classe, ativo ou fator.</p></div><div class="contribution-controls"><label>Nível<select id="contribution-level"><option value="CLASSES">Classes</option><option value="ASSETS">Ativos</option><option value="FACTORS">Fatores</option></select></label><label id="contribution-class-wrap" hidden>Classe<select id="contribution-class"></select></label></div></div><div id="wealth-contribution-chart" class="wealth-contribution-chart" aria-label="Contribuição divergente por classe de ativo"></div><p id="contribution-chart-note" class="coverage"></p></section><section class="card"><h2>O que fez seu patrimônio mudar?</h2><div class="wealth-bridge"><div class="bridge-row bridge-total"><span>Ativos no início</span><strong>${money(summary.opening_wealth, data.base_currency)}</strong></div>${bridge}<div class="bridge-row bridge-total"><span>Variação dos ativos</span><strong>${signedMoney(summary.absolute_change)}</strong></div></div><p class="coverage">Cobertura da explicação: ${quality.explanation_coverage_percentage === null ? "não aplicável" : percentage(Number(quality.explanation_coverage_percentage))}. Cobertura do valuation: ${percentage(Number(quality.valuation_coverage_percentage || 0))}. ${Number(r.unexplained_change || 0) === 0 ? "A variação foi reconciliada pelos efeitos conhecidos." : `Residual sem causa identificada: ${signedMoney(r.unexplained_change)}.`}</p></section><section class="card"><h2>Rendimentos recebidos no período</h2><div class="explanation-summary"><div><small>Total gerado</small><strong>${money(income.total, data.base_currency)}</strong></div></div><div class="wealth-bridge">${incomeRows}</div><p class="coverage">Rendimentos gerados pelos investimentos. Não são somados ao patrimônio investido quando não permanecem aplicados.</p></section>`;
+  contributionData = data;
+  renderContributionExplorer(data);
+}
+
+function renderContributionExplorer(data) {
+  const target = document.querySelector("#wealth-contribution-chart");
+  if (!target) return;
+  contributionResizeObserver?.disconnect();
+  contributionResizeObserver = null;
+  contributionChart?.dispose();
+  contributionChart = null;
+  const levelSelect = document.querySelector("#contribution-level");
+  const classWrap = document.querySelector("#contribution-class-wrap");
+  const classSelect = document.querySelector("#contribution-class");
+  if (!levelSelect || !classWrap || !classSelect) return;
+  levelSelect.value = contributionLevel;
+  const rows = buildContributionRows(data);
+  const classNames = [...new Set(rows.map(row => row.asset_class))];
+  if (!contributionAssetClass || !classNames.includes(contributionAssetClass)) contributionAssetClass = classNames[0] || "";
+  classWrap.hidden = contributionLevel !== "ASSETS";
+  classSelect.innerHTML = classNames.map(assetClass => `<option value="${assetClass}">${labels[assetClass] || assetClass}</option>`).join("");
+  classSelect.value = contributionAssetClass;
+  if (levelSelect.dataset.bound !== "true") {
+    levelSelect.dataset.bound = "true";
+    levelSelect.addEventListener("change", () => { contributionLevel = levelSelect.value; renderContributionExplorer(contributionData); });
+    classSelect.addEventListener("change", () => { contributionAssetClass = classSelect.value; renderContributionExplorer(contributionData); });
+  }
+  const note = document.querySelector("#contribution-chart-note");
+  const quality = data.data_quality || {};
+  note.textContent = `Aportes e retiradas ficam fora da contribuição. Rendimentos recebidos entram como fator separado. ${quality.valuation_complete ? "Valuation completo no período." : `Valuation parcial (${percentage(Number(quality.valuation_coverage_percentage || 0))}); posições pendentes aparecem identificadas.`} O detalhamento de efeito cambial e custos não está disponível neste relatório.`;
+
+  let categories = [];
+  let values = [];
+  let chartTitle = "Contribuição por classe";
+  let detailByCategory = new Map();
+  if (contributionLevel === "FACTORS") {
+    const factorLabels = { MARKET_VALUATION: "Valorização de mercado", FIXED_INCOME_ACCRUAL: "Renda fixa", VALUATION_ADJUSTMENTS: "Ajustes de valuation", PAID_INCOME: "Rendimentos recebidos", UNEXPLAINED: "Variação não explicada" };
+    const factors = new Map();
+    for (const component of data.components || []) {
+      if (component.component_type === "NET_ACQUISITIONS") continue;
+      factors.set(component.component_type, Number(component.signed_amount || 0));
+    }
+    factors.set("PAID_INCOME", Number(data.income_generated?.total || 0));
+    categories = [...factors.keys()].map(key => factorLabels[key] || key);
+    values = [...factors.values()];
+    chartTitle = "Contribuição por fator";
+    detailByCategory = new Map(categories.map((name, index) => [name, [`${money(values[index], data.base_currency)}`]]));
+  } else {
+    let visible = rows;
+    if (contributionLevel === "ASSETS") {
+      visible = rows.filter(row => row.asset_class === contributionAssetClass);
+      chartTitle = `Contribuição por ativo · ${labels[contributionAssetClass] || contributionAssetClass}`;
+    }
+    const grouped = new Map();
+    for (const row of visible) {
+      const name = contributionLevel === "CLASSES" ? (labels[row.asset_class] || row.asset_class) : row.name;
+      const current = grouped.get(name) || { value: 0, details: [], asset_class: row.asset_class };
+      current.value += row.value;
+      current.details.push(`${row.name}: ${money(row.value, data.base_currency)}${row.valuation_available ? "" : " (valuation pendente)"}`);
+      grouped.set(name, current);
+    }
+    const ordered = [...grouped.entries()].sort((a, b) => Math.abs(b[1].value) - Math.abs(a[1].value));
+    categories = ordered.map(([name]) => name);
+    values = ordered.map(([, item]) => item.value);
+    detailByCategory = new Map(ordered.map(([name, item]) => [name, item.details]));
+  }
+  target.setAttribute("aria-label", chartTitle);
+  if (!categories.length) {
+    target.innerHTML = emptyState("Sem contribuição detalhada", "Não há componentes financeiros para este período.");
+    return;
+  }
+  const height = Math.max(230, categories.length * 38 + 62);
+  target.innerHTML = `<div class="diverging-chart" style="height:${height}px"></div>`;
+  loadECharts().then(echarts => {
+    const chartTarget = target.querySelector(".diverging-chart");
+    if (!chartTarget?.isConnected) return;
+    contributionChart = echarts.init(chartTarget, null, { renderer: "svg" });
+    contributionChart.setOption({
+      backgroundColor: "transparent",
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, formatter: params => { const item = params[0]; const details = detailByCategory.get(item.name) || []; return `<strong>${escapeChartText(item.name)}</strong><br>${item.value > 0 ? "+" : item.value < 0 ? "−" : ""}${money(Math.abs(Number(item.value)), data.base_currency)}${details.length ? `<br><small>${details.map(escapeChartText).join("<br>")}</small>` : ""}`; } },
+      grid: { left: 130, right: 18, top: 10, bottom: 26 },
+      xAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: value => money(value, data.base_currency) }, axisLine: { lineStyle: { color: "#41546a" } }, splitLine: { lineStyle: { color: "#203247" } } },
+      yAxis: { type: "category", inverse: true, data: categories, axisLabel: { color: "#c6d2df", width: 120, overflow: "truncate" }, axisLine: { show: false }, axisTick: { show: false } },
+      series: [{ type: "bar", barMaxWidth: 24, data: values.map(value => ({ value, itemStyle: { color: value < 0 ? "#f06c75" : "#46c98b", borderRadius: value < 0 ? [0, 4, 4, 0] : [0, 4, 4, 0] } })) }],
+    });
+    contributionResizeObserver = new ResizeObserver(() => contributionChart?.resize());
+    contributionResizeObserver.observe(chartTarget);
+    if (contributionLevel === "CLASSES") contributionChart.on("click", params => {
+      const match = classNames.find(assetClass => (labels[assetClass] || assetClass) === params.name);
+      if (match) { contributionAssetClass = match; contributionLevel = "ASSETS"; renderContributionExplorer(contributionData); }
+    });
+  }).catch(error => {
+    console.error("Falha ao desenhar contribuições", error);
+    if (target.isConnected) target.innerHTML = errorState("Não foi possível desenhar as contribuições.");
+  });
+}
+
+function buildContributionRows(data) {
+  const assetRows = new Map();
+  for (const component of data.components || []) {
+    if (["NET_ACQUISITIONS", "UNEXPLAINED"].includes(component.component_type)) continue;
+    for (const child of component.children || []) {
+      const key = child.ticker || child.label || "Sem identificação";
+      const row = assetRows.get(key) || { name: key, ticker: child.ticker || key, asset_class: child.asset_class || "OTHER", factors: {}, valuation_available: true };
+      row.factors[component.component_type] = (row.factors[component.component_type] || 0) + Number(child.signed_amount || 0);
+      row.valuation_available &&= child.valuation_available !== false;
+      assetRows.set(key, row);
+    }
+  }
+  for (const income of data.income_generated?.items || []) {
+    const key = income.ticker || income.label || "Sem identificação";
+    const row = assetRows.get(key) || { name: key, ticker: income.ticker || key, asset_class: income.asset_class || "OTHER", factors: {}, valuation_available: true };
+    row.factors.PAID_INCOME = (row.factors.PAID_INCOME || 0) + Number(income.signed_amount || 0);
+    assetRows.set(key, row);
+  }
+  return [...assetRows.values()].map(row => ({ ...row, value: Object.values(row.factors).reduce((sum, value) => sum + value, 0) }));
 }
 
 async function renderWealthEvolution(evolution, requestId) {
@@ -146,6 +267,10 @@ function contributionExplorer(item, signedMoney) {
 }
 
 function sumSigned(items) { return items.reduce((sum, item) => sum + Number(item.signed_amount), 0); }
+
+function escapeChartText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+}
 
 let comparisonChart = null;
 let comparisonResizeObserver = null;

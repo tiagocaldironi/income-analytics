@@ -170,7 +170,8 @@ def test_holdings_experience_uses_one_aggregate_projection_and_strategy_context(
     assert '"Alvo classe"' in portfolio
     assert "#portfolio-evolution" in portfolio
     assert "Custo registrado" in dashboard
-    assert "Resultado econômico" in portfolio
+    assert "resultado econômico" in dashboard
+    assert "Number(point.total_cost) + Number(point.total_result)" in portfolio
     assert "Rendimentos recebidos" in dashboard
     assert '"capital-gain": capitalGain' in portfolio
     assert "afterLayout" in portfolio
@@ -341,7 +342,9 @@ def test_portfolio_history_chart_uses_economic_result_and_preserves_negative_ret
     assert (
         'event.target.matches("#portfolio-history-period, #portfolio-history-class")' in portfolio
     )
-    assert "data: points.map(point => Number(point.total_result))" in portfolio
+    assert "Number(point.total_cost) + Number(point.total_result)" in portfolio
+    assert 'type: "line"' in portfolio
+    assert "Math.max(Number(point.total_result)" not in portfolio
     assert "data: points.map(point => Number(point.capital_gain))" not in portfolio
     assert "item.market_value !== null && Number(item.market_value) > 0" in portfolio
     assert "Number(item.market_value) / total" in portfolio
