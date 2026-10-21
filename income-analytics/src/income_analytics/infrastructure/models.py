@@ -322,6 +322,58 @@ class AllocationTargetRecord(Base):
     target: Mapped[str] = mapped_column(String(40))
 
 
+class IncomeStarterTemplateVersionRecord(Base):
+    __tablename__ = "income_starter_template_versions"
+    __table_args__ = (
+        UniqueConstraint("template_key", "version", name="uq_income_starter_version"),
+    )
+
+    id: Mapped[str] = mapped_column(String(120), primary_key=True)
+    template_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="DRAFT")
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    objective: Mapped[str] = mapped_column(Text, nullable=False)
+    risk_profile: Mapped[str] = mapped_column(String(80), nullable=False)
+    horizon: Mapped[str] = mapped_column(String(120), nullable=False)
+    volatility_tolerance: Mapped[str] = mapped_column(Text, nullable=False)
+    knowledge: Mapped[str] = mapped_column(Text, nullable=False)
+    typical_profile: Mapped[str] = mapped_column(Text, nullable=False)
+    characteristics_json: Mapped[str] = mapped_column(Text, nullable=False)
+    not_suitable_json: Mapped[str] = mapped_column(Text, nullable=False)
+    author: Mapped[str] = mapped_column(String(120), nullable=False)
+    methodology: Mapped[str] = mapped_column(Text, nullable=False)
+    methodology_sources_json: Mapped[str] = mapped_column(Text, nullable=False)
+    allocation_sources_json: Mapped[str] = mapped_column(Text, nullable=False)
+    allocations_json: Mapped[str | None] = mapped_column(Text)
+    allocations_validated: Mapped[bool] = mapped_column(nullable=False, default=False)
+    financial_review_status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="PENDING"
+    )
+    regulatory_review_status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="PENDING"
+    )
+    reviewed_by: Mapped[str | None] = mapped_column(String(120))
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class PortfolioStrategyMetadataRecord(Base):
+    __tablename__ = "portfolio_strategy_metadata"
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), primary_key=True
+    )
+    source: Mapped[str] = mapped_column(String(16), nullable=False)
+    strategy_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    template_key: Mapped[str | None] = mapped_column(String(64))
+    template_version: Mapped[int | None] = mapped_column(Integer)
+    customized: Mapped[bool] = mapped_column(nullable=False, default=False)
+    adopted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    target_allocations_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
 class AssetTargetRecord(Base):
     __tablename__ = "asset_targets"
     __table_args__ = (

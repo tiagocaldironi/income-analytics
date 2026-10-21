@@ -31,6 +31,7 @@ from income_analytics.application.fx_data import FxRateUnavailable
 from income_analytics.application.historical_portfolio_reconstruction import (
     HistoricalPortfolioReconstructionService,
 )
+from income_analytics.application.income_starter import catalog as income_starter_catalog
 from income_analytics.application.investment_tools import TOOLS, ranking_contract
 from income_analytics.application.magic_formula_canonical_ranking import (
     MagicFormulaCanonicalRankingRepository,
@@ -4180,6 +4181,7 @@ def get_portfolio_intelligence(as_of: date | None = None) -> dict[str, object]:
 def set_allocation_policy(policy: AllocationPolicyInput) -> dict[str, str]:
     try:
         session.set_allocation_policy(AllocationPolicy(targets=policy.targets))
+        income_starter_catalog.record_manual_update(current_portfolio_id(), policy.targets)
         rebuild_portfolio_dashboard_snapshot()
     except ValueError as error:
         raise HTTPException(

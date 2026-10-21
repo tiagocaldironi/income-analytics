@@ -24,6 +24,7 @@ from income_analytics.api.routers.dashboard import (
     router as dashboard_router,
 )
 from income_analytics.api.routers.health import router as health_router
+from income_analytics.api.routers.income_starter import router as income_starter_router
 from income_analytics.api.routers.portfolios import router as portfolios_router
 from income_analytics.application.portfolio_context import (
     current_portfolio_id,
@@ -125,6 +126,7 @@ app.include_router(health_router)
 app.include_router(dashboard_router)
 app.include_router(b3_import_router)
 app.include_router(portfolios_router)
+app.include_router(income_starter_router)
 
 
 class NoCacheStaticFiles(StaticFiles):
