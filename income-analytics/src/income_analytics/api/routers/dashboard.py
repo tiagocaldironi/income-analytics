@@ -3799,11 +3799,19 @@ def _cached_performance_comparison(
 
 @router.get("/analytics/performance-comparison")
 def get_performance_comparison(
-    start_date: date,
     end_date: date,
+    start_date: date | None = None,
     asset_class: AssetClass | None = None,
 ) -> dict[str, object]:
     """Serve the Entender comparison from persisted streams without provider calls."""
+    if start_date is None:
+        event_dates = [
+            event.effective_date
+            for event in session._events
+            if event.asset is not None
+            and (asset_class is None or event.asset.asset_class is asset_class)
+        ]
+        start_date = min(event_dates) if event_dates else end_date
     if end_date < start_date:
         raise HTTPException(
             status_code=422, detail="A data final deve ser posterior à data inicial."

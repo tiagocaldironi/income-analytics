@@ -15,9 +15,14 @@ let groupDistributionTrigger = null;
 let groupDistributionChart = null;
 let portfolioFiltersBound = false;
 let incomeChartInstances = [];
+let portfolioPerformanceChart = null;
+let portfolioPerformanceResizeObserver = null;
+let portfolioPerformanceRequestId = 0;
+let portfolioPerformancePeriod = "MAX";
+const portfolioBenchmarkSelection = new Set(["portfolio", "CDI", "IBOV", "IFIX"]);
 
 export async function loadPortfolio(asOf = "", { refreshAttention = true } = {}) {
-  const containers = ["#positions", "#understand-history", "#allocation", "#class-allocation", "#portfolio-evolution"];
+  const containers = ["#positions", "#understand-history", "#allocation", "#class-allocation", "#portfolio-evolution", "#portfolio-performance-chart"];
   containers.forEach(selector => {
     const container = document.querySelector(selector);
     if (container) container.innerHTML = loadingState;
@@ -31,6 +36,7 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
     renderHistory(history, holdings.base_currency || portfolio.base_currency || "BRL");
     renderAllocation(allocation);
     renderClasses(holdings, classes);
+    loadPortfolioPerformanceChart();
     portfolioApi.operations().then(renderMonthlyIncome).catch(error => {
       console.error("Falha ao carregar rendimentos mensais", error);
       const target = document.querySelector("#monthly-income-chart");
@@ -50,6 +56,18 @@ export function bindPortfolioFilters() {
   if (portfolioFiltersBound) return;
   portfolioFiltersBound = true;
   document.addEventListener("change", async event => {
+    if (event.target.matches("#portfolio-performance-period")) {
+      portfolioPerformancePeriod = event.target.value;
+      loadPortfolioPerformanceChart();
+      return;
+    }
+    if (event.target.matches("[data-portfolio-benchmark]")) {
+      const code = event.target.dataset.portfolioBenchmark;
+      if (event.target.checked) portfolioBenchmarkSelection.add(code);
+      else portfolioBenchmarkSelection.delete(code);
+      updatePortfolioPerformanceLegend();
+      return;
+    }
     if (!event.target.matches("#portfolio-history-period, #portfolio-history-class")) return;
     const period = document.querySelector("#portfolio-history-period")?.value || "12";
     const assetClass = document.querySelector("#portfolio-history-class")?.value || "";
@@ -68,6 +86,125 @@ export function bindPortfolioFilters() {
     }
   });
   bindPortfolioInteractions();
+}
+
+const portfolioBenchmarkSeries = [
+  { code: "portfolio", label: "Minha carteira (TWR)", color: "#829cf3", type: "TWR" },
+  { code: "CDI", label: "CDI", color: "#ffbd45", type: "Retorno total acumulado" },
+  { code: "IBOV", label: "Ibovespa", color: "#5b9cff", type: "Índice de preços" },
+  { code: "IFIX", label: "IFIX", color: "#9e4a18", type: "Índice de preços" },
+  { code: "IVVB11", label: "IVVB11 · proxy em BRL", color: "#9b59b6", type: "Preço de ETF em BRL" },
+  { code: "SP500", label: "S&P 500 em BRL", color: "#c9c9c9", type: "Indisponível" },
+];
+
+function localDateString(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function portfolioComparisonRange(period) {
+  const end = new Date();
+  const endDate = localDateString(end);
+  if (period === "MAX") return { startDate: "", endDate };
+  const start = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+  if (period === "YTD") start.setMonth(0, 1);
+  else {
+    const day = start.getDate();
+    start.setDate(1);
+    start.setMonth(start.getMonth() - Number(period));
+    start.setDate(Math.min(day, new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate()));
+  }
+  return { startDate: localDateString(start), endDate };
+}
+
+function portfolioPerformanceControls(data, available) {
+  const periodOptions = [["1", "1M"], ["3", "3M"], ["6", "6M"], ["12", "12M"], ["YTD", "YTD"], ["MAX", "Máximo"]]
+    .map(([value, label]) => `<option value="${value}"${portfolioPerformancePeriod === value ? " selected" : ""}>${label}</option>`).join("");
+  const codes = new Set(data.benchmarks.map(item => item.code));
+  const choices = portfolioBenchmarkSeries.map(item => {
+    const exists = item.code === "portfolio" ? available : codes.has(item.code) && data.benchmarks.some(row => row.code === item.code && row.return !== null && row.status !== "UNAVAILABLE");
+    const selected = portfolioBenchmarkSelection.has(item.code);
+    return `<label${exists ? "" : ' aria-disabled="true"'}><input type="checkbox" data-portfolio-benchmark="${item.code}"${selected && exists ? " checked" : ""}${exists ? "" : " disabled"}><i style="background:${item.color}"></i>${item.label}</label>`;
+  }).join("");
+  return `<div class="portfolio-performance-controls"><label>Período<select id="portfolio-performance-period">${periodOptions}</select></label><div class="portfolio-benchmark-options" aria-label="Séries exibidas">${choices}</div></div>`;
+}
+
+async function loadPortfolioPerformanceChart() {
+  const target = document.querySelector("#portfolio-performance-chart");
+  if (!target) return;
+  const requestId = ++portfolioPerformanceRequestId;
+  target.innerHTML = loadingState;
+  try {
+    const { startDate, endDate } = portfolioComparisonRange(portfolioPerformancePeriod);
+    const data = await portfolioApi.performanceComparison(startDate, endDate);
+    if (requestId !== portfolioPerformanceRequestId || !target.isConnected) return;
+    renderPortfolioPerformanceChart(data, requestId);
+  } catch (error) {
+    if (requestId === portfolioPerformanceRequestId && target.isConnected) target.innerHTML = errorState("Não foi possível carregar a comparação de rentabilidade.");
+    console.error("Falha ao carregar comparação de rentabilidade", error);
+  }
+}
+
+async function renderPortfolioPerformanceChart(data, requestId) {
+  const target = document.querySelector("#portfolio-performance-chart");
+  if (!target) return;
+  const available = data.portfolio.return !== null && ["AVAILABLE", "PARTIAL"].includes(data.portfolio.status);
+  const rows = data.series || [];
+  if (!rows.length) {
+    target.innerHTML = emptyState("Série indisponível", "Não há observações históricas suficientes no período selecionado.");
+    return;
+  }
+  const controls = portfolioPerformanceControls(data, available);
+  const range = data.period || {};
+  const baseDate = range.start ? new Date(`${range.start}T00:00:00`).toLocaleDateString("pt-BR") : "data inicial disponível";
+  const note = `Base comparável: ${baseDate}. CDI: retorno acumulado; Ibovespa e IFIX: índices de preços; IVVB11: preço de mercado do ETF em BRL, usado apenas como proxy. S&P 500 em BRL indisponível: ainda não há série histórica integrada com câmbio.`;
+  const hasBenchmarkData = data.benchmarks.some(item => item.return !== null && item.return !== undefined && item.status !== "UNAVAILABLE");
+  if (!available && !hasBenchmarkData) {
+    target.innerHTML = `${controls}${emptyState("Comparação indisponível", "Não há TWR validado nem séries de índices suficientes no período selecionado.")}<p class="portfolio-chart-note">${note}</p>`;
+    return;
+  }
+  target.innerHTML = `${controls}<div id="portfolio-performance-echarts" class="portfolio-performance-chart" aria-label="Rentabilidade acumulada comparada"></div><p class="portfolio-chart-note">${note}</p>${!available ? `<p class="coverage" role="status">TWR da carteira indisponível para este período. As séries de mercado disponíveis são exibidas separadamente, sem estimar a rentabilidade da carteira.</p>` : data.portfolio.status === "PARTIAL" ? `<p class="coverage" role="status">TWR parcial, com cobertura de ${percentage(Number(data.portfolio.coverage) * 100)} do patrimônio.</p>` : ""}`;
+  const chartTarget = target.querySelector("#portfolio-performance-echarts");
+  const echarts = await loadECharts();
+  if (!chartTarget?.isConnected || requestId !== portfolioPerformanceRequestId) return;
+  portfolioPerformanceResizeObserver?.disconnect();
+  if (portfolioPerformanceChart && !portfolioPerformanceChart.isDisposed()) portfolioPerformanceChart.dispose();
+  portfolioPerformanceChart = echarts.init(chartTarget, null, { renderer: "svg" });
+  const series = portfolioBenchmarkSeries.slice(0, 5).map(item => ({
+    name: item.code === "portfolio" ? "Minha carteira (TWR)" : item.label,
+    type: "line",
+    smooth: false,
+    connectNulls: false,
+    showSymbol: false,
+    data: rows.map(point => item.code === "portfolio" ? (available ? point.portfolio : null) : point[item.code.toLowerCase()]),
+    lineStyle: { color: item.color, width: 2 },
+    itemStyle: { color: item.color },
+  }));
+  const option = {
+    backgroundColor: "transparent",
+    tooltip: { trigger: "axis", valueFormatter: amount => amount === null || amount === undefined ? "Indisponível" : percentage(Number(amount) * 100) },
+    legend: { show: false, selectedMode: true },
+    grid: { left: 58, right: 18, top: 40, bottom: 34 },
+    xAxis: { type: "category", data: rows.map(point => point.date), axisLabel: { color: "#93a4b8" }, axisLine: { lineStyle: { color: "#24364d" } } },
+    yAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: value => `${(Number(value) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` }, splitLine: { lineStyle: { color: "#203247" } } },
+    series,
+  };
+  portfolioPerformanceChart.setOption(option, true);
+  portfolioBenchmarkSeries.slice(0, 5).forEach(item => {
+    const input = target.querySelector(`[data-portfolio-benchmark="${item.code}"]`);
+    if (!input) return;
+    portfolioPerformanceChart.dispatchAction({ type: input.checked ? "legendSelect" : "legendUnSelect", name: item.code === "portfolio" ? "Minha carteira (TWR)" : item.label });
+  });
+  portfolioPerformanceResizeObserver = new ResizeObserver(() => portfolioPerformanceChart?.resize());
+  portfolioPerformanceResizeObserver.observe(chartTarget);
+  portfolioPerformanceChart.resize();
+}
+
+function updatePortfolioPerformanceLegend() {
+  if (!portfolioPerformanceChart || portfolioPerformanceChart.isDisposed()) return;
+  portfolioBenchmarkSeries.slice(0, 5).forEach(item => {
+    const name = item.code === "portfolio" ? "Minha carteira (TWR)" : item.label;
+    portfolioPerformanceChart.dispatchAction({ type: portfolioBenchmarkSelection.has(item.code) ? "legendSelect" : "legendUnSelect", name });
+  });
 }
 
 function bindPortfolioInteractions() {

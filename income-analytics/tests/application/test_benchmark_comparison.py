@@ -31,6 +31,13 @@ def test_comparison_composes_periodic_rates_and_normalizes_series_at_zero() -> N
         "IBOV": (
             BenchmarkObservation(
                 benchmark="IBOV",
+                effective_date=date(2025, 12, 31),
+                value=Decimal("100"),
+                nature="INDEX_LEVEL",
+                source="b3",
+            ),
+            BenchmarkObservation(
+                benchmark="IBOV",
                 effective_date=first,
                 value=Decimal("100"),
                 nature="INDEX_LEVEL",
@@ -98,6 +105,41 @@ def test_comparison_keeps_an_unavailable_benchmark_independent() -> None:
     assert by_code["IFIX"]["return"] is None
 
 
+def test_index_without_pre_period_observation_stays_unavailable_and_has_no_fake_zero() -> None:
+    start, first, end = date(2026, 1, 1), date(2026, 1, 2), date(2026, 1, 31)
+    result = build_performance_comparison(
+        start_date=start,
+        end_date=end,
+        rates=(),
+        observations={
+            "IBOV": (
+                BenchmarkObservation(
+                    benchmark="IBOV",
+                    effective_date=first,
+                    value=Decimal("100"),
+                    nature="INDEX_LEVEL",
+                    source="b3",
+                ),
+                BenchmarkObservation(
+                    benchmark="IBOV",
+                    effective_date=end,
+                    value=Decimal("110"),
+                    nature="INDEX_LEVEL",
+                    source="b3",
+                ),
+            )
+        },
+        performance_at=lambda low, high: projection(low, high, twr=None),
+    )
+
+    by_code = {item["code"]: item for item in result["benchmarks"]}
+    assert by_code["IBOV"]["status"] == "UNAVAILABLE"
+    assert by_code["IBOV"]["return"] is None
+    assert result["series"][0]["ibov"] is None
+    assert result["series"][0]["portfolio"] is None
+    assert result["series"][-1]["portfolio"] is None
+
+
 def test_stale_index_is_labeled_without_invalidating_portfolio() -> None:
     start, last = date(2026, 1, 1), date(2026, 1, 2)
     result = build_performance_comparison(
@@ -106,6 +148,13 @@ def test_stale_index_is_labeled_without_invalidating_portfolio() -> None:
         rates=(),
         observations={
             "IBOV": (
+                    BenchmarkObservation(
+                        benchmark="IBOV",
+                        effective_date=date(2025, 12, 31),
+                        value=Decimal("100"),
+                        nature="INDEX_LEVEL",
+                        source="b3",
+                    ),
                 BenchmarkObservation(
                     benchmark="IBOV",
                     effective_date=last,
@@ -128,6 +177,13 @@ def test_comparison_includes_small_cap_dividend_and_ivvb11_series() -> None:
     start, end = date(2026, 1, 1), date(2026, 1, 31)
     observations = {
         name: (
+            BenchmarkObservation(
+                benchmark=name,
+                effective_date=date(2025, 12, 31),
+                value=Decimal("100"),
+                nature="INDEX_LEVEL",
+                source="b3" if name != "IVVB11" else "b3_cotahist",
+            ),
             BenchmarkObservation(
                 benchmark=name,
                 effective_date=date(2026, 1, 2),
