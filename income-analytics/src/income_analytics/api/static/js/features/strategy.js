@@ -168,6 +168,17 @@ function starterCard(model) {
   return `<article class="income-starter-card"><div><span class="income-starter-status">${isJourney ? "Jornada" : `${status} · v${model.version}`}</span><h3>${html(model.name)}</h3><p>${html(model.description)}</p></div><button class="secondary" type="button" data-starter-detail="${html(model.template_key)}" data-starter-version="${model.version}">${isJourney ? "Conhecer jornada" : "Conhecer modelo"}</button></article>`;
 }
 
+const starterIdeas = [
+  { title: "Renda e proventos", description: "Entender como dividendos, juros e outros rendimentos participam dos objetivos da carteira." },
+  { title: "Diversificação por exposição", description: "Visualizar onde os ativos investem, além da classe de produto cadastrada." },
+  { title: "Estratégias por objetivo", description: "Explorar caminhos para diferentes horizontes e necessidades, após validação metodológica." },
+  { title: "Revisão da estratégia", description: "Acompanhar mudanças na carteira e avaliar quando revisar os objetivos definidos." },
+];
+
+function starterIdeaCard(idea) {
+  return `<article class="income-starter-card income-starter-idea"><div><span class="income-starter-status">Ideia para priorizar</span><h3>${html(idea.title)}</h3><p>${html(idea.description)}</p></div><small>Não disponível nesta versão</small></article>`;
+}
+
 async function openStarterCatalog(state, trigger) {
   const node = starterDialog(); node._trigger = trigger;
   const content = node.querySelector("[data-starter-catalog]");
@@ -178,7 +189,7 @@ async function openStarterCatalog(state, trigger) {
     const models = response.models || [];
     const journey = models.filter(model => model.template_type === "GUIDED_JOURNEY");
     const allocations = models.filter(model => model.template_type === "ALLOCATION_MODEL");
-    content.innerHTML = `<section class="income-starter-path"><h3>Começando a investir?</h3><p>Defina e acompanhe sua meta de reserva sem criar ativos ou operações.</p><div class="income-starter-grid">${journey.map(starterCard).join("")}</div></section><section class="income-starter-path"><h3>Já possui uma reserva e quer definir uma estratégia?</h3><p>Estes modelos seguem em elaboração e não podem ser adotados até a homologação.</p><div class="income-starter-grid">${allocations.map(starterCard).join("")}</div></section>`;
+    content.innerHTML = `<section class="income-starter-path"><h3>Começando a investir?</h3><p>Defina e acompanhe sua meta de reserva sem criar ativos ou operações.</p><div class="income-starter-grid">${journey.map(starterCard).join("")}</div></section><section class="income-starter-path"><h3>Estratégias de prateleira</h3><p>Modelos Conservadora, Moderada e Arrojada estão em elaboração. Ainda não têm distribuição aprovada e não podem ser adotados.</p><div class="income-starter-grid">${allocations.map(starterCard).join("")}</div></section><section class="income-starter-path income-starter-roadmap"><h3>O que mais queremos ter</h3><p>Ideias para priorizar com você. Ainda não são funcionalidades disponíveis nem recomendações de investimento.</p><div class="income-starter-grid">${starterIdeas.map(starterIdeaCard).join("")}</div></section>`;
     content.querySelectorAll("[data-starter-detail]").forEach(button => button.addEventListener("click", async () => {
       try {
         const model = await portfolioApi.incomeStarterModel(button.dataset.starterDetail, Number(button.dataset.starterVersion));
