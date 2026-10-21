@@ -23,14 +23,14 @@ export function bindPerformance() {
   const form = document.querySelector("#wealth-explanation-form");
   if (!form) return;
   performanceBound = true;
-  const period = document.querySelector("#understand-period");
+  const period = document.querySelector("#understand-period-disclosure");
   const startInput = document.querySelector("#wealth-start-date");
   const endInput = document.querySelector("#wealth-end-date");
   const validation = document.querySelector("#understand-period-validation");
   const status = document.querySelector("#understand-period-status");
-  const cancel = document.querySelector("#cancel-understand-period");
+  const cancel = document.querySelector(".period-cancel");
   const updateLabel = () => {
-    const label = document.querySelector("#understand-period-value");
+    const label = document.querySelector("#wealth-period-label");
     if (label && startInput.value && endInput.value) label.textContent = `${formatPeriodDate(startInput.value)} — ${formatPeriodDate(endInput.value)}`;
   };
   const clearValidation = () => {
@@ -67,9 +67,9 @@ export function bindPerformance() {
     }
     clearValidation();
     status.hidden = true;
-    const apply = document.querySelector("#apply-understand-period");
+    const apply = document.querySelector(".period-apply");
     apply.disabled = true;
-    apply.textContent = "Atualizando…";
+    apply.textContent = "Aplicando…";
     loadExplanation();
   });
   document.querySelector("#understand-questions")?.addEventListener("click", event => {
@@ -89,10 +89,12 @@ export async function loadExplanation() {
   try {
     const data = await portfolioApi.wealthExplanation(start, end);
     if (requestId !== explanationRequestId) return;
+    document.querySelector("#wealth-start-date").value = data.period.start_date;
     document.querySelector("#wealth-end-date").value = data.period.end_date;
-    const periodLabel = document.querySelector("#understand-period-value");
+    const periodLabel = document.querySelector("#wealth-period-label");
     if (periodLabel) periodLabel.textContent = `${formatPeriodDate(data.period.start_date)} — ${formatPeriodDate(data.period.end_date)}`;
-    const period = document.querySelector("#understand-period");
+    const period = document.querySelector("#understand-period-disclosure");
+    if (period) { period.dataset.originalStart = data.period.start_date; period.dataset.originalEnd = data.period.end_date; }
     if (period) period.open = false;
     const status = document.querySelector("#understand-period-status");
     if (status) { status.hidden = true; status.classList.remove("error"); }
@@ -102,13 +104,13 @@ export async function loadExplanation() {
   } catch (error) {
     if (requestId === explanationRequestId) {
       target.innerHTML = errorState(error.message);
-      const period = document.querySelector("#understand-period");
+      const period = document.querySelector("#understand-period-disclosure");
       const startInput = document.querySelector("#wealth-start-date");
       const endInput = document.querySelector("#wealth-end-date");
       if (period && period.dataset.originalStart && period.dataset.originalEnd) {
         startInput.value = period.dataset.originalStart;
         endInput.value = period.dataset.originalEnd;
-        const label = document.querySelector("#understand-period-value");
+        const label = document.querySelector("#wealth-period-label");
         if (label) label.textContent = `${formatPeriodDate(startInput.value)} — ${formatPeriodDate(endInput.value)}`;
       }
       const status = document.querySelector("#understand-period-status");
@@ -123,8 +125,8 @@ export async function loadExplanation() {
     }
   } finally {
     if (requestId === explanationRequestId) {
-      const apply = document.querySelector("#apply-understand-period");
-      if (apply) { apply.disabled = false; apply.textContent = "Aplicar período"; }
+      const apply = document.querySelector(".period-apply");
+      if (apply) { apply.disabled = false; apply.textContent = "Aplicar"; }
     }
   }
 }

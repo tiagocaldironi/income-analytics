@@ -3,10 +3,13 @@ import fs from "node:fs";
 import vm from "node:vm";
 
 const html = fs.readFileSync("src/income_analytics/api/static/index.html", "utf8");
-assert.match(html, /<details id="understand-period" class="card understand-period">/);
-assert.match(html, /<span class="secondary understand-period-action">Alterar período<\/span>/);
-assert.match(html, /<div class="understand-period-editor"><form id="wealth-explanation-form"/);
+assert.match(html, /<details id="understand-period-disclosure" class="period-disclosure">/);
+assert.match(html, /<span class="period-disclosure-action">Alterar período<\/span>/);
+assert.match(html, /<form id="wealth-explanation-form" class="period-form">/);
 assert.doesNotMatch(html, /<section class="card understand-period">/);
+const styles = fs.readFileSync("src/income_analytics/api/static/css/app.css", "utf8");
+assert.match(styles, /\.period-form input \{ width:148px; min-height:36px;/);
+assert.match(styles, /\.period-form button \{ min-height:34px;/);
 
 const source = fs
   .readFileSync("src/income_analytics/api/static/js/shared/dates.js", "utf8")
