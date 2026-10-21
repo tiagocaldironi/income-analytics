@@ -61,10 +61,10 @@ def calculate_capital_applied(
     base = base_currency.upper()
     for position in positions:
         ticker = str(position.asset.ticker)
-        if position.asset.asset_class not in _TRADED_CLASSES_WITH_CANONICAL_COST:
-            incomplete.append((ticker, "modelo de custo específico não conectado"))
-        elif position.asset.currency.code.upper() != base:
+        if position.asset.currency.code.upper() != base:
             incomplete.append((ticker, "custo não convertido pela taxa histórica"))
+        elif position.asset.asset_class not in _TRADED_CLASSES_WITH_CANONICAL_COST:
+            incomplete.append((ticker, "modelo de custo específico não conectado"))
         elif position.cost.amount <= 0:
             incomplete.append((ticker, "custo de aquisição ausente"))
         else:

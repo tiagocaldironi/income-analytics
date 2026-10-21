@@ -171,7 +171,7 @@ dashboard_snapshot_repository = _PortfolioRepositoryProxy(
     SqlitePortfolioDashboardSnapshotRepository
 )
 market_price_refresh_runs = _PortfolioRepositoryProxy(SqliteMarketPriceRefreshRunRepository)
-PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 2
+PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 3
 
 
 def _effective_analysis_end_date(start_date: date, end_date: date) -> date:
@@ -3398,7 +3398,10 @@ def backfill_us_market_price_history() -> dict[str, object]:
     events = tuple(
         event
         for event in session.history()
-        if event.asset is not None and event.asset.currency.code.upper() == "USD"
+        if event.asset is not None
+        and event.asset.currency.code.upper() == "USD"
+        and event.asset.asset_class
+        in {AssetClass.INTERNATIONAL, AssetClass.INTERNATIONAL_ETF, AssetClass.US_REIT}
     )
     by_ticker: dict[str, date] = {}
     for event in events:

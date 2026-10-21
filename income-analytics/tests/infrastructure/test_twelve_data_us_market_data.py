@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from urllib.error import URLError
 
@@ -193,3 +193,41 @@ def test_latest_prices_uses_yahoo_when_twelve_data_is_rate_limited(
         ("twelve_data", "FAILED", "Twelve Data respondeu HTTP 429."),
         ("yahoo_finance", "SUCCESS", None),
     )
+
+
+def test_history_uses_yahoo_when_twelve_data_is_rate_limited(monkeypatch) -> None:
+    first = datetime(2026, 3, 27, tzinfo=UTC)
+    second = datetime(2026, 3, 30, tzinfo=UTC)
+
+    def rate_limited(*_args, **_kwargs):
+        raise MarketDataUnavailable("Twelve Data respondeu HTTP 429.")
+
+    monkeypatch.setattr(TwelveDataUSMarketProvider, "_get", rate_limited)
+    monkeypatch.setattr(
+        "income_analytics.infrastructure.twelve_data_us_market_data.urlopen",
+        lambda *_args, **_kwargs: _Response(
+            {
+                "chart": {
+                    "result": [
+                        {
+                            "meta": {"symbol": "BND", "currency": "USD"},
+                            "timestamp": [int(first.timestamp()), int(second.timestamp())],
+                            "indicators": {"quote": [{"close": ["72.10", "72.40"]}]},
+                        }
+                    ],
+                    "error": None,
+                }
+            }
+        ),
+    )
+
+    observations = TwelveDataUSMarketProvider(api_key="test-key").history(
+        "BND", date(2026, 3, 1), date(2026, 3, 28)
+    )
+
+    assert len(observations) == 1
+    assert observations[0].symbol == "BND"
+    assert observations[0].price == Decimal("72.10")
+    assert observations[0].effective_date == date(2026, 3, 27)
+    assert observations[0].currency_code == "USD"
+    assert observations[0].source == "yahoo_finance"

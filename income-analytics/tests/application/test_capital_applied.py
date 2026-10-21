@@ -97,6 +97,7 @@ def test_foreign_or_special_model_positions_block_a_misleading_partial_total():
     assert result.amount is None
     assert result.partial_amount == Decimal("200")
     assert result.incomplete_assets == ("MCD",)
+    assert result.incomplete_reasons == (("MCD", "custo não convertido pela taxa histórica"),)
     assert result.included_position_count == 1
 
 

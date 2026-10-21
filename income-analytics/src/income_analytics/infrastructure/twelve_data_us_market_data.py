@@ -205,16 +205,25 @@ class TwelveDataUSMarketProvider:
     def history(
         self, symbol: str, start_date: date, end_date: date
     ) -> tuple[MarketPriceObservation, ...]:
-        payload = self._get(
-            "/time_series",
-            {
-                "symbol": symbol.strip().upper(),
-                "interval": "1day",
-                "start_date": start_date.isoformat(),
-                "end_date": end_date.isoformat(),
-            },
-            MarketDataUnavailable,
-        )
+        normalized_symbol = symbol.strip().upper()
+        try:
+            payload = self._get(
+                "/time_series",
+                {
+                    "symbol": normalized_symbol,
+                    "interval": "1day",
+                    "start_date": start_date.isoformat(),
+                    "end_date": end_date.isoformat(),
+                },
+                MarketDataUnavailable,
+            )
+        except MarketDataUnavailable as primary_error:
+            try:
+                return self._yahoo_history(normalized_symbol, start_date, end_date)
+            except MarketDataUnavailable as fallback_error:
+                raise MarketDataUnavailable(
+                    f"Twelve Data: {primary_error}; Yahoo Finance: {fallback_error}"
+                ) from fallback_error
         values = payload.get("values", ())
         if not isinstance(values, list):
             raise MarketDataUnavailable("Série histórica US indisponível.")
@@ -239,6 +248,67 @@ class TwelveDataUSMarketProvider:
                     )
                 )
         return tuple(sorted(observations, key=lambda item: item.effective_date))
+
+    def _yahoo_history(
+        self, symbol: str, start_date: date, end_date: date
+    ) -> tuple[MarketPriceObservation, ...]:
+        """Retrieve dated daily closes from Yahoo when Twelve Data is unavailable."""
+        start = datetime.combine(start_date, datetime.min.time(), UTC)
+        end = datetime.combine(end_date + timedelta(days=1), datetime.min.time(), UTC)
+        params = urlencode(
+            {
+                "period1": str(int(start.timestamp())),
+                "period2": str(int(end.timestamp())),
+                "interval": "1d",
+            }
+        )
+        request = Request(
+            f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?{params}",
+            headers={"Accept": "application/json", "User-Agent": "Mozilla/5.0"},
+        )
+        try:
+            with urlopen(request, timeout=self._timeout_seconds) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            chart = payload.get("chart", {})
+            result = next(iter(chart.get("result") or ()), None)
+            if not isinstance(result, dict):
+                error = chart.get("error")
+                message = error.get("description") if isinstance(error, dict) else None
+                raise MarketDataUnavailable(str(message or "nenhuma série diária retornada"))
+            meta = result.get("meta", {})
+            actual_symbol = str(meta.get("symbol") or "").upper()
+            currency = str(meta.get("currency") or "").upper()
+            if actual_symbol != symbol or currency != "USD":
+                raise MarketDataUnavailable(
+                    f"identidade/moeda inesperada ({actual_symbol or 'sem símbolo'}, "
+                    f"{currency or 'sem moeda'})."
+                )
+            timestamps = result.get("timestamp", ())
+            quotes = result.get("indicators", {}).get("quote", ())
+            closes = quotes[0].get("close", ()) if quotes and isinstance(quotes[0], dict) else ()
+            observations = []
+            for timestamp, close in zip(timestamps, closes):
+                if close is None:
+                    continue
+                observed = datetime.fromtimestamp(timestamp, UTC).date()
+                price = Decimal(str(close))
+                if start_date <= observed <= end_date and price > 0:
+                    observations.append(
+                        MarketPriceObservation(
+                            symbol=actual_symbol,
+                            price=price,
+                            currency_code=currency,
+                            effective_date=observed,
+                            source="yahoo_finance",
+                        )
+                    )
+            if not observations:
+                raise MarketDataUnavailable("nenhum fechamento diário válido retornado.")
+            return tuple(sorted(observations, key=lambda item: item.effective_date))
+        except MarketDataUnavailable:
+            raise
+        except Exception as error:
+            raise MarketDataUnavailable(f"falha ao consultar série diária: {error}") from error
 
     @classmethod
     def _candidate(cls, item: dict[str, object]) -> AssetCandidate | None:
