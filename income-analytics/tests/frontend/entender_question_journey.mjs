@@ -4,8 +4,8 @@ import vm from "node:vm";
 
 let source = fs.readFileSync("src/income_analytics/api/static/js/features/performance.js", "utf8");
 source = source.replace(/^import .*;\r?\n/gm, "").replaceAll("export async function", "async function").replaceAll("export function", "function");
-source += "\nglobalThis.__buildContributionRows = buildContributionRows; globalThis.__filterAndSortContributions = filterAndSortContributions; globalThis.__analyses = understandAnalyses;";
-const context = vm.createContext({});
+source += "\nglobalThis.__buildContributionRows = buildContributionRows; globalThis.__filterAndSortContributions = filterAndSortContributions; globalThis.__renderFixedIncomeAnswer = renderFixedIncomeAnswer; globalThis.__analyses = understandAnalyses;";
+const context = vm.createContext({ money: value => String(value), percentage: value => `${value}%` });
 vm.runInContext(source, context);
 
 const rows = context.__buildContributionRows({
@@ -31,4 +31,19 @@ assert.deepEqual(Array.from(context.__filterAndSortContributions(rows, "LOSSES")
 assert.deepEqual(Array.from(context.__filterAndSortContributions(rows, "ALL"), row => row.ticker), ["WEGE3", "PETR4", "ITSA4", "BBDC4"]);
 assert.deepEqual(Array.from(context.__filterAndSortContributions(rows, "ALL", "FII"), row => row.ticker), []);
 assert.deepEqual(Array.from(context.__analyses, item => item.id), ["asset-contributions", "wealth-bridge", "paid-income", "fixed-income"]);
-console.log("Entender: question catalog, financial row attribution, class filters, gain/loss filters, and deterministic ranking passed.");
+
+const fixedIncomeAnswer = context.__renderFixedIncomeAnswer({
+  base_currency: "BRL",
+  bridge: { fixed_income_return: 20 },
+  components: [{ component_type: "FIXED_INCOME_ACCRUAL", children: [
+    { ticker: "CDB-A", label: "CDB A", asset_class: "FIXED_INCOME", signed_amount: 8, valuation_available: true },
+    { ticker: "CDB-B", label: "CDB B", asset_class: "FIXED_INCOME", signed_amount: 21, valuation_available: true },
+    { ticker: "CDB-C", label: "CDB C", asset_class: "FIXED_INCOME", signed_amount: -2, valuation_available: true },
+  ] }],
+});
+assert.deepEqual(
+  Array.from(fixedIncomeAnswer.matchAll(/class="ranking-position">(\d+)<\/span><span class="ranking-identity"><strong>([^<]+)/g), match => match[2]),
+  ["CDB-B", "CDB-A", "CDB-C"],
+  "fixed-income investments are ordered by highest to lowest accrued return amount",
+);
+console.log("Entender: question catalog, financial row attribution, class filters, gain/loss filters, and fixed-income return ranking passed.");

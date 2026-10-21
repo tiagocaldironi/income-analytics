@@ -135,7 +135,7 @@ function renderIncomeAnswer(data) {
 
 function renderFixedIncomeAnswer(data) {
   const rows = buildContributionRows(data).filter(row => row.asset_class === "FIXED_INCOME");
-  const available = rows.filter(row => row.contribution_available && Number.isFinite(Number(row.factors.FIXED_INCOME_ACCRUAL)));
+  const available = rows.filter(row => row.contribution_available && Number.isFinite(Number(row.factors.FIXED_INCOME_ACCRUAL))).sort((left, right) => Number(right.factors.FIXED_INCOME_ACCRUAL) - Number(left.factors.FIXED_INCOME_ACCRUAL));
   const unavailable = rows.filter(row => !row.contribution_available);
   const total = data.bridge?.fixed_income_return;
   const components = available.map((row, index) => { const value = Number(row.factors.FIXED_INCOME_ACCRUAL); return `<details class="income-ranking-row fixed-income-ranking"><summary><span class="ranking-position">${index + 1}</span><span class="ranking-identity"><strong>${escapeChartText(row.ticker)}</strong><small>${escapeChartText(row.name)}</small></span><strong class="${value < 0 ? "negative-text" : "positive-text"}">${signedMoney(value, data.base_currency)}</strong></summary><div class="asset-ranking-detail"><div><span>Variação apurada do saldo</span><strong>${signedMoney(value, data.base_currency)}</strong></div>${row.factors.PAID_INCOME ? `<div><span>Rendimento pago (informação separada)</span><strong>${signedMoney(row.factors.PAID_INCOME, data.base_currency)}</strong></div>` : ""}</div></details>`; }).join("");
