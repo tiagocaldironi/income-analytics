@@ -45,6 +45,7 @@
 .understand-period-status { margin:-6px 0 14px; padding:.65rem .8rem; border:1px solid var(--ia-border); border-radius:8px; background:var(--ia-surface); color:var(--ia-text-secondary); font-size:.85rem; }
 .understand-period-status.error { border-color:#70424a; color:#ff9da4; }
 .understand-period input[aria-invalid="true"] { border-color:var(--ia-negative); }
+.strategy-error-actions { display:flex; justify-content:center; gap:.6rem; flex-wrap:wrap; }
 .explanation-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-top:1rem; }
 .explanation-summary div { border-left:2px solid var(--ia-brand); padding-left:.75rem; display:grid; gap:.25rem; }
 .data-quality-notice { display:grid; gap:.35rem; margin-top:1rem; padding:.85rem 1rem; border-left:3px solid #b7791f; border-radius:.4rem; background:#fffbeb; color:#744210; }

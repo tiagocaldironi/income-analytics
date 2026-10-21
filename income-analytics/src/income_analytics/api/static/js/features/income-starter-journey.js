@@ -121,6 +121,8 @@ export async function loadReserveJourney() {
     progress = await portfolioApi.reserveJourney();
     render();
   } catch (error) {
-    target.innerHTML = `<div class="empty" role="alert">Não foi possível carregar a jornada. ${escapeHtml(friendlyError(error))}</div>`;
+    console.error("Falha ao carregar a jornada Income Starter", error);
+    target.innerHTML = `<div class="empty reserve-error" role="alert"><p>Não foi possível carregar a jornada Income Starter.</p><small>${escapeHtml(friendlyError(error))}</small><p><button class="secondary" type="button" data-retry-reserve> Tentar novamente </button></p></div>`;
+    target.querySelector("[data-retry-reserve]").addEventListener("click", loadReserveJourney);
   }
 }

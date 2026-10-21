@@ -280,8 +280,9 @@ export async function loadStrategy() {
     }
   } catch (error) {
     console.error("Falha ao carregar a estratégia", error);
-    target.innerHTML = `<div class="strategy-error" role="alert"><p>Não foi possível carregar sua estratégia agora.</p><small>${html(friendlyError(error))}</small><button class="secondary" type="button" data-retry-strategy>Tentar novamente</button></div>`;
+    target.innerHTML = `<div class="strategy-error" role="alert"><p>Não foi possível carregar sua estratégia agora.</p><small>${html(friendlyError(error))}</small><div class="strategy-error-actions"><button class="secondary" type="button" data-retry-strategy>Tentar novamente</button><button type="button" data-open-starter-error>Explorar Income Starter</button></div></div>`;
     target.querySelector("[data-retry-strategy]").addEventListener("click", loadStrategy);
+    target.querySelector("[data-open-starter-error]").addEventListener("click", event => openStarterCatalog({ classes: [] }, event.currentTarget));
   }
 }
 export function bindStrategy() { loadStrategy(); }
