@@ -93,21 +93,27 @@ def test_dashboard_has_loading_and_error_states_for_initial_loading() -> None:
 
 def test_entender_explains_partial_historical_valuation_without_hiding_positions() -> None:
     performance = (STATIC / "js/features/performance.js").read_text(encoding="utf-8")
-    assert "Valuation histórico incompleto" in performance
-    assert "não representa ausência desses ativos" in performance
-    assert "data-quality-notice" in performance
+    assert "Ranking parcial." in performance
+    assert "sem contribuição calculável foram separados" in performance
+    assert "Valores pendentes não foram tratados como zero." in performance
 
 
-def test_entender_v3_keeps_a_single_explanation_evolution_and_performance_journey() -> None:
+def test_entender_v4_uses_the_question_led_wealth_analysis_journey() -> None:
     page = (STATIC / "index.html").read_text(encoding="utf-8")
     performance = (STATIC / "js/features/performance.js").read_text(encoding="utf-8")
     client = (STATIC / "js/api.js").read_text(encoding="utf-8")
-    assert "Como o patrimônio evoluiu?" in page
+    assert 'id="wealth-period-summary"' in page
+    assert 'id="understand-questions"' in page
+    assert 'id="wealth-explanation"' in page
+    assert "Quanto minha renda fixa valorizou?" in performance
+    assert "O que fez meu patrimônio aumentar ou diminuir?" in performance
+    assert "Quais investimentos geraram mais renda?" in performance
+    assert "Quais investimentos mais ganharam ou perderam valor?" in performance
     assert "Risco no período" not in page
-    assert "Contribuição por classe</h2>" not in performance
-    assert "Principais contribuições</h2>" not in performance
+    assert "portfolioApi.wealthExplanation(start, end)" in performance
+    assert "portfolioApi.performanceComparison" not in performance
     assert "historyRange" in client
-    assert "portfolioApi.historyRange(start, end)" in performance
+    assert "portfolioApi.historyRange(start, end)" not in performance
 
 
 def test_holdings_offer_a_lazy_accessible_asset_transactions_modal() -> None:
