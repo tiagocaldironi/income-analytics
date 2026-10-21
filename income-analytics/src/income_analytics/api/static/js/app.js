@@ -5,7 +5,7 @@ import { bindSimulation } from "./features/simulation.js?v=20260924-experience-v
 import { bindBenchmark } from "./features/benchmark.js?v=20260924-route-scoped-v1";
 import { bindAttentionCenter, loadAttentionCenter } from "./features/attention-center.js?v=20261018-v1-mobile-mp-merge";
 import { renderDiversification } from "./features/diversification.js";
-import { loadStrategy } from "./features/strategy.js?v=20261021-income-starter-draft-v1";
+import { loadStrategy } from "./features/strategy.js?v=20261021-strategy-resilient-v1";
 import { bindAssetDiscovery } from "./features/asset-discovery.js?v=20260924-route-scoped-v1";
 import { setTodayAsDefault } from "./shared/dates.js";
 import { setupMethodologyPage } from "./features/methodology.js?v=20261008-twr-methodology";

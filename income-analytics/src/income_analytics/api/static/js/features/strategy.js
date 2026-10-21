@@ -84,6 +84,9 @@ function render(target, state) {
   const targetValid = Math.abs(targetTotal - 1) < .000001;
   const targetComposition = targetValid ? composition(classes, "target_weight", "Carteira-alvo") : `<div class="strategy-composition strategy-composition-unavailable"><small>Carteira-alvo</small><div class="strategy-composition-message">A distribuição-alvo soma ${pct(targetTotal)}. Revise a estratégia para completar 100%.</div></div>`;
   target.innerHTML = `<section class="strategy-hero"><div class="strategy-hero-heading"><div><p>Minha estratégia</p><h2>Carteira atual × Carteira-alvo</h2>${strategyOrigin}</div><div class="strategy-hero-actions"><button class="secondary" type="button" data-explore-starter>Explorar Income Starter</button><button class="secondary" type="button" data-edit-strategy>Editar estratégia</button></div></div><div class="strategy-compositions">${composition(classes, "current_weight", "Carteira atual", state.valuationComplete !== false)}${targetComposition}</div>${strategyLegend(classes)}<div class="strategy-drift"><div><small>Distância da estratégia</small><strong>${pct(state.analysis.portfolio_drift)}</strong><span>Distância da distribuição-alvo</span></div><p>Representa a diferença agregada entre a distribuição atual e a política cadastrada.</p></div>${strategyDifferences(classes)}</section>${zeroTargetContext(classes)}${assetTargets(classes)}`;
+  if (state.dataWarning) {
+    target.insertAdjacentHTML("afterbegin", `<p class="coverage" role="status">${html(state.dataWarning)}</p>`);
+  }
   const details = target.querySelector?.("[data-strategy-differences]");
   details?.addEventListener("toggle", () => { strategyDifferencesOpen = details.open; details.querySelector("summary")?.setAttribute("aria-expanded", String(details.open)); });
   target.querySelectorAll("[data-edit-strategy]").forEach(button => button.addEventListener("click", () => openEditor(state, button)));
@@ -228,10 +231,14 @@ function noPolicy(target, holdings) { const classes = holdings.classes || []; ta
 export async function loadStrategy() {
   const target = document.querySelector("#strategy-workspace"); if (!target) return; target.innerHTML = `<div class="strategy-skeleton" aria-busy="true"><span></span><span></span></div>`;
   try {
-    const [holdings, intelligence, strategyMetadata] = await Promise.all([
+    const [holdingsResult, intelligenceResult, strategyResult] = await Promise.allSettled([
       portfolioApi.holdings(), sharedIntelligence(), portfolioApi.activeStrategyMetadata(),
     ]);
-    const drift = intelligence.findings?.find(finding => finding.code === "PORTFOLIO_DRIFT");
+    if (holdingsResult.status === "rejected") throw holdingsResult.reason;
+    const holdings = holdingsResult.value;
+    const intelligence = intelligenceResult.status === "fulfilled" ? intelligenceResult.value : null;
+    const strategyMetadata = strategyResult.status === "fulfilled" ? strategyResult.value : { strategy: null };
+    const drift = intelligence?.findings?.find(finding => finding.code === "PORTFOLIO_DRIFT");
     try {
       const analysis = drift
         ? {
@@ -258,13 +265,18 @@ export async function loadStrategy() {
         classes,
         valuationComplete: holdings.valuation_complete,
         strategy: strategyMetadata.strategy,
+        dataWarning: intelligenceResult.status === "rejected" || strategyResult.status === "rejected"
+          ? "Alguns dados complementares estão temporariamente indisponíveis; a estratégia continua disponível."
+          : "",
       });
     } catch (error) {
+      console.error("Falha ao calcular a estratégia", error);
       if (String(error.message || error).includes("política")) noPolicy(target, holdings);
       else throw error;
     }
-  } catch {
-    target.innerHTML = `<div class="strategy-error" role="alert"><p>Não foi possível carregar sua estratégia agora.</p><button class="secondary" type="button" data-retry-strategy>Tentar novamente</button></div>`;
+  } catch (error) {
+    console.error("Falha ao carregar a estratégia", error);
+    target.innerHTML = `<div class="strategy-error" role="alert"><p>Não foi possível carregar sua estratégia agora.</p><small>${html(friendlyError(error))}</small><button class="secondary" type="button" data-retry-strategy>Tentar novamente</button></div>`;
     target.querySelector("[data-retry-strategy]").addEventListener("click", loadStrategy);
   }
 }
