@@ -2,7 +2,7 @@
 
 from datetime import date
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import Any, Callable
 from uuid import UUID, uuid4
 
 from sqlalchemy import delete, select
@@ -32,7 +32,7 @@ class EconomicExposureRepository:
         self,
         session_factory: sessionmaker[Session] = SessionFactory,
         *,
-        initialize=initialize_database,
+        initialize: Callable[[], None] = initialize_database,
     ) -> None:
         self._session_factory = session_factory
         self._initialize = initialize
