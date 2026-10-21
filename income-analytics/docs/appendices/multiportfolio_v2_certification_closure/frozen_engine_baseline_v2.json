@@ -1,15 +1,15 @@
 {
   "creation_metadata": {
-    "created_at_utc": "2026-10-21T01:08:50.984828+00:00",
+    "created_at_utc": "2026-10-21T01:12:59.964294+00:00",
     "timestamp_excluded_from_payload_hash": true
   },
   "payload": {
     "baseline_id": "MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2",
     "generator": {
       "path": "scripts/generate_magic_formula_frozen_engine_baseline.py",
-      "sha256": "e58db8d94359dd4199f6720ffa9574f322a88e40704b9bd32d13bdfded28e3d5"
+      "sha256": "5484d930453e337c7639c421cd5a4c7f73adbca4e61155dcbe314718e916bf89"
     },
-    "git_commit": "2355292cfc8027133539ac88e9a84746b2816289",
+    "git_commit": "63e742bfface8a65f1581ebe5a872f9fd068d792",
     "golden_test_manifest": {
       "cases": [
         {
@@ -48,9 +48,9 @@
       "golden_file": "docs/appendices/multiportfolio_v2_certification_closure/frozen_engine_semantic_goldens.json",
       "golden_file_sha256": "b445a4b6f18f197791030ea19b774ed1bea46db94fb005e3a1c30e659bb0b6a2",
       "test_file": "tests/application/test_magic_formula_frozen_engine_semantics.py",
-      "test_file_sha256": "05b58a688dc11b2faba8d6825c56316b3d45418d1f4ab6edeff105dfd9b7beb0"
+      "test_file_sha256": "0150aaac804400cef47e524c2379e7f00d607b85075cd66264953ba3af10082a"
     },
-    "golden_test_manifest_sha256": "e68f38ab42d3c9e80af41866a82f4087f3a6f54eca2111acc9b5b160dd6741e2",
+    "golden_test_manifest_sha256": "18e7afe0407670aa2d29d5f436eba08ecc8d8f50af4a9511538eea0eaa2c941e",
     "methodology": {
       "active_snapshot_id": "mf-f1ee50809c83979ba221d84e",
       "canonical_result_sha256": "162c1b2f8856ae7d88cf5809d9418395464d0b2042bf6177fb48141e5b4fcf6a",
@@ -233,7 +233,7 @@
       },
       {
         "path": "tests/application/test_magic_formula_frozen_engine_semantics.py",
-        "sha256": "05b58a688dc11b2faba8d6825c56316b3d45418d1f4ab6edeff105dfd9b7beb0"
+        "sha256": "0150aaac804400cef47e524c2379e7f00d607b85075cd66264953ba3af10082a"
       },
       {
         "path": "tests/application/test_magic_formula_historical_price_sources_v5.py",
@@ -292,7 +292,7 @@
         "sha256": "f6b224d7080689498fefcde4e0099fbda8384e4cc4dbb79a3842598fdc598a05"
       }
     ],
-    "test_manifest_sha256": "b47cbb0eb2a0d1d7d135a082d9a33b0953fad6151c7f92284311fa48fdf8a95b"
+    "test_manifest_sha256": "c41274d6e53cf3beea8ea2e5cc8553448cf8283f2c7adb3fd6d0b1639bbd1dce"
   },
-  "payload_sha256": "9fdab31bb097a0f03f67c68fe20283dcb723127268cc5f43cb5e920419d4c9d4"
+  "payload_sha256": "a19381cb17819222116d5ede4b89f00e48de0765fead6c556b3055584148e8cb"
 }

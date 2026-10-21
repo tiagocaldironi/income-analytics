@@ -18,7 +18,7 @@
   "ranked_company_count": 165,
   "prospective_baseline_created": true,
   "prospective_baseline_id": "MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2",
-  "prospective_baseline_payload_sha256": "9fdab31bb097a0f03f67c68fe20283dcb723127268cc5f43cb5e920419d4c9d4",
+  "prospective_baseline_payload_sha256": "a19381cb17819222116d5ede4b89f00e48de0765fead6c556b3055584148e8cb",
   "prospective_baseline_deterministic": true,
   "magic_formula_tests": {"passed": 370, "failed": 0},
   "full_suite": {"collected": 893, "passed": 893, "failed": 0, "skipped": 0, "warnings": 6},

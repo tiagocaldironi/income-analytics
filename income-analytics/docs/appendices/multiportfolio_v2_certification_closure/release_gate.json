@@ -73,7 +73,7 @@
     "historical_hash_equivalence_proven": false,
     "frozen_engine_hash_gate": "PASS_PROSPECTIVE_BASELINE_V2",
     "prospective_baseline_id": "MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2",
-    "prospective_baseline_payload_sha256": "9fdab31bb097a0f03f67c68fe20283dcb723127268cc5f43cb5e920419d4c9d4",
+    "prospective_baseline_payload_sha256": "a19381cb17819222116d5ede4b89f00e48de0765fead6c556b3055584148e8cb",
     "frozen_engine_hash_evidence": "docs/appendices/multiportfolio_v2_certification_closure/cert_48_final_result.md"
   },
   "performance": {
@@ -97,7 +97,7 @@
     "further_historical_hash_hunt": "CLOSED",
     "historical_manifest": "UNRESOLVED_LEGACY_BASELINE_PRESERVED_UNCHANGED",
     "prospective_baseline_id": "MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2",
-    "prospective_baseline_payload_sha256": "9fdab31bb097a0f03f67c68fe20283dcb723127268cc5f43cb5e920419d4c9d4",
+    "prospective_baseline_payload_sha256": "a19381cb17819222116d5ede4b89f00e48de0765fead6c556b3055584148e8cb",
     "prospective_baseline_deterministic": true,
     "semantic_contract": "PASS",
     "semantic_goldens": "8/8 PASS",

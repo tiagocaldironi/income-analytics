@@ -2,7 +2,7 @@
 
 **CERT_48 = PASS_WITH_HISTORICAL_LIMITATION_ACCEPTED.** O gate histórico não foi reescrito nem tratado como equivalente: a investigação de origem é `UNRESOLVABLE`, a lacuna foi aceita e a busca adicional foi encerrada. O manifesto legado e seus hashes esperados permanecem preservados como `UNRESOLVED_LEGACY_BASELINE`.
 
-O novo gate é prospectivo. `MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2` liga o código atual, o contrato comportamental e os testes ao commit `2355292`; seu payload determinístico tem SHA-256 `9fdab31bb097a0f03f67c68fe20283dcb723127268cc5f43cb5e920419d4c9d4`. Duas gerações do manifesto produziram o mesmo payload/hash. Foram protegidos 23 arquivos de implementação, 25 arquivos de teste e 8 casos semânticos.
+O novo gate é prospectivo. `MF_BR_2027_V1_FROZEN_ENGINE_BASELINE_V2` liga o código atual, o contrato comportamental e os testes ao commit `63e742b`; seu payload determinístico tem SHA-256 `a19381cb17819222116d5ede4b89f00e48de0765fead6c556b3055584148e8cb`. Duas gerações do manifesto produziram o mesmo payload/hash. Foram protegidos 23 arquivos de implementação, 25 arquivos de teste e 8 casos semânticos.
 
 Os 8/8 goldens passaram. A auditoria A–O confirmou mercado 010 sem fallback para 020, tratamento de UNIT e classes sem duplicação, seleção S4 independente de EY/ROC/rank, L3 e S4 consistentes com a política ativada, subtração de tesouraria, ausência de filtros mínimos de market cap/volume, screening posterior para varejo/aviação, utilities incluídas e exclusões financeiras estruturais mantidas.
 
