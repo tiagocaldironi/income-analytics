@@ -406,8 +406,28 @@ function renderPortfolio(data, holdings, performance) {
     if (target) target.textContent = value === null ? "—" : money(value);
   });
   const netInvested = document.querySelector("#net-invested");
-  if (netInvested) netInvested.textContent = data.net_external_flow === null || data.net_external_flow === undefined
-    ? "—" : money(data.net_external_flow, data.base_currency || holdings.base_currency);
+  const capitalAppliedNote = document.querySelector("#capital-applied-note");
+  const capitalStatus = data.capital_applied_status;
+  if (netInvested) {
+    netInvested.textContent = capitalStatus === "AVAILABLE" || capitalStatus === "ZERO"
+      ? money(data.capital_applied, data.base_currency || holdings.base_currency)
+      : capitalStatus === "PARTIAL"
+        ? money(data.capital_applied_partial_amount, data.base_currency || holdings.base_currency)
+        : "Indisponível";
+  }
+  if (capitalAppliedNote) {
+    if (capitalStatus === "PARTIAL" || capitalStatus === "UNAVAILABLE") {
+      const assets = (data.capital_applied_incomplete_reasons || [])
+        .map(item => `${item.ticker} (${item.reason})`).join(", ");
+      capitalAppliedNote.textContent = assets
+        ? `${capitalStatus === "PARTIAL" ? `Parcial (${data.capital_applied_included_position_count}/${data.capital_applied_position_count} posições). ` : ""}Custo incompleto: ${assets}`
+        : "Não foi possível determinar o custo de todas as posições.";
+    } else if (capitalStatus === "ZERO") {
+      capitalAppliedNote.textContent = "Não há posições abertas com capital aplicado.";
+    } else {
+      capitalAppliedNote.textContent = "Custo de aquisição das posições atuais";
+    }
+  }
   if (data.total_market_value === null) {
     const equity = document.querySelector("#equity");
     if (equity) equity.textContent = "Valuation parcial";

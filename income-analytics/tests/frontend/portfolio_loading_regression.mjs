@@ -25,9 +25,11 @@ const nodes = new Map([
   ["#monthly-income-chart", element()],
   ["#portfolio-drift", element()],
   ["#home-performance", element()],
+  ["#net-invested", element()],
+  ["#capital-applied-note", element()],
 ]);
 const dashboard = {
-  portfolio: { cash: 0, total_cost: 0, total_market_value: 0, total_result: 0, portfolio_equity: 0, total_contributions: 0, total_withdrawals: 0, net_external_flow: 0, realized_result: 0, unrealized_result: 0, income_received: 0 },
+  portfolio: { cash: 0, total_cost: 0, total_market_value: 0, total_result: 0, portfolio_equity: 0, total_contributions: 0, total_withdrawals: 0, net_external_flow: 0, capital_applied: 0, capital_applied_status: "ZERO", realized_result: 0, unrealized_result: 0, income_received: 0 },
   performance: null,
   history: { snapshots: [], period_months: 12, asset_class: "" },
   allocation: { assets: [] },
@@ -60,6 +62,8 @@ vm.runInContext(source, context);
 await context.loadPortfolio();
 assert.match(nodes.get("#positions").innerHTML, /Sua carteira ainda está vazia/);
 assert.equal(nodes.get("#class-allocation").innerHTML, "Composição indisponível");
+assert.equal(nodes.get("#net-invested").textContent, "R$ 0");
+assert.match(nodes.get("#capital-applied-note").textContent, /Não há posições abertas/);
 assert(!nodes.get("#portfolio-evolution").innerHTML.includes("Carregando"));
 assert.equal(title.textContent, "Meus ativos");
 
