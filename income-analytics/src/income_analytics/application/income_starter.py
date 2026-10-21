@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any, Callable
 from uuid import UUID
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.infrastructure.database import SessionFactory, initialize_database
 from income_analytics.infrastructure.models import (
+    IncomeStarterJourneyProgressRecord,
     IncomeStarterTemplateVersionRecord,
     PortfolioRecord,
     PortfolioStrategyMetadataRecord,
@@ -36,11 +37,11 @@ class IncomeStarterRepository:
 
     def __init__(
         self,
-        session_factory: sessionmaker = SessionFactory,
+        session_factory: sessionmaker[Session] = SessionFactory,
         *,
-        initialize=initialize_database,
+        initialize: Callable[[], None] = initialize_database,
         transition_authorizer: Callable[[str, str], bool] | None = None,
-    ):
+    ) -> None:
         self._session_factory = session_factory
         self._initialize = initialize
         self._transition_authorizer = transition_authorizer
@@ -59,7 +60,8 @@ class IncomeStarterRepository:
         allocations = json.loads(row.allocations_json) if row.allocations_json else None
         allocation_sources = json.loads(row.allocation_sources_json)
         adoption_available = (
-            row.status == "PUBLISHED"
+            row.template_type == "ALLOCATION_MODEL"
+            and row.status == "PUBLISHED"
             and row.allocations_validated
             and row.financial_review_status == "APPROVED"
             and row.regulatory_review_status == "APPROVED"
@@ -84,6 +86,7 @@ class IncomeStarterRepository:
             "id": row.id,
             "template_key": row.template_key,
             "version": row.version,
+            "template_type": row.template_type,
             "name": row.name,
             "status": row.status,
             "description": row.description,
@@ -176,6 +179,10 @@ class IncomeStarterRepository:
         self._ready()
         with self._session_factory.begin() as session:
             row = self._required(session, template_key, version)
+            if row.template_type != "ALLOCATION_MODEL":
+                raise IncomeStarterError(
+                    "Uma jornada educacional não entra na revisão de alocação."
+                )
             if row.status != "DRAFT":
                 raise IncomeStarterError("Somente um rascunho pode entrar em revisão.")
             if not row.methodology.strip() or not row.author.strip():
@@ -209,6 +216,10 @@ class IncomeStarterRepository:
         self._ready()
         with self._session_factory.begin() as session:
             row = self._required(session, template_key, version)
+            if row.template_type != "ALLOCATION_MODEL":
+                raise IncomeStarterError(
+                    "Uma jornada educacional não pode ser publicada como alocação."
+                )
             if row.status != "IN_REVIEW":
                 raise IncomeStarterError("A aprovação exige um modelo em revisão.")
             if review_type == "FINANCIAL":
@@ -283,6 +294,7 @@ class IncomeStarterRepository:
                 id=f"{template_key}@{version}",
                 template_key=template_key,
                 version=version,
+                template_type=previous.template_type,
                 name=previous.name,
                 status="DRAFT",
                 description=previous.description,
@@ -447,6 +459,10 @@ class IncomeStarterRepository:
         model = self.get_version(template_key, version)
         if model is None:
             raise IncomeStarterError("Modelo não encontrado.")
+        if model["template_type"] != "ALLOCATION_MODEL":
+            raise IncomeStarterError(
+                "Jornadas educacionais não podem ser adotadas como carteira-alvo."
+            )
         if not model["adoption_available"] or model["status"] != "PUBLISHED":
             raise IncomeStarterError(
                 "Este modelo ainda não foi publicado e homologado para adoção."
@@ -519,3 +535,120 @@ class IncomeStarterRepository:
 
 
 catalog = IncomeStarterRepository()
+
+
+class ReserveJourneyRepository:
+    """Portfolio-scoped, self-declared progress separate from the financial ledger."""
+
+    def __init__(
+        self,
+        session_factory: sessionmaker[Session] = SessionFactory,
+        *,
+        initialize: Callable[[], None] = initialize_database,
+    ) -> None:
+        self._session_factory = session_factory
+        self._initialize = initialize
+
+    def get(self, portfolio_id: UUID) -> dict[str, Any]:
+        self._initialize()
+        with self._session_factory() as session:
+            row = session.get(IncomeStarterJourneyProgressRecord, str(portfolio_id))
+            return self._view(row, portfolio_id)
+
+    def save(
+        self,
+        portfolio_id: UUID,
+        *,
+        essential_monthly_expenses: Decimal | None,
+        coverage_months: int,
+        declared_reserved_amount: Decimal,
+        current_step: int,
+    ) -> dict[str, Any]:
+        if essential_monthly_expenses is not None and (
+            not essential_monthly_expenses.is_finite() or essential_monthly_expenses < 0
+        ):
+            raise IncomeStarterError("Despesas essenciais não podem ser negativas.")
+        if not declared_reserved_amount.is_finite() or declared_reserved_amount < 0:
+            raise IncomeStarterError("O valor reservado não pode ser negativo.")
+        if not 1 <= coverage_months <= 60:
+            raise IncomeStarterError("Escolha entre 1 e 60 meses de cobertura.")
+        if not 1 <= current_step <= 4:
+            raise IncomeStarterError("A etapa informada é inválida.")
+        self._initialize()
+        with self._session_factory.begin() as session:
+            row = session.get(IncomeStarterJourneyProgressRecord, str(portfolio_id))
+            if row is None:
+                row = IncomeStarterJourneyProgressRecord(
+                    portfolio_id=str(portfolio_id),
+                    template_key="primeiros-passos",
+                    template_version=1,
+                    coverage_months=coverage_months,
+                    reserve_goal=None,
+                    declared_reserved_amount="0",
+                    current_step=1,
+                    updated_at=datetime.now(UTC),
+                )
+                session.add(row)
+            goal = (
+                essential_monthly_expenses * coverage_months
+                if essential_monthly_expenses is not None
+                else None
+            )
+            row.essential_monthly_expenses = (
+                str(essential_monthly_expenses) if essential_monthly_expenses is not None else None
+            )
+            row.coverage_months = coverage_months
+            row.reserve_goal = str(goal) if goal is not None else None
+            row.declared_reserved_amount = str(declared_reserved_amount)
+            row.current_step = current_step
+            saved_at = datetime.now(UTC)
+            previous_update = row.updated_at
+            if previous_update is not None:
+                if previous_update.tzinfo is None:
+                    previous_update = previous_update.replace(tzinfo=UTC)
+                else:
+                    previous_update = previous_update.astimezone(UTC)
+                if saved_at <= previous_update:
+                    saved_at = previous_update + timedelta(microseconds=1)
+            row.updated_at = saved_at
+            session.flush()
+            return self._view(row, portfolio_id)
+
+    @staticmethod
+    def _view(row: IncomeStarterJourneyProgressRecord | None, portfolio_id: UUID) -> dict[str, Any]:
+        expenses = (
+            Decimal(row.essential_monthly_expenses)
+            if row and row.essential_monthly_expenses is not None
+            else None
+        )
+        goal = Decimal(row.reserve_goal) if row and row.reserve_goal is not None else None
+        reserved = Decimal(row.declared_reserved_amount) if row else Decimal(0)
+        months = row.coverage_months if row else 6
+        step = row.current_step if row else 1
+        reached = goal is not None and reserved >= goal
+        progress = (
+            (min(Decimal(1), reserved / goal) if goal > 0 else Decimal(1))
+            if goal is not None
+            else Decimal(0)
+        )
+        covered = reserved / expenses if expenses is not None and expenses > 0 else None
+        return {
+            "template_key": "primeiros-passos",
+            "template_version": row.template_version if row else 1,
+            "portfolio_id": str(portfolio_id),
+            "essential_monthly_expenses": str(expenses) if expenses is not None else None,
+            "coverage_months": months,
+            "reserve_goal": str(goal) if goal is not None else None,
+            "declared_reserved_amount": str(reserved),
+            "progress_percent": str(progress * 100),
+            "remaining_amount": str(max(Decimal(0), goal - reserved)) if goal is not None else None,
+            "months_covered": str(covered) if covered is not None else None,
+            "current_step": step,
+            "goal_reached": bool(reached),
+            "completed": step == 4,
+            "value_source": "SELF_DECLARED",
+            "updated_at": row.updated_at.isoformat() if row else None,
+        }
+
+
+reserve_journey = ReserveJourneyRepository()

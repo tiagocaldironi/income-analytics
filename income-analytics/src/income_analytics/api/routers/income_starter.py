@@ -5,7 +5,11 @@ from decimal import Decimal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from income_analytics.application.income_starter import IncomeStarterError, catalog
+from income_analytics.application.income_starter import (
+    IncomeStarterError,
+    catalog,
+    reserve_journey,
+)
 from income_analytics.application.portfolio_context import current_portfolio_id
 from income_analytics.domain.allocation_policy import AllocationPolicy
 from income_analytics.domain.enums.asset_class import AssetClass
@@ -18,9 +22,35 @@ class AdoptModelInput(BaseModel):
     allocations: dict[str, Decimal] | None = None
 
 
+class ReserveJourneyProgressInput(BaseModel):
+    essential_monthly_expenses: Decimal | None = None
+    coverage_months: int = 6
+    declared_reserved_amount: Decimal = Decimal(0)
+    current_step: int = 1
+
+
 @router.get("/catalog")
 def list_income_starter_models() -> dict[str, object]:
     return {"models": catalog.list_catalog()}
+
+
+@router.get("/journey/reserve")
+def get_reserve_journey_progress() -> dict[str, object]:
+    return reserve_journey.get(current_portfolio_id())
+
+
+@router.put("/journey/reserve")
+def save_reserve_journey_progress(body: ReserveJourneyProgressInput) -> dict[str, object]:
+    try:
+        return reserve_journey.save(
+            current_portfolio_id(),
+            essential_monthly_expenses=body.essential_monthly_expenses,
+            coverage_months=body.coverage_months,
+            declared_reserved_amount=body.declared_reserved_amount,
+            current_step=body.current_step,
+        )
+    except IncomeStarterError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
 
 
 @router.get("/active-strategy")

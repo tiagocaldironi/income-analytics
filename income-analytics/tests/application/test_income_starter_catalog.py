@@ -62,6 +62,7 @@ def repository(tmp_path):
                 id="conservadora@1",
                 template_key="conservadora",
                 version=1,
+                template_type="ALLOCATION_MODEL",
                 name="Conservadora",
                 status="DRAFT",
                 description="Em elaboração.",
@@ -294,3 +295,54 @@ def test_manual_editor_records_its_strategy_as_manual(repository):
     assert strategy["strategy_name"] == "Minha estratégia"
     assert strategy["template_key"] is None
     assert strategy["customized"] is False
+
+
+def test_guided_journey_type_cannot_be_adopted_or_submitted_for_allocation_review(repository):
+    from income_analytics.infrastructure.models import IncomeStarterTemplateVersionRecord
+
+    with repository._session_factory.begin() as session:
+        session.add(
+            IncomeStarterTemplateVersionRecord(
+                id="primeiros-passos@1",
+                template_key="primeiros-passos",
+                version=1,
+                template_type="GUIDED_JOURNEY",
+                name="Primeiros Passos",
+                status="DRAFT",
+                description="Jornada",
+                objective="Reserva",
+                risk_profile="Educacional",
+                horizon="Variável",
+                volatility_tolerance="Não é perfil",
+                knowledge="Inicial",
+                typical_profile="Iniciante",
+                characteristics_json="[]",
+                not_suitable_json="[]",
+                author="Income",
+                methodology="Educacional",
+                methodology_sources_json="[]",
+                allocation_sources_json="[]",
+                allocations_json=None,
+                allocations_validated=False,
+                financial_review_status="PENDING",
+                regulatory_review_status="PENDING",
+                created_at=datetime.now(UTC),
+            )
+        )
+    model = repository.get_version("primeiros-passos", 1)
+    assert model["template_type"] == "GUIDED_JOURNEY"
+    assert model["allocations"] is None
+    with pytest.raises(IncomeStarterError, match="não podem ser adotadas"):
+        repository.validate_for_adoption("primeiros-passos", 1, {})
+    with pytest.raises(IncomeStarterError, match="não entra na revisão"):
+        repository.submit_for_review(
+            "primeiros-passos",
+            1,
+            actor_id="Reviewer",
+            allocations={"FIXED_INCOME": "1"},
+            allocation_sources=ALLOCATION_SOURCES,
+        )
+    version_two = repository.create_next_draft_version("primeiros-passos")
+    assert version_two["template_type"] == "GUIDED_JOURNEY"
+    assert version_two["status"] == "DRAFT"
+    assert version_two["allocations"] is None

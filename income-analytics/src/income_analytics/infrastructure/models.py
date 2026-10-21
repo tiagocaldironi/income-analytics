@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime
 
 from sqlalchemy import (
+    CheckConstraint,
     Date,
     DateTime,
     ForeignKey,
@@ -326,11 +327,18 @@ class IncomeStarterTemplateVersionRecord(Base):
     __tablename__ = "income_starter_template_versions"
     __table_args__ = (
         UniqueConstraint("template_key", "version", name="uq_income_starter_version"),
+        CheckConstraint(
+            "template_type IN ('GUIDED_JOURNEY', 'ALLOCATION_MODEL')",
+            name="ck_income_starter_template_type",
+        ),
     )
 
     id: Mapped[str] = mapped_column(String(120), primary_key=True)
     template_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False)
+    template_type: Mapped[str] = mapped_column(
+        String(24), nullable=False, default="ALLOCATION_MODEL"
+    )
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="DRAFT")
     description: Mapped[str] = mapped_column(Text, nullable=False)
@@ -377,6 +385,54 @@ class PortfolioStrategyMetadataRecord(Base):
     customized: Mapped[bool] = mapped_column(nullable=False, default=False)
     adopted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     target_allocations_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class IncomeStarterJourneyProgressRecord(Base):
+    __tablename__ = "income_starter_journey_progress"
+
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="RESTRICT"), primary_key=True
+    )
+    template_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    template_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    essential_monthly_expenses: Mapped[str | None] = mapped_column(String(40))
+    coverage_months: Mapped[int] = mapped_column(Integer, nullable=False, default=6)
+    reserve_goal: Mapped[str | None] = mapped_column(String(40))
+    declared_reserved_amount: Mapped[str] = mapped_column(String(40), nullable=False, default="0")
+    current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class AssetEconomicExposureRecord(Base):
+    __tablename__ = "asset_economic_exposures"
+    __table_args__ = (
+        UniqueConstraint(
+            "asset_id", "category", "source", name="uq_asset_economic_exposure_source"
+        ),
+        CheckConstraint(
+            "category IN ("
+            "'BRAZIL_EQUITY','INTERNATIONAL_EQUITY','FIXED_INCOME',"
+            "'LISTED_REAL_ESTATE','DIRECT_REAL_ESTATE','COMMODITIES',"
+            "'CRYPTO','CASH_EQUIVALENTS','UNCLASSIFIED')",
+            name="ck_economic_exposure_category",
+        ),
+        CheckConstraint(
+            "classification_status IN ('CONFIRMED', 'UNKNOWN')",
+            name="ck_economic_exposure_status",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    asset_id: Mapped[str] = mapped_column(
+        ForeignKey("assets.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    category: Mapped[str] = mapped_column(String(32), nullable=False)
+    exposure_share: Mapped[str | None] = mapped_column(String(40))
+    classification_status: Mapped[str] = mapped_column(String(16), nullable=False)
+    source: Mapped[str | None] = mapped_column(String(80))
+    source_reference_date: Mapped[date | None] = mapped_column(Date)
+    source_url: Mapped[str | None] = mapped_column(Text)
+    notes: Mapped[str | None] = mapped_column(Text)
 
 
 class AssetTargetRecord(Base):

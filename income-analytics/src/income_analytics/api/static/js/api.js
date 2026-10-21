@@ -136,6 +136,8 @@ export const portfolioApi = {
   syncPaidIncome: () => request("/settings/paid-income/sync", { method: "POST" }),
   allocationPolicy: targets => request("/allocation-policy", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ targets }) }),
   incomeStarterCatalog: () => request("/income-starter/catalog"),
+  reserveJourney: () => request("/income-starter/journey/reserve"),
+  saveReserveJourney: progress => request("/income-starter/journey/reserve", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(progress) }),
   activeStrategyMetadata: () => request("/income-starter/active-strategy"),
   incomeStarterModel: (key, version) => request(`/income-starter/models/${encodeURIComponent(key)}${version ? `?version=${encodeURIComponent(version)}` : ""}`),
   adoptIncomeStarterModel: (key, version, allocations) => request(`/income-starter/models/${encodeURIComponent(key)}/adopt`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ version, allocations }) }),
