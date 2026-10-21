@@ -17,15 +17,28 @@ let rankingShowAll = false;
 let expandedAsset = "";
 let rankingClassFilter = "";
 let incomeClassFilter = "";
+let appliedUnderstandPeriod = null;
 
 export function bindPerformance() {
   if (performanceBound) return;
   const form = document.querySelector("#wealth-explanation-form");
   if (!form) return;
   performanceBound = true;
+  appliedUnderstandPeriod = {
+    start: document.querySelector("#wealth-start-date").value,
+    end: document.querySelector("#wealth-end-date").value,
+  };
+  updateUnderstandPeriodLabel();
   form.addEventListener("submit", event => {
     event.preventDefault();
     loadExplanation();
+  });
+  document.querySelector(".period-cancel")?.addEventListener("click", () => {
+    if (appliedUnderstandPeriod) {
+      document.querySelector("#wealth-start-date").value = appliedUnderstandPeriod.start;
+      document.querySelector("#wealth-end-date").value = appliedUnderstandPeriod.end;
+    }
+    document.querySelector("#understand-period-disclosure").open = false;
   });
   document.querySelector("#understand-questions")?.addEventListener("click", event => {
     const button = event.target.closest("[data-analysis-id]");
@@ -44,13 +57,30 @@ export async function loadExplanation() {
   try {
     const data = await portfolioApi.wealthExplanation(start, end);
     if (requestId !== explanationRequestId) return;
+    document.querySelector("#wealth-start-date").value = data.period.start_date;
     document.querySelector("#wealth-end-date").value = data.period.end_date;
+    appliedUnderstandPeriod = { start: data.period.start_date, end: data.period.end_date };
+    updateUnderstandPeriodLabel();
+    document.querySelector("#understand-period-disclosure").open = false;
     const domStarted = performance.now();
     renderExplanation(data);
     performance.measure("income:entender-dom-render", { start: domStarted, end: performance.now() });
   } catch (error) {
     if (requestId === explanationRequestId) target.innerHTML = errorState(error.message);
   }
+}
+
+function updateUnderstandPeriodLabel() {
+  const label = document.querySelector("#wealth-period-label");
+  if (!label) return;
+  const start = document.querySelector("#wealth-start-date")?.value;
+  const end = document.querySelector("#wealth-end-date")?.value;
+  label.textContent = start && end ? `${formatUnderstandDate(start)} — ${formatUnderstandDate(end)}` : "Selecione as datas";
+}
+
+function formatUnderstandDate(value) {
+  const [year, month, day] = value.split("-");
+  return `${day}/${month}/${year}`;
 }
 
 function renderExplanation(data) {
