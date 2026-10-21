@@ -24,6 +24,7 @@ import { createRouteLifecycle } from "./shared/route-lifecycle.js";
 import { beginRouteResourceCycle } from "./shared/resources.js";
 import { setupPortfolioContext } from "./features/portfolios.js?v=20261018-portfolio-menu-dismiss-v1";
 import { loadWalletSettings, setupWalletSettings } from "./features/wallet-settings.js";
+import { loadReserveJourney } from "./features/income-starter-journey.js";
 
 let operationsSetup = false;
 let settingsSetup = false;
@@ -63,6 +64,7 @@ const routeLoaders = {
   "minha-carteira": () => loadPortfolio("", { refreshAttention: false }),
   entender: loadUnderstandPage,
   estrategia: loadStrategy,
+  "primeiros-passos": loadReserveJourney,
   "risco-exposicao": renderDiversification,
   simular: bindSimulation,
   operacoes: loadOperationsPage,
