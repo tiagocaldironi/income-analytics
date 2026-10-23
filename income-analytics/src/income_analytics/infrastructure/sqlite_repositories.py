@@ -13,6 +13,7 @@ from uuid import UUID
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session
 
+from income_analytics.application.auth_context import current_principal
 from income_analytics.application.b3_import import (
     B3ImportBatch,
     B3ImportBatchStatus,
@@ -47,6 +48,7 @@ from income_analytics.domain.value_objects.money import Money
 from income_analytics.domain.value_objects.quantity import Quantity
 from income_analytics.domain.value_objects.ticker import Ticker
 from income_analytics.domain.wealth_details import PensionPlanDetails, RealEstateDetails
+from income_analytics.infrastructure.auth_config import saas_enabled
 from income_analytics.infrastructure.database import (
     SessionFactory,
     database_url,
@@ -63,16 +65,20 @@ from income_analytics.infrastructure.models import (
     FixedIncomeDetailsRecord,
     FxRateRecord,
     ImportedPaidIncomeRecord,
+    IncomeStarterJourneyProgressRecord,
     MarketPriceRecord,
     MarketPriceRefreshRunRecord,
     PaidIncomeProviderSettingsRecord,
     PensionFundQuotaRecord,
     PensionInvestmentVehicleRecord,
     PensionPlanDetailsRecord,
+    PortfolioAssetMetadataRecord,
     PortfolioAssetRecord,
     PortfolioConfigurationRecord,
     PortfolioDashboardSnapshotRecord,
+    PortfolioMarketPriceRecord,
     PortfolioRecord,
+    PortfolioStrategyMetadataRecord,
     ProviderHealthRecord,
     RealEstateDetailsRecord,
     RecurringRuleRecord,
@@ -386,7 +392,13 @@ class SqlitePortfolioRepository:
     def get(self, portfolio_id: UUID) -> Portfolio | None:
         initialize_database()
         with SessionFactory() as session:
-            row = session.get(PortfolioRecord, str(portfolio_id))
+            query = session.query(PortfolioRecord).filter_by(id=str(portfolio_id))
+            if saas_enabled():
+                actor = current_principal()
+                if actor is None:
+                    return None
+                query = query.filter_by(owner_user_id=str(actor.user_id))
+            row = query.one_or_none()
         if row is None:
             return None
         return Portfolio(
@@ -403,6 +415,11 @@ class SqlitePortfolioRepository:
         initialize_database()
         with SessionFactory() as session:
             query = session.query(PortfolioRecord)
+            if saas_enabled():
+                actor = current_principal()
+                if actor is None:
+                    return ()
+                query = query.filter_by(owner_user_id=str(actor.user_id))
             if not include_archived:
                 query = query.filter(PortfolioRecord.status == "ACTIVE")
             rows = query.order_by(PortfolioRecord.created_at, PortfolioRecord.id).all()
@@ -419,9 +436,25 @@ class SqlitePortfolioRepository:
             for row in rows
         )
 
+    def get_owned(self, portfolio_id: UUID, user_id: UUID) -> Portfolio | None:
+        # get() is also scoped by the verified request principal in SaaS mode.
+        portfolio = self.get(portfolio_id)
+        return portfolio if portfolio and portfolio.owner_user_id == user_id else None
+
     def save(self, portfolio: Portfolio) -> None:
         initialize_database()
+        if saas_enabled():
+            actor = current_principal()
+            if actor is None or portfolio.owner_user_id != actor.user_id:
+                raise PermissionError("Verified ownership is required")
         with SessionFactory.begin() as session:
+            existing = session.get(PortfolioRecord, str(portfolio.id))
+            if (
+                saas_enabled()
+                and existing is not None
+                and existing.owner_user_id != str(portfolio.owner_user_id)
+            ):
+                raise PermissionError("Ownership cannot be changed by ordinary portfolio saves")
             session.merge(
                 PortfolioRecord(
                     id=str(portfolio.id),
@@ -498,10 +531,14 @@ class SqliteAssetRepository:
     def save(self, asset: Asset) -> None:
         initialize_database()
         with SessionFactory.begin() as session:
+            if saas_enabled() and session.get(AssetRecord, str(asset.id)) is not None:
+                self._save_metadata(session, asset)
+                _cached_financial_events.cache_clear()
+                return
             session.merge(
                 AssetRecord(
                     id=str(asset.id),
-                    ticker=str(asset.ticker),
+                    ticker=self._storage_ticker(str(asset.ticker)),
                     name=asset.name,
                     asset_class=asset.asset_class.value,
                     asset_type=asset.asset_type.value,
@@ -521,9 +558,24 @@ class SqliteAssetRepository:
 
     def get_by_ticker(self, ticker: str) -> Asset | None:
         with SessionFactory() as session:
-            record = (
-                session.query(AssetRecord).filter_by(ticker=ticker.strip().upper()).one_or_none()
-            )
+            if saas_enabled():
+                record = (
+                    session.query(AssetRecord)
+                    .join(PortfolioAssetRecord, PortfolioAssetRecord.asset_id == AssetRecord.id)
+                    .filter(
+                        PortfolioAssetRecord.portfolio_id == self.portfolio_id,
+                        AssetRecord.ticker.in_(
+                            [ticker.strip().upper(), self._storage_ticker(ticker)]
+                        ),
+                    )
+                    .one_or_none()
+                )
+            else:
+                record = (
+                    session.query(AssetRecord)
+                    .filter_by(ticker=ticker.strip().upper())
+                    .one_or_none()
+                )
             if record is None:
                 return None
             linked = (
@@ -532,7 +584,7 @@ class SqliteAssetRepository:
                 .one_or_none()
             )
             if linked is not None:
-                return self._to_domain(record)
+                return self._scoped_asset(session, record)
             has_private_details = any(
                 session.query(model).filter_by(asset_id=record.id).first() is not None
                 for model in (
@@ -550,7 +602,7 @@ class SqliteAssetRepository:
                     "Este ativo é particular de outra carteira e não pode ser reutilizado. "
                     "Cadastre-o com um ticker local exclusivo."
                 )
-            return self._to_domain(record)
+            return self._scoped_asset(session, record)
 
     def link(self, asset_id: UUID) -> None:
         initialize_database()
@@ -569,7 +621,7 @@ class SqliteAssetRepository:
                 .filter(PortfolioAssetRecord.portfolio_id == self.portfolio_id)
                 .all()
             )
-            return tuple(self._to_domain(record) for record in records)
+            return tuple(self._scoped_asset(session, record) for record in records)
 
     @staticmethod
     def list_all() -> tuple[Asset, ...]:
@@ -579,12 +631,39 @@ class SqliteAssetRepository:
                 for record in session.query(AssetRecord).all()
             )
 
+    def _storage_ticker(self, ticker: str) -> str:
+        return f"@{self.portfolio_id}:{ticker.strip().upper()}" if saas_enabled() else ticker
+
+    def _save_metadata(self, session, asset):
+        link = session.get(PortfolioAssetRecord, (self.portfolio_id, str(asset.id)))
+        if link is None:
+            raise PermissionError("Asset is not part of the selected portfolio")
+        session.merge(
+            PortfolioAssetMetadataRecord(
+                portfolio_id=self.portfolio_id,
+                asset_id=str(asset.id),
+                payload=json.dumps({"name": asset.name, "asset_class": asset.asset_class.value}),
+            )
+        )
+
+    def _scoped_asset(self, session, record):
+        asset = self._to_domain(record)
+        if saas_enabled():
+            metadata = session.get(PortfolioAssetMetadataRecord, (self.portfolio_id, record.id))
+            if metadata:
+                values = json.loads(metadata.payload)
+                asset.name = values["name"]
+                asset.asset_class = AssetClass(values["asset_class"])
+        return asset
+
     @staticmethod
     def _to_domain(record: AssetRecord) -> Asset:
         created_at = SqliteAssetRepository._utc(record.created_at)
         return Asset(
             id=UUID(record.id),
-            ticker=Ticker(record.ticker),
+            ticker=Ticker(
+                record.ticker.split(":", 1)[-1] if record.ticker.startswith("@") else record.ticker
+            ),
             name=record.name,
             asset_type=AssetType(record.asset_type),
             valuation_method=ValuationMethod(
@@ -1012,10 +1091,14 @@ class SqliteFinancialEventRepository:
         return deleted
 
     def list(self) -> tuple[FinancialEvent, ...]:
+        if saas_enabled():
+            return self._list_uncached()
         return _cached_financial_events(database_url(), self.portfolio_id)
 
     def _list_uncached(self) -> tuple[FinancialEvent, ...]:
-        assets = {str(asset.id): asset for asset in SqliteAssetRepository.list_all()}
+        assets = {
+            str(asset.id): asset for asset in SqliteAssetRepository(UUID(self.portfolio_id)).list()
+        }
         with SessionFactory() as session:
             rows = (
                 session.query(FinancialEventRecord)
@@ -1056,6 +1139,10 @@ class SqliteMarketPriceRepository:
         """Persist a historical quote batch in one transaction."""
         if not prices:
             return
+        if saas_enabled():
+            for price in prices:
+                self.save(price)
+            return
         initialize_database()
         from sqlalchemy import insert
 
@@ -1080,9 +1167,16 @@ class SqliteMarketPriceRepository:
 
     def save(self, price: MarketPrice) -> None:
         initialize_database()
+        from income_analytics.application.portfolio_context import current_portfolio_id
+
+        record_type = PortfolioMarketPriceRecord if saas_enabled() else MarketPriceRecord
+        scope = {"portfolio_id": str(current_portfolio_id())} if saas_enabled() else {}
+        if saas_enabled() and current_principal() is None:
+            raise PermissionError("Verified principal required for private valuation")
         with SessionFactory.begin() as session:
             session.merge(
-                MarketPriceRecord(
+                record_type(
+                    **scope,
                     id=str(price.id),
                     asset_id=str(price.asset.id),
                     price=str(price.price.amount),
@@ -1096,10 +1190,79 @@ class SqliteMarketPriceRepository:
         _cached_market_prices_by_asset.cache_clear()
 
     def list(self) -> tuple[MarketPrice, ...]:
-        return _cached_market_prices(database_url())
+        if not saas_enabled():
+            return _cached_market_prices(database_url())
+        from income_analytics.application.portfolio_context import current_portfolio_id
+
+        portfolio_id = str(current_portfolio_id())
+        assets = SqliteAssetRepository(UUID(portfolio_id)).list()
+        by_id = {str(asset.id): asset for asset in assets}
+        by_ticker = {str(asset.ticker): asset for asset in assets}
+        # Only trusted public provenance is reusable across owners. Unclassified
+        # legacy manual prices require explicit review during legacy binding.
+        public_sources = {
+            "brapi",
+            "brapi_public",
+            "b3_cotahist",
+            "B3_COTAHIST",
+            "b3_etf",
+            "yahoo_finance",
+            "coingecko",
+            "twelve_data",
+        }
+        result = []
+        for price in _cached_market_prices(database_url()):
+            own = by_id.get(str(price.asset.id))
+            public = (
+                by_ticker.get(str(price.asset.ticker))
+                if price.provider in public_sources
+                and price.asset.asset_class
+                not in {
+                    AssetClass.FIXED_INCOME,
+                    AssetClass.PENSION,
+                    AssetClass.REAL_ESTATE,
+                }
+                else None
+            )
+            asset = own or public
+            if asset:
+                result.append(
+                    MarketPrice(
+                        id=price.id,
+                        asset=asset,
+                        price=price.price,
+                        effective_date=price.effective_date,
+                        registered_at=price.registered_at,
+                        provider=price.provider,
+                        price_timestamp=price.price_timestamp,
+                    )
+                )
+        with SessionFactory() as session:
+            rows = (
+                session.query(PortfolioMarketPriceRecord).filter_by(portfolio_id=portfolio_id).all()
+            )
+            for row in rows:
+                if row.asset_id in by_id:
+                    result.append(
+                        MarketPrice(
+                            id=UUID(row.id),
+                            asset=by_id[row.asset_id],
+                            price=Money(Decimal(row.price)),
+                            effective_date=row.effective_date,
+                            registered_at=SqliteAssetRepository._utc(row.registered_at),
+                            provider=row.provider,
+                            price_timestamp=row.price_timestamp,
+                        )
+                    )
+        return tuple(sorted(result, key=lambda price: (price.effective_date, price.registered_at)))
 
     def list_by_asset(self) -> dict[UUID, tuple[MarketPrice, ...]]:
         """Return a portfolio-local copy of the cached global quote index."""
+        if saas_enabled():
+            result = {}
+            for price in self.list():
+                result.setdefault(price.asset.id, []).append(price)
+            return {key: tuple(values) for key, values in result.items()}
         return dict(_cached_market_prices_by_asset(database_url()))
 
 
@@ -1431,6 +1594,8 @@ class SqlitePortfolioDataRepository:
         initialize_database()
         with SessionFactory.begin() as session:
             for model in (
+                PortfolioAssetMetadataRecord,
+                PortfolioMarketPriceRecord,
                 ImportedPaidIncomeRecord,
                 B3ImportedRecordRow,
                 FinancialEventRecord,
@@ -1438,6 +1603,9 @@ class SqlitePortfolioDataRepository:
                 FixedIncomeDetailsRecord,
                 PensionPlanDetailsRecord,
                 RealEstateDetailsRecord,
+                PensionInvestmentVehicleRecord,
+                IncomeStarterJourneyProgressRecord,
+                PortfolioStrategyMetadataRecord,
                 AssetTargetRecord,
                 AllocationTargetRecord,
                 B3ImportBatchRecord,
@@ -1447,6 +1615,14 @@ class SqlitePortfolioDataRepository:
             ):
                 session.query(model).filter_by(portfolio_id=self.portfolio_id).delete()
             session.query(PortfolioAssetRecord).filter_by(portfolio_id=self.portfolio_id).delete()
+            if saas_enabled():
+                # Only newly namespaced, now-unreferenced user assets. Never
+                # delete legacy/shared canonical records or another wallet's data.
+                session.query(AssetRecord).filter(
+                    AssetRecord.ticker.like(f"@{self.portfolio_id}:%"),
+                    ~AssetRecord.id.in_(session.query(PortfolioAssetRecord.asset_id)),
+                    ~AssetRecord.id.in_(session.query(MarketPriceRecord.asset_id)),
+                ).delete(synchronize_session=False)
             portfolio = session.get(PortfolioRecord, self.portfolio_id)
             if portfolio is not None:
                 portfolio.base_currency = "BRL"

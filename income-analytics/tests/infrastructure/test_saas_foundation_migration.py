@@ -73,10 +73,10 @@ def test_identity_constraints_and_rollback_refuses_data_loss(tmp_path):
         db.execute("PRAGMA foreign_keys=ON")
         a, b = str(uuid4()), str(uuid4())
         db.executemany("INSERT INTO users(id) VALUES (?)", [(a,), (b,)])
-        db.execute("INSERT INTO auth_identities VALUES (?,?,?,?)", (str(uuid4()), a, "idp", "sub"))
+        db.execute("INSERT INTO auth_identities(id,user_id,issuer,subject) VALUES (?,?,?,?)", (str(uuid4()), a, "idp", "sub"))
         with pytest.raises(sqlite3.IntegrityError):
             db.execute(
-                "INSERT INTO auth_identities VALUES (?,?,?,?)", (str(uuid4()), b, "idp", "sub")
+                "INSERT INTO auth_identities(id,user_id,issuer,subject) VALUES (?,?,?,?)", (str(uuid4()), b, "idp", "sub")
             )
         db.commit()
     with pytest.raises(subprocess.CalledProcessError):

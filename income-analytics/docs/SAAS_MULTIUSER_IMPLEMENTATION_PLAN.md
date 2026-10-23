@@ -1,5 +1,7 @@
 # Plano de implementação SaaS multiusuário — Income Free + Pro
 
+> Atualização Fase 2: o usuário adotou Firebase Authentication. Ver [configuração](FIREBASE_AUTH_SETUP.md) e [controles implementados](FIREBASE_AUTH_SECURITY.md). Este documento mantém a fotografia e as propostas da Fase 1.
+
 **Fase 1, 23/10/2026. Estado: desenho proposto, sem autenticação/migração aplicada e sem fornecedor contratado.** Este plano parte da [auditoria real](SAAS_MULTIUSER_ARCHITECTURE_AUDIT.md), das [35 tabelas](SAAS_MULTIUSER_DATA_INVENTORY.md) e das [96 rotas](SAAS_MULTIUSER_ENDPOINT_INVENTORY.md). Não é uma declaração de que os controles abaixo já existam.
 
 ## 1. Decisões antes de ativar autenticação e migrar titularidade

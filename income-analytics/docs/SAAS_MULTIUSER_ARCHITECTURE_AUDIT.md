@@ -1,5 +1,7 @@
 # Auditoria de arquitetura SaaS multiusuário — Fase 1
 
+> Atualização Fase 2: o usuário adotou Firebase Authentication. Ver [configuração](FIREBASE_AUTH_SETUP.md) e [controles implementados](FIREBASE_AUTH_SECURITY.md). Este documento mantém a fotografia e as propostas da Fase 1.
+
 **Data:** 23/10/2026. **Resultado:** base multiportfólio existente e reaproveitável; **não pronta para usuários independentes nem para publicação na internet**. A segurança atual depende de acesso confiável à instalação local/rede privada. O plano comercial Free/Pro ainda não existe no backend.
 
 ## 1. Escopo, revisão e método

@@ -36,6 +36,8 @@ class AuthIdentityRecord(Base):
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     issuer: Mapped[str] = mapped_column(String(512), nullable=False)
     subject: Mapped[str] = mapped_column(String(255), nullable=False)
+    approved_methods: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    link_confirmed_until: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
 
 class PortfolioRecord(Base):
@@ -627,3 +629,61 @@ class CompanyNormalizationValidationRecord(Base):
     status: Mapped[str] = mapped_column(String(32))
     notes: Mapped[str | None] = mapped_column(Text)
     validated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AuthSessionRecord(Base):
+    __tablename__ = "auth_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    csrf_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    expires_at: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class SecurityAuditRecord(Base):
+    __tablename__ = "security_audit"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    actor_id: Mapped[str | None] = mapped_column(String(36))
+    action: Mapped[str] = mapped_column(String(64), nullable=False)
+    evidence_ref: Mapped[str | None] = mapped_column(String(64))
+    resource_id: Mapped[str | None] = mapped_column(String(36))
+    created_at: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class SecurityRateLimitRecord(Base):
+    __tablename__ = "security_rate_limits"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    window: Mapped[int] = mapped_column(Integer, primary_key=True)
+    count: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class PortfolioAssetMetadataRecord(Base):
+    __tablename__ = "portfolio_asset_metadata"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+    )
+    portfolio_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    asset_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    payload: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class PortfolioMarketPriceRecord(Base):
+    __tablename__ = "portfolio_market_prices"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["portfolio_id", "asset_id"],
+            ["portfolio_assets.portfolio_id", "portfolio_assets.asset_id"],
+            ondelete="RESTRICT",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    asset_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    price: Mapped[str] = mapped_column(String(40), nullable=False)
+    effective_date: Mapped[date] = mapped_column(Date, nullable=False)
+    registered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    provider: Mapped[str | None] = mapped_column(String(80))
+    price_timestamp: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

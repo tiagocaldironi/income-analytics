@@ -86,6 +86,7 @@ from income_analytics.domain.read_models.portfolio_projection import PortfolioPr
 from income_analytics.domain.read_models.position_projection import PositionProjection
 from income_analytics.domain.recurring_rule import RecurrenceFrequency, RecurringRule
 from income_analytics.domain.value_objects.money import Money
+from income_analytics.infrastructure.auth_config import saas_enabled
 from income_analytics.infrastructure.b3_benchmark_data import (
     B3BenchmarkDataProvider,
     IVVB11BenchmarkDataProvider,
@@ -121,6 +122,7 @@ from income_analytics.infrastructure.sqlite_repositories import (
     SqliteProviderHealthRepository,
 )
 from income_analytics.infrastructure.twelve_data_us_market_data import TwelveDataUSMarketProvider
+from income_analytics.infrastructure.upload_safety import validate_workbook
 
 router = APIRouter(prefix="/api", tags=["Portfolio"])
 logger = logging.getLogger(__name__)
@@ -133,6 +135,8 @@ class _PortfolioSessionProxy:
 
     def _target(self) -> PortfolioSession:
         current = get_request_session()
+        if current is None and saas_enabled():
+            raise PermissionError("SaaS requires an authorized portfolio context")
         if current is None:
             current = PortfolioSession(portfolio_id=current_portfolio_id(), persistent=True)
         return current  # type: ignore[return-value]
@@ -1362,9 +1366,7 @@ def rebuild_portfolio_dashboard() -> dict[str, object]:
 
 
 @router.get("/portfolio/holdings")
-def get_portfolio_holdings(
-    request: Request = None, as_of: date | None = None
-) -> dict[str, object]:
+def get_portfolio_holdings(request: Request = None, as_of: date | None = None) -> dict[str, object]:
     """Read the current holdings projection; historical as-of views remain computed."""
     if as_of is not None:
         return _build_portfolio_holdings(as_of=as_of)
@@ -2328,6 +2330,8 @@ def _irpf_brazilian_stocks_import(
 ) -> tuple[IrpfBrazilianStockPosition, ...]:
     try:
         workbook = b64decode(payload.workbook_base64, validate=True)
+        if saas_enabled():
+            validate_workbook(workbook)
     except Base64Error as error:
         raise HTTPException(status_code=422, detail="Arquivo de importação inválido.") from error
     if len(workbook) > 10_000_000:
@@ -2401,6 +2405,8 @@ def import_irpf_brazilian_stocks(
 def _decode_b3_workbook(payload: B3ImportPreviewInput) -> bytes:
     try:
         workbook = b64decode(payload.workbook_base64, validate=True)
+        if saas_enabled():
+            validate_workbook(workbook)
     except Base64Error as error:
         raise HTTPException(status_code=422, detail="Arquivo B3 inválido.") from error
     if len(workbook) > 12_000_000:
@@ -2556,6 +2562,8 @@ def preview_b3_import(payload: B3ImportPreviewInput) -> dict[str, object]:
     )
     try:
         rows = parser.parse(workbook)
+        if saas_enabled() and len(rows) > 5000:
+            raise HTTPException(413, "Divida a planilha em lotes de até 5.000 linhas.")
     except B3LayoutError as error:
         raise HTTPException(
             status_code=422, detail={"code": error.code, "message": str(error)}
@@ -2567,9 +2575,10 @@ def preview_b3_import(payload: B3ImportPreviewInput) -> dict[str, object]:
         file_name=payload.file_name,
         report_type=report_type,
         rows=rows,
-        persist=False,
+        persist=saas_enabled(),
     )
-    _b3_preview_cache[(current_portfolio_id(), batch.id)] = (batch, records)
+    if not saas_enabled():
+        _b3_preview_cache[(current_portfolio_id(), batch.id)] = (batch, records)
     return _serialize_b3_batch(batch, records)
 
 
@@ -2834,6 +2843,8 @@ def _refresh_open_fx_rates(*, today: date) -> list[dict[str, object]]:
 
 
 def run_daily_market_data_refresh() -> None:
+    if saas_enabled():
+        return
     """Best-effort startup refresh; persist outcomes without stopping other work."""
 
     for portfolio in SqlitePortfolioRepository().list(include_archived=False):
@@ -2903,6 +2914,8 @@ def _run_daily_market_data_refresh_for_portfolio() -> None:
 
 
 def run_daily_recurring_rule_execution() -> None:
+    if saas_enabled():
+        return
     """Materialize due occurrences from rules that are still within their validity."""
     for portfolio in SqlitePortfolioRepository().list(include_archived=False):
         token = set_active_portfolio_id(portfolio.id)
@@ -2917,6 +2930,8 @@ def run_daily_recurring_rule_execution() -> None:
 
 
 def run_daily_paid_income_sync() -> None:
+    if saas_enabled():
+        return
     """Best-effort daily sync; the service short-circuits while disabled."""
     settings = paid_income_settings.get()
     if not settings.enabled or not settings.api_token:
@@ -2952,6 +2967,8 @@ def refresh_historical_market_cache(*, reference_date: date | None = None) -> bo
 
 
 def run_scheduled_historical_market_refresh() -> None:
+    if saas_enabled():
+        return
     """Refresh B3's daily official file around 23:59 without blocking the API."""
     refresh_historical_market_cache()
     while True:
@@ -2974,6 +2991,8 @@ def run_scheduled_historical_market_refresh() -> None:
 
 
 def run_daily_reference_data_refresh() -> None:
+    if saas_enabled():
+        return
     """Refresh only references that lack coverage for their expected cadence."""
     today = date.today()
     refresh_plan = (
@@ -3060,6 +3079,8 @@ def _refresh_fixed_income_reference_history(
 
 
 def run_fixed_income_reference_backfill() -> None:
+    if saas_enabled():
+        return
     """Restore missing official history for contracts created before this rollout."""
     oldest_by_benchmark: dict[str, date] = {}
     for details in session._fixed_income_details.values():
@@ -3084,6 +3105,8 @@ def run_fixed_income_reference_backfill() -> None:
 
 
 def run_reference_data_bootstrap() -> None:
+    if saas_enabled():
+        return
     """Load current and historical official series without concurrent BCB calls."""
     portfolio_start = min((event.effective_date for event in session._events), default=None)
     if portfolio_start is not None:
@@ -3796,13 +3819,10 @@ def _cached_performance_comparison(
         )
         for item in AssetClass
         if any(
-            event.asset is not None and event.asset.asset_class is item
-            for event in session._events
+            event.asset is not None and event.asset.asset_class is item for event in session._events
         )
     }
-    all_start_dates = [
-        event.effective_date for event in session._events if event.asset is not None
-    ]
+    all_start_dates = [event.effective_date for event in session._events if event.asset is not None]
     comparison["available_start_dates"] = {
         "ALL": min(all_start_dates).isoformat() if all_start_dates else None,
         **{name: value.isoformat() for name, value in class_start_dates.items()},

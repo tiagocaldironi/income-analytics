@@ -55,6 +55,18 @@ def initialize_database() -> None:
         database_path = database_path.resolve()
         if _initialized_database_path == database_path:
             return
+        from income_analytics.infrastructure.auth_config import saas_enabled
+
+        if saas_enabled():
+            script = ScriptDirectory.from_config(config)
+            with engine.connect() as connection:
+                revision = MigrationContext.configure(connection).get_current_revision()
+            if revision != script.get_current_head():
+                raise RuntimeError(
+                    "SaaS requires an explicitly migrated database; run reviewed Alembic deployment"
+                )
+            _initialized_database_path = database_path
+            return
         if (
             "assets" in inspect(engine).get_table_names()
             and "alembic_version" not in inspect(engine).get_table_names()
