@@ -9,6 +9,7 @@ Ambiente: Windows, Python 3.14, SQLite, Node 24, Firebase Admin Python 7.7.0 e A
 | Regressão dirigida ampla | **134 testes Python passaram**: domínio, segurança, persistência, multiportfólio, TWR/múltiplas moedas, reconstrução histórica, explicação patrimonial e contratos do frontend |
 | Rechecagem após endurecer cookie/revogação e offload de I/O | **26 testes passaram**: segurança, API multiportfólio local e escopo persistido. São testes repetidos/adicionais, não somar como contagem de casos únicos |
 | Firebase real emulado — **4 testes passaram**, incluindo ações OOB de verificação e recuperação | Dois usuários de senha distintos, e-mail obrigatório, quatro carteiras, Google sintético, confirmação de vinculação, conta desativada e revogação pelo Admin SDK aprovados |
+| Contraste das telas de conta | Teste WCAG AA de texto, links, limites de campos e foco passou nos dois temas |
 | Cliente BFF Node | CSRF, troca de token somente em memória, seleção de carteira e limpeza de logout passaram |
 | Regressão HTML | Nome de ativo com marcação inerte é escapado; não se torna elemento HTML |
 | Migração em cópia consistente do banco pessoal | `0023 → 0025 → 0023`; hashes de conteúdo das **34 tabelas de dados** preservados, `integrity_check=ok`, zero violações de FK. Cópia removida; origem não migrada |
@@ -49,3 +50,20 @@ O fluxo de Google no emulador usa identidade sintética. OAuth/consentimento Goo
 ## Gate de liberação
 
 Cadastro público de produção permanece fechado por padrão. Nenhum merge, deploy, migração do banco em uso, vínculo de carteira real, billing ou integração bancária foi executado. Exigir projeto e configuração reais, revisão de infraestrutura/limites/licenças, validação privada com duas contas reais e fechamento da pendência de certificação antes de publicar.
+
+
+## Evidências visuais da interface
+
+Capturas reais do navegador, com dados de demonstração em banco descartável:
+
+| Desktop claro | Desktop escuro |
+|---|---|
+| ![Entrada desktop clara](evidence/firebase-auth/desktop-light.png) | ![Entrada desktop escura](evidence/firebase-auth/desktop-dark.png) |
+
+| Mobile claro | Mobile escuro | Primeiro acesso |
+|---|---|---|
+| ![Entrada mobile clara](evidence/firebase-auth/mobile-light.png) | ![Entrada mobile escura](evidence/firebase-auth/mobile-dark.png) | ![Onboarding mobile](evidence/firebase-auth/onboarding-mobile-light.png) |
+
+PRs empilhados: fundações #15 → API/autorização #16 → interface/primeiro acesso. Não fazer merge sem revisar a base e os gates de implantação. Os screenshots não contêm dados de investimento de produção.
+
+Verificações finais de interface: **28 testes de aceitação passaram**, quatro scripts Node passaram (BFF, carteira, HTML e contraste) e os módulos JavaScript modificados passaram por verificação de sintaxe.

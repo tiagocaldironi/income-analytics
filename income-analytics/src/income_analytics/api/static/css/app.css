@@ -1029,3 +1029,6 @@ html[data-theme="light"] .fixed-income-big-number,html[data-theme="light"] .unde
   .asset-ranking-detail, .bridge-answer-children { padding-left:12px; }
   .understand-answer-heading h2 { font-size:1.05rem; }
 }
+
+.auth-pending body{visibility:hidden}
+.account-access{color:var(--ia-text-primary);padding:12px;font-size:.85rem;white-space:nowrap}

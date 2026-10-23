@@ -225,3 +225,13 @@ app.mount("/static", NoCacheStaticFiles(directory=static_directory), name="stati
 @app.get("/", include_in_schema=False)
 def dashboard() -> FileResponse:
     return FileResponse(static_directory / "index.html", headers={"Cache-Control": "no-store"})
+
+
+@app.get("/entrar", include_in_schema=False)
+@app.get("/criar-conta", include_in_schema=False)
+@app.get("/confirmar-email", include_in_schema=False)
+@app.get("/recuperar-senha", include_in_schema=False)
+@app.get("/primeiro-acesso", include_in_schema=False)
+@app.get("/conta", include_in_schema=False)
+def account_page() -> FileResponse:
+    return FileResponse(static_directory / "account.html", headers={"Cache-Control": "no-store"})

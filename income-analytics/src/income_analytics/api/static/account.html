@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light"><title>Sua conta · Income Analytics</title>
+<link rel="stylesheet" href="/static/css/account.css"></head>
+<body>
+<header class="account-header"><a class="brand" href="/" aria-label="Income Analytics, início"><span aria-hidden="true">◈</span> INCOME ANALYTICS</a><button type="button" id="theme" aria-label="Alternar tema">◐</button></header>
+<main class="account-layout">
+<section class="account-story"><p class="eyebrow">SEU PATRIMÔNIO, COM CLAREZA</p><h1>Mais espaço para <br>o seu futuro.</h1><p>Organize seus investimentos e acompanhe suas escolhas, em um lugar que é seu.</p><div class="story-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><p class="story-note">Income Free · cadastro manual, carteiras e análises.</p></section>
+<section class="account-card" aria-labelledby="account-title" aria-busy="true">
+<p class="eyebrow" id="account-eyebrow">BEM-VINDO AO INCOME</p><h2 id="account-title">Entrar</h2><p id="account-description">Continue de onde você parou.</p>
+<p id="account-message" role="status" aria-live="polite"></p>
+<div id="login-controls" hidden>
+<button type="button" id="google" class="google-button"><span aria-hidden="true">G</span> Continuar com Google</button><p class="separator"><span>ou use seu e-mail</span></p>
+<form id="credentials"><label for="email">E-mail</label><input type="email" id="email" autocomplete="email" required maxlength="254"><label for="password">Senha</label><input type="password" id="password" autocomplete="current-password" required minlength="8" maxlength="128"><button type="submit" id="submit">Entrar</button></form>
+<nav class="account-links" aria-label="Acesso"><a href="/recuperar-senha" id="recover-link">Esqueci minha senha</a><a href="/criar-conta" id="signup-link">Criar conta Free</a><a href="/entrar" id="login-link" hidden>Já tenho uma conta</a></nav>
+</div>
+<div id="verify-controls" hidden><p>Abra a mensagem enviada para o seu e-mail e confirme o endereço. Depois, volte para continuar.</p><button id="verified" type="button">Já confirmei meu e-mail</button><button id="resend" type="button" class="secondary">Reenviar confirmação</button><a href="/entrar">Voltar para entrar</a></div>
+<form id="first-wallet" hidden><label for="wallet-name">Nome da sua primeira carteira</label><input id="wallet-name" autocomplete="off" maxlength="100" required placeholder="Meus investimentos"><p>Comece com uma carteira vazia. Você poderá criar outras quando quiser.</p><button type="submit">Criar carteira e começar</button></form>
+<div id="account-controls" hidden><p>Seu plano <strong>Income Free</strong> inclui cadastro manual, carteiras e análises.</p><a class="button" href="/">Abrir minhas carteiras</a><h3>Métodos de acesso</h3><p>Confirme seu acesso atual antes de adicionar outro método. Contas distintas não são unidas pelo e-mail.</p><form id="link-credentials"><label for="link-email">E-mail do acesso atual</label><input id="link-email" type="email" autocomplete="email" required><label for="link-password">Senha atual</label><input id="link-password" type="password" autocomplete="current-password" required><button type="submit" class="secondary">Confirmar acesso por senha</button></form><button id="confirm-google" type="button" class="secondary">Confirmar acesso com Google</button><div id="link-actions" hidden><button id="link-google" type="button">Adicionar Google à minha conta</button><form id="link-password-form"><label for="new-password">Adicionar uma senha</label><input type="password" id="new-password" autocomplete="new-password" minlength="8" maxlength="128" required><button type="submit" class="secondary">Adicionar senha ao meu e-mail confirmado</button></form></div><h3>Sessões</h3><button id="logout" type="button" class="secondary">Sair deste dispositivo</button><button id="revoke" type="button" class="secondary">Encerrar todos os acessos</button></div>
+<p class="privacy-note">Suas carteiras ficam disponíveis apenas na sua conta.</p>
+</section></main><script type="module" src="/static/js/account.js"></script></body></html>
