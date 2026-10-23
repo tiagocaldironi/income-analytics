@@ -67,3 +67,13 @@ Capturas reais do navegador, com dados de demonstração em banco descartável:
 PRs empilhados: fundações #15 → API/autorização #16 → interface/primeiro acesso. Não fazer merge sem revisar a base e os gates de implantação. Os screenshots não contêm dados de investimento de produção.
 
 Verificações finais de interface: **28 testes de aceitação passaram**, quatro scripts Node passaram (BFF, carteira, HTML e contraste) e os módulos JavaScript modificados passaram por verificação de sintaxe.
+
+## Continuação: projeto income-analytics-c0150 (23/10/2026)
+
+O operador informou que Google e Email/Password estão habilitados nesse projeto. Nesta estação, não foram localizados os identificadores públicos Web nas variáveis do processo/usuário/máquina nem nos anexos textuais consultados. GOOGLE_APPLICATION_CREDENTIALS também está ausente. Não foi aberto, copiado ou versionado JSON administrativo anterior. A revogação da chave compartilhada e o caminho de uma chave nova precisam ser confirmados pelo operador; datas de arquivo não comprovam rotação.
+
+A integração Admin existente usa Application Default Credentials, portanto aceita GOOGLE_APPLICATION_CREDENTIALS sem incorporar a chave ao código. O .env.example agora registra o projeto informado e o kill switch explícito em 0, mantendo os demais valores como placeholders. Esse arquivo é documentação: não altera variáveis do serviço pessoal. Na ausência da flag, o backend já mantém o cadastro fechado.
+
+Reexecução desta continuação: **16 testes Python passaram** (autorização Firebase com provedor substituto determinístico, vínculo legado em SQLite temporário e ownership). O conftest gera um novo arquivo SQLite no diretório temporário antes de importar a aplicação. **Dois scripts Node passaram**: sessão BFF/CSRF/limpeza de logout e contraste da conta em ambos os temas. Houve três avisos de depreciação, sem falhas.
+
+Não foram repetidos nesta continuação os testes do emulador. Os resultados anteriores do emulador permanecem evidência separada; não validam OAuth Google real. Login Google, senha, entrega de e-mails, cookies e isolamento contra o projeto real ainda estão bloqueados pela configuração/credencial ausente. Não houve migração no banco pessoal, mudança no motor financeiro, merge nem publicação. Antes da exposição pública, continuam necessários os testes reais com dois usuários e os demais gates de liberação já descritos neste documento.
