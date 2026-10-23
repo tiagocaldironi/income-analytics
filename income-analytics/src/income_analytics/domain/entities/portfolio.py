@@ -19,3 +19,4 @@ class Portfolio:
     status: str = "ACTIVE"
     created_at: datetime = field(default_factory=_now_utc)
     updated_at: datetime = field(default_factory=_now_utc)
+    owner_user_id: UUID | None = None

@@ -20,9 +20,28 @@ from sqlalchemy.orm import Mapped, mapped_column
 from income_analytics.infrastructure.database import Base
 
 
+class UserRecord(Base):
+    __tablename__ = "users"
+    __table_args__ = (CheckConstraint("status IN ('ACTIVE', 'SUSPENDED')", name="ck_users_status"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="ACTIVE")
+
+
+class AuthIdentityRecord(Base):
+    __tablename__ = "auth_identities"
+    __table_args__ = (
+        UniqueConstraint("issuer", "subject", name="uq_auth_identity_issuer_subject"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
+    issuer: Mapped[str] = mapped_column(String(512), nullable=False)
+    subject: Mapped[str] = mapped_column(String(255), nullable=False)
+
+
 class PortfolioRecord(Base):
     __tablename__ = "portfolios"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    owner_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     base_currency: Mapped[str] = mapped_column(String(3), nullable=False, default="BRL")
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="ACTIVE")
