@@ -1,7 +1,7 @@
 /* Income Design System V2. Semantic aliases keep legacy consumers compatible. */
 :root{--income-navy:#102743;--income-action:#7daeff;--income-action-bg:#275edb;--income-on-action:#fff;--income-positive:#78ddb1;--income-negative:#ffaaa1;--income-bg:#0b1423;--income-surface:#111f32;--income-raised:#192b43;--income-text:#edf3fb;--income-secondary:#acbdd3;--income-line:#344963;--income-context:#172f50;--income-focus:#9fc6ff;--income-radius:18px;--income-shadow:0 8px 26px #00000012;--income-space:clamp(16px,2.3vw,28px)}
 html[data-theme="light"]{--income-action:#174faf;--income-action-bg:#245bd6;--income-positive:#176348;--income-negative:#b42318;--income-bg:#f3f6fa;--income-surface:#fff;--income-raised:#eaf0f6;--income-text:#172b46;--income-secondary:#52657b;--income-line:#cbd5e1;--income-context:#eaf1ff;--income-focus:#174b80}
-html.income-v2{--ia-bg-primary:var(--income-bg);--ia-bg-secondary:var(--income-bg);--ia-surface:var(--income-surface);--ia-surface-elevated:var(--income-raised);--ia-surface-hover:var(--income-raised);--ia-text-primary:var(--income-text);--ia-text-secondary:var(--income-secondary);--ia-border:var(--income-line);--ia-brand:var(--income-action);--ia-info:var(--income-focus);--ia-positive:var(--income-positive);--ia-negative:var(--income-negative);background:var(--income-bg);color:var(--income-text)}
+html.income-v2{--ia-bg-primary:var(--income-bg);--ia-bg-secondary:var(--income-bg);--ia-surface:var(--income-surface);--ia-surface-elevated:var(--income-raised);--ia-surface-hover:var(--income-raised);--ia-text-primary:var(--income-text);--ia-text-secondary:var(--income-secondary);--ia-border:var(--income-line);--ia-brand:var(--income-action);--ia-accent:var(--income-action);--ia-info:var(--income-focus);--ia-positive:var(--income-positive);--ia-negative:var(--income-negative);background:var(--income-bg);color:var(--income-text)}
 .income-card{background:var(--income-surface);border:1px solid var(--income-line);border-radius:var(--income-radius);padding:var(--income-space);box-shadow:var(--income-shadow)}
 .income-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid transparent;border-radius:10px;background:var(--income-action-bg);color:var(--income-on-action);font:inherit;font-size:.88rem;font-weight:650;text-decoration:none;cursor:pointer}
 .income-button.secondary{border-color:var(--income-line);background:var(--income-surface);color:var(--income-text)}
@@ -13,3 +13,18 @@ html.income-v2{--ia-bg-primary:var(--income-bg);--ia-bg-secondary:var(--income-b
 .income-v2 .message-error{color:var(--income-negative);background:var(--income-surface);border:1px solid currentColor}
 .income-v2 .message-success{color:var(--income-positive);background:var(--income-surface);border:1px solid currentColor}
 @media(prefers-reduced-motion:reduce){.income-v2 *{scroll-behavior:auto!important;animation-duration:0s!important;transition:none!important}}
+
+.income-v2 .wallet-settings-icon{background:var(--income-context);border-color:var(--income-line);color:var(--income-action)}
+
+/* Quantitative tools use the same surfaces and text tokens in both themes. */
+.income-v2 [data-page=ferramentas] .card,.income-v2 #magic-formula-ranking,.income-v2 .mf-summary article,.income-v2 .mf-mobile-card,.income-v2 .mf-company-drawer,.income-v2 .mf-detail-section,.income-v2 .mf-detail-metrics article{background:var(--income-surface);border-color:var(--income-line);color:var(--income-text)}
+.income-v2 .mf-table-wrap table,.income-v2 .mf-mobile-card,.income-v2 .mf-toolbar label{color:var(--income-text)}
+.income-v2 .mf-table-wrap th{background:var(--income-raised);color:var(--income-secondary)}
+.income-v2 .mf-table-wrap td{color:var(--income-text);border-color:var(--income-line)}
+.income-v2 .mf-table-wrap small,.income-v2 .mf-summary span,.income-v2 .mf-note,.income-v2 .mf-drawer-eyebrow,.income-v2 .mf-detail-section small,.income-v2 .mf-detail-section dt,.income-v2 .mf-detail-metrics span,.income-v2 .mf-global-rank span{color:var(--income-secondary)}
+.income-v2 .mf-toolbar input[type=checkbox]{width:18px;height:18px;min-height:18px;flex:none;margin:0;accent-color:var(--income-action-bg)}
+.income-v2 .mf-toolbar input[type=search]{background:var(--income-surface);color:var(--income-text);border-color:var(--income-line)}
+.income-v2 .mf-global-rank,.income-v2 .page-intro .eyebrow{color:var(--income-action)}
+.income-v2 .mf-point-in-time{background:var(--income-context);border-color:var(--income-action);color:var(--income-text)}
+.income-v2 .mf-company-drawer .mf-dialog-close{background:var(--income-raised);color:var(--income-text);border-color:var(--income-line)}
+.income-v2 [data-page^=tools-magic-formula] a{color:var(--income-action)}
