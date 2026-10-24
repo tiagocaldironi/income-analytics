@@ -14,6 +14,12 @@ function pane(id, title, description) {
   $("#account-description").textContent = description;
 }
 function readableError(error) {
+  if (error.code === "auth/internal-error") return "O serviço de acesso encontrou um erro. Se estiver no navegador interno, abra este endereço no Chrome ou Edge e tente novamente.";
+  if (error.code === "auth/unauthorized-domain") return "Este endereço ainda não está autorizado para entrar com Google. A configuração do acesso precisa ser concluída.";
+  if (error.code === "auth/popup-blocked") return "O navegador bloqueou a janela do Google. Permita pop-ups para este site ou abra o Income no Chrome ou Edge.";
+  if (error.code === "auth/operation-not-supported-in-this-environment") return "Abra o Income no Chrome ou Edge para entrar com Google.";
+  if (error.code === "auth/operation-not-allowed") return "Este método de acesso ainda não está habilitado. Entre por outro método ou contate o suporte.";
+  if (error.code === "auth/network-request-failed") return "Não foi possível conectar ao serviço de acesso. Verifique sua conexão e tente novamente.";
   if (error.code === "auth/account-exists-with-different-credential" || error.code === "auth/credential-already-in-use")
     return "Entre pelo método que você já usa. Você pode adicionar outro em sua conta, sem unir contas diferentes.";
   if (error.code === "auth/too-many-requests") return "Muitas tentativas. Aguarde antes de tentar novamente.";
@@ -30,7 +36,11 @@ async function action(callback) {
   $(".account-card").setAttribute("aria-busy", "true");
   message("");
   try { await callback(); }
-  catch (error) { message(readableError(error), true); }
+  catch (error) {
+    // Codes only: never log credentials, tokens or the provider error object.
+    if (/^auth\/[a-z0-9-]+$/.test(error.code || "")) console.warn("Income sign-in:", error.code);
+    message(readableError(error), true);
+  }
   finally {
     busy = false;
     buttons.forEach(button => { button.disabled = false; });
