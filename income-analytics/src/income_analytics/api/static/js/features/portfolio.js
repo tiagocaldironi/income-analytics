@@ -26,7 +26,13 @@ const portfolioBenchmarkSelection = new Set(["portfolio", "CDI", "IBOV", "IFIX"]
 
 export async function loadPortfolio(asOf = "", { refreshAttention = true } = {}) {
   const sequence = ++portfolioLoadSequence;
-  const containers = ["#positions", "#understand-history", "#allocation", "#class-allocation", "#portfolio-evolution", "#portfolio-performance-chart"];
+  ++portfolioPerformanceRequestId;
+  ++equityChartRequestId;
+  const metricIds = ["equity", "home-return", "income", "net-invested"];
+  metricIds.forEach(id => { const node = document.querySelector(`#${id}`); if (node) node.textContent = "Carregando…"; });
+  const insight = document.querySelector("#portfolio-insight");
+  if (insight) { insight.hidden = true; insight.textContent = ""; }
+  const containers = ["#positions", "#understand-history", "#allocation", "#class-allocation", "#portfolio-evolution", "#portfolio-performance-chart", "#monthly-income-chart"];
   containers.forEach(selector => {
     const container = document.querySelector(selector);
     if (container) container.innerHTML = loadingState;
@@ -53,6 +59,7 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
   } catch (error) {
     if (sequence !== portfolioLoadSequence) return;
     console.error("Falha ao renderizar Minha Carteira", error);
+    metricIds.forEach(id => { const node = document.querySelector(`#${id}`); if (node) node.textContent = "Indisponível"; });
     containers.forEach(selector => {
       const container = document.querySelector(selector);
       if (container) container.innerHTML = errorState(error.message);

@@ -200,3 +200,8 @@ html.income-v2[data-theme="light"] .metric.metric-primary>small,html.income-v2[d
  .income-v2 .primary-nav{scrollbar-width:none;-ms-overflow-style:none}
  .income-v2 .primary-nav::-webkit-scrollbar{display:none;width:0;height:0}
 }
+
+.income-v2 .portfolio-insight{margin:20px 0;padding:18px 20px;border:1px solid var(--income-line);border-left:3px solid var(--income-action);border-radius:12px;background:var(--income-surface);color:var(--income-text)}
+.income-v2 .portfolio-insight strong{font-size:.85rem}
+.income-v2 .portfolio-insight p{margin:8px 0;line-height:1.6;font-size:.9rem}
+.income-v2 .portfolio-insight small{display:block;color:var(--income-secondary);line-height:1.6;font-size:.76rem}

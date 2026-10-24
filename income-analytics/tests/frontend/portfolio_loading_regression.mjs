@@ -71,3 +71,16 @@ assert.match(source, /if \(container\) container\.innerHTML = loadingState/);
 assert.match(source, /if \(dashboardTarget\) dashboardTarget\.innerHTML = content/);
 assert.match(source, /if \(legacyStrategyTarget\) \{/);
 console.log("Portfolio loading regression checks passed.");
+
+// A failed request for a new wallet must not retain the prior wallet's figures.
+for (const id of ['equity','home-return','income']) nodes.set(`#${id}`,element());
+const insight=element();insight.hidden=false;insight.textContent='Previous wallet';nodes.set('#portfolio-insight',insight);
+let rejectDashboard;
+context.portfolioApi.dashboard=()=>new Promise((_resolve,reject)=>{rejectDashboard=reject;});
+const failedLoad=context.loadPortfolio();
+assert.equal(nodes.get('#equity').textContent,'Carregando…');assert.equal(insight.hidden,true);assert.equal(insight.textContent,'');
+assert.equal(nodes.get('#monthly-income-chart').innerHTML,'Carregando…');
+rejectDashboard(new Error('offline'));await failedLoad;
+for (const id of ['equity','home-return','income','net-invested']) assert.equal(nodes.get(`#${id}`).textContent,'Indisponível');
+assert.match(nodes.get('#monthly-income-chart').innerHTML,/offline/);
+console.log('Failed wallet refresh clears prior metrics, monthly income and insight.');
