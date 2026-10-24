@@ -31,3 +31,11 @@ Novo lançamento abre o mesmo formulário já existente, pelo evento income:open
 
 ![Ações junto aos ativos](evidence/portfolio-v2-alignment/desktop-actions.png)
 ![Ações no celular](evidence/portfolio-v2-alignment/mobile-actions.png)
+
+## Menu lateral recolhível
+
+Chevron SVG discreto, sem círculo, recolhe a navegação desktop de 218px para 76px e libera 142px para o conteúdo. Os ícones mantêm os nomes acessíveis e os títulos ao passar o mouse; o botão expõe aria-expanded e alterna seu nome entre Recolher/Expandir. A preferência visual é salva localmente e a indisponibilidade do armazenamento não interrompe o menu. Os gráficos são redimensionados após a mudança, sem recarregar dados.
+
+No mobile o controle fica oculto e a navegação existente é preservada. Validação manual: teclado Enter, persistência após reload, SVG do gráfico acompanhando a largura do container e ausência de overflow em desktop/390px. Testes Node cobrem expansão/recolhimento, rótulos, persistência, resize e armazenamento bloqueado; os 28 testes de aceitação passaram.
+
+![Menu compacto](evidence/portfolio-v2-alignment/sidebar-compact.png)
