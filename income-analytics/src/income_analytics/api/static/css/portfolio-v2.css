@@ -205,3 +205,11 @@ html.income-v2[data-theme="light"] .metric.metric-primary>small,html.income-v2[d
 .income-v2 .portfolio-insight strong{font-size:.85rem}
 .income-v2 .portfolio-insight p{margin:8px 0;line-height:1.6;font-size:.9rem}
 .income-v2 .portfolio-insight small{display:block;color:var(--income-secondary);line-height:1.6;font-size:.76rem}
+
+/* A proportional pie beside a readable legend; no minimum slice inflation. */
+.income-v2 .allocation-pie-layout{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr);align-items:center;gap:32px;padding:20px 0;min-width:0}
+.income-v2 .allocation-pie{width:min(100%,300px);aspect-ratio:1;border-radius:50%;justify-self:center}
+.income-v2 .allocation-pie-layout .allocation-legend{width:100%;min-width:0}
+.income-v2 .allocation-pie-layout .allocation-legend>div{grid-template-columns:12px minmax(0,1fr) auto;text-align:left}
+.income-v2 .allocation-pie-layout .allocation-legend span{overflow-wrap:anywhere}
+@media(max-width:700px){.income-v2 .allocation-pie-layout{grid-template-columns:1fr;gap:24px;padding:16px 0}.income-v2 .allocation-pie{width:min(100%,240px)}}
