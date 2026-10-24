@@ -1,0 +1,53 @@
+/* V2 shell and portfolio. Financial components retain their original IDs. */
+.income-v2 body{background:var(--income-bg)}
+.income-v2 main{min-width:0}
+.income-v2 .page-intro{margin-bottom:28px}
+.income-v2 [data-page="minha-carteira"] .page-intro h1{font-size:clamp(1.8rem,3vw,2.5rem);line-height:1.18;max-width:800px;font-weight:750}
+.income-v2 [data-page="minha-carteira"] .page-intro>p:last-of-type{max-width:680px;line-height:1.7;color:var(--income-secondary)}
+.portfolio-welcome-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:22px}
+.portfolio-identity{display:inline-flex;gap:8px;align-items:center;font-size:.85rem;font-weight:650;color:var(--income-secondary)}
+.income-v2 .metrics{gap:16px}
+.income-v2 .metric{position:relative;background:var(--income-surface);border:1px solid var(--income-line);border-radius:var(--income-radius);padding:22px;box-shadow:var(--income-shadow);min-width:0}
+.income-v2 .metric-primary{background:var(--income-navy);color:#fff;border-color:var(--income-navy)}
+.income-v2 .metric-primary small,.income-v2 .metric-primary strong,.income-v2 .metric-primary>span{color:#fff}
+.income-v2 .metric strong{font-size:clamp(1.4rem,2vw,1.9rem);line-height:1.25;margin:16px 0 8px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.income-v2 .metric>small{font-size:.77rem;font-weight:650;text-transform:none;letter-spacing:0}
+.income-v2 .metric>span:not(.metric-icon){font-size:.75rem;line-height:1.5;color:var(--income-secondary)}
+.income-v2 .metric .metric-icon{display:grid;place-items:center;width:36px;height:36px;margin-bottom:16px;border-radius:10px;background:var(--income-context);color:var(--income-action)}
+.income-v2 .metric-primary .metric-icon{background:#ffffff18;color:#b7d5ff}
+.portfolio-analysis{margin:28px 0}
+.analysis-tabs{display:flex;gap:6px;overflow-x:auto;max-width:100%;border-bottom:1px solid var(--income-line);padding:4px 0 12px;scrollbar-width:thin}
+.analysis-tabs button{flex:0 0 auto;min-height:44px;border:1px solid transparent;border-radius:10px;padding:10px 14px;background:transparent;color:var(--income-secondary);font:inherit;font-size:.82rem;font-weight:650;white-space:nowrap}
+.analysis-tabs button[aria-selected="true"]{background:var(--income-context);border-color:var(--income-line);color:var(--income-action)}
+.income-v2 .portfolio-overview{display:block;margin-top:16px}
+.income-v2 .portfolio-overview>.card{background:var(--income-surface);border:1px solid var(--income-line);border-radius:var(--income-radius);padding:var(--income-space);min-width:0;box-shadow:var(--income-shadow)}
+.income-v2 [hidden]{display:none!important}
+.income-v2 .portfolio-overview h2{font-size:1.2rem;line-height:1.4}
+.income-v2 .portfolio-overview .section-heading p{max-width:650px;line-height:1.6;color:var(--income-secondary);font-size:.85rem}
+.income-v2 .portfolio-overview .section-heading a{color:var(--income-action);font-size:.83rem;white-space:nowrap}
+.income-v2 .chart-controls,.income-v2 .portfolio-performance-controls{display:flex;gap:14px;flex-wrap:wrap;align-items:end;margin:18px 0}
+.income-v2 .chart-controls label,.income-v2 .portfolio-performance-controls>label{display:grid;gap:6px;color:var(--income-secondary);font-size:.8rem}
+.income-v2 .chart-controls select,.income-v2 #portfolio-performance-period{min-height:42px;border:1px solid var(--income-line);border-radius:9px;padding:8px 28px 8px 10px;background:var(--income-surface);color:var(--income-text)}
+.income-v2 .portfolio-chart-note{font-size:.78rem;line-height:1.65;color:var(--income-secondary)}
+.income-v2 .equity-echarts,.income-v2 .portfolio-performance-chart{height:clamp(290px,35vw,420px);width:100%;min-width:0}
+.income-v2 .income-month-chart{height:300px;width:100%}
+.income-v2 .allocation-legend{gap:12px}.income-v2 .allocation-legend small{color:var(--income-secondary)}
+.income-v2 .primary-nav a::before{content:none}
+.income-v2 .primary-nav .income-icon{width:20px;height:20px}
+.income-v2 .header-operation{background:var(--income-action-bg);color:#fff;min-height:44px}
+@media(min-width:1100px){
+ .income-v2 .app-header{position:static;height:0;padding:0;border:0;background:transparent}
+ .income-v2 .brand-row{position:fixed;top:0;left:0;right:0;height:76px;z-index:80;max-width:none;padding:14px 28px;background:var(--income-surface);border-bottom:1px solid var(--income-line);gap:18px}
+ .income-v2 .primary-nav{position:fixed;top:76px;left:0;bottom:0;width:218px;max-width:none;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;padding:26px 16px;background:var(--income-surface);border-right:1px solid var(--income-line);border-bottom:0;z-index:60;overflow-y:auto}
+ .income-v2 .primary-nav a{display:flex;align-items:center;gap:12px;min-height:46px;padding:12px;border-radius:10px;color:var(--income-secondary);font-size:.85rem}
+ .income-v2 .primary-nav a[aria-current="page"]{background:var(--income-context);color:var(--income-action);font-weight:700}
+ .income-v2 main{margin:0 0 0 218px;width:calc(100% - 218px);max-width:none;padding:108px clamp(24px,3vw,48px) 48px}
+}
+@media(max-width:700px){
+ .income-v2 .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .income-v2 .metric{padding:16px}.income-v2 .metric strong{font-size:1.2rem}.income-v2 .metric>span:not(.metric-icon){font-size:.72rem}
+ .income-v2 .portfolio-overview .section-heading{align-items:flex-start;gap:12px;flex-direction:column}
+ .income-v2 .portfolio-overview>.card{padding:18px}.income-v2 .portfolio-benchmark-options{display:flex;flex-wrap:wrap;gap:12px}
+ .portfolio-welcome-actions{align-items:flex-start;flex-direction:column}.portfolio-welcome-actions .income-button{width:100%}
+}
+@media(max-width:360px){.income-v2 .metrics{grid-template-columns:1fr}}

@@ -42,7 +42,7 @@ const document = {
   addEventListener() {},
 };
 const context = vm.createContext({
-  console,
+  console, setupPortfolioView() {}, updatePortfolioView() {},
   document,
   portfolioApi: { dashboard: async () => dashboard, operations: async () => ({ operations: [] }) },
   loadingState: "Carregando…",
