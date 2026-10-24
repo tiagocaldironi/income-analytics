@@ -1,3 +1,4 @@
+import { renderPortfolioInsight } from "./portfolio-insights-v2.js";
 import { renderPortfolioGuidance } from "./portfolio-guidance-v2.js";
 import { icon } from "../shared/icons.js";
 let bound = false;
@@ -97,5 +98,6 @@ export function updatePortfolioView(dashboard) {
   const root = document.querySelector('[data-page="minha-carteira"]');
   if (!root) return;
   renderPortfolioGuidance(dashboard);
+  renderPortfolioInsight(dashboard);
   root.dataset.hasPositions = String(dashboard.holdings.classes.some(group => group.assets.some(asset => !asset.target_only)));
 }
