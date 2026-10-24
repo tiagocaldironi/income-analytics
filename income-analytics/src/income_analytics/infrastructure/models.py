@@ -687,3 +687,20 @@ class PortfolioMarketPriceRecord(Base):
     registered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     provider: Mapped[str | None] = mapped_column(String(80))
     price_timestamp: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class PortfolioOnboardingRecord(Base):
+    """UI state is isolated from trades, holdings, valuations and reserve goals."""
+
+    __tablename__ = "portfolio_onboarding"
+    __table_args__ = (
+        CheckConstraint("current_step BETWEEN 1 AND 4", name="ck_onboarding_step"),
+        CheckConstraint("status IN ('ACTIVE','SKIPPED','COMPLETED')", name="ck_onboarding_status"),
+    )
+    viewer_key: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(
+        ForeignKey("portfolios.id", ondelete="CASCADE"), primary_key=True
+    )
+    current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="ACTIVE")
+    updated_at: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -1,10 +1,12 @@
 """Lifecycle endpoints for local, single-user portfolios."""
 
+import time
 from datetime import UTC, datetime
+from typing import Literal
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.exc import IntegrityError
 
 from income_analytics.application.auth_context import current_principal
@@ -178,3 +180,56 @@ def archive_portfolio(portfolio_id: UUID) -> dict[str, str]:
 @router.post("/{portfolio_id}/restore")
 def restore_portfolio(portfolio_id: UUID) -> dict[str, str]:
     return _change_status(portfolio_id, "ACTIVE")
+
+
+class PortfolioOnboardingUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    current_step: int = Field(ge=1, le=4)
+    status: Literal["ACTIVE", "SKIPPED", "COMPLETED"]
+
+
+def _onboarding_key(portfolio_id: UUID) -> tuple[str, str]:
+    if SqlitePortfolioRepository().get(portfolio_id) is None:
+        raise HTTPException(404, "Carteira não encontrada.")
+    viewer = str(current_principal().user_id) if saas_enabled() else "local"
+    return viewer, str(portfolio_id)
+
+
+@router.get("/{portfolio_id}/onboarding")
+def get_portfolio_onboarding(portfolio_id: UUID):
+    from income_analytics.infrastructure.database import SessionFactory
+    from income_analytics.infrastructure.models import PortfolioOnboardingRecord
+
+    key = _onboarding_key(portfolio_id)
+    with SessionFactory() as db:
+        row = db.get(PortfolioOnboardingRecord, key)
+        return {
+            "current_step": row.current_step if row else 1,
+            "status": row.status if row else "ACTIVE",
+        }
+
+
+@router.put("/{portfolio_id}/onboarding")
+def update_portfolio_onboarding(portfolio_id: UUID, body: PortfolioOnboardingUpdate):
+    from income_analytics.infrastructure.database import SessionFactory
+    from income_analytics.infrastructure.models import PortfolioOnboardingRecord
+
+    viewer, wallet_id = _onboarding_key(portfolio_id)
+    from sqlalchemy.dialects.sqlite import insert
+
+    values = dict(
+        viewer_key=viewer,
+        portfolio_id=wallet_id,
+        current_step=body.current_step,
+        status=body.status,
+        updated_at=int(time.time()),
+    )
+    with SessionFactory.begin() as db:
+        statement = insert(PortfolioOnboardingRecord).values(**values)
+        db.execute(
+            statement.on_conflict_do_update(
+                index_elements=["viewer_key", "portfolio_id"],
+                set_={k: values[k] for k in ("current_step", "status", "updated_at")},
+            )
+        )
+    return {"current_step": body.current_step, "status": body.status}

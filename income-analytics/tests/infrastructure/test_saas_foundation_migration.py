@@ -73,10 +73,14 @@ def test_identity_constraints_and_rollback_refuses_data_loss(tmp_path):
         db.execute("PRAGMA foreign_keys=ON")
         a, b = str(uuid4()), str(uuid4())
         db.executemany("INSERT INTO users(id) VALUES (?)", [(a,), (b,)])
-        db.execute("INSERT INTO auth_identities(id,user_id,issuer,subject) VALUES (?,?,?,?)", (str(uuid4()), a, "idp", "sub"))
+        db.execute(
+            "INSERT INTO auth_identities(id,user_id,issuer,subject) VALUES (?,?,?,?)",
+            (str(uuid4()), a, "idp", "sub"),
+        )
         with pytest.raises(sqlite3.IntegrityError):
             db.execute(
-                "INSERT INTO auth_identities(id,user_id,issuer,subject) VALUES (?,?,?,?)", (str(uuid4()), b, "idp", "sub")
+                "INSERT INTO auth_identities(id,user_id,issuer,subject) VALUES (?,?,?,?)",
+                (str(uuid4()), b, "idp", "sub"),
             )
         db.commit()
     with pytest.raises(subprocess.CalledProcessError):
@@ -84,3 +88,35 @@ def test_identity_constraints_and_rollback_refuses_data_loss(tmp_path):
     with sqlite3.connect(path) as db:
         assert db.execute("SELECT count(*) FROM users").fetchone()[0] == 2
         assert db.execute("SELECT count(*) FROM auth_identities").fetchone()[0] == 1
+
+
+def test_onboarding_migration_does_not_drop_saved_progress(tmp_path):
+    path = tmp_path / "onboarding.db"
+    migrate(path, "upgrade", "0025_firebase_sessions_private")
+    with sqlite3.connect(path) as db:
+        before = snapshot(db)
+    migrate(path, "upgrade", "head")
+    with sqlite3.connect(path) as db:
+        after = snapshot(db)
+        assert {name: after[name] for name in before} == before
+        portfolio = str(uuid4())
+        db.execute(
+            "INSERT INTO portfolios(id,name,base_currency,status,created_at,updated_at) "
+            "VALUES (?, 'UI metadata test', 'BRL', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+            (portfolio,),
+        )
+        db.execute(
+            "INSERT INTO portfolio_onboarding"
+            "(viewer_key,portfolio_id,current_step,status,updated_at) "
+            "VALUES ('local', ?, 2, 'SKIPPED', 1)",
+            (portfolio,),
+        )
+        db.commit()
+    with pytest.raises(subprocess.CalledProcessError):
+        migrate(path, "downgrade", "0025_firebase_sessions_private")
+    with sqlite3.connect(path) as db:
+        assert db.execute("SELECT current_step,status FROM portfolio_onboarding").fetchone() == (
+            2,
+            "SKIPPED",
+        )
+        assert db.execute("PRAGMA integrity_check").fetchone() == ("ok",)

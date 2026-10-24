@@ -48,6 +48,8 @@ async function request(path, options = {}) {
 }
 
 export const portfolioApi = {
+  onboarding: id => request(`/portfolios/${encodeURIComponent(id)}/onboarding`),
+  saveOnboarding: (id, state) => request(`/portfolios/${encodeURIComponent(id)}/onboarding`, {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(state)}),
   listPortfolios: () => request("/portfolios"),
   createPortfolio: payload => request("/portfolios", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
   renamePortfolio: (id, name) => request(`/portfolios/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) }),

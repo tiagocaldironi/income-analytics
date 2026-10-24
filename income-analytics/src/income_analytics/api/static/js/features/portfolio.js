@@ -2,9 +2,10 @@ import { setupPortfolioView, updatePortfolioView } from "./portfolio-view-v2.js"
 import { portfolioApi } from "../api.js";
 import { financialConcepts } from "../shared/financial-concepts.js";
 import { emptyState, errorState, loadingState, money, percentage, table } from "../shared/ui.js";
-import { loadECharts } from "../shared/charts.js";
+import { loadECharts, chartTheme } from "../shared/charts.js";
 
 let currentHoldings = null;
+let portfolioLoadSequence = 0;
 let equityChart = null;
 let equityChartResizeObserver = null;
 let equityChartRequestId = 0;
@@ -16,6 +17,7 @@ let groupDistributionTrigger = null;
 let groupDistributionChart = null;
 let portfolioFiltersBound = false;
 let incomeChartInstances = [];
+let incomeRenderSequence = 0;
 let portfolioPerformanceChart = null;
 let portfolioPerformanceResizeObserver = null;
 let portfolioPerformanceRequestId = 0;
@@ -23,6 +25,7 @@ let portfolioPerformancePeriod = "MAX";
 const portfolioBenchmarkSelection = new Set(["portfolio", "CDI", "IBOV", "IFIX"]);
 
 export async function loadPortfolio(asOf = "", { refreshAttention = true } = {}) {
+  const sequence = ++portfolioLoadSequence;
   const containers = ["#positions", "#understand-history", "#allocation", "#class-allocation", "#portfolio-evolution", "#portfolio-performance-chart"];
   containers.forEach(selector => {
     const container = document.querySelector(selector);
@@ -32,6 +35,7 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
     // First render is one fast read-model request. Financial consolidation runs
     // only when the snapshot is rebuilt after a write.
     const dashboard = await portfolioApi.dashboard();
+    if (sequence !== portfolioLoadSequence) return;
     const { portfolio, performance, history, allocation, class_allocation: classes, holdings } = dashboard;
     renderPortfolio(portfolio, holdings, performance);
     updatePortfolioView(dashboard);
@@ -39,13 +43,15 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
     renderAllocation(allocation);
     renderClasses(holdings, classes);
     loadPortfolioPerformanceChart();
-    portfolioApi.operations().then(renderMonthlyIncome).catch(error => {
+    portfolioApi.operations().then(data => { if (sequence === portfolioLoadSequence) renderMonthlyIncome(data); }).catch(error => {
+      if (sequence !== portfolioLoadSequence) return;
       console.error("Falha ao carregar rendimentos mensais", error);
       const target = document.querySelector("#monthly-income-chart");
       if (target) target.innerHTML = errorState("Não foi possível carregar os rendimentos mensais.");
     });
     if (refreshAttention) document.dispatchEvent(new Event("portfolio:intelligence-refresh"));
   } catch (error) {
+    if (sequence !== portfolioLoadSequence) return;
     console.error("Falha ao renderizar Minha Carteira", error);
     containers.forEach(selector => {
       const container = document.querySelector(selector);
@@ -58,9 +64,12 @@ export function bindPortfolioFilters() {
   if (portfolioFiltersBound) return;
   portfolioFiltersBound = true;
   setupPortfolioView(() => {
-    equityChart?.resize();
-    portfolioPerformanceChart?.resize();
-    incomeChartInstances.forEach(chart => chart.resize());
+    [equityChart, portfolioPerformanceChart, ...incomeChartInstances].forEach(chart => {
+      if (!chart || chart.isDisposed()) return;
+      const colors = chartTheme();
+      chart.setOption({textStyle:{color:colors.text},xAxis:{axisLabel:{color:colors.muted},axisLine:{lineStyle:{color:colors.border}}},yAxis:{axisLabel:{color:colors.muted},splitLine:{lineStyle:{color:colors.border}}},tooltip:{backgroundColor:colors.surface,textStyle:{color:colors.text},borderColor:colors.border}});
+      chart.resize();
+    });
   });
   document.addEventListener("change", async event => {
     if (event.target.matches("#portfolio-performance-period")) {
@@ -191,8 +200,8 @@ async function renderPortfolioPerformanceChart(data, requestId) {
     tooltip: { trigger: "axis", valueFormatter: amount => amount === null || amount === undefined ? "Indisponível" : percentage(Number(amount) * 100) },
     legend: { show: false, selectedMode: true },
     grid: { left: 58, right: 18, top: 40, bottom: 34 },
-    xAxis: { type: "category", data: rows.map(point => point.date), axisLabel: { color: "#93a4b8" }, axisLine: { lineStyle: { color: "#24364d" } } },
-    yAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: value => `${(Number(value) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` }, splitLine: { lineStyle: { color: "#203247" } } },
+    xAxis: { type: "category", data: rows.map(point => point.date), axisLabel: { color: chartTheme().muted }, axisLine: { lineStyle: { color: chartTheme().border } } },
+    yAxis: { type: "value", axisLabel: { color: chartTheme().muted, formatter: value => `${(Number(value) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` }, splitLine: { lineStyle: { color: chartTheme().border } } },
     series,
   };
   portfolioPerformanceChart.setOption(option, true);
@@ -693,9 +702,9 @@ async function renderEquityChart(points, requestId, baseCurrency) {
     backgroundColor: "transparent",
     tooltip: { trigger: "axis", formatter: params => `${formatDate(params[0]?.axisValue)}<br><strong>${money(params[0]?.value, baseCurrency)}</strong>` },
     grid: { left: 66, right: 16, top: 20, bottom: 36 },
-    xAxis: { type: "category", data: points.map(point => point.effective_date), axisLabel: { color: "#93a4b8" }, axisLine: { lineStyle: { color: "#24364d" } } },
-    yAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: value => money(value, baseCurrency) }, splitLine: { lineStyle: { color: "#203247" } } },
-    series: [{ name: "Patrimônio", type: "line", smooth: true, connectNulls: false, data: wealth, symbol: "circle", symbolSize: 5, lineStyle: { color: "#27c7a8", width: 3 }, itemStyle: { color: "#27c7a8" }, areaStyle: { color: "rgba(39, 199, 168, .18)" } }],
+    xAxis: { type: "category", data: points.map(point => point.effective_date), axisLabel: { color: chartTheme().muted }, axisLine: { lineStyle: { color: chartTheme().border } } },
+    yAxis: { type: "value", axisLabel: { color: chartTheme().muted, formatter: value => money(value, baseCurrency) }, splitLine: { lineStyle: { color: chartTheme().border } } },
+    series: [{ name: "Patrimônio", type: "line", smooth: true, connectNulls: false, data: wealth, symbol: "circle", symbolSize: 5, lineStyle: { color: chartTheme().accent, width: 3 }, itemStyle: { color: chartTheme().accent }, areaStyle: { color: chartTheme().accent, opacity: .12 } }],
   });
   equityChartResizeObserver = new ResizeObserver(() => equityChart?.resize());
   equityChartResizeObserver.observe(target);
@@ -732,6 +741,7 @@ function renderClasses(holdings, fallback) {
 }
 
 function renderMonthlyIncome(data) {
+  const sequence = ++incomeRenderSequence;
   const target = document.querySelector("#monthly-income-chart");
   if (!target) return;
   incomeChartInstances.forEach(chart => chart.dispose());
@@ -743,6 +753,7 @@ function renderMonthlyIncome(data) {
   }
   target.innerHTML = [...byCurrency.keys()].sort().map((currency, index) => `<div class="monthly-income-unit"><div class="monthly-income-unit-heading"><strong>${escapeHtml(currency)}</strong><small>Valores mantidos na moeda do lançamento</small></div><div class="income-month-chart" data-income-currency="${escapeHtml(currency)}" data-income-index="${index}" aria-label="Rendimentos mensais em ${escapeHtml(currency)}"></div></div>`).join("");
   loadECharts().then(echarts => {
+    if (sequence !== incomeRenderSequence) return;
     target.querySelectorAll(".income-month-chart").forEach(chartTarget => {
       if (!chartTarget.isConnected) return;
       const currency = chartTarget.dataset.incomeCurrency;
@@ -752,17 +763,17 @@ function renderMonthlyIncome(data) {
         backgroundColor: "transparent",
         tooltip: { trigger: "axis", formatter: params => `${params[0]?.axisValue}<br><strong>${money(params[0]?.value, currency)}</strong>` },
         grid: { left: 62, right: 14, top: 12, bottom: 34 },
-        xAxis: { type: "category", data: months.map(month => month.label), axisLabel: { color: "#93a4b8", hideOverlap: true }, axisLine: { lineStyle: { color: "#24364d" } } },
-        yAxis: { type: "value", axisLabel: { color: "#93a4b8", formatter: value => money(value, currency) }, splitLine: { lineStyle: { color: "#203247" } } },
+        xAxis: { type: "category", data: months.map(month => month.label), axisLabel: { color: chartTheme().muted, hideOverlap: true }, axisLine: { lineStyle: { color: chartTheme().border } } },
+        yAxis: { type: "value", axisLabel: { color: chartTheme().muted, formatter: value => money(value, currency) }, splitLine: { lineStyle: { color: chartTheme().border } } },
         series: [{ type: "bar", data: months.map(month => Number(values[month.key] || 0)), barMaxWidth: 32, itemStyle: { color: "#46c98b", borderRadius: [4, 4, 0, 0] } }],
       });
       const observer = new ResizeObserver(() => chart.resize());
       observer.observe(chartTarget);
-      incomeChartInstances.push({ dispose: () => { observer.disconnect(); chart.dispose(); } });
+      incomeChartInstances.push({ resize: () => chart.resize(), isDisposed: () => chart.isDisposed(), setOption: option => chart.setOption(option), dispose: () => { observer.disconnect(); chart.dispose(); } });
     });
   }).catch(error => {
     console.error("Falha ao desenhar rendimentos mensais", error);
-    if (target.isConnected) target.innerHTML = errorState("Não foi possível desenhar o gráfico de rendimentos.");
+    if (sequence === incomeRenderSequence && target.isConnected) target.innerHTML = errorState("Não foi possível desenhar o gráfico de rendimentos.");
   });
 }
 
