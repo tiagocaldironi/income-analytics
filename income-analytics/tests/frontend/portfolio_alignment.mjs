@@ -6,7 +6,7 @@ const positions={innerHTML:"",closest:()=>({classList:{add(){}},querySelector:()
 const context=vm.createContext({document:{querySelector:s=>s==="#positions"?positions:s==="#open-allocation-policy"?{}:null},money:v=>String(v),percentage:v=>String(v)+"%",financialConcepts:{returnTooltip:"TWR"},table:(heads,rows)=>'<table><thead>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</thead>'+rows.join('')+'</table>'});
 const source=fs.readFileSync(root+'js/features/portfolio.js','utf8').replace(/^import .*;\r?\n/gm,'').replaceAll('export async function','async function').replaceAll('export function','function');
 vm.runInContext(source,context);
-const base={asset_class:'FIXED_INCOME',label:'Renda Fixa',assets:[],market_value:100,total_cost:80,weight:.4,target_weight:.2,deviation:.2,performance_coverage:null};
+const base={asset_class:'FIXED_INCOME',label:'Renda Fixa',assets:[{asset_id:'test',ticker:'TEST',name:'Teste',quantity:1,market_value:100,total_result:null,return_percentage:null,current_price:null,portfolio_weight:null,target_weight:null}],market_value:100,total_cost:80,weight:.4,target_weight:.2,deviation:.2,performance_coverage:null};
 context.renderPortfolio({}, {base_currency:'BRL',classes:[base,{...base,asset_class:'FII',label:'FIIs',target_weight:null}]},null);
 const html=positions.innerHTML;
 assert.equal((html.match(/holding-class-statistics/g)||[]).length,2);
