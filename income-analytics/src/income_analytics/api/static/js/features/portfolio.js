@@ -1,3 +1,4 @@
+import { invalidatePortfolioGuidance, setupContextualOnboarding } from "./portfolio-guidance-v2.js";
 import { setupPortfolioView, updatePortfolioView } from "./portfolio-view-v2.js";
 import { portfolioApi } from "../api.js";
 import { financialConcepts } from "../shared/financial-concepts.js";
@@ -59,6 +60,7 @@ const portfolioBenchmarkSelection = new Set(["portfolio", "CDI", "IBOV", "IFIX"]
 
 export async function loadPortfolio(asOf = "", { refreshAttention = true } = {}) {
   const sequence = ++portfolioLoadSequence;
+  invalidatePortfolioGuidance();
   const wallet = typeof localStorage === "undefined" ? null : localStorage.getItem("income.activePortfolioId");
   if (wallet !== holdingsWallet) {
     saveHoldingsPreferences(); holdingsWallet = wallet;
@@ -123,6 +125,7 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
 export function bindPortfolioFilters() {
   if (portfolioFiltersBound) return;
   portfolioFiltersBound = true;
+  setupContextualOnboarding();
   setupPortfolioView(() => {
     [equityChart, portfolioPerformanceChart, ...incomeChartInstances].forEach(chart => {
       if (!chart || chart.isDisposed()) return;

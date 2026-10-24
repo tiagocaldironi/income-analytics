@@ -238,3 +238,25 @@ html.income-v2[data-theme="light"] .metric.metric-primary>small,html.income-v2[d
 }
 
 .income-v2 .holdings-sort-note{display:block;margin-top:12px;color:var(--income-secondary);font-size:.75rem;line-height:1.6}
+
+/* Contextual onboarding V2: choices, real achievements and non-blocking controls. */
+.income-v2 .onboarding-card{margin:22px 0 28px;background:var(--income-surface);padding:var(--income-space)}
+.income-v2 .onboarding-card h2{font-size:clamp(1.2rem,2vw,1.6rem);margin:10px 0}
+.income-v2 .onboarding-card p{color:var(--income-secondary);line-height:1.65}
+.income-v2 .onboarding-intents,.income-v2 .onboarding-classes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;border:0;padding:0;margin:20px 0}
+.income-v2 .onboarding-intents label{position:relative;display:flex;align-items:flex-start;gap:10px;padding:18px;border:1px solid var(--income-line);border-radius:12px;color:var(--income-text);cursor:pointer}
+.income-v2 .onboarding-intents label:has(input:checked){border-color:var(--income-action);background:var(--income-context)}
+.income-v2 .onboarding-intents input{width:18px;height:18px;min-height:18px;flex:none;margin:2px 0;accent-color:var(--income-action-bg)}
+.income-v2 .onboarding-intents strong,.income-v2 .onboarding-intents small{display:block;line-height:1.5}
+.income-v2 .onboarding-intents small{margin-top:8px;color:var(--income-secondary)}
+.income-v2 .onboarding-actions,.income-v2 .onboarding-footer{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.income-v2 .onboarding-card button{width:auto;margin:0;min-height:44px}
+.income-v2 .onboarding-footer{padding-top:16px;border-top:1px solid var(--income-line)}
+.income-v2 .onboarding-achievements{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;list-style:none;padding:20px 0;margin:20px 0 0;border-top:1px solid var(--income-line)}
+.income-v2 .onboarding-achievements li{display:flex;gap:10px;color:var(--income-secondary)}
+.income-v2 .onboarding-achievements small{display:block;margin-top:5px;font-size:.75rem}
+.income-v2 .onboarding-achievements [data-achievement-state=COMPLETED]>span{color:var(--income-positive)}
+.income-v2 .onboarding-classes button{display:flex;gap:10px;align-items:center;width:100%;padding:16px;background:var(--income-surface);color:var(--income-text);border:1px solid var(--income-line);border-radius:12px;text-align:left}
+.income-v2 .onboarding-note{font-size:.8rem;line-height:1.6;color:var(--income-secondary)}
+.income-v2 .onboarding-skeleton{height:160px;margin:22px 0;background:var(--income-raised);border-radius:var(--income-radius)}
+@media(max-width:700px){.income-v2 .onboarding-intents,.income-v2 .onboarding-classes,.income-v2 .onboarding-achievements{grid-template-columns:1fr}.income-v2 .onboarding-actions button{flex:1}.income-v2 .onboarding-card{padding:18px}}

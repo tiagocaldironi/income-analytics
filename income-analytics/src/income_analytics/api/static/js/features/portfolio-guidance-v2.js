@@ -1,5 +1,9 @@
 import { portfolioApi } from "../api.js";
-let generation = 0;
+import { icon } from "../shared/icons.js";
+let generation=0, state=null, dashboard=null, bound=false, choosingIntent=false, pendingOperation=null, lastWallet=null;
+const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const activeWallet=()=>localStorage.getItem("income.activePortfolioId");
+const button=(label,action,secondary=false)=>`<button type="button" class="income-button${secondary?' secondary':''}" data-onboarding-action="${action}">${label}</button>`;
 export function portfolioIsEmpty(data) {
   const hasAssets = data.holdings.classes.some(group => group.assets.some(asset => !asset.target_only));
   const boundary = data.history?.history_boundary || data.portfolio.history_boundary;
@@ -8,62 +12,128 @@ export function portfolioIsEmpty(data) {
   return !hasAssets && !hasHistory &&
     ![data.portfolio.total_market_value,data.portfolio.total_contributions,data.portfolio.income_received,data.portfolio.cash].some(value => Number(value || 0) !== 0);
 }
-export async function renderPortfolioGuidance(data) {
-  const target = document.querySelector("#portfolio-guidance");
-  if (!target) return;
-  const sequence = ++generation;
-  const id = localStorage.getItem("income.activePortfolioId");
-  const empty = portfolioIsEmpty(data);
-  const page = document.querySelector('[data-page="minha-carteira"]');
-  page.dataset.empty = String(empty);
-  if (empty) page.querySelector('.page-intro').after(target);
-  else page.append(target);
-  const isCurrent = () => sequence === generation && id === localStorage.getItem("income.activePortfolioId");
-  let state;
-  try { state = await portfolioApi.onboarding(id); }
-  catch {
-    if (isCurrent()) target.innerHTML = '<div class="income-context"><h2>Explore no seu ritmo</h2><p>O guia está indisponível agora. Seus investimentos e operações continuam acessíveis.</p><a href="#operacoes" data-navigate class="income-button">Adicionar investimento</a></div>';
-    return;
+
+export function invalidatePortfolioGuidance(){
+  generation++;state=null;dashboard=null;
+  if(lastWallet!==activeWallet())choosingIntent=false;
+  if(pendingOperation!==activeWallet())pendingOperation=null;
+  const target=document.querySelector('#portfolio-guidance');
+  if(target){target.replaceChildren();target.hidden=true;}
+  const assist=document.querySelector('#onboarding-operation-help');if(assist&&!pendingOperation)assist.remove();
+}
+function current(id,sequence){return id===activeWallet()&&sequence===generation;}
+function error(message){const target=document.querySelector('#portfolio-guidance');if(!target)return;target.hidden=false;target.innerHTML=`<div class="income-context" role="alert"><p>${esc(message)}</p>${button('Tentar novamente','retry',true)}<a href="#operacoes" class="income-button secondary" data-navigate>Registrar investimento</a></div>`;}
+export async function renderPortfolioGuidance(data){
+  bind();dashboard=data;
+  const target=document.querySelector('#portfolio-guidance');if(!target)return;
+  const id=activeWallet(),sequence=++generation;lastWallet=id;
+  const page=document.querySelector('[data-page="minha-carteira"]');page.dataset.empty=String(portfolioIsEmpty(data));
+  page.querySelector('.page-intro').after(target);
+  target.hidden=false;target.innerHTML='<div class="onboarding-skeleton" role="status" aria-label="Carregando seus primeiros passos"></div>';
+  try{
+    let next=await portfolioApi.contextualOnboarding(id);
+    if(!current(id,sequence))return;
+    if(next.status==='ACTIVE')next=await portfolioApi.saveContextualOnboarding(id,{action:'START'});
+    if(!current(id,sequence))return;
+    state=next;render();
+  }catch{if(current(id,sequence))error('Não foi possível carregar seus primeiros passos. Seus investimentos continuam disponíveis.');}
+}
+async function save(body){
+  if(!state)return false;
+  const id=state.portfolio_id,sequence=generation;
+  if(id!==activeWallet())return false;
+  const restoreFocus=Boolean(document.querySelector('#portfolio-guidance')?.contains?.(document.activeElement));
+  document.querySelectorAll('#portfolio-guidance button').forEach(node=>node.disabled=true);
+  try{
+    const next=await portfolioApi.saveContextualOnboarding(id,body);
+    if(!current(id,sequence))return false;
+    state=next;choosingIntent=false;render();if(restoreFocus){const heading=document.querySelector('#onboarding-title');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}}return true;
+  }catch{
+    if(current(id,sequence)){render();const msg=document.querySelector('#onboarding-message');if(msg)msg.textContent='Não foi possível salvar. Tente novamente; seu progresso não foi confirmado.';}
+    return false;
   }
-  if (!isCurrent()) return;
-  let viewed = state.current_step;
-  const steps = [
-    [empty ? "Adicione seu primeiro investimento." : "Mantenha seus investimentos em dia.",empty ? "Registre uma compra ou um investimento que você já possui. Seus dados começam com você." : "Registre novas movimentações para continuar acompanhando os investimentos que você cadastrou.",empty ? "Cadastrar investimento" : "Adicionar investimento","#operacoes"],
-    ["Conheça a distribuição da sua carteira.","Veja como os valores disponíveis se distribuem entre classes de ativos.","Explorar composição",null],
-    ["Explore o resultado dos seus investimentos.","Entenda a diferença entre patrimônio, resultado econômico e rentabilidade TWR.","Entender resultados","#entender"],
-    ["Defina uma estratégia para acompanhar sua alocação.","Organize os pesos que você deseja acompanhar. Você decide seus próximos passos.","Ver estratégia","#estrategia"],
-  ];
-  function render() {
-    if (!isCurrent()) return;
-    if (state.status !== "ACTIVE") {
-      target.innerHTML = `<div class="guidance-compact"><div><strong>${empty ? "Comece com seu primeiro investimento" : "Continue explorando sua carteira"}</strong><p>${empty ? "Adicione seus investimentos para acompanhar o patrimônio." : "Composição, resultados e estratégia estão disponíveis no seu ritmo."}</p></div><button type="button" class="income-button secondary" data-resume-guide>Retomar guia</button></div>`;
-      target.querySelector('[data-resume-guide]').onclick = () => save({...state,status:"ACTIVE"});
+}
+
+export function setupContextualOnboarding(){bind();}
+export function renderOnboardingAchievements(achievements){
+  return `<ol class="onboarding-achievements" aria-label="Suas conquistas">${achievements.map(a=>`<li data-achievement-state="${a.state}"><span aria-hidden="true">${icon(a.state==='COMPLETED'?'check':a.id==='wallet_created'?'wallet':a.id==='first_investment'?'plus':'chart')}</span><div><strong>${esc(a.title)}</strong><small>${esc(a.description)}</small><small>${esc(a.state==='COMPLETED'?'Concluído':a.state==='IN_PROGRESS'?'Em andamento':'Ainda não iniciado')}</small></div></li>`).join('')}</ol>`;
+}
+function render(){
+  const target=document.querySelector('#portfolio-guidance');if(!target||!state||state.portfolio_id!==activeWallet())return;
+  if(state.status!=='ACTIVE'&&!choosingIntent){target.hidden=true;target.replaceChildren();return;}
+  target.hidden=false;
+  const intent=state.ask_intent||choosingIntent;
+  const progress=renderOnboardingAchievements(state.achievements);
+  let content='';
+  if(intent){
+    content=`<h2 id="onboarding-title">Como você quer começar no Income?</h2><p>Vamos adaptar seus primeiros passos. Você pode mudar sua escolha quando quiser.</p><fieldset class="onboarding-intents"><legend class="sr-only">Escolha como começar</legend>${[['STARTING','book','Estou começando a investir','Quero aprender o básico e organizar meus primeiros objetivos.'],['EXISTING','wallet','Já tenho investimentos','Quero reunir meus investimentos e acompanhar meu patrimônio.'],['ORGANIZE','layers','Quero organizar meu patrimônio','Tenho investimentos diferentes e quero enxergar tudo em um só lugar.']].map(([code,i,title,copy])=>`<label>${icon(i)}<input type="radio" name="onboarding-intent" value="${code}" ${state.intent===code?'checked':''}><span><strong>${title}</strong><small>${copy}</small></span></label>`).join('')}</fieldset><p class="onboarding-note">Essa escolha personaliza o uso do Income. Não define seu perfil de risco.</p><div class="onboarding-actions">${button('Continuar','intent')}${button('Agora não','defer',true)}</div>`;
+  }else if(state.last_step===2){
+    content=`<h2 id="onboarding-title">Sua carteira está pronta!</h2><p><strong>${esc(state.portfolio_name)}</strong></p><p>Agora vamos adicionar seu primeiro investimento. Pode começar por qualquer ativo que você já tenha.</p>${state.intent==='STARTING'?'<p>Se preferir, conheça o básico na jornada educacional Primeiros Passos.</p><a href="#primeiros-passos" data-navigate class="income-button secondary">Conhecer Primeiros Passos</a>':''}<div class="onboarding-actions">${button('Adicionar meu primeiro investimento','classes')}${button('Fazer isso depois','skip',true)}</div>`;
+  }else if(state.last_step===3){
+    content=`<h2 id="onboarding-title">Por onde você quer começar?</h2><p>Escolha um tipo de investimento. Você poderá adicionar outros depois.</p><div class="onboarding-classes">${state.classes.map(c=>`<button type="button" data-onboarding-class="${esc(c.code)}">${icon(c.code==='FIXED_INCOME'?'income':c.code==='REAL_ESTATE'?'home':'layers')}<span>${esc(c.label)}</span></button>`).join('')}</div><div class="onboarding-actions">${button('Voltar','ready',true)}${button('Pular por enquanto','skip',true)}</div>`;
+  }else if(state.last_step===4){
+    content=`<h2 id="onboarding-title">Vamos registrar seu investimento</h2><p>Informe os dados que você já conhece. O Income organizará as informações da sua carteira.</p><p>Usamos o mesmo cadastro e as mesmas validações das operações da sua carteira.</p><div class="onboarding-actions">${button('Abrir cadastro','register')}${button('Voltar','classes',true)}${button('Fazer isso depois','skip',true)}</div>`;
+  }else if(state.last_step===5){
+    content=`<h2 id="onboarding-title">Seu primeiro investimento já está no Income!</h2><p>Agora você pode acompanhar esse investimento e continuar montando sua carteira no seu ritmo.</p><div class="onboarding-actions">${button('Ver minha carteira','analysis')}${button('Adicionar outro investimento','classes',true)}</div>`;
+  }else{
+    content=`<h2 id="onboarding-title">Agora vamos conhecer sua carteira?</h2><p>Veja o que já conseguimos mostrar com os investimentos cadastrados.</p>${state.facts.available_analyses.length?'':'<p>Algumas análises aparecerão conforme você registrar mais informações e construir seu histórico.</p>'}<div class="onboarding-actions">${state.facts.available_analyses.length?button('Explorar primeira análise','explore'):button('Adicionar informações','classes')}${button('Continuar depois','skip',true)}</div>`;
+  }
+  target.innerHTML=`<section class="income-context onboarding-card" aria-labelledby="onboarding-title"><p class="income-eyebrow">Seus primeiros passos · Income Free</p>${content}${progress}<div class="onboarding-footer">${button('Mudar minha escolha','change-intent',true)}${button('Dispensar guia','dismiss',true)}</div><p id="onboarding-message" role="status" aria-live="polite"></p></section>`;
+}
+function openRegistration(){
+  if(!state||state.portfolio_id!==activeWallet())return;
+  pendingOperation=state.portfolio_id;
+  window.dispatchEvent(new CustomEvent('income:open-operation',{detail:{assetClass:state.selected_class,eventType:'BUY'}}));
+  const dialog=document.querySelector('#operation-modal');
+  if(dialog?.open){
+    document.querySelector('#onboarding-operation-help')?.remove();
+    const help=document.createElement('p');help.id='onboarding-operation-help';help.className='onboarding-note';
+    help.textContent=['FIXED_INCOME','PENSION','REAL_ESTATE'].includes(state.selected_class)?'Preencha os campos específicos deste investimento. Confira a data e o valor aplicado conforme seus registros.':'Quantidade: quantas unidades foram negociadas? Data: quando a operação aconteceu? Preço unitário: quanto você pagou por unidade?';
+    dialog.querySelector('#trade-form')?.prepend(help);
+  }
+}
+function bind(){
+  if(bound)return;bound=true;
+  document.querySelector('#operation-modal')?.addEventListener('close',()=>{pendingOperation=null;document.querySelector('#onboarding-operation-help')?.remove();});
+  document.addEventListener('change',event=>{
+    if(event.target.id!=='trade-asset-class')return;
+    const help=document.querySelector('#onboarding-operation-help');
+    if(help)help.textContent=['FIXED_INCOME','PENSION','REAL_ESTATE'].includes(event.target.value)?'Preencha os campos específicos deste investimento. Confira a data e o valor aplicado conforme seus registros.':'Quantidade: quantas unidades foram negociadas? Data: quando a operação aconteceu? Preço unitário: quanto você pagou por unidade?';
+  });
+  const help=document.querySelector('[data-page="ajuda-metodologia"] .page-intro');
+  if(help&&!document.querySelector('[data-reopen-onboarding]'))help.insertAdjacentHTML('beforeend','<button type="button" class="income-button secondary" data-reopen-onboarding>Retomar primeiros passos</button>');
+  document.addEventListener('click',async event=>{
+    const reopen=event.target.closest('[data-reopen-onboarding]');
+    if(reopen){
+      const id=activeWallet(),sequence=++generation;
+      try{const next=await portfolioApi.saveContextualOnboarding(id,{action:'RESUME'});if(!current(id,sequence))return;state=next;choosingIntent=false;location.hash='#minha-carteira';render();}catch{location.hash='#minha-carteira';error('Não foi possível retomar seus primeiros passos.');}
       return;
     }
-    const [title,copy,label,href] = steps[viewed-1];
-    const markers = steps.map((_,i) => `<button type="button" aria-label="Etapa ${i+1}" ${i+1===viewed?'aria-current="step"':''} data-guide-step="${i+1}" ${i+1>state.current_step?'disabled':''}>${i+1}</button>`).join("");
-    target.innerHTML = `<div class="income-context guidance-card"><div class="guidance-copy"><p class="income-eyebrow">${empty ? "Vamos começar" : "Explore no seu ritmo"} · ${viewed} de 4</p><h2>${title}</h2><p>${copy}</p>${href ? `<a class="income-button" href="${href}" data-navigate>${label}</a>` : '<button class="income-button" type="button" data-guide-allocation>Explorar composição</button>'}</div><div class="guidance-progress"><nav aria-label="Etapas do guia">${markers}</nav><div class="guidance-actions"><button class="income-button secondary" type="button" data-guide-skip>Pular por agora</button><button class="income-button secondary" type="button" data-guide-next>${viewed===4?'Concluir guia':'Continuar'}</button></div><p class="guidance-message" role="status" aria-live="polite"></p></div></div>`;
-    target.querySelectorAll('[data-guide-step]').forEach(button => button.onclick = () => {viewed=Number(button.dataset.guideStep);render();});
-    target.querySelector('[data-guide-skip]').onclick = () => save({...state,status:"SKIPPED"});
-    target.querySelector('[data-guide-next]').onclick = () => save({current_step:Math.max(state.current_step,Math.min(viewed+1,4)),status:viewed===4?'COMPLETED':'ACTIVE'},Math.min(viewed+1,4));
-    target.querySelector('[data-guide-allocation]')?.addEventListener('click',() => {
-      if (empty) { target.querySelector('.guidance-message').textContent='Registre um investimento para visualizar sua composição.';return; }
-      document.querySelector('[data-analysis-tab="1"]').click();
-      document.querySelector('#portfolio-analysis').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
-    });
-  }
-  async function save(next, nextViewed=next.current_step) {
-    if (!isCurrent()) return;
-    target.querySelectorAll('button').forEach(button => button.disabled=true);
-    try {
-      const saved = await portfolioApi.saveOnboarding(id,next);
-      if (!isCurrent()) return;
-      state=saved;viewed=nextViewed;render();
-    } catch {
-      if (!isCurrent()) return;
-      render();const message=target.querySelector('.guidance-message');
-      if (message) message.textContent='Não foi possível salvar o progresso. Tente novamente.';
+    const selected=event.target.closest('[data-onboarding-class]');
+    if(selected){if(await save({action:'CLASS',asset_class:selected.dataset.onboardingClass}))openRegistration();return;}
+    const action=event.target.closest('[data-onboarding-action]')?.dataset.onboardingAction;
+    if(action){
+      if(action==='retry'){if(dashboard)renderPortfolioGuidance(dashboard);return;}
+      if(action==='intent'){const intent=document.querySelector('[name="onboarding-intent"]:checked')?.value;if(!intent){document.querySelector('#onboarding-message').textContent='Escolha uma das opções para continuar.';return;}await save({action:'INTENT',intent});}
+      if(action==='defer')await save({action:'DEFER_INTENT'});
+      if(action==='change-intent'){choosingIntent=true;render();}
+      if(action==='classes')await save({action:'STEP',step:3});
+      if(action==='ready')await save({action:'STEP',step:2});
+      if(action==='analysis')await save({action:'STEP',step:6});
+      if(action==='skip')await save({action:'SKIP'});
+      if(action==='dismiss')await save({action:'DISMISS'});
+      if(action==='register')openRegistration();
+      if(action==='explore'&&state?.facts.available_analyses.length){const analysis=state.facts.available_analyses[0];const tab=document.querySelector(`[data-analysis-tab="${analysis==='composition'?1:0}"]`);tab?.focus();tab?.click();document.querySelector('#portfolio-analysis')?.scrollIntoView({block:'start'});}
     }
-  }
-  render();
+  });
+  document.addEventListener('income:analysis-explored',async event=>{
+    if(state?.status!=='ACTIVE')return;
+    const analysis=event.detail?.index===1?'composition':event.detail?.index===0?'evolution':null;
+    if(state.facts.available_analyses.includes(analysis))await save({action:'EXPLORE',analysis});
+  });
+  window.addEventListener('income:operation-confirmed',async event=>{
+    if(event.detail?.portfolioId!==pendingOperation||pendingOperation!==activeWallet())return;
+    pendingOperation=null;document.querySelector('#onboarding-operation-help')?.remove();
+    if(await save({action:'CONFIRM_ASSET'}))document.querySelector('#portfolio-guidance')?.scrollIntoView({block:'start'});
+  });
 }

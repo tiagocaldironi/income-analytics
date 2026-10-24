@@ -42,7 +42,7 @@ const document = {
   addEventListener() {},
 };
 const context = vm.createContext({
-  console, financialConcepts:{returnTooltip:"TWR"}, setupPortfolioView() {}, updatePortfolioView() {},
+  invalidatePortfolioGuidance(){}, console, financialConcepts:{returnTooltip:"TWR"}, setupPortfolioView() {}, updatePortfolioView() {},
   document,
   portfolioApi: { dashboard: async () => dashboard, operations: async () => ({ operations: [] }) },
   loadingState: "Carregando…",

@@ -840,6 +840,7 @@ export function bindOperations() {
     }
     const message = document.querySelector("#message");
     const button = form.querySelector("button[type=submit]");
+    const operationPortfolioId=localStorage.getItem("income.activePortfolioId");
     const external = ["DEPOSIT", "WITHDRAWAL"].includes(type);
     const fixedIncome = type === "BUY" && assetClass === "FIXED_INCOME";
     const pension = type === "BUY" && assetClass === "PENSION";
@@ -918,6 +919,7 @@ export function bindOperations() {
         }
         await Promise.all([loadPortfolio(), loadOperations({ reset: true })]);
       });
+      window.dispatchEvent(new CustomEvent("income:operation-confirmed",{detail:{portfolioId:operationPortfolioId}}));
       setMessage(message, "Operação registrada com sucesso.");
       document.querySelector("#operation-modal")?.close();
       form.reset();
