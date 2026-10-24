@@ -50,6 +50,8 @@ function renderSelector() {
   applyPortfolioTheme(selected?.id);
   const currentName = document.querySelector("#portfolio-current-name");
   if (currentName) currentName.textContent = selected?.name || "Carteira";
+  const homeName = document.querySelector("#home-wallet-name");
+  if (homeName) homeName.textContent = selected?.name || "Sua carteira";
   const archive = document.querySelector("#portfolio-archive");
   const restore = document.querySelector("#portfolio-restore");
   if (archive) archive.disabled = !selected || selected.status !== "ACTIVE";

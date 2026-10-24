@@ -1,3 +1,4 @@
+import { setupPortfolioView, updatePortfolioView } from "./portfolio-view-v2.js";
 import { portfolioApi } from "../api.js";
 import { financialConcepts } from "../shared/financial-concepts.js";
 import { emptyState, errorState, loadingState, money, percentage, table } from "../shared/ui.js";
@@ -33,6 +34,7 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
     const dashboard = await portfolioApi.dashboard();
     const { portfolio, performance, history, allocation, class_allocation: classes, holdings } = dashboard;
     renderPortfolio(portfolio, holdings, performance);
+    updatePortfolioView(dashboard);
     renderHistory(history, holdings.base_currency || portfolio.base_currency || "BRL");
     renderAllocation(allocation);
     renderClasses(holdings, classes);
@@ -55,6 +57,11 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
 export function bindPortfolioFilters() {
   if (portfolioFiltersBound) return;
   portfolioFiltersBound = true;
+  setupPortfolioView(() => {
+    equityChart?.resize();
+    portfolioPerformanceChart?.resize();
+    incomeChartInstances.forEach(chart => chart.resize());
+  });
   document.addEventListener("change", async event => {
     if (event.target.matches("#portfolio-performance-period")) {
       portfolioPerformancePeriod = event.target.value;
