@@ -1,0 +1,391 @@
+"""HTTP attack matrix with a deterministic IdP double; emulator tests are separate."""
+
+import time
+from uuid import uuid4
+
+import pytest
+from fastapi.routing import APIRoute
+from fastapi.testclient import TestClient
+
+from income_analytics.api.saas_security import (
+    CURATOR_HANDLERS,
+    PUBLIC,
+    REFERENCE_HANDLERS,
+    UNAVAILABLE_HANDLERS,
+    api_routes,
+)
+from income_analytics.infrastructure.auth_config import cookie_name
+from income_analytics.infrastructure.database import SessionFactory, initialize_database
+from income_analytics.infrastructure.firebase_identity import identity_provider
+from income_analytics.infrastructure.models import (
+    AssetRecord,
+    AuthSessionRecord,
+    PortfolioRecord,
+    SecurityRateLimitRecord,
+    UserRecord,
+)
+from income_analytics.main import app
+
+ORIGIN = "https://income.test"
+
+
+@pytest.fixture
+def saas(monkeypatch):
+    initialize_database()
+    monkeypatch.setenv("INCOME_AUTH_MODE", "firebase")
+    monkeypatch.setenv("INCOME_APP_ORIGIN", ORIGIN)
+    monkeypatch.setenv("FIREBASE_PROJECT_ID", "demo-unit-income")
+    monkeypatch.setenv("INCOME_PUBLIC_SIGNUP_ENABLED", "1")
+    with SessionFactory.begin() as db:
+        db.query(SecurityRateLimitRecord).delete()
+    tokens, cookies = {}, {}
+
+    def verify(token, values):
+        if token not in values:
+            raise ValueError("Invalid/expired/revoked/disabled")
+        return dict(values[token])
+
+    def create_cookie(token, _seconds):
+        cookie = uuid4().hex
+        cookies[cookie] = tokens[token]
+        return cookie
+
+    monkeypatch.setattr(identity_provider, "verify_id_token", lambda t: verify(t, tokens))
+    monkeypatch.setattr(identity_provider, "verify_cookie", lambda t: verify(t, cookies))
+    monkeypatch.setattr(identity_provider, "verify_link_cookie", lambda t: verify(t, cookies))
+    monkeypatch.setattr(identity_provider, "create_cookie", create_cookie)
+    monkeypatch.setattr(identity_provider, "revoke", lambda _uid: cookies.clear())
+    monkeypatch.setattr(identity_provider, "methods", lambda _uid: ["google.com", "password"])
+
+    def login(*, uid=None, verified=True, provider="password", email="same@example.invalid"):
+        token = uuid4().hex
+        tokens[token] = {
+            "sub": uid or uuid4().hex,
+            "iss": "https://securetoken.google.com/demo-unit-income",
+            "email": email,
+            "email_verified": verified,
+            "auth_time": time.time(),
+            "firebase": {"sign_in_provider": provider},
+        }
+        client = TestClient(app, base_url=ORIGIN)
+        csrf = client.get("/api/auth/csrf").json()["csrf_token"]
+        client.headers.update({"Origin": ORIGIN, "X-CSRF-Token": csrf})
+        response = client.post("/api/auth/session", json={"id_token": token})
+        if response.status_code == 200:
+            csrf = client.get("/api/auth/csrf").json()["csrf_token"]
+            client.headers["X-CSRF-Token"] = csrf
+        return client, response, token
+
+    return login, tokens, cookies
+
+
+def wallet(client, label):
+    response = client.post("/api/portfolios", json={"name": f"{label}-{uuid4().hex[:6]}"})
+    assert response.status_code == 201, response.text
+    return response.json()["id"]
+
+
+def trade(client, wallet_id, ticker="SHARED3", **fields):
+    payload = {
+        "event_type": "BUY",
+        "ticker": ticker,
+        "quantity": "2",
+        "unit_price": "10",
+        "asset_class": "BRAZILIAN_STOCK",
+        "effective_date": "2026-10-01",
+        **fields,
+    }
+    return client.post("/api/trades", headers={"X-Portfolio-Id": wallet_id}, json=payload)
+
+
+def test_two_users_four_wallets_scoped_lifecycle_and_no_main(saas):
+    login, _, _ = saas
+    a, ar, _ = login()
+    b, br, _ = login()  # same email, different subjects must stay independent
+    assert ar.status_code == br.status_code == 200
+    assert ar.json()["user_id"] != br.json()["user_id"]
+    a1, a2, b1, b2 = [wallet(c, n) for c, n in ((a, "A1"), (a, "A2"), (b, "B1"), (b, "B2"))]
+    assert {p["id"] for p in a.get("/api/portfolios").json()["portfolios"]} == {a1, a2}
+    assert {p["id"] for p in b.get("/api/portfolios").json()["portfolios"]} == {b1, b2}
+    assert a.get("/api/portfolio").status_code == 400
+    assert a.get("/api/portfolio", headers={"X-Portfolio-Id": b1}).status_code == 404
+    assert a.patch(f"/api/portfolios/{b1}", json={"name": "stolen"}).status_code == 404
+    assert a.post(f"/api/portfolios/{b1}/archive").status_code == 404
+    assert trade(a, a1).status_code == 201
+    assert trade(b, b1).status_code == 201
+    assert a.get("/api/portfolio", headers={"X-Portfolio-Id": a2}).json()["positions"] == []
+    assert b.get("/api/portfolio", headers={"X-Portfolio-Id": b2}).json()["positions"] == []
+
+
+def test_every_registered_private_wallet_route_rejects_foreign_selection(saas):
+    login, _, _ = saas
+    a, _, _ = login()
+    b, _, _ = login()
+    foreign = wallet(b, "Foreign")
+    tested = set()
+    for route in api_routes(app.routes):
+        if not isinstance(route, APIRoute) or route.path in PUBLIC:
+            continue
+        if route.path.startswith("/api/auth/") or route.name in REFERENCE_HANDLERS:
+            continue
+        if route.name in {"account_page", "list_portfolios", "create_portfolio"}:
+            continue
+        path = route.path
+        for parameter in route.param_convertors:
+            path = path.replace(
+                "{" + parameter + "}", foreign if parameter == "portfolio_id" else str(uuid4())
+            )
+        for method in route.methods:
+            response = a.request(method, path, headers={"X-Portfolio-Id": foreign}, json={})
+            expected = {403} if route.name in (CURATOR_HANDLERS | UNAVAILABLE_HANDLERS) else {404}
+            if route.name in {"get_data_sources", "list_market_price_refresh_runs"}:
+                expected = {200}  # sanitized empty response, never the legacy log
+            assert response.status_code in expected, (
+                method,
+                path,
+                response.status_code,
+                response.text,
+            )
+            tested.add((method, route.path))
+    assert len(tested) >= 70
+
+
+def test_anonymous_aliases_and_unknown_paths_never_expose_private_data(saas):
+    client = TestClient(app, base_url=ORIGIN)
+    for path in (
+        "/api/portfolios",
+        "/api/portfolio",
+        "/api/operations",
+        "/api/private-new",
+        "/imports/b3/fake/apply",
+        "/backup.db",
+    ):
+        assert client.get(path).status_code == 401, path
+    assert client.get("/conta", follow_redirects=False).status_code == 303
+    assert client.get("/docs").status_code == 404
+    assert (
+        client.get("/api/portfolio", headers={"Authorization": "Bearer forged"}).status_code == 401
+    )
+    assert client.get("/static/../income_analytics.db").status_code != 200
+
+
+def test_csrf_host_body_size_and_cookies(saas):
+    login, _, _ = saas
+    a, response, _ = login()
+    cookies = response.headers.get_list("set-cookie")
+    assert all(
+        "HttpOnly" in value and "Secure" in value and "SameSite=strict" in value
+        for value in cookies
+    )
+    assert any("__Host-income_session=" in value for value in cookies)
+    assert (
+        a.post(
+            "/api/portfolios", headers={"Origin": "https://evil.test"}, json={"name": "bad"}
+        ).status_code
+        == 403
+    )
+    assert (
+        a.post(
+            "/api/portfolios", headers={"X-CSRF-Token": "forged"}, json={"name": "bad"}
+        ).status_code
+        == 403
+    )
+    assert a.get("/api/portfolios", headers={"Host": "evil.test"}).status_code == 400
+    assert a.post("/api/portfolios", content="x" * (128 * 1024 + 1)).status_code == 413
+    assert "no-store" in a.get("/api/portfolios").headers["cache-control"]
+
+
+def test_unverified_disabled_expired_and_logout_replay(saas):
+    login, _, cookies = saas
+    _, response, _ = login(verified=False)
+    assert response.status_code == 403
+    a, response, _ = login()
+    user_id = response.json()["user_id"]
+    cookie = a.cookies.get(cookie_name("session"))
+    with SessionFactory.begin() as db:
+        db.get(UserRecord, user_id).status = "SUSPENDED"
+    assert a.get("/api/auth/me").status_code == 401
+    with SessionFactory.begin() as db:
+        db.get(UserRecord, user_id).status = "ACTIVE"
+        db.query(AuthSessionRecord).filter_by(user_id=user_id).update({"expires_at": 0})
+    assert a.get("/api/auth/me").status_code == 401
+    a, _, _ = login()
+    cookie = a.cookies.get(cookie_name("session"))
+    assert a.post("/api/auth/logout").status_code == 200
+    a.cookies.set(cookie_name("session"), cookie)
+    assert a.get("/api/auth/me").status_code == 401
+    a, _, _ = login()
+    cookies.clear()  # IdP revocation/disabled account, not merely local deletion
+    assert a.get("/api/auth/me").status_code == 401
+
+
+def test_p0_global_classification_and_manual_prices_are_private(saas):
+    login, _, _ = saas
+    a, _, _ = login()
+    b, _, _ = login()
+    a1, b1 = wallet(a, "A"), wallet(b, "B")
+    assert trade(a, a1, name="Private A name").status_code == 201
+    assert trade(b, b1, name="Private B name").status_code == 201
+    assert (
+        a.put(
+            "/api/assets/SHARED3/class", headers={"X-Portfolio-Id": a1}, json={"asset_class": "FII"}
+        ).status_code
+        == 200
+    )
+    b_view = b.get("/api/portfolio", headers={"X-Portfolio-Id": b1}).json()
+    assert b_view["positions"][0]["asset_class"] == "BRAZILIAN_STOCK"
+    assert "Private A name" not in str(b_view)
+    before = b_view["positions"]
+    response = a.put(
+        "/api/market-prices/SHARED3",
+        headers={"X-Portfolio-Id": a1},
+        json={"current_price": "99", "effective_date": "2026-10-01"},
+    )
+    assert response.status_code == 200, response.text
+    assert b.get("/api/portfolio", headers={"X-Portfolio-Id": b1}).json()["positions"] == before
+    with SessionFactory() as db:
+        records = db.query(AssetRecord).filter(AssetRecord.ticker.like("@%:SHARED3")).all()
+        assert len(records) >= 2
+    for method, path in (
+        ("PUT", "/api/settings/paid-income"),
+        ("GET", "/api/settings/paid-income"),
+        ("POST", "/api/benchmarks/CDI"),
+    ):
+        assert a.request(method, path, headers={"X-Portfolio-Id": a1}, json={}).status_code == 403
+
+
+def test_legacy_remains_unclaimed_and_unlisted(saas):
+    login, _, _ = saas
+    a, _, _ = login()
+    assert (
+        a.get(
+            "/api/portfolio", headers={"X-Portfolio-Id": "7a54eeb7-542a-5832-8544-8be7dcb0237e"}
+        ).status_code
+        == 404
+    )
+    with SessionFactory() as db:
+        assert db.get(PortfolioRecord, "7a54eeb7-542a-5832-8544-8be7dcb0237e").owner_user_id is None
+
+
+def test_linking_requires_existing_method_and_same_uid(saas):
+    login, tokens, _ = saas
+    uid = uuid4().hex
+    a, _, old = login(uid=uid)
+    _, unapproved, new = login(uid=uid, provider="google.com")
+    assert unapproved.status_code == 403
+    assert a.post("/api/auth/confirm-method", json={"id_token": new}).status_code == 403
+    _, _, foreign = login()
+    assert a.post("/api/auth/confirm-method", json={"id_token": foreign}).status_code == 403
+    assert a.post("/api/auth/authorize-method", json={"id_token": old}).status_code == 403
+    assert a.post("/api/auth/confirm-method", json={"id_token": old}).status_code == 200
+    assert a.post("/api/auth/authorize-method", json={"id_token": old}).status_code == 200
+    assert a.post("/api/auth/authorize-method", json={"id_token": old}).status_code == 403
+    assert login(uid=uid, provider="google.com")[1].status_code == 200
+
+
+def test_reset_is_owned_and_allows_recreating_private_tickers(saas):
+    login, _, _ = saas
+    a, _, _ = login()
+    b, _, _ = login()
+    a1, b1 = wallet(a, "A-reset"), wallet(b, "B-preserved")
+    assert trade(a, a1, ticker="RESET3").status_code == 201
+    assert trade(b, b1, ticker="RESET3").status_code == 201
+    before = b.get("/api/portfolio", headers={"X-Portfolio-Id": b1}).json()["positions"]
+    assert (
+        a.post(
+            "/api/data/reset", headers={"X-Portfolio-Id": b1}, json={"confirmation": "EXCLUIR"}
+        ).status_code
+        == 404
+    )
+    assert (
+        a.post(
+            "/api/data/reset", headers={"X-Portfolio-Id": a1}, json={"confirmation": "EXCLUIR"}
+        ).status_code
+        == 200
+    )
+    assert trade(a, a1, ticker="RESET3").status_code == 201
+    assert b.get("/api/portfolio", headers={"X-Portfolio-Id": b1}).json()["positions"] == before
+
+
+def test_foreign_event_id_cannot_be_deleted_using_an_owned_wallet(saas):
+    login, _, _ = saas
+    a, _, _ = login()
+    b, _, _ = login()
+    a1, b1 = wallet(a, "A-event"), wallet(b, "B-event")
+    assert trade(b, b1).status_code == 201
+    headers = {"X-Portfolio-Id": b1}
+    before = b.get("/api/operations", headers=headers).json()
+    event_id = before["operations"][0]["id"]
+    assert (
+        a.delete(f"/api/operations/{event_id}", headers={"X-Portfolio-Id": a1}).status_code == 404
+    )
+    assert b.get("/api/operations", headers=headers).json() == before
+
+
+def test_signup_kill_switch_and_recent_signin(saas, monkeypatch):
+    login, tokens, _ = saas
+    uid = uuid4().hex
+    assert login(uid=uid)[1].status_code == 200
+    monkeypatch.setenv("INCOME_PUBLIC_SIGNUP_ENABLED", "0")
+    assert login(uid=uid)[1].status_code == 200
+    assert login()[1].status_code == 403
+    a, _, token = login(uid=uid)
+    tokens[token]["auth_time"] = time.time() - 301
+    assert a.post("/api/auth/session", json={"id_token": token}).status_code == 401
+    assert (
+        a.post(
+            "/api/auth/session", json={"id_token": token, "income_roles": ["MARKET_CURATOR"]}
+        ).status_code
+        == 422
+    )
+
+
+def test_upload_archive_bombs_and_xml_entities_are_rejected():
+    from io import BytesIO
+    from zipfile import ZIP_DEFLATED, ZipFile
+
+    from income_analytics.infrastructure.upload_safety import validate_workbook
+
+    for xml in (b"<!DOCTYPE sheet [<!ENTITY secret 'x'>]><sheet/>", b"x" * (2 * 1024 * 1024)):
+        output = BytesIO()
+        with ZipFile(output, "w", ZIP_DEFLATED) as archive:
+            archive.writestr("xl/worksheets/sheet1.xml", xml)
+        with pytest.raises(ValueError):
+            validate_workbook(output.getvalue())
+
+
+def test_rate_limit_shared_counter_and_production_emulator_guard(saas, monkeypatch):
+    from fastapi import HTTPException
+
+    from income_analytics.infrastructure.auth_config import validate_configuration
+    from income_analytics.infrastructure.auth_repository import rate_limit
+
+    key = uuid4().hex
+    for _ in range(3):
+        rate_limit(key, limit=3)
+    with pytest.raises(HTTPException) as error:
+        rate_limit(key, limit=3)
+    assert error.value.status_code == 429
+    monkeypatch.setenv("INCOME_ENV", "production")
+    monkeypatch.setenv("FIREBASE_AUTH_EMULATOR_HOST", "127.0.0.1:9099")
+    with pytest.raises(RuntimeError):
+        validate_configuration()
+
+
+def test_logout_replay_stays_revoked_when_firebase_reissues_same_cookie(saas, monkeypatch):
+    login, tokens, cookies = saas
+    uid = uuid4().hex
+
+    def identical_cookie(token, _seconds):
+        cookies["identical-firebase-jwt"] = tokens[token]
+        return "identical-firebase-jwt"
+
+    monkeypatch.setattr(identity_provider, "create_cookie", identical_cookie)
+    a, _, _ = login(uid=uid)
+    old_cookie = a.cookies.get(cookie_name("session"))
+    assert a.post("/api/auth/logout").status_code == 200
+    b, _, _ = login(uid=uid)
+    assert b.cookies.get(cookie_name("session")) != old_cookie
+    a.cookies.set(cookie_name("session"), old_cookie)
+    assert a.get("/api/auth/me").status_code == 401
+    assert b.get("/api/auth/me").status_code == 200

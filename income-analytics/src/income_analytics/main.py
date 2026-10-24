@@ -8,9 +8,11 @@ from uuid import UUID
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.concurrency import run_in_threadpool
 from starlette.responses import Response
 from starlette.types import Scope
 
+from income_analytics.api.routers.auth import router as auth_router
 from income_analytics.api.routers.dashboard import (
     b3_import_router,
     ensure_portfolio_dashboard_snapshot_current,
@@ -26,6 +28,7 @@ from income_analytics.api.routers.dashboard import (
 from income_analytics.api.routers.health import router as health_router
 from income_analytics.api.routers.income_starter import router as income_starter_router
 from income_analytics.api.routers.portfolios import router as portfolios_router
+from income_analytics.api.saas_security import authorize_request
 from income_analytics.application.portfolio_context import (
     current_portfolio_id,
     reset_active_portfolio_id,
@@ -34,12 +37,15 @@ from income_analytics.application.portfolio_context import (
     set_request_session,
 )
 from income_analytics.application.portfolio_session import PortfolioSession
+from income_analytics.infrastructure.auth_config import saas_enabled, validate_configuration
 from income_analytics.infrastructure.database import engine, initialize_database
 from income_analytics.infrastructure.request_profiling import (
     current_request_metrics,
     install_sql_timing,
 )
 from income_analytics.infrastructure.sqlite_repositories import SqlitePortfolioRepository
+
+validate_configuration()
 
 app = FastAPI(
     title="Income Analytics",
@@ -56,7 +62,13 @@ if os.environ.get("INCOME_ANALYTICS_PERF_LOG", "").strip().lower() in {"1", "tru
 
 @app.middleware("http")
 async def portfolio_request_context(request, call_next):
-    if request.url.path.startswith("/api/portfolios"):
+    if saas_enabled():
+
+        async def scoped(portfolio_id):
+            return await serve_portfolio(request, call_next, portfolio_id)
+
+        return await authorize_request(request, call_next, portfolio_handler=scoped)
+    if request.url.path.startswith("/api/portfolios") or request.url.path.startswith("/api/auth/"):
         return await call_next(request)
     explicit_id = request.headers.get("x-portfolio-id")
     if explicit_id:
@@ -66,20 +78,55 @@ async def portfolio_request_context(request, call_next):
             return JSONResponse({"detail": "Identificador de carteira inválido."}, status_code=400)
     else:
         portfolio_id = current_portfolio_id()
+    return await serve_portfolio(request, call_next, portfolio_id)
+
+
+async def serve_portfolio(request, call_next, portfolio_id):
     portfolio = SqlitePortfolioRepository().get(portfolio_id)
     if portfolio is None:
         return JSONResponse({"detail": "Carteira não encontrada."}, status_code=404)
     if portfolio.status != "ACTIVE" and request.method not in {"GET", "HEAD", "OPTIONS"}:
         return JSONResponse({"detail": "Restaure a carteira antes de alterá-la."}, status_code=409)
     portfolio_token = set_active_portfolio_id(portfolio_id)
-    session_token = set_request_session(
-        PortfolioSession(portfolio_id=portfolio_id, persistent=True)
-    )
+    session_token = None
     try:
+        financial_session = await run_in_threadpool(
+            PortfolioSession, portfolio_id=portfolio_id, persistent=True
+        )
+        session_token = set_request_session(financial_session)
         return await call_next(request)
     finally:
-        reset_request_session(session_token)
+        if session_token is not None:
+            reset_request_session(session_token)
         reset_active_portfolio_id(portfolio_token)
+
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    response = await call_next(request)
+    if saas_enabled():
+        response.headers["Cache-Control"] = "no-store, private"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "same-origin"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; script-src 'self' https://www.gstatic.com "
+            "https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' "
+            "https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https:; connect-src 'self' "
+            "https://identitytoolkit.googleapis.com https://securetoken.googleapis.com "
+            + (
+                "http://127.0.0.1:9099 http://localhost:9099 "
+                if os.getenv("FIREBASE_AUTH_EMULATOR_HOST")
+                else ""
+            )
+            + "; frame-src https://*.firebaseapp.com https://accounts.google.com; "
+            "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        )
+        if request.url.scheme == "https":
+            response.headers["Strict-Transport-Security"] = "max-age=31536000"
+    return response
 
 
 @app.middleware("http")
@@ -122,6 +169,7 @@ async def profile_request(request, call_next):
 
 initialize_database()
 
+app.include_router(auth_router)
 app.include_router(health_router)
 app.include_router(dashboard_router)
 app.include_router(b3_import_router)
@@ -140,6 +188,11 @@ class NoCacheStaticFiles(StaticFiles):
 
 @app.on_event("startup")
 def start_daily_data_refresh() -> None:
+    if saas_enabled():
+        # Existing local jobs have no service principal. No legacy MAIN rebuild,
+        # paid-income singleton, or cross-owner traversal is allowed in SaaS.
+        logger.info("Local background jobs disabled in SaaS; use a reviewed service worker.")
+        return
     # Rebuild only when the persisted read-model schema changes; ordinary restarts
     # should not replay the financial ledger or recalculate all-time performance.
     try:

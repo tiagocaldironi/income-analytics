@@ -43,3 +43,8 @@ tmp/paid-income-b3-cvm/
 
 # macOS
 .DS_Store
+
+# Firebase Admin secrets and local emulator state
+service-account*.json
+*-firebase-adminsdk-*.json
+.firebase/

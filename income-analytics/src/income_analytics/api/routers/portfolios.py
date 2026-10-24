@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.exc import IntegrityError
 
+from income_analytics.application.auth_context import current_principal
 from income_analytics.application.portfolio_context import (
     MAIN_PORTFOLIO_ID,
     reset_active_portfolio_id,
@@ -16,6 +17,7 @@ from income_analytics.application.portfolio_context import (
 )
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.domain.entities.portfolio import Portfolio
+from income_analytics.infrastructure.auth_config import saas_enabled
 from income_analytics.infrastructure.sqlite_repositories import SqlitePortfolioRepository
 
 router = APIRouter(prefix="/api/portfolios", tags=["Portfolios"])
@@ -96,7 +98,12 @@ def create_portfolio(body: PortfolioCreate) -> dict[str, str]:
         raise HTTPException(status_code=422, detail="Moeda inválida.")
     now = datetime.now(UTC)
     portfolio = Portfolio(
-        id=uuid4(), name=name, base_currency=currency, created_at=now, updated_at=now
+        id=uuid4(),
+        name=name,
+        base_currency=currency,
+        created_at=now,
+        updated_at=now,
+        owner_user_id=current_principal().user_id if saas_enabled() else None,
     )
     try:
         repository.save(portfolio)
