@@ -5,6 +5,39 @@ import { emptyState, errorState, loadingState, money, percentage, table } from "
 import { loadECharts, chartTheme } from "../shared/charts.js";
 
 let currentHoldings = null;
+let holdingsClass = "";
+let holdingsQuery = "";
+let holdingsSort = "name";
+let holdingsWallet = null;
+const holdingsPreferences = new Map();
+const holdingsOpenGroups = new Map();
+const holdingsSkeleton = '<div class="holdings-skeleton" role="status" aria-label="Carregando investimentos"><span></span><span></span><span></span></div>';
+function normalizeHoldingText(value) { return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR"); }
+function selectHoldingAssets(group) {
+  const query = normalizeHoldingText(holdingsQuery.trim());
+  return assetsForDisplay(group).filter(asset => !query || normalizeHoldingText([asset.name, asset.ticker, asset.display_name].join(" ")).includes(query)).sort((a,b) => {
+    if (holdingsSort !== "name") {
+      const currency = String(a.currency_code || "BRL").localeCompare(String(b.currency_code || "BRL"));
+      if (currency) return currency;
+      const av = a.market_value, bv = b.market_value;
+      if (av === null || av === undefined) return bv === null || bv === undefined ? 0 : 1;
+      if (bv === null || bv === undefined) return -1;
+      const delta = Number(av) - Number(bv);
+      if (delta) return holdingsSort === "value-desc" ? -delta : delta;
+    }
+    return String(a.display_name || a.name || a.ticker).localeCompare(String(b.display_name || b.name || b.ticker), "pt-BR");
+  });
+}
+function saveHoldingsPreferences() {
+  holdingsPreferences.set(holdingsWallet, {class:holdingsClass,query:holdingsQuery,sort:holdingsSort});
+}
+function renderHoldingsCategories() {
+  const target = document.querySelector("#holdings-categories");
+  if (!target || !currentHoldings) return;
+  const groups = currentHoldings.classes.filter(group => assetsForDisplay(group).length);
+  target.innerHTML = `<button type="button" data-holdings-class="" aria-pressed="${!holdingsClass}">Todos os investimentos</button>` + groups.map(group => `<button type="button" data-holdings-class="${escapeHtml(group.asset_class)}" aria-pressed="${holdingsClass===group.asset_class}"><span>${escapeHtml(group.label)}</span><small>${assetsForDisplay(group).length} · ${group.weight == null ? "Participação indisponível" : percentage(group.weight * 100)}</small></button>`).join("");
+}
+
 let portfolioLoadSequence = 0;
 let equityChart = null;
 let equityChartResizeObserver = null;
@@ -26,6 +59,26 @@ const portfolioBenchmarkSelection = new Set(["portfolio", "CDI", "IBOV", "IFIX"]
 
 export async function loadPortfolio(asOf = "", { refreshAttention = true } = {}) {
   const sequence = ++portfolioLoadSequence;
+  const wallet = typeof localStorage === "undefined" ? null : localStorage.getItem("income.activePortfolioId");
+  if (wallet !== holdingsWallet) {
+    saveHoldingsPreferences(); holdingsWallet = wallet;
+    const saved = holdingsPreferences.get(wallet);
+    holdingsClass = saved?.class || ""; holdingsQuery = saved?.query || ""; holdingsSort = saved?.sort || "name";
+    holdingsOpenGroups.clear();
+  }
+  currentHoldings = null;
+  if (openAssetMenu) { openAssetMenu.hidden=true;openAssetMenu=null; }
+  const policy = document.querySelector("#allocation-policy-dialog");
+  if (policy?.open) policy.close();
+  ++assetTransactionsRequestId;
+  const transactions = document.querySelector("#asset-transactions-modal");
+  if (transactions?.open) transactions.close();
+  const distribution = document.querySelector("#group-distribution-modal");
+  if (distribution?.open) distribution.close();
+  const categories = document.querySelector("#holdings-categories");
+  if (categories) categories.textContent = "";
+  const count = document.querySelector("#holdings-count");
+  if (count) count.textContent = "";
   ++portfolioPerformanceRequestId;
   ++equityChartRequestId;
   const metricIds = ["equity", "home-return", "income", "net-invested"];
@@ -35,7 +88,7 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
   const containers = ["#positions", "#understand-history", "#allocation", "#class-allocation", "#portfolio-evolution", "#portfolio-performance-chart", "#monthly-income-chart"];
   containers.forEach(selector => {
     const container = document.querySelector(selector);
-    if (container) container.innerHTML = loadingState;
+    if (container) container.innerHTML = selector === "#positions" ? holdingsSkeleton : loadingState;
   });
   try {
     // First render is one fast read-model request. Financial consolidation runs
@@ -62,7 +115,7 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
     metricIds.forEach(id => { const node = document.querySelector(`#${id}`); if (node) node.textContent = "Indisponível"; });
     containers.forEach(selector => {
       const container = document.querySelector(selector);
-      if (container) container.innerHTML = errorState(error.message);
+      if (container) container.innerHTML = selector === "#positions" ? '<div class="holdings-state" role="alert"><p>Não foi possível carregar seus investimentos.</p><button type="button" class="income-button secondary" data-holdings-retry>Tentar novamente</button></div>' : errorState(error.message);
     });
   }
 }
@@ -78,7 +131,15 @@ export function bindPortfolioFilters() {
       chart.resize();
     });
   });
+  document.addEventListener("input", event => {
+    if (event.target.id !== "holdings-search" || !currentHoldings) return;
+    holdingsQuery = event.target.value; saveHoldingsPreferences(); renderHoldings();
+  });
+  document.addEventListener("toggle", event => {
+    if (event.target.matches?.("#positions > details[data-holdings-group]")) holdingsOpenGroups.set(event.target.dataset.holdingsGroup,event.target.open);
+  }, true);
   document.addEventListener("change", async event => {
+    if (event.target.id === "holdings-sort" && currentHoldings) { holdingsSort=event.target.value; saveHoldingsPreferences(); renderHoldings(); return; }
     if (event.target.matches("#portfolio-performance-period")) {
       portfolioPerformancePeriod = event.target.value;
       loadPortfolioPerformanceChart();
@@ -100,7 +161,20 @@ export function bindPortfolioFilters() {
     catch (error) { chart.innerHTML = errorState(error.message); }
   });
   document.addEventListener("click", event => {
-    if (event.target.closest("#portfolio-new-operation")) window.dispatchEvent(new Event("income:open-operation"));
+    const category = event.target.closest("[data-holdings-class]");
+    if (category && currentHoldings) {
+      holdingsClass = category.dataset.holdingsClass; saveHoldingsPreferences(); renderHoldingsCategories(); renderHoldings();
+      [...document.querySelectorAll("[data-holdings-class]")].find(node => node.dataset.holdingsClass === holdingsClass)?.focus();
+    }
+    if (event.target.closest("[data-holdings-clear]") && currentHoldings) {
+      holdingsClass="";holdingsQuery="";holdingsSort="name";saveHoldingsPreferences();
+      document.querySelector("#holdings-search").value="";document.querySelector("#holdings-sort").value="name";
+      renderHoldingsCategories();renderHoldings();document.querySelector("#holdings-search").focus();
+    }
+    if (event.target.closest("[data-holdings-retry]")) loadPortfolio();
+    const details = event.target.closest("[data-holding-details]");
+    if (details) { const row=details.closest("tr"); const expanded=details.getAttribute("aria-expanded")!=="true";row.classList.toggle("holding-expanded",expanded);details.setAttribute("aria-expanded",String(expanded));details.textContent=expanded?"Menos detalhes":"Mais detalhes"; }
+    if (event.target.closest("#portfolio-new-operation, #holdings-first-operation")) window.dispatchEvent(new Event("income:open-operation"));
     if (event.target.closest("#open-allocation-policy")) openAllocationPolicy();
     const groupChart = event.target.closest("[data-group-distribution]");
     if (groupChart) {
@@ -403,7 +477,7 @@ function assetsForDisplay(group) {
   });
 }
 
-function renderHoldingRow(asset, fixedIncome, assetClass) {
+function renderHoldingRow(asset, fixedIncome, assetClass, classLabel = assetClass) {
   const title = fixedIncome ? (asset.display_name || asset.name) : asset.ticker;
   const applicationCount = asset.lot_count || 1;
   const subtitle = fixedIncome
@@ -413,12 +487,12 @@ function renderHoldingRow(asset, fixedIncome, assetClass) {
     ? applicationCount
     : asset.quantity;
   const tradeActions = !fixedIncome && !["PENSION", "REAL_ESTATE"].includes(assetClass)
-    ? ["BUY", "SELL"].map(type => `<button type="button" role="menuitem" data-open-operation data-operation-type="${type}" data-operation-class="${assetClass}" data-operation-ticker="${escapeHtml(asset.ticker)}" data-operation-name="${escapeHtml(asset.name)}" data-operation-country="${escapeHtml(asset.country || "")}" data-operation-currency="${escapeHtml(asset.currency_code || "BRL")}" data-operation-sector="${escapeHtml(asset.sector || "")}">${type === "BUY" ? "Nova compra" : "Registrar venda"}</button>`).join("")
+    ? ["BUY", "SELL"].map(type => `<button type="button" role="menuitem" data-open-operation data-operation-type="${type}" data-operation-class="${escapeHtml(assetClass)}" data-operation-ticker="${escapeHtml(asset.ticker)}" data-operation-name="${escapeHtml(asset.name)}" data-operation-country="${escapeHtml(asset.country || "")}" data-operation-currency="${escapeHtml(asset.currency_code || "BRL")}" data-operation-sector="${escapeHtml(asset.sector || "")}">${type === "BUY" ? "Nova compra" : "Registrar venda"}</button>`).join("")
     : "";
-  const menu = `<td class="asset-options-cell"><button class="asset-options-button" type="button" title="Opções" aria-label="Opções de ${escapeHtml(title)}" aria-haspopup="menu" aria-expanded="false" data-asset-options>⋯</button><div class="asset-context-menu" role="menu" hidden><button type="button" role="menuitem" data-asset-transactions data-asset-id="${asset.asset_id}" data-asset-title="${escapeHtml(title)}"><span aria-hidden="true">≡</span> Lançamentos</button>${tradeActions}</div></td>`;
+  const menu = `<td class="asset-options-cell"><button type="button" class="holding-details-toggle" data-holding-details aria-expanded="false" aria-label="Detalhes de ${escapeHtml(title)}">Mais detalhes</button><button class="asset-options-button" type="button" title="Opções" aria-label="Opções de ${escapeHtml(title)}" aria-haspopup="menu" aria-expanded="false" data-asset-options>⋯</button><div class="asset-context-menu" role="menu" hidden><button type="button" role="menuitem" data-asset-transactions data-asset-id="${escapeHtml(asset.asset_id)}" data-asset-title="${escapeHtml(title)}"><span aria-hidden="true">≡</span> Lançamentos</button>${tradeActions}</div></td>`;
   const fullName = asset.name || title;
   const tickerHint = `title="${escapeHtml(fullName)}" aria-label="${escapeHtml(`${title} — ${fullName}`)}"`;
-  return `<tr><td data-label="Ativo"><span class="asset-identity"><i>${escapeHtml(title.slice(0, 2))}</i><span><strong ${tickerHint}>${escapeHtml(title)}</strong><small>${escapeHtml(subtitle)}</small></span></span></td><td data-label="Quantidade">${quantity}</td><td data-label="PM">${money(asset.average_price, asset.currency_code)}</td><td data-label="Cotação">${asset.current_price === null ? "Cotação indisponível" : money(asset.current_price, asset.currency_code)}</td><td data-label="Saldo">${asset.market_value === null ? "—" : money(asset.market_value, asset.currency_code)}</td><td data-label="Resultado"><b class="metric-pill ${asset.total_result === null ? "" : Number(asset.total_result) < 0 ? "negative" : Number(asset.total_result) > 0 ? "positive" : ""}">${asset.total_result === null ? "—" : `${Number(asset.total_result) > 0 ? "+" : ""}${money(asset.total_result, asset.currency_code)}`}</b></td><td data-label="Valorização"><b class="metric-pill ${asset.return_percentage === null ? "" : Number(asset.return_percentage) < 0 ? "negative" : Number(asset.return_percentage) > 0 ? "positive" : ""}">${asset.return_percentage === null ? "—" : `${Number(asset.return_percentage) > 0 ? "+" : ""}${percentage(asset.return_percentage)}`}</b></td><td data-label="Rendimentos">${money(asset.income_received, asset.currency_code)}</td><td data-label="Peso">${asset.portfolio_weight === null ? "—" : percentage(asset.portfolio_weight * 100)}</td><td data-label="Alvo classe">${asset.target_weight === null ? "—" : percentage(asset.target_weight * 100)}</td>${menu.replace('<td class="asset-options-cell"', '<td class="asset-options-cell" data-label="Opções"')}</tr>`;
+  return `<tr><td data-label="Ativo"><span class="asset-identity"><i>${escapeHtml(title.slice(0, 2))}</i><span><strong ${tickerHint}>${escapeHtml(title)}</strong><small>${escapeHtml(fullName)}</small><small>${escapeHtml(subtitle)}</small><small class="holding-class-label">${escapeHtml(classLabel)}</small></span></span></td><td data-label="Quantidade">${escapeHtml(quantity)}</td><td data-label="PM">${money(asset.average_price, asset.currency_code)}</td><td data-label="Cotação">${asset.current_price == null ? "Preço não disponível." : money(asset.current_price, asset.currency_code)}</td><td data-label="Saldo">${asset.market_value === null ? "—" : money(asset.market_value, asset.currency_code)}</td><td data-label="Resultado"><b class="metric-pill ${asset.total_result === null ? "" : Number(asset.total_result) < 0 ? "negative" : Number(asset.total_result) > 0 ? "positive" : ""}">${asset.total_result === null ? "Resultado indisponível" : `${Number(asset.total_result) > 0 ? "Ganho +" : Number(asset.total_result) < 0 ? "Perda " : "Sem variação "}${money(asset.total_result, asset.currency_code)}`}</b></td><td data-label="Valorização"><b class="metric-pill ${asset.return_percentage === null ? "" : Number(asset.return_percentage) < 0 ? "negative" : Number(asset.return_percentage) > 0 ? "positive" : ""}">${asset.return_percentage === null ? "—" : `${Number(asset.return_percentage) > 0 ? "+" : ""}${percentage(asset.return_percentage)}`}</b></td><td data-label="Rendimentos">${money(asset.income_received, asset.currency_code)}</td><td data-label="Peso">${asset.portfolio_weight === null ? "—" : percentage(asset.portfolio_weight * 100)}</td><td data-label="Alvo classe">${asset.target_weight === null ? "—" : percentage(asset.target_weight * 100)}</td>${menu.replace('<td class="asset-options-cell"', '<td class="asset-options-cell" data-label="Opções"')}</tr>`;
 }
 
 function renderPortfolio(data, holdings, performance) {
@@ -461,13 +535,24 @@ function renderPortfolio(data, holdings, performance) {
   if (returnHeading) returnHeading.textContent = financialConcepts.returnLabel;
   const returnInfo = document.querySelector(".metric-info");
   if (returnInfo) returnInfo.title = financialConcepts.returnTooltip;
+  renderHoldingsCategories();
+  const search = document.querySelector("#holdings-search"); if (search) search.value=holdingsQuery;
+  const sort = document.querySelector("#holdings-sort"); if (sort) sort.value=holdingsSort;
+  renderHoldings();
+}
+function renderHoldings() {
+  const holdings = currentHoldings;
+  if (!holdings) return;
   const title = document.querySelector("#positions")?.closest(".card")?.querySelector("h2");
-  if (title) title.textContent = "Meus ativos";
+  if (title) title.textContent = "Seus investimentos, em um só lugar";
   if (!document.querySelector("#open-allocation-policy")) title?.insertAdjacentHTML("afterend", '<button class="secondary allocation-policy-trigger" id="open-allocation-policy" type="button"><svg class="income-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h6m4 0h6M4 17h10m4 0h2"/><circle cx="12" cy="7" r="2"/><circle cx="16" cy="17" r="2"/></svg><span>Configurar alocação ideal</span></button>');
   document.querySelector("#positions")?.closest(".card")?.classList.add("holdings-card");
-  document.querySelector("#positions").innerHTML = holdings.classes.length
-    ? holdings.classes.map((group, index) => {
-      const assets = assetsForDisplay(group);
+  const allGroups = holdings.classes.filter(group => assetsForDisplay(group).length);
+  const groups = allGroups.filter(group => !holdingsClass || group.asset_class===holdingsClass).map(group => ({group, assets:selectHoldingAssets(group)})).filter(item => item.assets.length);
+  const count = document.querySelector("#holdings-count");
+  if (count) count.textContent = `${groups.reduce((sum,item)=>sum+item.assets.length,0)} investimentos encontrados`;
+  document.querySelector("#positions").innerHTML = groups.length
+    ? groups.map(({group, assets}, index) => {
       const fixedIncome = group.asset_class === "FIXED_INCOME";
       const columns = fixedIncome
         ? ["Contrato", "Aplicações", "PM", "Cotação", "Saldo", "Resultado", "Variação", "Rendimentos", "Peso", "Alvo classe", "Opções"]
@@ -491,10 +576,12 @@ function renderPortfolio(data, holdings, performance) {
         ? percentage((Number(group.market_value) - Number(group.total_cost)) / Number(group.total_cost) * 100)
         : "—";
       const chartAvailable = group.market_value !== null && group.assets.some(asset => asset.market_value !== null);
-      const groupAction = `<button class="holding-chart-button" type="button" data-group-distribution data-group-id="${group.asset_class}" ${chartAvailable ? "" : "disabled"} title="${chartAvailable ? "Gráficos" : "Não há ativos para visualizar."}" aria-label="Gráficos de ${escapeHtml(group.label)}"><svg class="income-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9h9A9 9 0 1 1 9 3.5M15 3.5a9 9 0 0 1 5.5 5.5H15z"/></svg><span>Distribuição</span></button>`;
-      return `<details class="holding-class" ${index === 0 ? "open" : ""}><summary><span class="holding-class-name"><strong>${group.label}</strong><small>${assets.length} investimento${assets.length === 1 ? "" : "s"}</small></span><span class="holding-class-value"><small>Valor atual</small><strong>${group.market_value === null ? "Valuation parcial" : money(group.market_value, holdings.base_currency)}</strong></span><span class="holding-class-statistics"><span class="holding-class-metric"><small title="Diferença entre o valor atual dos ativos da classe e o custo registrado; não é rentabilidade TWR.">Diferença vs. custo</small><strong>${variation}</strong></span><span class="holding-class-metric"><small title="${classReason}">TWR · desde ${classPeriod.replace("Desde ", "")}</small><strong title="${classReason}">${classTwr}</strong></span><span class="holding-class-metric"><small>Peso atual</small><strong>${group.weight === null ? "—" : percentage(group.weight * 100)}</strong></span>${group.target_weight === null ? "" : `<span class="holding-class-metric"><small>Peso ideal</small><strong>${percentage(group.target_weight * 100)}</strong><small>Desvio ${percentage(group.deviation * 100)}</small></span>`}</span>${groupAction}<span class="holding-class-action" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg></span></summary>${table(columns, assets.map(asset => renderHoldingRow(asset, fixedIncome, group.asset_class))).replace("<table>", `<table aria-label="Ativos de ${escapeHtml(group.label)}">`).replaceAll("<th>", '<th scope="col">')}</details>`;
+      const groupAction = `<button class="holding-chart-button" type="button" data-group-distribution data-group-id="${escapeHtml(group.asset_class)}" ${chartAvailable ? "" : "disabled"} title="${chartAvailable ? "Gráficos" : "Não há ativos para visualizar."}" aria-label="Gráficos de ${escapeHtml(group.label)}"><svg class="income-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9h9A9 9 0 1 1 9 3.5M15 3.5a9 9 0 0 1 5.5 5.5H15z"/></svg><span>Distribuição</span></button>`;
+      return `<details class="holding-class" data-holdings-group="${escapeHtml(group.asset_class)}" ${(holdingsOpenGroups.get(group.asset_class) ?? (index === 0 || Boolean(holdingsQuery))) ? "open" : ""}><summary><span class="holding-class-name"><strong>${escapeHtml(group.label)}</strong><small>${assets.length} investimento${assets.length === 1 ? "" : "s"}</small></span><span class="holding-class-value"><small>Total da classe</small><strong>${group.market_value === null ? "Valuation parcial" : money(group.market_value, holdings.base_currency)}</strong></span><span class="holding-class-statistics"><span class="holding-class-metric"><small title="Diferença entre o valor atual dos ativos da classe e o custo registrado; não é rentabilidade TWR.">Diferença vs. custo</small><strong>${variation}</strong></span><span class="holding-class-metric"><small title="${classReason}">TWR · desde ${classPeriod.replace("Desde ", "")}</small><strong title="${classReason}">${classTwr}</strong></span><span class="holding-class-metric"><small>Peso atual</small><strong>${group.weight === null ? "—" : percentage(group.weight * 100)}</strong></span>${group.target_weight === null ? "" : `<span class="holding-class-metric"><small>Peso ideal</small><strong>${percentage(group.target_weight * 100)}</strong><small>Desvio ${percentage(group.deviation * 100)}</small></span>`}</span>${groupAction}<span class="holding-class-action" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg></span></summary>${table(columns, assets.map(asset => renderHoldingRow(asset, fixedIncome, group.asset_class, group.label))).replace("<table>", `<table aria-label="Ativos de ${escapeHtml(group.label)}">`).replaceAll("<th>", '<th scope="col">')}</details>`;
     }).join("")
-    : emptyState("Sua carteira ainda está vazia.", '<a href="#operacoes" data-navigate class="text-link">Registrar primeira operação</a>');
+    : allGroups.length
+      ? '<div class="holdings-state"><p>Nenhum investimento encontrado nesta categoria.</p><button type="button" class="income-button secondary" data-holdings-clear>Limpar filtros</button></div>'
+      : '<div class="holdings-state"><p>Seus investimentos aparecerão aqui.</p><button type="button" class="income-button" id="holdings-first-operation">Adicionar investimento</button></div>';
 }
 
 function openAssetTransactions(assetId, assetTitle, trigger) {
