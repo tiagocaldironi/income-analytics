@@ -4,7 +4,7 @@ let fxBound = false;
 
 export function bindFx() {
   if (fxBound) return;
-  const target = document.querySelector(".danger-zone");
+  const target = document.querySelector("#paid-income-settings") || document.querySelector(".danger-zone");
   if (!target) return;
   fxBound = true;
   target.insertAdjacentHTML("beforebegin", '<section class="card" id="fx-card"><h2>Moeda-base e câmbio</h2><p>O patrimônio é consolidado em BRL. Para ativos em USD, atualize a PTAX da data desejada.</p><button type="button" class="secondary" id="refresh-usd-brl">Atualizar USD/BRL</button><div class="message" id="fx-message" role="alert"></div></section>');

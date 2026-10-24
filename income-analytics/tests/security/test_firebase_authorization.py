@@ -488,3 +488,21 @@ def test_contextual_onboarding_unauthenticated_and_csrf(saas):
     assert client.post('/api/auth/logout').status_code==200
     client.headers['X-CSRF-Token']=client.get('/api/auth/csrf').json()['csrf_token']
     assert client.put(path,json={"action":"START"}).status_code==401
+
+
+def test_data_sources_exposes_only_public_catalog(saas):
+    login, _, _ = saas
+    client, response, _ = login()
+    assert response.status_code == 200
+    response = client.get("/api/data-sources")
+    assert response.status_code == 200
+    providers = response.json()["providers"]
+    assert {item["provider"] for item in providers} == {"Brapi", "B3 COTAHIST", "BCB PTAX", "CoinGecko"}
+    allowed = {"provider", "description", "status", "last_success", "next_execution", "execution_note", "group"}
+    for item in providers:
+        assert set(item) == allowed
+        assert item["status"] == "UNKNOWN"
+        assert item["last_success"] is None
+        assert item["next_execution"] is None
+    anonymous = TestClient(app, base_url=ORIGIN)
+    assert anonymous.get("/api/data-sources").status_code == 401
