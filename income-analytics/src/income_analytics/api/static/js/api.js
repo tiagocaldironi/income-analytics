@@ -48,6 +48,8 @@ async function request(path, options = {}) {
 }
 
 export const portfolioApi = {
+  contextualOnboarding: id => request(`/portfolios/${encodeURIComponent(id)}/onboarding-v2`),
+  saveContextualOnboarding: (id,body) => request(`/portfolios/${encodeURIComponent(id)}/onboarding-v2`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),
   onboarding: id => request(`/portfolios/${encodeURIComponent(id)}/onboarding`),
   saveOnboarding: (id, state) => request(`/portfolios/${encodeURIComponent(id)}/onboarding`, {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(state)}),
   listPortfolios: () => request("/portfolios"),

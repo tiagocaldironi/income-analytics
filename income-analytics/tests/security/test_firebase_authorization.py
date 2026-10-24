@@ -413,3 +413,78 @@ def test_onboarding_metadata_is_persisted_and_isolated_without_financial_writes(
     assert a.put(path(a1), json={"current_step": 5, "status": "ACTIVE"}).status_code == 422
     assert a.put(path(a1), json={"current_step": 3, "status": "ACTIVE"}).status_code == 200
     assert a.get("/api/portfolio", headers={"X-Portfolio-Id": a1}).json() == before
+
+
+def test_contextual_onboarding_intent_is_personal_progress_is_per_wallet(saas):
+    login, tokens, _ = saas
+    a,_,token=login();b,_,_=login()
+    first=wallet(a,"onboard-a");second=wallet(a,"onboard-second");foreign=wallet(b,"onboard-b")
+    path=f"/api/portfolios/{first}/onboarding-v2"
+    initial=a.get(path).json()
+    assert initial["ask_intent"] and initial["achievements"][0]["state"]=="COMPLETED"
+    assert not initial["facts"]["confirmed_investment"]
+    for client,w in ((a,foreign),(b,first)):
+        assert client.get(f"/api/portfolios/{w}/onboarding-v2").status_code==404
+        assert client.put(f"/api/portfolios/{w}/onboarding-v2",json={"action":"START"}).status_code==404
+    assert a.put(path,json={"action":"INTENT","intent":"EXISTING","user_id":"forged"}).status_code==422
+    assert a.put(path,json={"action":"INTENT","intent":"EXISTING"}).status_code==200
+    assert a.get(path).json()["intent"]=="EXISTING"
+    returning,session,_=login(uid=tokens[token]["sub"])
+    assert session.status_code==200 and returning.get(path).json()["intent"]=="EXISTING"
+    other=a.get(f"/api/portfolios/{second}/onboarding-v2").json()
+    assert other["intent"]=="EXISTING" and not other["ask_intent"]
+    assert other["status"]=="ACTIVE"
+    assert a.put(path,json={"action":"CONFIRM_ASSET"}).status_code==409
+    assert a.put(path,json={"action":"EXPLORE","analysis":"composition"}).status_code==409
+    assert a.put(path,json={"action":"CLASS","asset_class":"FAKE_CLASS"}).status_code==422
+    assert a.put(path,json={"action":"CLASS","asset_class":"FII"}).json()["last_step"]==4
+    assert a.put(path,json={"action":"SKIP"}).json()["status"]=="SKIPPED"
+    assert a.get(path).json()["status"]=="SKIPPED"
+    assert a.put(path,json={"action":"RESUME"}).json()["status"]=="ACTIVE"
+    assert a.put(path,json={"action":"DISMISS"}).json()["dismissed_at"] is not None
+    assert a.get(f"/api/portfolios/{second}/onboarding-v2").json()["status"]=="ACTIVE"
+
+
+def test_contextual_onboarding_confirmed_facts_events_and_deletion(saas):
+    from sqlalchemy import select,func
+    from income_analytics.infrastructure.models import OnboardingEventV2Record,FinancialEventRecord
+    login,_,_=saas
+    client,_,_=login();wid=wallet(client,"onboard-confirmed");path=f"/api/portfolios/{wid}/onboarding-v2"
+    assert client.put(path,json={"action":"START"}).status_code==200
+    assert client.put(path,json={"action":"START"}).status_code==200
+    failed=trade(client,wid,ticker="ONBV2",quantity="-1")
+    assert failed.status_code==422
+    assert not client.get(path).json()["facts"]["confirmed_investment"]
+    assert trade(client,wid,ticker="ONBV2").status_code==201
+    loaded=client.get(path).json()
+    assert loaded["facts"]["confirmed_investment"]
+    assert loaded["achievements"][1]["state"]=="COMPLETED"
+    assert loaded["facts"]["available_analyses"]==[]
+    assert client.put('/api/market-prices/ONBV2',headers={"X-Portfolio-Id":wid},json={"current_price":"12","effective_date":"2026-10-01"}).status_code==200
+    loaded=client.get(path).json()
+    assert loaded["facts"]["available_analyses"]
+    before=client.get('/api/portfolio',headers={"X-Portfolio-Id":wid}).json()
+    assert client.put(path,json={"action":"CONFIRM_ASSET"}).json()["last_step"]==5
+    for _ in range(2):
+        result=client.put(path,json={"action":"EXPLORE","analysis":loaded["facts"]["available_analyses"][0]})
+        assert result.status_code==200 and result.json()["status"]=="COMPLETED"
+    assert client.get('/api/portfolio',headers={"X-Portfolio-Id":wid}).json()==before
+    with SessionFactory() as db:
+        assert db.scalar(select(func.count()).select_from(OnboardingEventV2Record).where(OnboardingEventV2Record.portfolio_id==wid,OnboardingEventV2Record.event_name=="onboarding_started"))==1
+        assert db.scalar(select(func.count()).select_from(OnboardingEventV2Record).where(OnboardingEventV2Record.portfolio_id==wid,OnboardingEventV2Record.event_name=="onboarding_completed"))==1
+        event_id=db.scalar(select(FinancialEventRecord.id).where(FinancialEventRecord.portfolio_id==wid))
+    assert client.delete(f"/api/operations/{event_id}",headers={"X-Portfolio-Id":wid}).status_code==200
+    deleted=client.get(path).json()
+    assert not deleted["facts"]["has_current_investments"]
+    assert deleted["achievements"][1]["state"]=="NOT_STARTED"
+    assert deleted["first_asset_earned_at"] is not None
+
+
+def test_contextual_onboarding_unauthenticated_and_csrf(saas):
+    login,_,_=saas
+    client,_,_=login();wid=wallet(client,"onboard-csrf");path=f"/api/portfolios/{wid}/onboarding-v2"
+    assert TestClient(app,base_url=ORIGIN).get(path).status_code==401
+    assert client.put(path,headers={"X-CSRF-Token":"forged"},json={"action":"START"}).status_code==403
+    assert client.post('/api/auth/logout').status_code==200
+    client.headers['X-CSRF-Token']=client.get('/api/auth/csrf').json()['csrf_token']
+    assert client.put(path,json={"action":"START"}).status_code==401

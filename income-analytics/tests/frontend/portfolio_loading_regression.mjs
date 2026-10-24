@@ -42,7 +42,7 @@ const document = {
   addEventListener() {},
 };
 const context = vm.createContext({
-  console, setupPortfolioView() {}, updatePortfolioView() {},
+  invalidatePortfolioGuidance(){}, console, financialConcepts:{returnTooltip:"TWR"}, setupPortfolioView() {}, updatePortfolioView() {},
   document,
   portfolioApi: { dashboard: async () => dashboard, operations: async () => ({ operations: [] }) },
   loadingState: "Carregando…",
@@ -60,14 +60,14 @@ vm.runInContext(source, context);
 // The current page intentionally has no #allocation or
 // #strategy-class-allocation. Their absence must not stop the dashboard.
 await context.loadPortfolio();
-assert.match(nodes.get("#positions").innerHTML, /Sua carteira ainda está vazia/);
+assert.match(nodes.get("#positions").innerHTML, /Seus investimentos aparecerão aqui/);
 assert.equal(nodes.get("#class-allocation").innerHTML, "Composição indisponível");
 assert.equal(nodes.get("#net-invested").textContent, "R$ 0");
 assert.match(nodes.get("#capital-applied-note").textContent, /Não há posições abertas/);
 assert(!nodes.get("#portfolio-evolution").innerHTML.includes("Carregando"));
-assert.equal(title.textContent, "Meus ativos");
+assert.equal(title.textContent, "Seus investimentos, em um só lugar");
 
-assert.match(source, /if \(container\) container\.innerHTML = loadingState/);
+assert.ok(source.includes('selector === "#positions" ? holdingsSkeleton : loadingState'));
 assert.match(source, /if \(dashboardTarget\) dashboardTarget\.innerHTML = content/);
 assert.match(source, /if \(legacyStrategyTarget\) \{/);
 console.log("Portfolio loading regression checks passed.");
@@ -84,3 +84,11 @@ rejectDashboard(new Error('offline'));await failedLoad;
 for (const id of ['equity','home-return','income','net-invested']) assert.equal(nodes.get(`#${id}`).textContent,'Indisponível');
 assert.match(nodes.get('#monthly-income-chart').innerHTML,/offline/);
 console.log('Failed wallet refresh clears prior metrics, monthly income and insight.');
+
+// A delayed previous request cannot overwrite the most recently selected wallet.
+const pending=[];context.portfolioApi.dashboard=()=>new Promise(resolve=>pending.push(resolve));
+const older=context.loadPortfolio();const newer=context.loadPortfolio();
+pending[1]({...dashboard,portfolio:{...dashboard.portfolio,capital_applied_status:'AVAILABLE',capital_applied:222}});await newer;
+pending[0]({...dashboard,portfolio:{...dashboard.portfolio,capital_applied_status:'AVAILABLE',capital_applied:111}});await older;
+assert.equal(nodes.get('#net-invested').textContent,'R$ 222');
+console.log('Rapid wallet refresh: delayed older response cannot overwrite the current wallet.');
