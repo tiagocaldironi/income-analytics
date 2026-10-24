@@ -68,7 +68,7 @@ export function setupPortfolioView(resize) {
     const current = Number(region.querySelector('[aria-selected="true"]').dataset.analysisTab);
     selectAnalysis(current+(dx<0?1:-1));
   }, {passive:true});
-  const icons = ["wallet","chart","income","layers"];
+  const icons = ["wallet","chart","moneybag","layers"];
   document.querySelectorAll('[data-page="minha-carteira"] .metric').forEach((card,i) => {
     const node = document.createElement("span"); node.className = "metric-icon";
     node.innerHTML = icon(icons[i]); card.prepend(node);
@@ -82,7 +82,7 @@ export function setupPortfolioView(resize) {
   });
   document.querySelectorAll(".primary-nav a").forEach(link => {
     const route = link.getAttribute("href");
-    const iconsByRoute = {"#minha-carteira":"wallet","#entender":"book","#estrategia":"compass","#simular":"chart","#operacoes":"income","#configuracoes":"settings","#ferramentas":"layers","#ajuda-metodologia":"book"};
+    const iconsByRoute = {"#minha-carteira":"wallet","#entender":"book","#estrategia":"compass","#simular":"chart","#operacoes":"income","#configuracoes":"settings","#ferramentas":"tools","#ajuda-metodologia":"help"};
     const label = document.createElement("span");
     label.className = "nav-label";
     label.textContent = link.textContent;
