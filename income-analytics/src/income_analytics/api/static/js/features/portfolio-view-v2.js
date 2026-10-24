@@ -3,7 +3,7 @@ import { renderPortfolioGuidance } from "./portfolio-guidance-v2.js";
 import { icon } from "../shared/icons.js";
 let bound = false;
 let resizeCharts = () => {};
-export function selectAnalysis(index, focus = false) {
+export function selectAnalysis(index, focus = false, interacted = false) {
   const tabs = [...document.querySelectorAll("[data-analysis-tab]")];
   const panels = [...document.querySelectorAll("[data-analysis-panel]")];
   if (!tabs.length) return;
@@ -14,6 +14,7 @@ export function selectAnalysis(index, focus = false) {
     panels[i].hidden = i !== index;
   });
   if (focus) tabs[index].focus();
+  if (interacted) document.dispatchEvent(new CustomEvent("income:analysis-explored",{detail:{index}}));
   // Panels remain mounted: filters and loaded data survive every switch.
   requestAnimationFrame(() => resizeCharts());
 }
@@ -45,14 +46,14 @@ export function setupPortfolioView(resize) {
   if (!region) return;
   region.addEventListener("click", event => {
     const tab = event.target.closest("[data-analysis-tab]");
-    if (tab) selectAnalysis(Number(tab.dataset.analysisTab));
+    if (tab) selectAnalysis(Number(tab.dataset.analysisTab), false, true);
   });
   region.addEventListener("keydown", event => {
     const tab = event.target.closest("[data-analysis-tab]");
     if (!tab) return;
     const i = Number(tab.dataset.analysisTab);
     const next = {ArrowRight:i+1, ArrowLeft:i-1, Home:0, End:3}[event.key];
-    if (next !== undefined) { event.preventDefault(); selectAnalysis(next, true); }
+    if (next !== undefined) { event.preventDefault(); selectAnalysis(next, true, true); }
   });
   // Swipe is confined to navigation. Chart gestures/tooltips remain untouched.
   const strip = region.querySelector("[role=tablist]");
@@ -66,7 +67,7 @@ export function setupPortfolioView(resize) {
     start = null;
     if (Math.abs(dx) < 65 || Math.abs(dx) < Math.abs(dy)*1.5) return;
     const current = Number(region.querySelector('[aria-selected="true"]').dataset.analysisTab);
-    selectAnalysis(current+(dx<0?1:-1));
+    selectAnalysis(current+(dx<0?1:-1), false, true);
   }, {passive:true});
   const icons = ["wallet","chart","income","layers"];
   document.querySelectorAll('[data-page="minha-carteira"] .metric').forEach((card,i) => {

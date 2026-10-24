@@ -12,12 +12,12 @@ for(const section of [css.match(/:root\{([^}]+)/)[1],css.match(/html\[data-theme
  assert.ok(contrast(tokens.focus,tokens.bg)>=3,'focus');
 }
 assert.ok(contrast('#ffffff','#245bd6')>=4.5);
-let resized=0, focus=-1;
+let resized=0, focus=-1;const explored=[];
 const tabs=Array.from({length:4},(_,i)=>({dataset:{analysisTab:String(i)},attributes:{},setAttribute(k,v){this.attributes[k]=v;},focus(){focus=i;}}));
 const panels=tabs.map(()=>({hidden:false,filter:{value:'12'}}));
 const events={}; const touch={};
 const region={addEventListener:(type,fn)=>events[type]=fn,querySelector:s=>s==='[role=tablist]'?{addEventListener:(type,fn)=>touch[type]=fn}:tabs.find(t=>t.attributes['aria-selected']==='true')};
-const context=vm.createContext({document:{querySelector:()=>region,querySelectorAll:s=>s==='[data-analysis-tab]'?tabs:s==='[data-analysis-panel]'?panels:[],documentElement:{}},requestAnimationFrame:fn=>fn(),MutationObserver:class{observe(){}},renderPortfolioGuidance(){}});
+const context=vm.createContext({CustomEvent,document:{querySelector:()=>region,querySelectorAll:s=>s==='[data-analysis-tab]'?tabs:s==='[data-analysis-panel]'?panels:[],documentElement:{},dispatchEvent(event){explored.push(event.detail.index);}},requestAnimationFrame:fn=>fn(),MutationObserver:class{observe(){}},renderPortfolioGuidance(){}});
 vm.runInContext(fs.readFileSync(base+'js/features/portfolio-view-v2.js','utf8').replace(/^import .*;$/gm,'').replaceAll('export function','function'),context);
 context.setupPortfolioView(()=>resized++);
 context.selectAnalysis(2,true);assert.equal(focus,2);assert.deepEqual(panels.map(p=>p.hidden),[true,true,false,true]);
@@ -25,7 +25,7 @@ assert.equal(panels[0].filter.value,'12');
 events.keydown({target:{closest:()=>tabs[2]},key:'End',preventDefault(){}});assert.equal(focus,3);
 events.keydown({target:{closest:()=>tabs[3]},key:'ArrowRight',preventDefault(){}});assert.equal(focus,0);
 touch.touchstart({changedTouches:[{clientX:200,clientY:10}]});touch.touchend({changedTouches:[{clientX:40,clientY:12}]});assert.equal(tabs[1].attributes['aria-selected'],'true');
-assert.equal(resized,4);
+assert.equal(resized,4);assert.deepEqual(explored,[3,0,1],"only keyboard/touch interaction emits exploration, not initial programmatic selection");
 const emptyContext=vm.createContext({});
 vm.runInContext(fs.readFileSync(base+'js/features/portfolio-guidance-v2.js','utf8').replace(/^import .*;$/gm,'').replaceAll('export async function','async function').replaceAll('export function','function'),emptyContext);
 const empty={holdings:{classes:[]},history:{snapshots:[]},portfolio:{}};
