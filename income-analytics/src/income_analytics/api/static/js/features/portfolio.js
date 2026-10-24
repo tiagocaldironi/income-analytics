@@ -815,6 +815,44 @@ function renderAllocation(data) {
   target.innerHTML = data.assets.length ? table(["Ativo", "Peso"], data.assets.map(asset => `<tr><td>${asset.ticker}</td><td>${asset.portfolio_weight === null ? "—" : percentage(asset.portfolio_weight * 100)}</td></tr>`)) : "Nenhuma posição com cotação disponível.";
 }
 
+function compositionSlicePath(start, end) {
+  const point = angle => [100 + 90 * Math.sin(angle * Math.PI / 180), 100 - 90 * Math.cos(angle * Math.PI / 180)];
+  const [sx,sy]=point(start),[ex,ey]=point(end);
+  if(end-start>=359.999999) return "M100 10A90 90 0 1 1 100 190A90 90 0 1 1 100 10Z";
+  return `M100 100L${sx} ${sy}A90 90 0 ${end-start>180?1:0} 1 ${ex} ${ey}Z`;
+}
+function bindCompositionInteractions(target, valued, total, currency) {
+  const svg=target?.querySelector?.('.composition-interactive');
+  if(!svg)return;
+  const slices=[...svg.querySelectorAll('[data-composition-slice]')];
+  const tooltip=target.querySelector('.composition-tooltip');
+  const show=index=>{
+    const item=valued[index];
+    tooltip.querySelector('[data-composition-name]').textContent=item.label;
+    tooltip.querySelector('[data-composition-value]').textContent=money(item.market_value,currency);
+    tooltip.querySelector('[data-composition-share]').textContent=percentage(Number(item.market_value)/total*100);
+    tooltip.hidden=false;
+    slices.forEach((slice,i)=>slice.classList.toggle('is-highlighted',i===index));
+  };
+  const hide=()=>{tooltip.hidden=true;slices.forEach(slice=>slice.classList.remove('is-highlighted'));};
+  slices.forEach((slice,index)=>{
+    slice.addEventListener('pointerenter',()=>show(index));
+    slice.addEventListener('pointerleave',()=>{if(!slices.includes(document.activeElement))hide();});
+    slice.addEventListener('focus',()=>show(index));
+    slice.addEventListener('blur',event=>{if(!slices.includes(event.relatedTarget))hide();});
+    slice.addEventListener('click',()=>{slice.focus();show(index);});
+    slice.addEventListener('keydown',event=>{
+      let next;
+      if(event.key==='ArrowRight'||event.key==='ArrowDown')next=(index+1)%slices.length;
+      if(event.key==='ArrowLeft'||event.key==='ArrowUp')next=(index+slices.length-1)%slices.length;
+      if(event.key==='Home')next=0;if(event.key==='End')next=slices.length-1;
+      if(next!==undefined){event.preventDefault();slices[next].focus();}
+      if(event.key==='Enter'||event.key===' '){event.preventDefault();show(index);}
+      if(event.key==='Escape'){event.preventDefault();slice.blur();hide();}
+    });
+  });
+}
+
 function renderClasses(holdings, fallback) {
   // Allocation is a current-value view in portfolio base currency. Foreign
   // class costs are intentionally unavailable in the holdings read model,
@@ -823,12 +861,17 @@ function renderClasses(holdings, fallback) {
   const total = valued.reduce((sum, item) => sum + Number(item.market_value), 0);
   const colors = { BRAZILIAN_STOCK: "#5b8def", BRAZILIAN_ETF: "#5b9cff", FII: "#8a6ce8", FIXED_INCOME: "#e7b65a", INTERNATIONAL: "#e26f95", INTERNATIONAL_ETF: "#5fc5e6", CRYPTO: "#d983ff", PENSION: "#b493e4", REAL_ESTATE: "#f28e6b", CASH: "#6f95c8", OTHER: "#a3afbf" };
   let cursor = 0;
-  const stops = valued.map(item => { const start = cursor; cursor += Number(item.market_value) / total * 100; return `${colors[item.asset_class] || colors.OTHER} ${start}% ${cursor}%`; }).join(", ");
-  const pieDescription = `Composição por classe: ${holdings.classes.map(item => `${item.label} ${item.market_value === null || !total ? "sem valuation" : percentage(Math.max(Number(item.market_value), 0) / total * 100)}`).join(", ")}`;
-  const content = valued.length ? `<div class="allocation-pie-layout"><div class="allocation-pie" role="img" aria-label="${escapeHtml(pieDescription)}" style="background:conic-gradient(${stops})"></div><div class="allocation-legend">${holdings.classes.map(item => { const amount = item.market_value === null ? null : Number(item.market_value); const share = amount === null || !total ? null : Math.max(amount, 0) / total * 100; const detail = amount === null ? "Valuation indisponível" : amount < 0 ? `Saldo negativo · ${money(amount, holdings.base_currency)} · fora do gráfico` : money(amount, holdings.base_currency); return `<div><i style="background:${colors[item.asset_class] || colors.OTHER}"></i><span>${escapeHtml(item.label)}<small>${detail}</small></span><strong>${share === null ? "—" : percentage(share)}</strong></div>`; }).join("")}</div></div>` : emptyState("Composição indisponível", "Não há saldos positivos avaliados para compor a distribuição.");
+  const slices=valued.map((item,index)=>{
+    const start=cursor;cursor+=Number(item.market_value)/total*360;
+    const label=`${item.label}: ${money(item.market_value,holdings.base_currency)}, ${percentage(Number(item.market_value)/total*100)}`;
+    return `<path d="${compositionSlicePath(start,cursor)}" fill="${colors[item.asset_class]||colors.OTHER}" tabindex="0" role="button" aria-label="${escapeHtml(label)}" data-composition-slice="${index}"><title>${escapeHtml(label)}</title></path>`;
+  }).join('');
+  const partialNotice = holdings.classes.some(item => item.market_value === null || Number(item.market_value) < 0) ? '<p class="composition-hint">Distribuição dos saldos positivos com avaliação disponível. Consulte os detalhes para ver classes sem avaliação ou com saldo negativo.</p>' : "";
+  const content = valued.length ? `<div class="composition-explorer"><p class="composition-hint">Passe o mouse, toque ou use as setas do teclado para explorar cada classe.</p>${partialNotice}<svg class="composition-interactive" viewBox="0 0 200 200" role="group" aria-label="Composição da carteira por classe">${slices}</svg><div class="composition-tooltip" role="status" aria-live="polite" hidden><strong data-composition-name></strong><span data-composition-value></span><b data-composition-share></b></div><details class="composition-details"><summary>Ver todos os detalhes</summary><div class="allocation-legend">${holdings.classes.map(item => { const amount = item.market_value === null ? null : Number(item.market_value); const share = amount === null || !total ? null : Math.max(amount, 0) / total * 100; const detail = amount === null ? "Valuation indisponível" : amount < 0 ? `Saldo negativo · ${money(amount, holdings.base_currency)} · fora do gráfico` : money(amount, holdings.base_currency); return `<div><i style="background:${colors[item.asset_class] || colors.OTHER}"></i><span>${escapeHtml(item.label)}<small>${detail}</small></span><strong>${share === null ? "—" : percentage(share)}</strong></div>`; }).join("")}</div></details></div>` : emptyState("Composição indisponível", "Não há saldos positivos avaliados para compor a distribuição.");
   const dashboardTarget = document.querySelector("#class-allocation");
   const legacyStrategyTarget = document.querySelector("#strategy-class-allocation");
   if (dashboardTarget) dashboardTarget.innerHTML = content;
+  bindCompositionInteractions(dashboardTarget,valued,total,holdings.base_currency);
   if (legacyStrategyTarget) {
     legacyStrategyTarget.innerHTML = valued.length
       ? `<div class="allocation-content"><div id="strategy-allocation-chart" class="allocation-chart" aria-label="Distribuição atual por classe"></div><div class="allocation-legend">${holdings.classes.map(item => `<div><i style="background:${colors[item.asset_class] || colors.OTHER}"></i><span>${escapeHtml(item.label)}</span><strong>${item.market_value === null || !total ? "—" : percentage(Number(item.market_value) / total * 100)}</strong></div>`).join("")}</div></div>`
