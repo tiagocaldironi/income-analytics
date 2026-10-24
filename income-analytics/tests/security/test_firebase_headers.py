@@ -1,6 +1,7 @@
 """Google popup bootstrap must be compatible with our restrictive CSP."""
 
 from fastapi.testclient import TestClient
+
 from income_analytics.main import app
 
 
