@@ -704,3 +704,39 @@ class PortfolioOnboardingRecord(Base):
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="ACTIVE")
     updated_at: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class OnboardingPreferenceV2Record(Base):
+    __tablename__ = "onboarding_preferences_v2"
+    viewer_key: Mapped[str] = mapped_column(String(36), primary_key=True)
+    owner_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    intent: Mapped[str | None] = mapped_column(String(24))
+    chosen_at: Mapped[int | None] = mapped_column(Integer)
+    deferred_at: Mapped[int | None] = mapped_column(Integer)
+    version: Mapped[int] = mapped_column(Integer, default=2)
+
+
+class OnboardingJourneyV2Record(Base):
+    __tablename__ = "onboarding_journeys_v2"
+    __table_args__ = (CheckConstraint("status IN ('ACTIVE','SKIPPED','DISMISSED','COMPLETED')", name="ck_onboarding_v2_status"), CheckConstraint("last_step BETWEEN 1 AND 6", name="ck_onboarding_v2_step"))
+    viewer_key: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(ForeignKey("portfolios.id", ondelete="CASCADE"), primary_key=True)
+    owner_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    version: Mapped[int] = mapped_column(Integer, default=2)
+    status: Mapped[str] = mapped_column(String(16), default="ACTIVE")
+    last_step: Mapped[int] = mapped_column(Integer, default=1)
+    selected_class: Mapped[str | None] = mapped_column(String(32))
+    first_asset_at: Mapped[int | None] = mapped_column(Integer)
+    analysis_at: Mapped[int | None] = mapped_column(Integer)
+    completed_at: Mapped[int | None] = mapped_column(Integer)
+    dismissed_at: Mapped[int | None] = mapped_column(Integer)
+    updated_at: Mapped[int] = mapped_column(Integer)
+
+
+class OnboardingEventV2Record(Base):
+    __tablename__ = "onboarding_events_v2"
+    viewer_key: Mapped[str] = mapped_column(String(36), primary_key=True)
+    portfolio_id: Mapped[str] = mapped_column(ForeignKey("portfolios.id", ondelete="CASCADE"), primary_key=True)
+    version: Mapped[int] = mapped_column(Integer, primary_key=True, default=2)
+    event_name: Mapped[str] = mapped_column(String(48), primary_key=True)
+    occurred_at: Mapped[int] = mapped_column(Integer)

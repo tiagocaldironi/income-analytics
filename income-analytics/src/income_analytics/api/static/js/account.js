@@ -95,7 +95,7 @@ async function initialize() {
           const result = await response.json();
           if (!response.ok) throw new Error(result.detail || "Não foi possível criar a carteira.");
           localStorage.setItem("income.activePortfolioId", result.id);
-          location.replace("/#operacoes");
+          location.replace("/#minha-carteira");
         });
       });
     } else {

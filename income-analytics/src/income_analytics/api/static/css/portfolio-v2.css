@@ -205,3 +205,58 @@ html.income-v2[data-theme="light"] .metric.metric-primary>small,html.income-v2[d
 .income-v2 .portfolio-insight strong{font-size:.85rem}
 .income-v2 .portfolio-insight p{margin:8px 0;line-height:1.6;font-size:.9rem}
 .income-v2 .portfolio-insight small{display:block;color:var(--income-secondary);line-height:1.6;font-size:.76rem}
+
+/* Meus Ativos: controls share semantic tokens and never change financial values. */
+.income-v2 [data-page="minha-carteira"][data-empty=true]>.holdings-card{display:block}
+.income-v2 .holdings-filters{margin:22px 0}
+.income-v2 .holdings-categories{display:flex;flex-wrap:wrap;gap:8px}
+.income-v2 .holdings-categories button{width:auto;margin:0;min-height:44px;padding:10px 14px;border:1px solid var(--income-line);border-radius:10px;background:var(--income-surface);color:var(--income-secondary);text-align:left;box-shadow:none}
+.income-v2 .holdings-categories button small{display:block;margin-top:4px;color:inherit;font-size:.75rem}
+.income-v2 .holdings-categories button[aria-pressed=true]{color:var(--income-action);background:var(--income-context);border-color:var(--income-action)}
+.income-v2 .holdings-search-row{display:flex;gap:16px;margin-top:18px;align-items:end}
+.income-v2 .holdings-search-row label{flex:1;display:grid;gap:8px;color:var(--income-secondary);font-size:.8rem;min-width:0}
+.income-v2 .holdings-search-row input,.income-v2 .holdings-search-row select{width:100%;min-height:44px;margin:0;border:1px solid var(--income-line);border-radius:9px;background:var(--income-surface);color:var(--income-text);padding:10px 12px;font:inherit}
+.income-v2 #holdings-count{font-size:.8rem;color:var(--income-secondary);margin:14px 0}
+.income-v2 .holding-class td:not(:first-child){font-variant-numeric:tabular-nums}
+.income-v2 .holding-class td[data-label=Saldo],.income-v2 .holding-class td[data-label=Resultado],.income-v2 .holding-class td[data-label=Rendimentos]{text-align:right}
+.income-v2 .asset-identity>span>small{display:block;white-space:normal;line-height:1.5}
+.income-v2 .holding-class-label{font-size:.72rem;color:var(--income-secondary)}
+.income-v2 .holding-details-toggle{display:none}
+.income-v2 .holdings-state{padding:28px 16px;text-align:center;color:var(--income-secondary)}
+.income-v2 .holdings-state button{margin:12px 0 0;width:auto}
+.income-v2 .holdings-skeleton{display:grid;gap:16px;padding:20px 0}
+.income-v2 .holdings-skeleton span{display:block;min-height:84px;background:var(--income-raised);border:1px solid var(--income-line);border-radius:12px}
+@media(max-width:700px){
+ .income-v2 .holdings-search-row{flex-direction:column;align-items:stretch}
+ .income-v2 .holdings-categories button{flex:1 1 auto}
+ .income-v2 .holding-class tbody tr{border:1px solid var(--income-line);border-radius:12px;margin:12px 0;gap:16px}
+ .income-v2 .holding-class tbody tr:not(.holding-expanded) td:not([data-label=Ativo]):not([data-label=Saldo]):not([data-label=Resultado]):not([data-label=Opções]){display:none!important}
+ .income-v2 .holding-class tbody td[data-label=Saldo],.income-v2 .holding-class tbody td[data-label=Resultado]{text-align:left}
+ .income-v2 .holding-class tbody td.asset-options-cell{display:flex!important;flex-direction:row;align-items:center;justify-content:space-between;position:relative}
+ .income-v2 .holding-details-toggle{display:inline-flex;align-items:center;justify-content:center;width:auto;min-height:44px;margin:0;padding:8px 10px;border:1px solid var(--income-line);border-radius:8px;background:transparent;color:var(--income-action);font:inherit;font-size:.8rem;box-shadow:none}
+ .income-v2 .asset-options-button{margin:0}
+}
+
+.income-v2 .holdings-sort-note{display:block;margin-top:12px;color:var(--income-secondary);font-size:.75rem;line-height:1.6}
+
+/* Contextual onboarding V2: choices, real achievements and non-blocking controls. */
+.income-v2 .onboarding-card{margin:22px 0 28px;background:var(--income-surface);padding:var(--income-space)}
+.income-v2 .onboarding-card h2{font-size:clamp(1.2rem,2vw,1.6rem);margin:10px 0}
+.income-v2 .onboarding-card p{color:var(--income-secondary);line-height:1.65}
+.income-v2 .onboarding-intents,.income-v2 .onboarding-classes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;border:0;padding:0;margin:20px 0}
+.income-v2 .onboarding-intents label{position:relative;display:flex;align-items:flex-start;gap:10px;padding:18px;border:1px solid var(--income-line);border-radius:12px;color:var(--income-text);cursor:pointer}
+.income-v2 .onboarding-intents label:has(input:checked){border-color:var(--income-action);background:var(--income-context)}
+.income-v2 .onboarding-intents input{width:18px;height:18px;min-height:18px;flex:none;margin:2px 0;accent-color:var(--income-action-bg)}
+.income-v2 .onboarding-intents strong,.income-v2 .onboarding-intents small{display:block;line-height:1.5}
+.income-v2 .onboarding-intents small{margin-top:8px;color:var(--income-secondary)}
+.income-v2 .onboarding-actions,.income-v2 .onboarding-footer{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.income-v2 .onboarding-card button{width:auto;margin:0;min-height:44px}
+.income-v2 .onboarding-footer{padding-top:16px;border-top:1px solid var(--income-line)}
+.income-v2 .onboarding-achievements{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;list-style:none;padding:20px 0;margin:20px 0 0;border-top:1px solid var(--income-line)}
+.income-v2 .onboarding-achievements li{display:flex;gap:10px;color:var(--income-secondary)}
+.income-v2 .onboarding-achievements small{display:block;margin-top:5px;font-size:.75rem}
+.income-v2 .onboarding-achievements [data-achievement-state=COMPLETED]>span{color:var(--income-positive)}
+.income-v2 .onboarding-classes button{display:flex;gap:10px;align-items:center;width:100%;padding:16px;background:var(--income-surface);color:var(--income-text);border:1px solid var(--income-line);border-radius:12px;text-align:left}
+.income-v2 .onboarding-note{font-size:.8rem;line-height:1.6;color:var(--income-secondary)}
+.income-v2 .onboarding-skeleton{height:160px;margin:22px 0;background:var(--income-raised);border-radius:var(--income-radius)}
+@media(max-width:700px){.income-v2 .onboarding-intents,.income-v2 .onboarding-classes,.income-v2 .onboarding-achievements{grid-template-columns:1fr}.income-v2 .onboarding-actions button{flex:1}.income-v2 .onboarding-card{padding:18px}}

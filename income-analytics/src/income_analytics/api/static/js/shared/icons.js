@@ -1,4 +1,6 @@
 const paths = {
+ check:'<path d="m5 12 4 4L19 6"/>',
+ home:'<path d="m3 11 9-8 9 8v10H3V11ZM9 21v-8h6v8"/>',
  wallet:'<path d="M4 6h14v4H4a2 2 0 0 1 0-4Zm0 4v10h16V8h-2M16 13h4v4h-4z"/>',
  chart:'<path d="M4 4v16h16M8 15l4-5 4 2 4-7"/>',
  income:'<path d="M4 8h16v12H4zM8 4h8M8 13h8M12 10v6"/>',
