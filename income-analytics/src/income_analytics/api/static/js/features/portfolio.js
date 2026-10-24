@@ -93,6 +93,7 @@ export function bindPortfolioFilters() {
     catch (error) { chart.innerHTML = errorState(error.message); }
   });
   document.addEventListener("click", event => {
+    if (event.target.closest("#portfolio-new-operation")) window.dispatchEvent(new Event("income:open-operation"));
     if (event.target.closest("#open-allocation-policy")) openAllocationPolicy();
     const groupChart = event.target.closest("[data-group-distribution]");
     if (groupChart) {

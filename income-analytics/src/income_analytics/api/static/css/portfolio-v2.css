@@ -166,3 +166,16 @@ html.income-v2[data-theme="light"] .metric.metric-primary>small,html.income-v2[d
 }
 
 .income-v2 .holdings-card #positions{padding:0;min-height:0;text-align:initial;color:inherit}.income-v2 .holdings-heading{margin-bottom:8px}
+
+/* Header controls must not inherit the generic form button's top margin. */
+.income-v2 .brand-row{align-items:center}
+.income-v2 .brand-row>.header-operation,.income-v2 .brand-row>.attention-center-trigger{margin:0;align-self:center;flex:none;min-height:44px;height:44px}
+.income-v2 .brand-row .portfolio-menu>summary,.income-v2 .brand-row .portfolio-settings{min-height:44px;height:44px}
+.income-v2 .brand-row>.user-account{margin:0;align-self:center}
+.income-v2 .brand-row>.user-account>summary{height:44px;min-height:44px}
+.income-v2 .holdings-heading>.holdings-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex:none;max-width:none}
+.income-v2 .holdings-actions>.income-button{margin:0;width:auto;white-space:nowrap;min-height:44px}
+.income-v2 .holdings-actions .income-icon{width:18px;height:18px}
+@media(max-width:1100px){.income-v2 .holdings-heading{flex-wrap:wrap}.income-v2 .holdings-heading>.holdings-actions{margin-left:auto}}
+@media(max-width:850px){.income-v2 .holdings-heading>.holdings-actions{width:100%;margin-left:0;justify-content:flex-end;flex-wrap:wrap}.income-v2 .holdings-actions>.income-button{flex:1}.income-v2 .holdings-actions>.allocation-policy-trigger{flex:1}}
+@media(max-width:600px){.income-v2 .brand-row .portfolio-menu>summary{max-width:76px}.income-v2 .brand-row .portfolio-settings{width:33px}.income-v2 .holdings-heading>.holdings-actions{flex-direction:column;align-items:stretch}.income-v2 .holdings-actions>.income-button,.income-v2 .holdings-actions>.allocation-policy-trigger{width:100%;justify-content:center}}

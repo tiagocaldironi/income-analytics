@@ -22,3 +22,12 @@ Validação: 28 testes de aceitação passaram. Scripts Node alignment, V2/contr
 | ![Claro](evidence/portfolio-v2-alignment/mobile-light.png) | ![Escuro](evidence/portfolio-v2-alignment/mobile-dark.png) |
 
 Prévia isolada. Sem merge ou atualização automática do serviço oficial nesta correção.
+
+## Ajuste dos controles e do lançamento
+
+A regra genérica de button aplicava margin-top: 19px à ação do cabeçalho. Os controles do topo agora têm margem zero e altura consistente de 44px. O lançamento saiu da área de boas-vindas e passou para a direita do cabeçalho Meus ativos, ao lado da configuração de alocação e próximo às consolidações. No celular, as duas ações ocupam a largura disponível em linhas separadas.
+
+Novo lançamento abre o mesmo formulário já existente, pelo evento income:open-operation. Não registra dados ao abrir. Validado no navegador em desktop e 390px: controles superiores alinhados na mesma coordenada vertical, formulário abre/fecha, sem overflow horizontal. Testes alignment/loading e 28 testes de aceitação passaram novamente.
+
+![Ações junto aos ativos](evidence/portfolio-v2-alignment/desktop-actions.png)
+![Ações no celular](evidence/portfolio-v2-alignment/mobile-actions.png)
