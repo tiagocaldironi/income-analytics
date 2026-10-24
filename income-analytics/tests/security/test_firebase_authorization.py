@@ -389,3 +389,27 @@ def test_logout_replay_stays_revoked_when_firebase_reissues_same_cookie(saas, mo
     a.cookies.set(cookie_name("session"), old_cookie)
     assert a.get("/api/auth/me").status_code == 401
     assert b.get("/api/auth/me").status_code == 200
+
+
+def test_onboarding_metadata_is_persisted_and_isolated_without_financial_writes(saas):
+    login, _, _ = saas
+    a, ra, _ = login()
+    b, rb, _ = login()
+    assert ra.status_code == rb.status_code == 200
+    a1, a2, b1 = wallet(a, "guide-a"), wallet(a, "guide-a2"), wallet(b, "guide-b")
+    def path(key):
+        return f"/api/portfolios/{key}/onboarding"
+
+    before = a.get("/api/portfolio", headers={"X-Portfolio-Id": a1}).json()
+    assert a.get(path(a1)).json() == {"current_step": 1, "status": "ACTIVE"}
+    state = {"current_step": 3, "status": "SKIPPED"}
+    assert a.put(path(a1), json=state).status_code == 200
+    assert a.get(path(a1)).json() == state
+    assert a.get(path(a2)).json() == {"current_step": 1, "status": "ACTIVE"}
+    assert b.get(path(b1)).json() == {"current_step": 1, "status": "ACTIVE"}
+    assert b.get(path(a1), headers={"X-Portfolio-Id": b1}).status_code == 404
+    assert b.put(path(a1), json=state).status_code == 404
+    assert a.put(path(a1), json={**state, "user_id": rb.json()["user_id"]}).status_code == 422
+    assert a.put(path(a1), json={"current_step": 5, "status": "ACTIVE"}).status_code == 422
+    assert a.put(path(a1), json={"current_step": 3, "status": "ACTIVE"}).status_code == 200
+    assert a.get("/api/portfolio", headers={"X-Portfolio-Id": a1}).json() == before

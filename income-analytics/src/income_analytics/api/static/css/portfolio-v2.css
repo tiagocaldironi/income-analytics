@@ -36,7 +36,7 @@
 .income-v2 .primary-nav .income-icon{width:20px;height:20px}
 .income-v2 .header-operation{background:var(--income-action-bg);color:#fff;min-height:44px}
 @media(min-width:1100px){
- .income-v2 .app-header{position:static;height:0;padding:0;border:0;background:transparent}
+ .income-v2 .app-header{position:static;height:0;padding:0;border:0;background:transparent;backdrop-filter:none}
  .income-v2 .brand-row{position:fixed;top:0;left:0;right:0;height:76px;z-index:80;max-width:none;padding:14px 28px;background:var(--income-surface);border-bottom:1px solid var(--income-line);gap:18px}
  .income-v2 .primary-nav{position:fixed;top:76px;left:0;bottom:0;width:218px;max-width:none;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;padding:26px 16px;background:var(--income-surface);border-right:1px solid var(--income-line);border-bottom:0;z-index:60;overflow-y:auto}
  .income-v2 .primary-nav a{display:flex;align-items:center;gap:12px;min-height:46px;padding:12px;border-radius:10px;color:var(--income-secondary);font-size:.85rem}
@@ -87,3 +87,43 @@
  .income-v2 .holding-class tbody td.asset-options-cell{grid-column:1/-1;display:block!important;text-align:right}
  .income-v2 .holding-class td.asset-options-cell:before{display:none}.income-v2 .asset-identity{min-width:0;max-width:100%}.income-v2 .asset-context-menu{right:0}
 }
+
+#portfolio-guidance{margin:24px 0}
+.guidance-card{display:flex;justify-content:space-between;align-items:center;gap:28px}
+.guidance-copy{max-width:620px}.guidance-copy h2{font-size:1.3rem;line-height:1.4;margin:8px 0}.guidance-copy>p{font-size:.85rem;line-height:1.65;color:var(--income-secondary)}
+.guidance-progress{flex:none;max-width:100%}.guidance-progress nav{display:flex;gap:10px;justify-content:flex-end;margin-bottom:22px}
+.guidance-progress nav button{width:36px;height:36px;border-radius:50%;border:1px solid var(--income-line);background:var(--income-surface);color:var(--income-text);font:inherit}
+.guidance-progress nav button[aria-current=step]{background:var(--income-action-bg);color:#fff;border-color:transparent}
+.guidance-progress nav button:disabled{opacity:.5;cursor:not-allowed}.guidance-actions{display:flex;gap:8px;flex-wrap:wrap}.guidance-message{font-size:.8rem;max-width:280px;color:var(--income-negative)}.guidance-message:empty{display:none}
+.guidance-compact{display:flex;gap:20px;justify-content:space-between;align-items:center;padding:18px 20px;background:var(--income-surface);border:1px solid var(--income-line);border-radius:14px}.guidance-compact p{font-size:.8rem;color:var(--income-secondary);margin:6px 0 0}.guidance-compact .income-button{flex:none}
+.income-v2 [data-page="minha-carteira"][data-empty=true]>.metrics,.income-v2 [data-page="minha-carteira"][data-empty=true]>.portfolio-analysis,.income-v2 [data-page="minha-carteira"][data-empty=true]>.holdings-card{display:none}
+@media(max-width:850px){.guidance-card,.guidance-compact{align-items:stretch;flex-direction:column}.guidance-progress nav{justify-content:flex-start;margin-bottom:16px}.guidance-actions{justify-content:space-between}.guidance-message{max-width:none}}
+
+.guidance-actions .income-button{width:auto;flex:1;white-space:nowrap}
+.income-v2 .portfolio-menu>summary,.income-v2 .portfolio-settings{color:var(--income-text);border-color:var(--income-line);background:var(--income-surface)}
+.income-v2 .portfolio-dropdown{background:var(--income-surface);border-color:var(--income-line);color:var(--income-text)}
+.income-v2 .portfolio-option,.income-v2 .portfolio-create,.income-v2 .portfolio-manage-actions button{color:var(--income-text)}
+.income-v2 .portfolio-option:hover,.income-v2 .portfolio-option[aria-selected=true]{background:var(--income-context)}
+@media(min-width:1100px){.income-v2 .primary-nav{height:calc(100dvh - 76px)}}
+
+.analysis-tabs button{width:auto}.income-v2 .holding-chart-button{width:auto}.income-v2 .holding-class-name{text-align:left}.income-v2 .primary-nav a[aria-current="page"]::after{content:none}
+
+.metric-help{position:absolute;top:18px;right:16px;text-align:left;z-index:3}
+.metric-help summary{display:grid;place-items:center;list-style:none;border:1px solid var(--income-line);border-radius:50%;width:28px;height:28px;color:var(--income-secondary);font-size:.8rem;cursor:pointer}
+.metric-help summary::-webkit-details-marker{display:none}.metric-help p{position:absolute;right:0;width:220px;max-width:calc(100vw - 64px);padding:16px;background:var(--income-surface);border:1px solid var(--income-line);border-radius:12px;color:var(--income-text);font-size:.8rem;line-height:1.65;box-shadow:var(--income-shadow)}
+.income-v2 .metric-primary .metric-help summary{color:#fff;border-color:#8ca7c6}
+
+html.income-v2[data-theme="light"] .metric.metric-primary{background:var(--income-navy);border-color:var(--income-navy)}
+html.income-v2[data-theme="light"] .metric.metric-primary>small,html.income-v2[data-theme="light"] .metric.metric-primary>strong,html.income-v2[data-theme="light"] .metric.metric-primary>span:not(.metric-icon){color:#fff}
+
+.income-v2 .allocation-policy-trigger{float:none;display:inline-flex;width:auto}
+@media(max-width:850px){
+ .income-v2 .holding-class summary>.holding-class-name{grid-row:1;grid-column:1/-1;padding-right:24px}
+ .income-v2 .holding-class summary>.holding-class-metric{grid-column:auto;grid-row:auto}
+ .income-v2 .holding-class summary>.holding-chart-button{grid-column:1/-1;grid-row:auto;justify-self:stretch;width:auto}
+ .income-v2 .holding-class summary>.holding-class-action{grid-column:2;grid-row:1;justify-self:end}
+}
+@media(max-width:600px){.income-v2 .header-operation{display:none}.income-v2 .brand-row{gap:8px}.income-v2 .portfolio-menu>summary{max-width:145px}.income-v2 .metric-help summary{width:32px;height:32px}}
+
+.guidance-progress nav button{width:44px;height:44px}
+@media(max-width:600px){.income-v2 .brand{font-size:0;gap:0}.income-v2 .brand-row{gap:4px}.income-v2 .portfolio-controls{gap:4px}.income-v2 .portfolio-menu>summary{max-width:80px}.income-v2 .metric-help{top:10px;right:8px}.income-v2 .metric-help summary{width:44px;height:44px}}

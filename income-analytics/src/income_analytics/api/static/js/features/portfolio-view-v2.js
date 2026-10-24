@@ -1,3 +1,4 @@
+import { renderPortfolioGuidance } from "./portfolio-guidance-v2.js";
 import { icon } from "../shared/icons.js";
 let bound = false;
 let resizeCharts = () => {};
@@ -50,14 +51,24 @@ export function setupPortfolioView(resize) {
   document.querySelectorAll('[data-page="minha-carteira"] .metric').forEach((card,i) => {
     const node = document.createElement("span"); node.className = "metric-icon";
     node.innerHTML = icon(icons[i]); card.prepend(node);
+    const help = document.createElement("details"); help.className = "metric-help";
+    const label = card.querySelector("small")?.textContent || "indicador";
+    const summary = document.createElement("summary"); summary.textContent = "i";
+    summary.setAttribute("aria-label", `Como interpretar ${label}`);
+    const copy = document.createElement("p");
+    copy.textContent = ["Valor de mercado disponível na moeda-base da carteira. Valores incompletos permanecem identificados.","Retorno TWR dos últimos 12 meses. Depende da cobertura histórica e pode estar parcial ou indisponível.","Rendimentos registrados desde o início. Este total não representa rentabilidade percentual.","Custo de aquisição das posições atuais. É diferente do patrimônio de mercado e do capital líquido investido."][i];
+    help.append(summary,copy); card.append(help);
   });
-  document.querySelectorAll(".primary-nav a").forEach((link,i) => {
-    link.insertAdjacentHTML("afterbegin",icon(["wallet","book","compass","chart","income","settings"][i]));
+  document.querySelectorAll(".primary-nav a").forEach(link => {
+    const route = link.getAttribute("href");
+    const iconsByRoute = {"#minha-carteira":"wallet","#entender":"book","#estrategia":"compass","#simular":"chart","#operacoes":"income","#configuracoes":"settings","#ferramentas":"layers","#ajuda-metodologia":"book"};
+    link.insertAdjacentHTML("afterbegin",icon(iconsByRoute[route]));
   });
   new MutationObserver(() => resizeCharts()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
 }
 export function updatePortfolioView(dashboard) {
   const root = document.querySelector('[data-page="minha-carteira"]');
   if (!root) return;
+  renderPortfolioGuidance(dashboard);
   root.dataset.hasPositions = String(dashboard.holdings.classes.some(group => group.assets.some(asset => !asset.target_only)));
 }
