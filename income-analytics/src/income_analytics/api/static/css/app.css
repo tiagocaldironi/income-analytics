@@ -74,7 +74,7 @@ main { max-width: 1600px; min-height: calc(100vh - 106px); margin: 0 auto; paddi
 .brand { display: flex; align-items: center; flex: 0 0 auto; gap: 10px; padding: 0; color: var(--ia-text-primary); font-size: 1.05rem; font-weight: 800; letter-spacing: .1em; text-decoration: none; text-transform: uppercase; }
 .brand::before { display: grid; width: 30px; height: 30px; place-items: center; border: 2px solid var(--ia-brand); border-radius: 8px; color: var(--ia-brand); content: "◇"; font-size: 1.55rem; line-height: 1; }
 .workspace-name { padding-left: 20px; border-left: 1px solid #35455a; color: #d3ddeb; font-size: .9rem; font-weight: 700; }
-.header-operation { width: auto; min-height: 33px; margin-left: auto; padding: 7px 13px; border-radius: 7px; background: linear-gradient(135deg, #22bda6, #149d98); color: #03151b; font-size: .8rem; font-weight: 850; text-decoration: none; }
+.header-operation { width: auto; min-height: 33px; margin-left: auto; padding: 7px 13px; border-radius: 7px; background: var(--income-action-bg, #245bd6); color: var(--income-on-action, #fff); font-size: .8rem; font-weight: 850; text-decoration: none; }
 .primary-nav { display: flex; align-items: stretch; width: 100%; min-height: 53px; gap: 2px; padding: 0 clamp(12px, 2.5vw, 34px); overflow-x: auto; }
 .primary-nav a { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; min-height: 53px; padding: 0 11px; color: var(--ia-text-secondary); font-size: .82rem; font-weight: 650; text-decoration: none; transition: background .18s ease, color .18s ease; }
 .primary-nav a.nav-hidden { display: none !important; }
@@ -120,7 +120,7 @@ p { color: var(--ia-text-secondary); line-height: 1.55; }
 .performance-summary small { margin-bottom: 3px; font-size: .66rem; }
 .performance-summary .unavailable { grid-column: 1 / -1; color: var(--ia-text-secondary); font-weight: 600; }
 .metric-info { display: inline-grid; width: 15px; min-height: 15px; margin: 0 0 0 3px; padding: 0; place-items: center; border-radius: 50%; background: var(--ia-surface-elevated); color: var(--ia-text-secondary); font-size: .65rem; vertical-align: 1px; }
-.button-link { display: inline-flex; align-items: center; min-height: 40px; margin-top: 18px; padding: 9px 14px; border-radius: 8px; background: linear-gradient(135deg, #22bda6, #149d98); color: #03151b; font-size: .9rem; font-weight: 800; text-decoration: none; }
+.button-link { display: inline-flex; align-items: center; min-height: 40px; margin-top: 18px; padding: 9px 14px; border-radius: 8px; background: var(--income-action-bg, #245bd6); color: var(--income-on-action, #fff); font-size: .9rem; font-weight: 800; text-decoration: none; }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .section-heading h2 + p { margin: 6px 0 0; }
 .text-link, .section-heading a { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--ia-info); font-size: .91rem; font-weight: 750; text-decoration: none; }
@@ -227,7 +227,7 @@ label { display: block; margin: 15px 0 6px; color: #c2cfde; font-size: .83rem; f
 input, select, button { width: 100%; border-radius: 8px; font: inherit; }
 input, select { min-height: 42px; padding: 9px 11px; outline: none; background: #0b1727; border: 1px solid #2b4057; color: var(--ia-text-primary); transition: border-color .18s ease, box-shadow .18s ease; }
 input:focus, select:focus { border-color: var(--ia-brand); box-shadow: 0 0 0 3px #27c7a821; }
-button { min-height: 42px; margin-top: 19px; padding: 10px 14px; border: 1px solid transparent; outline: none; background: linear-gradient(135deg, #22bda6, #149d98); color: #03151b; cursor: pointer; font-weight: 800; transition: filter .18s ease, transform .18s ease; }
+button { min-height: 42px; margin-top: 19px; padding: 10px 14px; border: 1px solid transparent; outline: none; background: var(--income-action-bg, #245bd6); color: var(--income-on-action, #fff); cursor: pointer; font-weight: 800; transition: filter .18s ease, transform .18s ease; }
 button:hover { filter: brightness(1.1); }
 button:active { transform: translateY(1px); }
 button:disabled { cursor: wait; filter: grayscale(.7); opacity: .65; }
