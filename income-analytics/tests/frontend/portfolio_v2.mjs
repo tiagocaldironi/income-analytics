@@ -35,3 +35,23 @@ assert.equal(emptyContext.portfolioIsEmpty({...empty,history:{snapshots:[{}]}}),
 assert.equal(emptyContext.portfolioIsEmpty({...empty,holdings:{classes:[{assets:[{target_only:true}]}]}}),true);
 assert.equal(emptyContext.portfolioIsEmpty({...empty,portfolio:{cash:100}}),false);
 console.log('Portfolio V2: AA tokens, persistent panels, keyboard/swipe and real empty-state classification passed.');
+
+// The sidebar preference survives setup and storage denial does not break navigation.
+const sidebarSource=fs.readFileSync(base+'js/features/portfolio-view-v2.js','utf8').replace(/^import .*;$/gm,'').replaceAll('export function','function');
+function sidebarHarness(stored='0', blocked=false){
+ const classes=new Set();const attrs={};let click;let chartResizes=0;
+ const toggle={id:'sidebar-toggle',setAttribute(k,v){attrs[k]=v;},addEventListener(type,fn){if(type==='click')click=fn;}};
+ const storage={getItem(){if(blocked)throw Error('denied');return stored;},setItem(k,v){if(blocked)throw Error('denied');stored=v;}};
+ const root={classList:{toggle(k,on){on?classes.add(k):classes.delete(k);},contains:k=>classes.has(k)}};
+ const ctx=vm.createContext({document:{querySelector:()=>toggle,documentElement:root},localStorage:storage,requestAnimationFrame:fn=>{chartResizes++;fn();}});
+ vm.runInContext(sidebarSource,ctx);ctx.setupSidebar();
+ return {attrs,classes,toggle,click:()=>click(),stored:()=>stored,resizes:()=>chartResizes};
+}
+const sidebar=sidebarHarness('1');
+assert.equal(sidebar.attrs['aria-expanded'],'false');
+assert.equal(sidebar.attrs['aria-label'],'Expandir menu lateral');
+sidebar.click();assert.equal(sidebar.attrs['aria-expanded'],'true');assert.equal(sidebar.stored(),'0');
+sidebar.click();assert.ok(sidebar.classes.has('sidebar-collapsed'));assert.equal(sidebar.stored(),'1');
+assert.equal(sidebar.resizes(),3);
+const deniedSidebar=sidebarHarness('1',true);deniedSidebar.click();assert.equal(deniedSidebar.attrs['aria-expanded'],'false');
+console.log('Sidebar: collapse/expand, accessible labels, persistence, resize and unavailable storage passed.');

@@ -93,6 +93,7 @@ export function bindPortfolioFilters() {
     catch (error) { chart.innerHTML = errorState(error.message); }
   });
   document.addEventListener("click", event => {
+    if (event.target.closest("#portfolio-new-operation")) window.dispatchEvent(new Event("income:open-operation"));
     if (event.target.closest("#open-allocation-policy")) openAllocationPolicy();
     const groupChart = event.target.closest("[data-group-distribution]");
     if (groupChart) {
@@ -300,7 +301,7 @@ function openAllocationPolicy() {
     const values = inputs.map(input => Math.max(Number(input.value) || 0, 0));
     const total = values.reduce((sum, value) => sum + value, 0);
     form.querySelector("#policy-total").textContent = `Total ${percentage(total)}`;
-    const colors = ["#27c7a8", "#5b9cff", "#8a6ce8", "#e7b65a", "#e26f95", "#5fc5e6"];
+    const colors = ["#5b8def", "#5b9cff", "#8a6ce8", "#e7b65a", "#e26f95", "#5fc5e6"];
     let start = 0;
     const stops = values.map((value, index) => { const end = start + value; const stop = `${colors[index % colors.length]} ${start}% ${end}%`; start = end; return stop; });
     form.querySelector(".policy-donut").style.background = `conic-gradient(${stops.join(",")})`;
@@ -455,7 +456,7 @@ function renderPortfolio(data, holdings, performance) {
   if (returnInfo) returnInfo.title = financialConcepts.returnTooltip;
   const title = document.querySelector("#positions")?.closest(".card")?.querySelector("h2");
   if (title) title.textContent = "Meus ativos";
-  if (!document.querySelector("#open-allocation-policy")) title?.insertAdjacentHTML("afterend", '<button class="secondary allocation-policy-trigger" id="open-allocation-policy" type="button">Configurar alocação ideal</button>');
+  if (!document.querySelector("#open-allocation-policy")) title?.insertAdjacentHTML("afterend", '<button class="secondary allocation-policy-trigger" id="open-allocation-policy" type="button"><svg class="income-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h6m4 0h6M4 17h10m4 0h2"/><circle cx="12" cy="7" r="2"/><circle cx="16" cy="17" r="2"/></svg><span>Configurar alocação ideal</span></button>');
   document.querySelector("#positions")?.closest(".card")?.classList.add("holdings-card");
   document.querySelector("#positions").innerHTML = holdings.classes.length
     ? holdings.classes.map((group, index) => {
@@ -483,8 +484,8 @@ function renderPortfolio(data, holdings, performance) {
         ? percentage((Number(group.market_value) - Number(group.total_cost)) / Number(group.total_cost) * 100)
         : "—";
       const chartAvailable = group.market_value !== null && group.assets.some(asset => asset.market_value !== null);
-      const groupAction = `<button class="holding-chart-button" type="button" data-group-distribution data-group-id="${group.asset_class}" ${chartAvailable ? "" : "disabled"} title="${chartAvailable ? "Gráficos" : "Não há ativos para visualizar."}" aria-label="Gráficos de ${escapeHtml(group.label)}"><span aria-hidden="true">◔</span> Gráficos</button>`;
-      return `<details class="holding-class" ${index === 0 ? "open" : ""}><summary><span class="holding-class-name"><strong>${group.label}</strong><small>${assets.length} investimento${assets.length === 1 ? "" : "s"}</small></span><span class="holding-class-metric"><small>Valor atual</small><strong>${group.market_value === null ? "Valuation parcial" : money(group.market_value, holdings.base_currency)}</strong></span><span class="holding-class-metric"><small title="Diferença entre o valor atual dos ativos da classe e o custo registrado; não é rentabilidade TWR.">Diferença vs. custo</small><strong>${variation}</strong></span><span class="holding-class-metric"><small title="${classReason}">TWR · desde ${classPeriod.replace("Desde ", "")}</small><strong title="${classReason}">${classTwr}</strong></span><span class="holding-class-metric"><small>Peso atual</small><strong>${group.weight === null ? "—" : percentage(group.weight * 100)}</strong></span>${group.target_weight === null ? "" : `<span class="holding-class-metric"><small>Peso ideal</small><strong>${percentage(group.target_weight * 100)}</strong><small>Desvio ${percentage(group.deviation * 100)}</small></span>`}${groupAction}<span class="holding-class-action" aria-hidden="true"></span></summary>${table(columns, assets.map(asset => renderHoldingRow(asset, fixedIncome, group.asset_class))).replace("<table>", `<table aria-label="Ativos de ${escapeHtml(group.label)}">`).replaceAll("<th>", '<th scope="col">')}</details>`;
+      const groupAction = `<button class="holding-chart-button" type="button" data-group-distribution data-group-id="${group.asset_class}" ${chartAvailable ? "" : "disabled"} title="${chartAvailable ? "Gráficos" : "Não há ativos para visualizar."}" aria-label="Gráficos de ${escapeHtml(group.label)}"><svg class="income-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9h9A9 9 0 1 1 9 3.5M15 3.5a9 9 0 0 1 5.5 5.5H15z"/></svg><span>Distribuição</span></button>`;
+      return `<details class="holding-class" ${index === 0 ? "open" : ""}><summary><span class="holding-class-name"><strong>${group.label}</strong><small>${assets.length} investimento${assets.length === 1 ? "" : "s"}</small></span><span class="holding-class-value"><small>Valor atual</small><strong>${group.market_value === null ? "Valuation parcial" : money(group.market_value, holdings.base_currency)}</strong></span><span class="holding-class-statistics"><span class="holding-class-metric"><small title="Diferença entre o valor atual dos ativos da classe e o custo registrado; não é rentabilidade TWR.">Diferença vs. custo</small><strong>${variation}</strong></span><span class="holding-class-metric"><small title="${classReason}">TWR · desde ${classPeriod.replace("Desde ", "")}</small><strong title="${classReason}">${classTwr}</strong></span><span class="holding-class-metric"><small>Peso atual</small><strong>${group.weight === null ? "—" : percentage(group.weight * 100)}</strong></span>${group.target_weight === null ? "" : `<span class="holding-class-metric"><small>Peso ideal</small><strong>${percentage(group.target_weight * 100)}</strong><small>Desvio ${percentage(group.deviation * 100)}</small></span>`}</span>${groupAction}<span class="holding-class-action" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg></span></summary>${table(columns, assets.map(asset => renderHoldingRow(asset, fixedIncome, group.asset_class))).replace("<table>", `<table aria-label="Ativos de ${escapeHtml(group.label)}">`).replaceAll("<th>", '<th scope="col">')}</details>`;
     }).join("")
     : emptyState("Sua carteira ainda está vazia.", '<a href="#operacoes" data-navigate class="text-link">Registrar primeira operação</a>');
 }
@@ -652,7 +653,7 @@ async function renderGroupDistributionChart(dialog, group, assets) {
 }
 
 function distributionColors(count) {
-  const palette = ["#27c7a8", "#5b9cff", "#8a6ce8", "#e7b65a", "#e26f95", "#5fc5e6", "#d983ff", "#9acb5a", "#f28e6b", "#6f95c8"];
+  const palette = ["#5b8def", "#5b9cff", "#8a6ce8", "#e7b65a", "#e26f95", "#5fc5e6", "#d983ff", "#b493e4", "#f28e6b", "#6f95c8"];
   return Array.from({ length: count }, (_, index) => palette[index % palette.length]);
 }
 
@@ -723,7 +724,7 @@ function renderClasses(holdings, fallback) {
   // while market_value has already been converted to BRL.
   const valued = holdings.classes.filter(item => item.market_value !== null && Number(item.market_value) > 0);
   const total = valued.reduce((sum, item) => sum + Number(item.market_value), 0);
-  const colors = { BRAZILIAN_STOCK: "#27c7a8", BRAZILIAN_ETF: "#5b9cff", FII: "#8a6ce8", FIXED_INCOME: "#e7b65a", INTERNATIONAL: "#e26f95", INTERNATIONAL_ETF: "#5fc5e6", CRYPTO: "#d983ff", PENSION: "#9acb5a", REAL_ESTATE: "#f28e6b", CASH: "#6f95c8", OTHER: "#a3afbf" };
+  const colors = { BRAZILIAN_STOCK: "#5b8def", BRAZILIAN_ETF: "#5b9cff", FII: "#8a6ce8", FIXED_INCOME: "#e7b65a", INTERNATIONAL: "#e26f95", INTERNATIONAL_ETF: "#5fc5e6", CRYPTO: "#d983ff", PENSION: "#b493e4", REAL_ESTATE: "#f28e6b", CASH: "#6f95c8", OTHER: "#a3afbf" };
   let cursor = 0;
   const stops = valued.map(item => { const start = cursor; cursor += Number(item.market_value) / total * 100; return `${colors[item.asset_class] || colors.OTHER} ${start}% ${cursor}%`; }).join(", ");
   const content = valued.length ? `<div class="allocation-segmented" role="img" aria-label="Composição por classe: ${holdings.classes.map(item => `${item.label} ${item.market_value === null || !total ? "sem valuation" : percentage(Math.max(Number(item.market_value), 0) / total * 100)}`).join(", ")}"><div class="allocation-segmented-bar">${valued.map(item => `<span title="${escapeHtml(item.label)} · ${money(item.market_value, holdings.base_currency)} · ${percentage(Number(item.market_value) / total * 100)}" style="width:${Math.max(Number(item.market_value) / total * 100, 0.5)}%;background:${colors[item.asset_class] || colors.OTHER}"></span>`).join("")}</div><div class="allocation-legend">${holdings.classes.map(item => { const amount = item.market_value === null ? null : Number(item.market_value); const share = amount === null || !total ? null : Math.max(amount, 0) / total * 100; const detail = amount === null ? "Valuation indisponível" : amount < 0 ? `Saldo negativo · ${money(amount, holdings.base_currency)} · fora da barra` : money(amount, holdings.base_currency); return `<div><i style="background:${colors[item.asset_class] || colors.OTHER}"></i><span>${escapeHtml(item.label)}<small>${detail}</small></span><strong>${share === null ? "—" : percentage(share)}</strong></div>`; }).join("")}</div></div>` : emptyState("Composição indisponível", "Não há saldos positivos avaliados para compor a distribuição.");

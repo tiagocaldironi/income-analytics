@@ -16,6 +16,26 @@ export function selectAnalysis(index, focus = false) {
   // Panels remain mounted: filters and loaded data survive every switch.
   requestAnimationFrame(() => resizeCharts());
 }
+export function setupSidebar() {
+  const toggle = document.querySelector("#sidebar-toggle");
+  if (toggle?.id !== "sidebar-toggle") return;
+  const root = document.documentElement;
+  const apply = collapsed => {
+    root.classList.toggle("sidebar-collapsed", collapsed);
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    const label = collapsed ? "Expandir menu lateral" : "Recolher menu lateral";
+    toggle.setAttribute("aria-label", label);
+    toggle.title = label;
+    requestAnimationFrame(() => resizeCharts());
+  };
+  // Only a display preference is stored; storage may be unavailable in private browsing.
+  try { apply(localStorage.getItem("income.sidebar.collapsed") === "1"); } catch { apply(false); }
+  toggle.addEventListener("click", () => {
+    const collapsed = !root.classList.contains("sidebar-collapsed");
+    apply(collapsed);
+    try { localStorage.setItem("income.sidebar.collapsed", collapsed ? "1" : "0"); } catch {}
+  });
+}
 export function setupPortfolioView(resize) {
   resizeCharts = resize;
   if (bound) return;
@@ -62,8 +82,15 @@ export function setupPortfolioView(resize) {
   document.querySelectorAll(".primary-nav a").forEach(link => {
     const route = link.getAttribute("href");
     const iconsByRoute = {"#minha-carteira":"wallet","#entender":"book","#estrategia":"compass","#simular":"chart","#operacoes":"income","#configuracoes":"settings","#ferramentas":"layers","#ajuda-metodologia":"book"};
+    const label = document.createElement("span");
+    label.className = "nav-label";
+    label.textContent = link.textContent;
+    link.setAttribute("aria-label", link.textContent.trim());
+    link.textContent = "";
     link.insertAdjacentHTML("afterbegin",icon(iconsByRoute[route]));
+    link.append(label);
   });
+  setupSidebar();
   new MutationObserver(() => resizeCharts()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
 }
 export function updatePortfolioView(dashboard) {
