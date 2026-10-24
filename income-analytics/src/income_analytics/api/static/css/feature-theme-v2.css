@@ -1,0 +1,80 @@
+/* Feature surfaces share V2 semantics; financial chart categories keep their palette. */
+html.income-v2[data-theme=light]{color-scheme:light}
+html.income-v2 .page-intro .eyebrow,html.income-v2 .eyebrow{color:var(--income-action)}
+html.income-v2 :is(.strategy-hero,.strategy-context,.strategy-class-card,.strategy-asset-group,.strategy-distance-ranking,.strategy-composition-message,.strategy-differences,.strategy-editor-dialog,.strategy-editor-content>div:first-child,.strategy-class-choice,.strategy-quality,.strategy-insight-card){background:var(--income-surface);color:var(--income-text);border-color:var(--income-line)}
+html.income-v2 :is(.strategy-hero,.strategy-class-card,.strategy-differences,.strategy-editor-dialog,.strategy-context) :is(h2,h3,h4,strong,b){color:var(--income-text)}
+html.income-v2 :is(.strategy-drift,.strategy-factual,.strategy-asset-helper,.strategy-composition-summary span){background:var(--income-context);border-color:var(--income-line);color:var(--income-text)}
+html.income-v2 .strategy-drift strong{color:var(--income-action)}
+html.income-v2 :is(.strategy-legend,.strategy-editor-content>div:first-child span,.strategy-difference-values,.strategy-difference-values small,.strategy-class-values em){color:var(--income-secondary)}
+html.income-v2 :is(.strategy-editor-dialog,.strategy-editor-dialog .dialog-actions){background:var(--income-surface);color:var(--income-text)}
+html.income-v2 .strategy-editor-row input{background:var(--income-surface);color:var(--income-text);border-color:var(--income-line)}
+html.income-v2 :is(.strategy-bullet,.strategy-comparison-line i){background:var(--income-raised)}
+html.income-v2 .strategy-bullet>b{background:var(--income-text);box-shadow:0 0 0 2px var(--income-surface)}
+html.income-v2 :is(.simulation-intent,.simulation-mode){background:var(--income-surface);color:var(--income-text);border-color:var(--income-line)}
+html.income-v2 :is(.simulation-intent.active,.simulation-intent[aria-pressed=true],.simulation-mode:has(input:checked)){background:var(--income-context);border-color:var(--income-action);color:var(--income-text)}
+html.income-v2 :is(.simulation-intent,.simulation-mode) :is(strong,span){color:inherit}
+html.income-v2 :is(.simulation-intent,.simulation-mode) small{color:var(--income-secondary)}
+html.income-v2 .simulation-mode:has(input:disabled){background:var(--income-raised);color:var(--income-secondary);opacity:1;border-style:dashed}
+html.income-v2 .simulation-intent-icon{color:var(--income-action);background:var(--income-context)}
+html.income-v2 .simulation-hero{background:var(--income-context);color:var(--income-text);border-color:var(--income-line)}
+html.income-v2 .simulation-hero :is(strong,b,h2,h3){color:var(--income-text)}
+html.income-v2 .simulation-hero :is(small,p,span){color:var(--income-secondary)}
+html.income-v2 :is(.simulation-track,.simulation-bullet){background:var(--income-raised)}
+html.income-v2 .simulation-fill{background:var(--income-action-bg)}
+html.income-v2 .simulation-safety{background:var(--income-surface);color:var(--income-secondary);border-color:var(--income-line)}
+html.income-v2 .operations-tabs button[aria-selected=true],html.income-v2 .operations-tabs button.active,html.income-v2 .operations-tabs button.is-active{background:var(--income-context);color:var(--income-action);border-color:var(--income-action)}
+html.income-v2 .operations-page-actions{align-items:center;gap:10px}
+html.income-v2 .operations-page-actions>button{margin:0;min-height:44px;width:auto}
+html.income-v2 .operations-import-menu>summary{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;margin:0;padding:9px 12px;border:1px solid var(--income-line);border-radius:9px;background:var(--income-surface);color:var(--income-action);list-style:none;white-space:nowrap}
+html.income-v2 .operations-import-menu>summary::-webkit-details-marker{display:none}
+html.income-v2 .operations-import-menu>summary svg{width:18px;height:18px;flex:none}
+html.income-v2 .operations-import-menu>summary svg:last-child{width:14px}
+html.income-v2 .operations-import-dropdown{min-width:220px;background:var(--income-surface);color:var(--income-text);border-color:var(--income-line);box-shadow:var(--income-shadow)}
+html.income-v2 .operations-import-dropdown button:hover{background:var(--income-context);color:var(--income-action)}
+html.income-v2 [data-page=configuracoes]:not([hidden]){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+html.income-v2 [data-page=configuracoes]>.page-intro{grid-column:1/-1;margin-bottom:4px}
+html.income-v2 [data-page=configuracoes]>.card{margin:0;min-width:0;padding:24px;background:var(--income-surface);color:var(--income-text);border:1px solid var(--income-line);border-radius:var(--income-radius);box-shadow:var(--income-shadow)}
+html.income-v2 [data-page=configuracoes] h2{font-size:1.1rem;margin:0 0 10px}
+html.income-v2 [data-page=configuracoes] h3{font-size:.88rem}
+html.income-v2 [data-page=configuracoes] p{font-size:.86rem;line-height:1.65;color:var(--income-secondary)}
+html.income-v2 [data-page=configuracoes] button{width:auto;max-width:100%;min-height:44px;margin:12px 0 0;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px}
+html.income-v2 #data-sources-card{grid-column:1/-1}
+html.income-v2 .settings-provider-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:20px}
+html.income-v2 .settings-provider{padding:16px;background:var(--income-raised);border:1px solid var(--income-line);border-radius:12px;min-width:0}
+html.income-v2 .settings-provider small{color:var(--income-secondary);font-size:.75rem}
+html.income-v2 .danger-zone button{color:var(--income-negative);background:transparent;border-color:var(--income-negative)}
+html.income-v2 .wallet-settings-icon{background:var(--income-context);color:var(--income-action);border-color:var(--income-line)}
+@media(max-width:850px){html.income-v2 .settings-provider-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){html.income-v2 [data-page=configuracoes]:not([hidden]){grid-template-columns:1fr}html.income-v2 .settings-provider-grid{grid-template-columns:1fr}html.income-v2 .operations-page-actions{justify-content:flex-end;flex-wrap:wrap}}
+
+html.income-v2 .simulation-intent-main{background:var(--income-context);color:var(--income-text);border-color:var(--income-line)}
+
+html.income-v2 .strategy-drift :is(small,span,p){color:var(--income-secondary)}
+html.income-v2 .strategy-editor-dialog :is(p,small){color:var(--income-secondary)}
+
+html.income-v2 #settings-preferences{grid-column:1/-1;order:1}
+html.income-v2 #settings-preferences:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px}
+html.income-v2 #settings-preferences :is(h2,p){margin:0}
+html.income-v2 #market-price-settings{order:2}
+html.income-v2 #fx-card{order:3}
+html.income-v2 #paid-income-settings{order:4;grid-column:1/-1}
+html.income-v2 #data-sources-card{order:5}
+html.income-v2 [data-page=configuracoes]>.danger-zone{order:6;grid-column:1/-1}
+html.income-v2 [data-page=configuracoes] .divider{margin:20px 0}
+
+html.income-v2 .operations-tabs{scrollbar-width:none}
+html.income-v2 .operations-tabs::-webkit-scrollbar{display:none}
+html.income-v2 .operations-tabs button{min-height:44px}
+
+/* Secondary strategy views and expanded simulation details use the same surfaces. */
+html.income-v2 :is(.strategy-distribution,.strategy-asset-targets,.strategy-empty,.strategy-asset-example,.strategy-card-distance,.strategy-aligned,.strategy-unconfigured article,.composition-detail-dialog,.composition-detail-row,.income-starter-change-preview){background:var(--income-surface);color:var(--income-text);border-color:var(--income-line)}
+html.income-v2 :is(.strategy-distribution,.strategy-asset-targets,.strategy-empty,.strategy-asset-example,.strategy-insight-card,.composition-detail-dialog) :is(h2,h3,h4,strong,b){color:var(--income-text)}
+html.income-v2 :is(.strategy-context>div span,.strategy-card-distance,.strategy-aligned,.composition-detail-controls button){background:var(--income-context);color:var(--income-text);border-color:var(--income-line)}
+html.income-v2 :is(.strategy-class-choice:hover,.strategy-class-choice:focus-visible){background:var(--income-context)}
+html.income-v2 :is(.strategy-distance-ranking i,.composition-bullet,.strategy-composition-bar){background:var(--income-raised);border-color:var(--income-line)}
+html.income-v2 .composition-bullet b{background:var(--income-text)}
+html.income-v2 :is(.simulation-no-strategy,.simulation-class-detail){background:var(--income-context);color:var(--income-text)}
+html.income-v2 :is(.simulation-class-detail,.simulation-explorer) dl div{background:var(--income-raised);color:var(--income-text)}
+html.income-v2 .simulation-amount:focus-within{border-color:var(--income-focus);box-shadow:0 0 0 3px var(--income-context)}
+html.income-v2 .simulation-loading span{background:var(--income-raised)}
+html.income-v2 .simulation-bullet{background:transparent}

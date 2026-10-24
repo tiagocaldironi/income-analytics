@@ -178,7 +178,27 @@ async def authorize_request(request, call_next, *, portfolio_handler):
         if route.name in CURATOR_HANDLERS and "MARKET_CURATOR" not in principal.roles:
             raise HTTPException(403, "Esta ação exige curadoria de dados de mercado.")
         if route.name == "get_data_sources":
-            return JSONResponse({"providers": []})
+            # Publish a static catalog, never global health, logs or job schedules.
+            catalog = (
+                ("Brapi", "Cotações de ativos brasileiros, conforme cobertura disponível."),
+                ("B3 COTAHIST", "Histórico oficial de preços de ativos negociados na B3."),
+                ("BCB PTAX", "Referência oficial de câmbio do Banco Central."),
+                ("CoinGecko", "Referências de preço para criptoativos suportados."),
+            )
+            return JSONResponse({
+                "providers": [
+                    {
+                        "provider": name,
+                        "description": description,
+                        "status": "UNKNOWN",
+                        "last_success": None,
+                        "next_execution": None,
+                        "execution_note": "Consulta sob demanda",
+                        "group": "Dados de mercado",
+                    }
+                    for name, description in catalog
+                ]
+            })
         if route.name == "list_market_price_refresh_runs":
             # Legacy run records are global and may contain private diagnostics.
             return JSONResponse({"runs": []})

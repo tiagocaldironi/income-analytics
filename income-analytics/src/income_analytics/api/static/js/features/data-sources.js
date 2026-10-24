@@ -1,15 +1,43 @@
 import { portfolioApi } from "../api.js";
-import { errorState, loadingState, table } from "../shared/ui.js";
+import { errorState, loadingState } from "../shared/ui.js";
 
 export async function renderDataSources() {
   const target = document.querySelector("#fx-card");
   if (!target) return;
-  if (!document.querySelector("#data-sources-card")) target.insertAdjacentHTML("afterend", '<section class="card" id="data-sources-card"><h2>Fontes de dados</h2><div id="data-sources">Carregando…</div></section>');
+  if (!document.querySelector("#data-sources-card")) (document.querySelector("#paid-income-settings") || target).insertAdjacentHTML("afterend", '<section class="card" id="data-sources-card"><h2>Fontes de dados</h2><div id="data-sources">Carregando…</div></section>');
   const output = document.querySelector("#data-sources");
   output.innerHTML = loadingState;
   try {
     const data = await portfolioApi.dataSources();
-    const renderGroup = (title, providers) => providers.length ? `<h3>${title}</h3>${table(["Fonte", "Processo", "Status", "Próxima execução", "Último sucesso"], providers.map(item => `<tr><td>${item.provider}</td><td>${item.description}</td><td data-tone="${item.status === "OK" ? "positive" : item.status === "UNKNOWN" ? "" : "negative"}">${item.status === "OK" ? "Atualizada" : item.status === "UNKNOWN" ? "Sem atualização" : item.status === "DEGRADED" ? "Instável" : "Indisponível"}</td><td>${item.next_execution ? new Date(item.next_execution).toLocaleString("pt-BR") : item.execution_note || "—"}</td><td>${item.last_success ? new Date(item.last_success).toLocaleString("pt-BR") : "—"}</td></tr>`))}` : "";
-    output.innerHTML = renderGroup("Fontes de dados", data.providers.filter(item => item.group !== "Agendamentos do sistema")) + renderGroup("Agendamentos do sistema", data.providers.filter(item => item.group === "Agendamentos do sistema"));
+    output.replaceChildren();
+    const providers = (data.providers || []).filter(item => item.group !== "Agendamentos do sistema");
+    if (!providers.length) {
+      output.textContent = "As fontes de dados estão indisponíveis no momento.";
+      return;
+    }
+    const grid = document.createElement("div");
+    grid.className = "settings-provider-grid";
+    const labels = {
+      OK: "Última consulta concluída",
+      UNKNOWN: "Consulta sob demanda",
+      DEGRADED: "Consulta instável",
+    };
+    providers.forEach(item => {
+      const card = document.createElement("article");
+      card.className = "settings-provider";
+      const name = document.createElement("h3");
+      name.textContent = item.provider;
+      const description = document.createElement("p");
+      description.textContent = item.description;
+      const status = document.createElement("small");
+      status.textContent = labels[item.status] || "Temporariamente indisponível";
+      card.append(name, description, status);
+      grid.append(card);
+    });
+    output.append(grid);
+    const note = document.createElement("p");
+    note.className = "field-help";
+    note.textContent = "A cobertura varia por ativo. Esta lista não indica sincronização bancária automática nem garante atualização em tempo real.";
+    output.append(note);
   } catch (error) { output.innerHTML = errorState(error); }
 }
