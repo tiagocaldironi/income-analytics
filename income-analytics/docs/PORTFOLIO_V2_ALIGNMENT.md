@@ -21,7 +21,7 @@ Validação: 28 testes de aceitação passaram. Scripts Node alignment, V2/contr
 |---|---|
 | ![Claro](evidence/portfolio-v2-alignment/mobile-light.png) | ![Escuro](evidence/portfolio-v2-alignment/mobile-dark.png) |
 
-Prévia isolada. Sem merge ou atualização automática do serviço oficial nesta correção.
+Versão validada em prévia isolada e aprovada pelo usuário para mesclagem e atualização do serviço oficial em 24/10/2026. A publicação preserva acesso privado HTTPS via Tailscale e cadastro público desabilitado.
 
 ## Ajuste dos controles e do lançamento
 
@@ -39,3 +39,9 @@ Chevron SVG discreto, sem círculo, recolhe a navegação desktop de 218px para 
 No mobile o controle fica oculto e a navegação existente é preservada. Validação manual: teclado Enter, persistência após reload, SVG do gráfico acompanhando a largura do container e ausência de overflow em desktop/390px. Testes Node cobrem expansão/recolhimento, rótulos, persistência, resize e armazenamento bloqueado; os 28 testes de aceitação passaram.
 
 ![Menu compacto](evidence/portfolio-v2-alignment/sidebar-compact.png)
+
+## Validação final para publicação — 24/10/2026
+
+45 testes Python de interface, autorização Firebase, cabeçalhos e vinculação legada passaram. Dez scripts Node de interface/multiportfólio/login/logout/contraste/XSS passaram. Git diff --check sem problemas. A revisão do diff confirma alterações apenas em apresentação, testes e documentação; nenhuma migração adicional ou alteração no motor financeiro.
+
+A versão incorpora a autenticação e o Design System V2 previamente mesclados nos PRs 15–21 e os ajustes visuais e menu recolhível deste PR 22. O serviço utiliza o mesmo banco e as mesmas credenciais externas, sem copiá-las para o repositório. O procedimento de atualização prevê backup SQLite consistente, comparação dos registros financeiros e checks de HTTPS/autenticação/arquivos publicados após o reinício. Em caso de falha, o checkout pode voltar ao commit anterior 779cbd2 sem migração reversa.
