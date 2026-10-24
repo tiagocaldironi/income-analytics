@@ -1,17 +1,17 @@
 <!doctype html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark light"><title>Sua conta · Income Analytics</title>
+<meta name="color-scheme" content="dark light"><title>Sua conta · Income Analytics</title><link rel="icon" type="image/svg+xml" href="/static/img/income-mark.svg">
 <link rel="stylesheet" href="/static/css/account.css"></head>
 <body>
-<header class="account-header"><a class="brand" href="/" aria-label="Income Analytics, início"><span aria-hidden="true">◈</span> INCOME ANALYTICS</a><button type="button" id="theme" aria-label="Alternar tema">◐</button></header>
+<header class="account-header"><a class="brand" href="/" aria-label="Income Analytics, início"><img class="income-mark" src="/static/img/income-mark.svg" width="42" height="42" alt=""> INCOME ANALYTICS</a><button type="button" id="theme" aria-label="Alternar tema">◐</button></header>
 <main class="account-layout">
 <section class="account-story"><p class="eyebrow">SEU PATRIMÔNIO, COM CLAREZA</p><h1>Mais espaço para <br>o seu futuro.</h1><p>Organize seus investimentos e acompanhe suas escolhas, em um lugar que é seu.</p><div class="story-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><p class="story-note">Income Free · cadastro manual, carteiras e análises.</p></section>
 <section class="account-card" aria-labelledby="account-title" aria-busy="true">
 <p class="eyebrow" id="account-eyebrow">BEM-VINDO AO INCOME</p><h2 id="account-title">Entrar</h2><p id="account-description">Continue de onde você parou.</p>
 <p id="account-message" role="status" aria-live="polite"></p>
 <div id="login-controls" hidden>
-<button type="button" id="google" class="google-button"><span aria-hidden="true">G</span> Continuar com Google</button><p class="separator"><span>ou use seu e-mail</span></p>
+<button type="button" id="google" class="google-button"><img src="/static/img/google.svg" width="20" height="20" alt=""> Continuar com Google</button><p class="separator"><span>ou use seu e-mail</span></p>
 <form id="credentials"><label for="email">E-mail</label><input type="email" id="email" autocomplete="email" required maxlength="254"><label for="password">Senha</label><input type="password" id="password" autocomplete="current-password" required minlength="8" maxlength="128"><button type="submit" id="submit">Entrar</button></form>
 <nav class="account-links" aria-label="Acesso"><a href="/recuperar-senha" id="recover-link">Esqueci minha senha</a><a href="/criar-conta" id="signup-link">Criar conta Free</a><a href="/entrar" id="login-link" hidden>Já tenho uma conta</a></nav>
 </div>

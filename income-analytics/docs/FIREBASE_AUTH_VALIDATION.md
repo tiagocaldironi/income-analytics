@@ -91,3 +91,11 @@ A verificação de e-mail foi alterada administrativamente somente nas contas si
 A investigação de auth/internal-error encontrou incompatibilidade entre a CSP do Income e o SDK oficial Firebase Web 13.1.0: o SDK carrega https://apis.google.com/js/api.js no fluxo popup, mas script-src não permitia esse domínio. A origem foi adicionada explicitamente, preservando as proibições de scripts inline/eval, object-src e frame-ancestors. A mensagem de erro interno deixou de sugerir que trocar de navegador resolveria a falha.
 
 O teste de regressão de cabeçalhos passou, assim como o script de mensagens de erro. O servidor de teste loopback foi reiniciado com o mesmo SQLite descartável. A autenticação Google completa ainda requer conclusão interativa pelo usuário; permitir o bootstrap não constitui evidência de login finalizado.
+
+## UX da conta e identidade visual (24/10/2026)
+
+O link isolado de conta foi substituído por um disclosure nativo no cabeçalho: avatar, configurações e saída explícita. Escape devolve foco ao acionador; clique/foco fora fecha o painel. A saída reutiliza o BFF/CSRF existente, impede envio duplicado e oferece recuperação após erro. No celular, o acionador conserva nome acessível e área de toque, ocultando apenas o texto visual. Nenhuma identidade ou token é interpolado no HTML do menu.
+
+Marca vetorial Income compartilhada pelo aplicativo e autenticação, também usada como favicon. O símbolo Google colorido vem do asset oficial gstatic Firebase UI (https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg), preservado localmente. Não há SDK Analytics adicional.
+
+Validação: 28 testes de módulos frontend; scripts Node de sessão, contraste e novo comportamento do menu passaram. JavaScript passou na verificação de sintaxe. Prévia visual isolada, sem dados financeiros, conferida em desktop e 390px; login também conferido. A prévia temporária foi removida após as capturas. Nenhum logout da sessão real do operador foi executado durante a inspeção.

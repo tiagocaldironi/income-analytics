@@ -1,3 +1,4 @@
+import { mountAccountMenu } from "./account-menu.js";
 import { authRequest, clearPrivateBrowserState } from "./auth-client.js";
 
 async function start() {
@@ -29,11 +30,7 @@ async function start() {
       channel.addEventListener("message", leave);
     }
     window.addEventListener("pageshow", event => { if (event.persisted) location.reload(); });
-    const header = document.querySelector("header");
-    const accountLink = document.createElement("a");
-    accountLink.href = "/conta"; accountLink.textContent = "Minha conta";
-    accountLink.className = "account-access";
-    header?.append(accountLink);
+    mountAccountMenu(document.querySelector(".brand-row"));
     // Financial data never remains displayed after a backend session rejection.
     window.addEventListener("income:session-expired", () => {
       clearPrivateBrowserState(); leave();
