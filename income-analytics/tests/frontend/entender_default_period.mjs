@@ -3,7 +3,7 @@ import fs from "node:fs";
 import vm from "node:vm";
 
 const html = fs.readFileSync("src/income_analytics/api/static/index.html", "utf8");
-assert.match(html, /<details id="understand-period-disclosure" class="period-disclosure">/);
+assert.match(html, /<details id="understand-period" class="period-disclosure">/);
 assert.match(html, /<span class="period-disclosure-action">Alterar período<\/span>/);
 assert.match(html, /<form id="wealth-explanation-form" class="period-form">/);
 assert.doesNotMatch(html, /<section class="card understand-period">/);

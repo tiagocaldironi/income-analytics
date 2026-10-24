@@ -1,0 +1,19 @@
+.income-mark{display:block;flex:none}
+.user-account{position:relative;flex:none;margin-left:8px;color:var(--ia-text-primary)}
+.user-account summary{display:flex;align-items:center;gap:9px;min-height:44px;padding:4px 10px 4px 4px;cursor:pointer;border:1px solid var(--ia-border);border-radius:24px;background:var(--ia-surface);font-size:.85rem;font-weight:650;list-style:none}
+.user-account summary::-webkit-details-marker{display:none}
+.user-avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--ia-surface-elevated);color:var(--ia-text-primary)}
+.user-avatar svg,.user-signout svg{width:20px;height:20px;flex:none}
+.user-account-panel{position:absolute;right:0;top:calc(100% + 10px);width:min(280px,calc(100vw - 32px));padding:12px;border:1px solid var(--ia-border);border-radius:16px;background:var(--ia-surface);box-shadow:0 14px 40px #0003;z-index:1000}
+.user-account-heading{margin:0;padding:8px 10px 14px;font-weight:700;font-size:.95rem;color:var(--ia-text-primary)}
+.user-account-heading span{display:block;margin-top:4px;font-size:.75rem;font-weight:500;color:var(--ia-text-secondary)}
+.user-account-panel a,.user-account-panel button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:46px;padding:10px;border:0;border-radius:8px;background:transparent;color:var(--ia-text-primary);font:inherit;font-size:.86rem;text-decoration:none;cursor:pointer;text-align:left}
+.user-account-panel .user-signout{justify-content:flex-start;font-weight:650}
+.user-account-panel a:hover,.user-account-panel button:hover:not(:disabled),.user-account[open] summary{background:var(--ia-surface-elevated)}
+.user-account :focus-visible{outline:3px solid var(--ia-info);outline-offset:3px}
+.user-account-divider{height:1px;background:var(--ia-border);margin:8px 0}
+.user-account-status:empty{display:none}.user-account-status{margin:8px;font-size:.8rem;line-height:1.5;color:var(--ia-text-primary)}
+.user-signout:disabled{opacity:.65;cursor:wait}
+@media(max-width:600px){.user-account-label{display:none}.user-account{margin-left:0}.user-account summary{padding-right:8px;gap:5px}.brand .income-mark{width:30px;height:30px}}
+
+.brand::before{content:none}

@@ -82,7 +82,7 @@ const lifecycle = createRouteLifecycle({
   beginCycle: beginRouteResourceCycle,
 });
 
-window.addEventListener("DOMContentLoaded", () => {
+function startApplication() {
   window.portfolioLoad = loadPortfolio;
   setupToolsRoutes();
   setupMethodologyPage();
@@ -101,4 +101,6 @@ window.addEventListener("DOMContentLoaded", () => {
     console.error("Não foi possível carregar as carteiras", error);
   });
   setupWalletSettings();
-});
+ }
+if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", startApplication, { once: true });
+else startApplication();

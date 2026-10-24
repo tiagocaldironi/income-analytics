@@ -5,7 +5,10 @@ STATIC = Path("src/income_analytics/api/static")
 
 def test_dashboard_uses_only_the_modular_javascript_entrypoint() -> None:
     page = (STATIC / "index.html").read_text(encoding="utf-8")
-    assert 'type="module" src="/static/js/app.js?v=' in page
+    assert 'type="module" src="/static/js/app-entry.js"' in page
+    entry = (STATIC / "js/app-entry.js").read_text(encoding="utf-8")
+    assert 'await authRequest("/me")' in entry
+    assert 'await import("./app.js")' in entry
     assert "legacy-dashboard.js" not in page
 
 
@@ -227,7 +230,7 @@ def test_critical_submits_are_bound_to_the_modular_api_client() -> None:
     assert "portfolioApi.assetAllocationPolicy" in strategy
     assert "data-save-strategy" in strategy
     app = (STATIC / "js/app.js").read_text(encoding="utf-8")
-    assert "strategy.js?v=20261021-starter-independent-access-v1" in app
+    assert 'from "./features/strategy.js?v=' in app
 
 
 def test_income_entry_does_not_request_an_automatic_market_price() -> None:

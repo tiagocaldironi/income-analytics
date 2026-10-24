@@ -9,6 +9,7 @@ const localStorage = {
   setItem: (key, value) => storage.set(key, String(value)),
 };
 const source = fs.readFileSync("src/income_analytics/api/static/js/api.js", "utf8")
+  .replace(/^import .*;\r?\n/gm, "")
   .replace(/^export const /gm, "const ") + "\nglobalThis.portfolioApi = portfolioApi;";
 const context = vm.createContext({
   AbortController,

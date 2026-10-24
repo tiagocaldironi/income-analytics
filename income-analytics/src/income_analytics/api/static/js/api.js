@@ -1,3 +1,4 @@
+import { refreshCsrf } from "./auth-client.js";
 // Centralized HTTP client for the local portfolio API.
 
 async function request(path, options = {}) {
@@ -8,6 +9,9 @@ async function request(path, options = {}) {
     const headers = new Headers(options.headers || {});
     const portfolioId = window.localStorage.getItem("income.activePortfolioId");
     if (portfolioId) headers.set("X-Portfolio-Id", portfolioId);
+    if (window.sessionStorage?.getItem("income.userId") && options.method && options.method !== "GET") {
+      headers.set("X-CSRF-Token", await refreshCsrf());
+    }
     const response = await fetch(`/api${path}`, {
       cache: "no-store",
       ...options,
@@ -26,6 +30,9 @@ async function request(path, options = {}) {
       throw new DOMException("A carteira ativa mudou durante a solicitação.", "AbortError");
     }
     if (!response.ok) {
+      if (response.status === 401 && window.sessionStorage?.getItem("income.userId")) {
+        window.dispatchEvent(new Event("income:session-expired"));
+      }
       const detail = Array.isArray(body.detail)
         ? body.detail.map(item => {
           const field = Array.isArray(item.loc) ? item.loc.at(-1) : "";
