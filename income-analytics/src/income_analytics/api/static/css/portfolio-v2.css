@@ -127,3 +127,42 @@ html.income-v2[data-theme="light"] .metric.metric-primary>small,html.income-v2[d
 
 .guidance-progress nav button{width:44px;height:44px}
 @media(max-width:600px){.income-v2 .brand{font-size:0;gap:0}.income-v2 .brand-row{gap:4px}.income-v2 .portfolio-controls{gap:4px}.income-v2 .portfolio-menu>summary{max-width:80px}.income-v2 .metric-help{top:10px;right:8px}.income-v2 .metric-help summary{width:44px;height:44px}}
+
+/* Alignment refinement: one toolbar, two explicit summary rows, one blue action language. */
+.income-v2 .holdings-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:24px}
+.income-v2 .holdings-heading>div{min-width:0;max-width:670px}
+.income-v2 .holdings-heading h2{margin:0 0 10px;font-size:1.3rem}
+.income-v2 .holdings-heading .holdings-note{margin:0;line-height:1.7}
+.income-v2 .holdings-heading .allocation-policy-trigger{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:none;width:auto;margin:0;padding:10px 14px;min-height:44px;white-space:nowrap;box-shadow:none;background:transparent;color:var(--income-action);border:1px solid var(--income-line);border-radius:10px}
+.income-v2 .allocation-policy-trigger .income-icon{width:18px;height:18px}
+.income-v2 .holding-class{margin:16px 0}
+.income-v2 .holding-class>summary{display:grid;grid-template-columns:minmax(0,1fr) auto auto 24px;grid-template-areas:"name value tools toggle" "stats stats stats stats";gap:18px 24px;padding:20px;text-align:left;border-radius:14px;background:var(--income-surface)}
+.income-v2 .holding-class[open]>summary{border-bottom:1px solid var(--income-line);border-radius:14px 14px 0 0}
+.income-v2 .holding-class>summary>.holding-class-name{grid-area:name;min-width:0;padding:0}
+.income-v2 .holding-class-name strong{font-weight:700;line-height:1.4}
+.income-v2 .holding-class-name small{margin:4px 0 0}
+.income-v2 .holding-class>summary>.holding-class-value{grid-area:value;text-align:right}
+.income-v2 .holding-class-value strong{font-size:1.05rem;color:var(--income-text);font-variant-numeric:tabular-nums}
+.income-v2 .holding-class>summary>.holding-class-statistics{grid-area:stats;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 24px;min-width:0;padding-top:16px;border-top:1px solid var(--income-line)}
+.income-v2 .holding-class-statistics>.holding-class-metric{display:flex!important;flex-direction:column;align-items:flex-start;grid-column:auto;grid-row:auto;gap:4px;min-width:0;text-align:left}
+.income-v2 .holding-class-statistics .holding-class-metric strong{text-align:left;line-height:1.45;overflow-wrap:anywhere}
+.income-v2 .holding-class-statistics .holding-class-metric small{margin:0;line-height:1.5}
+.income-v2 .holding-class>summary>.holding-chart-button{grid-area:tools;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:auto;min-height:44px;margin:0;padding:8px 12px;background:transparent;border:1px solid var(--income-line);border-radius:9px;box-shadow:none}
+.income-v2 .holding-chart-button .income-icon{width:17px;height:17px}
+.income-v2 .holding-class>summary>.holding-class-action{grid-area:toggle;display:grid;place-items:center;align-self:center;width:24px;height:44px;color:var(--income-secondary);background:none;border:0;border-radius:0}
+.income-v2 .holding-class-action::after{content:none!important;display:none}
+.income-v2 .holding-class-action svg{width:20px;height:20px;transition:transform .18s ease}
+.income-v2 .holding-class[open] .holding-class-action svg{transform:rotate(180deg)}
+.income-v2 .holding-chart-button:hover,.income-v2 .holding-chart-button:focus-visible,.income-v2 .allocation-policy-trigger:hover{background:var(--income-context);border-color:var(--income-action);color:var(--income-action);box-shadow:none}
+.income-v2 .mobile-bottom-nav a.active,.income-v2 .mobile-bottom-nav a[aria-current="page"]{color:var(--income-action);background:var(--income-context)}
+@media(max-width:850px){
+ .income-v2 .holdings-heading{flex-direction:column;gap:16px;margin-bottom:20px}
+ .income-v2 .holdings-heading .allocation-policy-trigger{align-self:flex-start;white-space:normal;text-align:left}
+ .income-v2 .holding-class>summary{grid-template-columns:minmax(0,1fr) 24px;grid-template-areas:"name toggle" "value tools" "stats stats";gap:14px 10px;padding:16px}
+ .income-v2 .holding-class>summary>.holding-class-value{text-align:left}
+ .income-v2 .holding-class>summary>.holding-class-statistics{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px;padding-top:14px}
+ .income-v2 .holding-class>summary>.holding-chart-button{grid-column:1/-1;grid-row:4;justify-self:start;padding-inline:10px}
+ .income-v2 .holding-class>summary>.holding-class-value{grid-column:1/-1;grid-row:2}
+}
+
+.income-v2 .holdings-card #positions{padding:0;min-height:0;text-align:initial;color:inherit}.income-v2 .holdings-heading{margin-bottom:8px}
