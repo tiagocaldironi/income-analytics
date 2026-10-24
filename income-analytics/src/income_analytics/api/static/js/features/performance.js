@@ -1,10 +1,9 @@
 import { portfolioApi } from "../api.js?v=20261017-performance-class-filters-v2";
-import { money, percentage } from "../shared/ui.js";
+import { errorState, money, percentage } from "../shared/ui.js";
 
 const labels = { BRAZILIAN_STOCK: "Ações Brasil", BRAZILIAN_ETF: "ETF Brasil", FII: "FIIs", FIXED_INCOME: "Renda fixa", INTERNATIONAL: "Ações exterior", INTERNATIONAL_ETF: "ETF internacional", US_REIT: "REITs EUA", CRYPTO: "Cripto", PENSION: "Previdência", REAL_ESTATE: "Imóveis", CASH: "Caixa", OTHER: "Outros" };
 let performanceBound = false;
 let explanationRequestId = 0;
-let periodEditSnapshot = null;
 let contributionData = null;
 const understandAnalyses = [
   { id: "asset-contributions", question: "Quais investimentos mais ganharam ou perderam valor?", service: "wealth-explanation", filters: ["asset_class", "direction", "metric"], render: renderAssetContributionAnswer },
@@ -24,51 +23,54 @@ export function bindPerformance() {
   const form = document.querySelector("#wealth-explanation-form");
   if (!form) return;
   performanceBound = true;
-  const periodPanel = document.querySelector("#understand-period");
-  const periodTrigger = periodPanel?.querySelector("summary");
+  const period = document.querySelector("#understand-period-disclosure");
+  const startInput = document.querySelector("#wealth-start-date");
+  const endInput = document.querySelector("#wealth-end-date");
   const validation = document.querySelector("#understand-period-validation");
-  const inputs = [document.querySelector("#wealth-start-date"), document.querySelector("#wealth-end-date")];
-  syncUnderstandPeriodLabel();
+  const status = document.querySelector("#understand-period-status");
+  const cancel = document.querySelector(".period-cancel");
+  const updateLabel = () => {
+    const label = document.querySelector("#wealth-period-label");
+    if (label && startInput.value && endInput.value) label.textContent = `${formatPeriodDate(startInput.value)} — ${formatPeriodDate(endInput.value)}`;
+  };
+  const clearValidation = () => {
+    validation.hidden = true;
+    validation.textContent = "";
+    startInput.removeAttribute("aria-invalid");
+    endInput.removeAttribute("aria-invalid");
+  };
+  updateLabel();
+  period?.addEventListener("toggle", () => {
+    if (period.open) {
+      period.dataset.originalStart = startInput.value;
+      period.dataset.originalEnd = endInput.value;
+      clearValidation();
+      status.hidden = true;
+    }
+  });
+  cancel?.addEventListener("click", () => {
+    startInput.value = period.dataset.originalStart || startInput.value;
+    endInput.value = period.dataset.originalEnd || endInput.value;
+    clearValidation();
+    period.open = false;
+  });
+  startInput.addEventListener("input", clearValidation);
+  endInput.addEventListener("input", clearValidation);
   form.addEventListener("submit", event => {
     event.preventDefault();
-    if (document.querySelector("#apply-understand-period")?.disabled) return;
-    if (!inputs[0].value || !inputs[1].value) return;
-    if (inputs[0].value > inputs[1].value) {
-      inputs[0].setAttribute("aria-invalid", "true");
-      inputs[1].setAttribute("aria-invalid", "true");
-      validation.textContent = "A data inicial deve ser anterior ou igual à data final.";
+    if (!startInput.value || !endInput.value || startInput.value > endInput.value) {
+      validation.textContent = "Informe datas válidas e confirme que a data inicial não é posterior à final.";
       validation.hidden = false;
-      inputs[0].focus();
+      startInput.setAttribute("aria-invalid", String(!startInput.value || startInput.value > endInput.value));
+      endInput.setAttribute("aria-invalid", String(!endInput.value));
       return;
     }
-    inputs.forEach(input => input.removeAttribute("aria-invalid"));
-    validation.hidden = true;
+    clearValidation();
+    status.hidden = true;
+    const apply = document.querySelector(".period-apply");
+    apply.disabled = true;
+    apply.textContent = "Aplicando…";
     loadExplanation();
-  });
-  inputs.forEach(input => input.addEventListener("input", () => {
-    inputs.forEach(field => field.removeAttribute("aria-invalid"));
-    validation.hidden = true;
-  }));
-  periodPanel?.addEventListener("toggle", () => {
-    if (!periodPanel.open) return;
-    periodEditSnapshot = contributionData?.period
-      ? { ...contributionData.period }
-      : { start_date: inputs[0].value, end_date: inputs[1].value };
-    if (contributionData?.period) setPeriodInputs(contributionData.period);
-    window.requestAnimationFrame(() => inputs[0]?.focus());
-  });
-  document.querySelector("#cancel-understand-period")?.addEventListener("click", () => {
-    setPeriodInputs(periodEditSnapshot || contributionData?.period);
-    validation.hidden = true;
-    periodPanel.open = false;
-    periodTrigger?.focus();
-  });
-  document.addEventListener("keydown", event => {
-    if (event.key !== "Escape" || !periodPanel?.open) return;
-    event.preventDefault();
-    setPeriodInputs(periodEditSnapshot || contributionData?.period);
-    periodPanel.open = false;
-    periodTrigger?.focus();
   });
   document.querySelector("#understand-questions")?.addEventListener("click", event => {
     const button = event.target.closest("[data-analysis-id]");
@@ -79,85 +81,59 @@ export function bindPerformance() {
 }
 
 export async function loadExplanation() {
-  const applyButton = document.querySelector("#apply-understand-period");
   const requestId = ++explanationRequestId;
   const start = document.querySelector("#wealth-start-date").value;
   const end = document.querySelector("#wealth-end-date").value;
-  const status = document.querySelector("#understand-period-status");
-  const inputs = [document.querySelector("#wealth-start-date"), document.querySelector("#wealth-end-date")];
-  const lastAppliedPeriod = contributionData?.period;
-  if (applyButton) {
-    applyButton.disabled = true;
-    applyButton.textContent = "Aplicando…";
-  }
-  inputs.forEach(input => { input.disabled = true; });
-  if (status) {
-    status.classList.remove("error");
-    status.textContent = lastAppliedPeriod
-      ? `Atualizando análise. O resumo anterior continua referente a ${formatPeriod(lastAppliedPeriod.start_date, lastAppliedPeriod.end_date)}.`
-      : "Calculando a análise para o período selecionado…";
-    status.hidden = false;
-  }
+  const target = document.querySelector("#wealth-explanation");
+  target.innerHTML = '<div class="empty">Calculando análise com o histórico registrado…</div>';
   try {
     const data = await portfolioApi.wealthExplanation(start, end);
     if (requestId !== explanationRequestId) return;
-    setPeriodInputs(data.period);
+    document.querySelector("#wealth-start-date").value = data.period.start_date;
+    document.querySelector("#wealth-end-date").value = data.period.end_date;
+    const periodLabel = document.querySelector("#wealth-period-label");
+    if (periodLabel) periodLabel.textContent = `${formatPeriodDate(data.period.start_date)} — ${formatPeriodDate(data.period.end_date)}`;
+    const period = document.querySelector("#understand-period-disclosure");
+    if (period) { period.dataset.originalStart = data.period.start_date; period.dataset.originalEnd = data.period.end_date; }
+    if (period) period.open = false;
+    const status = document.querySelector("#understand-period-status");
+    if (status) { status.hidden = true; status.classList.remove("error"); }
     const domStarted = performance.now();
     renderExplanation(data);
-    syncUnderstandPeriodLabel(data.period);
-    if (status) status.hidden = true;
-    if (status) status.classList.remove("error");
-    const panel = document.querySelector("#understand-period");
-    if (panel?.open) {
-      panel.open = false;
-      panel.querySelector("summary")?.focus();
-    }
     performance.measure("income:entender-dom-render", { start: domStarted, end: performance.now() });
   } catch (error) {
     if (requestId === explanationRequestId) {
-      if (lastAppliedPeriod) setPeriodInputs(lastAppliedPeriod);
-      syncUnderstandPeriodLabel(lastAppliedPeriod);
-      if (status) {
-        status.textContent = lastAppliedPeriod
-          ? `Não foi possível atualizar o período. O resumo exibido permanece referente a ${formatPeriod(lastAppliedPeriod.start_date, lastAppliedPeriod.end_date)}. ${error.message}`
-          : `Não foi possível carregar a análise para o período selecionado. ${error.message}`;
-        status.hidden = false;
-        status.classList.add("error");
+      target.innerHTML = errorState(error.message);
+      const period = document.querySelector("#understand-period-disclosure");
+      const startInput = document.querySelector("#wealth-start-date");
+      const endInput = document.querySelector("#wealth-end-date");
+      if (period && period.dataset.originalStart && period.dataset.originalEnd) {
+        startInput.value = period.dataset.originalStart;
+        endInput.value = period.dataset.originalEnd;
+        const label = document.querySelector("#wealth-period-label");
+        if (label) label.textContent = `${formatPeriodDate(startInput.value)} — ${formatPeriodDate(endInput.value)}`;
       }
+      const status = document.querySelector("#understand-period-status");
+      if (status) {
+        status.textContent = contributionData
+          ? "Não foi possível atualizar o período. O intervalo anterior continua aplicado."
+          : "Não foi possível carregar a análise para este período. Tente novamente.";
+        status.classList.add("error");
+        status.hidden = false;
+      }
+      if (period) period.open = true;
     }
   } finally {
     if (requestId === explanationRequestId) {
-      if (applyButton) {
-        applyButton.disabled = false;
-        applyButton.textContent = "Aplicar período";
-      }
-      inputs.forEach(input => { input.disabled = false; });
+      const apply = document.querySelector(".period-apply");
+      if (apply) { apply.disabled = false; apply.textContent = "Aplicar"; }
     }
   }
 }
 
-function setPeriodInputs(period) {
-  if (!period) return;
-  const start = document.querySelector("#wealth-start-date");
-  const end = document.querySelector("#wealth-end-date");
-  if (start) start.value = period.start_date || "";
-  if (end) end.value = period.end_date || "";
-}
-
-function syncUnderstandPeriodLabel(period = contributionData?.period) {
-  const label = document.querySelector("#understand-period-value");
-  if (!label) return;
-  const start = period?.start_date || document.querySelector("#wealth-start-date")?.value;
-  const end = period?.end_date || document.querySelector("#wealth-end-date")?.value;
-  label.textContent = start && end ? formatPeriod(start, end) : "Selecione um período";
-}
-
-function formatPeriod(start, end) {
-  const format = value => {
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || "");
-    return match ? `${match[3]}/${match[2]}/${match[1]}` : value || "";
-  };
-  return `${format(start)} — ${format(end)}`;
+function formatPeriodDate(value) {
+  const [year, month, day] = String(value).split("-");
+  return year && month && day ? `${day}/${month}/${year}` : String(value || "");
 }
 
 function renderExplanation(data) {
@@ -185,7 +161,7 @@ function renderPeriodSummary(data) {
     ["Aquisições líquidas", signed(bridge.net_acquisitions)],
   ];
   const coverage = quality.valuation_complete ? "Valuation completo nas datas de abertura e encerramento." : `Valuation parcial · cobertura ${quality.valuation_coverage_percentage === null ? "indisponível" : percentage(Number(quality.valuation_coverage_percentage))}. Valores pendentes não foram tratados como zero.`;
-  target.innerHTML = `<section class="card understand-summary-card"><div class="understand-summary-heading"><div><h2>Resumo do período</h2></div><span class="coverage-pill ${quality.valuation_complete ? "complete" : "partial"}">${quality.valuation_complete ? "Cobertura completa" : "Cobertura parcial"}</span></div><div class="understand-metrics">${metrics.map(([label, value, note], index) => `<div class="understand-metric ${index === 0 ? "primary" : ""}"><small>${label}</small><strong>${value}</strong>${note ? `<span>${note}</span>` : ""}</div>`).join("")}</div><p class="coverage">${coverage}</p></section>`;
+  target.innerHTML = `<section class="card understand-summary-card"><div class="understand-summary-heading"><div><p class="eyebrow">${escapeChartText(data.period.start_date)} a ${escapeChartText(data.period.end_date)}</p><h2>Resumo do período</h2></div><span class="coverage-pill ${quality.valuation_complete ? "complete" : "partial"}">${quality.valuation_complete ? "Cobertura completa" : "Cobertura parcial"}</span></div><div class="understand-metrics">${metrics.map(([label, value, note], index) => `<div class="understand-metric ${index === 0 ? "primary" : ""}"><small>${label}</small><strong>${value}</strong>${note ? `<span>${note}</span>` : ""}</div>`).join("")}</div><p class="coverage">${coverage}</p></section>`;
 }
 
 function renderQuestionChoices() {

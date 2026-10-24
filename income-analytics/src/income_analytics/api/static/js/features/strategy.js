@@ -84,6 +84,9 @@ function render(target, state) {
   const targetValid = Math.abs(targetTotal - 1) < .000001;
   const targetComposition = targetValid ? composition(classes, "target_weight", "Carteira-alvo") : `<div class="strategy-composition strategy-composition-unavailable"><small>Carteira-alvo</small><div class="strategy-composition-message">A distribuição-alvo soma ${pct(targetTotal)}. Revise a estratégia para completar 100%.</div></div>`;
   target.innerHTML = `<section class="strategy-hero"><div class="strategy-hero-heading"><div><p>Minha estratégia</p><h2>Carteira atual × Carteira-alvo</h2>${strategyOrigin}</div><div class="strategy-hero-actions"><button class="secondary" type="button" data-explore-starter>Explorar Income Starter</button><button class="secondary" type="button" data-edit-strategy>Editar estratégia</button></div></div><div class="strategy-compositions">${composition(classes, "current_weight", "Carteira atual", state.valuationComplete !== false)}${targetComposition}</div>${strategyLegend(classes)}<div class="strategy-drift"><div><small>Distância da estratégia</small><strong>${pct(state.analysis.portfolio_drift)}</strong><span>Distância da distribuição-alvo</span></div><p>Representa a diferença agregada entre a distribuição atual e a política cadastrada.</p></div>${strategyDifferences(classes)}</section>${zeroTargetContext(classes)}${assetTargets(classes)}`;
+  if (state.dataWarning) {
+    target.insertAdjacentHTML("afterbegin", `<p class="coverage" role="status">${html(state.dataWarning)}</p>`);
+  }
   const details = target.querySelector?.("[data-strategy-differences]");
   details?.addEventListener("toggle", () => { strategyDifferencesOpen = details.open; details.querySelector("summary")?.setAttribute("aria-expanded", String(details.open)); });
   target.querySelectorAll("[data-edit-strategy]").forEach(button => button.addEventListener("click", () => openEditor(state, button)));
@@ -157,14 +160,26 @@ function starterDialog() {
   let node = document.querySelector("#income-starter-dialog");
   if (node) return node;
   node = document.createElement("dialog"); node.id = "income-starter-dialog"; node.className = "income-starter-dialog";
-  node.innerHTML = `<div class="income-starter-content"><header><div><p>Income Starter · catálogo educacional</p><h2>Modelos em validação</h2><small>Conheça objetivo, contexto e limitações. Nenhum modelo pode ser adotado antes da homologação.</small></div><button type="button" data-starter-close aria-label="Fechar catálogo">×</button></header><div data-starter-catalog></div><p class="income-starter-notice">${html("Este catálogo não é recomendação individualizada, avaliação de adequação ao seu perfil nem promessa de rentabilidade.")}</p></div>`;
+  node.innerHTML = `<div class="income-starter-content"><header><div><p>Income Starter</p><h2>Escolha como começar</h2><small>Uma jornada educativa ou modelos de alocação ainda em homologação.</small></div><button type="button" data-starter-close aria-label="Fechar catálogo">×</button></header><div data-starter-catalog></div><p class="income-starter-notice">${html("O conteúdo é educacional e não constitui recomendação individualizada nem suitability.")}</p></div>`;
   node.querySelector("[data-starter-close]").addEventListener("click", () => node.close());
   document.body.append(node); return node;
 }
 
 function starterCard(model) {
   const status = model.status === "DRAFT" ? "Rascunho" : model.status === "IN_REVIEW" ? "Em revisão" : "Publicado";
-  return `<article class="income-starter-card"><div><span class="income-starter-status">${status} · v${model.version}</span><h3>${html(model.name)}</h3><p>${html(model.description)}</p></div><button class="secondary" type="button" data-starter-detail="${html(model.template_key)}" data-starter-version="${model.version}">Conhecer modelo</button></article>`;
+  const isJourney = model.template_type === "GUIDED_JOURNEY";
+  return `<article class="income-starter-card"><div><span class="income-starter-status">${isJourney ? "Jornada" : `${status} · v${model.version}`}</span><h3>${html(model.name)}</h3><p>${html(model.description)}</p></div><button class="secondary" type="button" data-starter-detail="${html(model.template_key)}" data-starter-version="${model.version}">${isJourney ? "Conhecer jornada" : "Conhecer modelo"}</button></article>`;
+}
+
+const starterIdeas = [
+  { title: "Renda e proventos", description: "Entender como dividendos, juros e outros rendimentos participam dos objetivos da carteira." },
+  { title: "Diversificação por exposição", description: "Visualizar onde os ativos investem, além da classe de produto cadastrada." },
+  { title: "Estratégias por objetivo", description: "Explorar caminhos para diferentes horizontes e necessidades, após validação metodológica." },
+  { title: "Revisão da estratégia", description: "Acompanhar mudanças na carteira e avaliar quando revisar os objetivos definidos." },
+];
+
+function starterIdeaCard(idea) {
+  return `<article class="income-starter-card income-starter-idea"><div><span class="income-starter-status">Ideia para priorizar</span><h3>${html(idea.title)}</h3><p>${html(idea.description)}</p></div><small>Não disponível nesta versão</small></article>`;
 }
 
 async function openStarterCatalog(state, trigger) {
@@ -175,27 +190,35 @@ async function openStarterCatalog(state, trigger) {
   try {
     const response = await portfolioApi.incomeStarterCatalog();
     const models = response.models || [];
-    content.innerHTML = `<div class="income-starter-grid">${models.map(starterCard).join("")}</div>`;
+    const journey = models.filter(model => model.template_type === "GUIDED_JOURNEY");
+    const allocations = models.filter(model => model.template_type === "ALLOCATION_MODEL");
+    content.innerHTML = `<section class="income-starter-path"><h3>Começando a investir?</h3><p>Defina e acompanhe sua meta de reserva sem criar ativos ou operações.</p><div class="income-starter-grid">${journey.map(starterCard).join("")}</div></section><section class="income-starter-path"><h3>Estratégias de prateleira</h3><p>Modelos Conservadora, Moderada e Arrojada estão em elaboração. Ainda não têm distribuição aprovada e não podem ser adotados.</p><div class="income-starter-grid">${allocations.map(starterCard).join("")}</div></section><section class="income-starter-path income-starter-roadmap"><h3>O que mais queremos ter</h3><p>Ideias para priorizar com você. Ainda não são funcionalidades disponíveis nem recomendações de investimento.</p><div class="income-starter-grid">${starterIdeas.map(starterIdeaCard).join("")}</div></section>`;
     content.querySelectorAll("[data-starter-detail]").forEach(button => button.addEventListener("click", async () => {
       try {
         const model = await portfolioApi.incomeStarterModel(button.dataset.starterDetail, Number(button.dataset.starterVersion));
         showStarterDetails(node, model, state);
       } catch (error) { content.innerHTML = `<p role="alert">${html(friendlyError(error))}</p>`; }
     }));
-  } catch (error) { content.innerHTML = `<p role="alert">Não foi possível carregar o catálogo: ${html(friendlyError(error))}</p>`; }
+  } catch (error) {
+    console.error("Falha ao carregar o catálogo Income Starter", error);
+    content.innerHTML = `<div class="income-starter-load-error" role="alert"><p>Não foi possível carregar o catálogo Income Starter.</p><small>${html(friendlyError(error))}</small><button class="secondary" type="button" data-starter-retry>Tentar novamente</button></div>`;
+    content.querySelector("[data-starter-retry]").addEventListener("click", () => openStarterCatalog(state, trigger));
+  }
 }
 
 function showStarterDetails(node, model, state) {
   const content = node.querySelector("[data-starter-catalog]");
   const status = model.status === "DRAFT" ? "Rascunho" : model.status === "IN_REVIEW" ? "Em revisão" : "Publicado";
-  const allocations = model.allocations ? `<section><h3>Distribuição validada</h3><div class="income-starter-allocations">${Object.entries(model.allocations).map(([key, value]) => `<span>${html(assetClassLabel(key))}<b>${pct(value)}</b></span>`).join("")}</div></section>` : `<section class="income-starter-no-allocation"><h3>Distribuição</h3><p>Nenhum percentual foi definido. Este conteúdo é um rascunho, não um modelo aprovado.</p></section>`;
+  const isJourney = model.template_type === "GUIDED_JOURNEY";
+  const allocations = isJourney ? `<section class="income-starter-no-allocation"><h3>Tipo de conteúdo</h3><p>Jornada educacional sem distribuição de ativos e sem adoção como carteira-alvo.</p></section>` : model.allocations ? `<section><h3>Distribuição validada</h3><div class="income-starter-allocations">${Object.entries(model.allocations).map(([key, value]) => `<span>${html(assetClassLabel(key))}<b>${pct(value)}</b></span>`).join("")}</div></section>` : `<section class="income-starter-no-allocation"><h3>Distribuição</h3><p>Nenhum percentual foi definido. Este conteúdo é um rascunho, não um modelo aprovado.</p></section>`;
   const methodologySources = model.methodology_sources || [];
   const allocationSources = model.allocation_sources || [];
   const sourceList = sources => `<ul>${sources.map(source => `<li><a href="${html(source.url)}" target="_blank" rel="noreferrer">${html(source.title)}</a> — ${html(source.supports)}</li>`).join("")}</ul>`;
   const reviewDate = model.reviewed_at ? new Date(model.reviewed_at).toLocaleDateString("pt-BR") : "Pendente";
   const publishedDate = model.published_at ? new Date(model.published_at).toLocaleDateString("pt-BR") : "Não publicado";
-  content.innerHTML = `<button type="button" class="income-starter-back" data-starter-back>← Voltar ao catálogo</button><article class="income-starter-detail"><span class="income-starter-status">${status} · versão ${model.version}</span><h2>${html(model.name)}</h2><p>${html(model.description)}</p><div class="income-starter-facts"><section><h3>Objetivo</h3><p>${html(model.objective)}</p></section><section><h3>Perfil típico</h3><p>${html(model.typical_profile)}</p></section><section><h3>Risco e horizonte</h3><p>${html(model.risk_profile)} · ${html(model.horizon)}</p></section><section><h3>Tolerância a oscilações e conhecimento</h3><p>${html(model.volatility_tolerance)} ${html(model.knowledge)}</p></section><section><h3>Características</h3><ul>${model.characteristics.map(item => `<li>${html(item)}</li>`).join("")}</ul></section><section><h3>Quando pode não fazer sentido</h3><ul>${model.not_suitable.map(item => `<li>${html(item)}</li>`).join("")}</ul></section>${allocations}<section><h3>Origem e metodologia</h3><p>${html(model.methodology)}</p><p>Autoria: ${html(model.author)}</p><p>Revisão: ${html(reviewDate)} · Publicação: ${html(publishedDate)}</p><h4>Fontes conceituais e regulatórias</h4>${sourceList(methodologySources)}<h4>Fontes de alocação</h4>${allocationSources.length ? sourceList(allocationSources) : "<p>Nenhuma fonte de percentuais foi documentada. As referências conceituais não comprovam alocações.</p>"}</section></div><p class="income-starter-notice">${html(model.educational_notice)}</p><button type="button" class="secondary" data-starter-adopt ${model.adoption_available ? "" : "disabled"}>${model.adoption_available ? "Personalizar no editor" : "Aguardando validação"}</button></article>`;
+  content.innerHTML = `<button type="button" class="income-starter-back" data-starter-back>← Voltar ao catálogo</button><article class="income-starter-detail"><span class="income-starter-status">${isJourney ? "Jornada educacional" : `${status} · versão ${model.version}`}</span><h2>${html(model.name)}</h2><p>${html(model.description)}</p><div class="income-starter-facts"><section><h3>Objetivo</h3><p>${html(model.objective)}</p></section><section><h3>Perfil típico</h3><p>${html(model.typical_profile)}</p></section><section><h3>Risco e horizonte</h3><p>${html(model.risk_profile)} · ${html(model.horizon)}</p></section><section><h3>Tolerância a oscilações e conhecimento</h3><p>${html(model.volatility_tolerance)} ${html(model.knowledge)}</p></section><section><h3>Características</h3><ul>${model.characteristics.map(item => `<li>${html(item)}</li>`).join("")}</ul></section><section><h3>Quando pode não fazer sentido</h3><ul>${model.not_suitable.map(item => `<li>${html(item)}</li>`).join("")}</ul></section>${allocations}<section><h3>Origem e metodologia</h3><p>${html(model.methodology)}</p><p>Autoria: ${html(model.author)}</p><p>Revisão: ${html(reviewDate)} · Publicação: ${html(publishedDate)}</p><h4>Fontes conceituais e regulatórias</h4>${sourceList(methodologySources)}<h4>Fontes de alocação</h4>${allocationSources.length ? sourceList(allocationSources) : "<p>Nenhuma fonte de percentuais foi documentada. As referências conceituais não comprovam alocações.</p>"}</section></div><p class="income-starter-notice">${html(model.educational_notice)}</p>${isJourney ? '<button type="button" data-start-reserve>Iniciar ou continuar</button>' : `<button type="button" class="secondary" data-starter-adopt ${model.adoption_available ? "" : "disabled"}>${model.adoption_available ? "Personalizar no editor" : "Aguardando validação"}</button>`}</article>`;
   content.querySelector("[data-starter-back]").addEventListener("click", () => openStarterCatalog(state, node._trigger));
+  content.querySelector("[data-start-reserve]")?.addEventListener("click", () => { node.close(); window.location.hash = "#primeiros-passos"; });
   const adopt = content.querySelector("[data-starter-adopt]");
   if (model.adoption_available) adopt.addEventListener("click", () => {
     const merged = new Map(state.classes.map(item => [item.asset_class, { ...item, previous_target_weight: number(item.target_weight) }]));
@@ -212,10 +235,14 @@ function noPolicy(target, holdings) { const classes = holdings.classes || []; ta
 export async function loadStrategy() {
   const target = document.querySelector("#strategy-workspace"); if (!target) return; target.innerHTML = `<div class="strategy-skeleton" aria-busy="true"><span></span><span></span></div>`;
   try {
-    const [holdings, intelligence, strategyMetadata] = await Promise.all([
+    const [holdingsResult, intelligenceResult, strategyResult] = await Promise.allSettled([
       portfolioApi.holdings(), sharedIntelligence(), portfolioApi.activeStrategyMetadata(),
     ]);
-    const drift = intelligence.findings?.find(finding => finding.code === "PORTFOLIO_DRIFT");
+    if (holdingsResult.status === "rejected") throw holdingsResult.reason;
+    const holdings = holdingsResult.value;
+    const intelligence = intelligenceResult.status === "fulfilled" ? intelligenceResult.value : null;
+    const strategyMetadata = strategyResult.status === "fulfilled" ? strategyResult.value : { strategy: null };
+    const drift = intelligence?.findings?.find(finding => finding.code === "PORTFOLIO_DRIFT");
     try {
       const analysis = drift
         ? {
@@ -242,14 +269,20 @@ export async function loadStrategy() {
         classes,
         valuationComplete: holdings.valuation_complete,
         strategy: strategyMetadata.strategy,
+        dataWarning: intelligenceResult.status === "rejected" || strategyResult.status === "rejected"
+          ? "Alguns dados complementares estão temporariamente indisponíveis; a estratégia continua disponível."
+          : "",
       });
     } catch (error) {
+      console.error("Falha ao calcular a estratégia", error);
       if (String(error.message || error).includes("política")) noPolicy(target, holdings);
       else throw error;
     }
-  } catch {
-    target.innerHTML = `<div class="strategy-error" role="alert"><p>Não foi possível carregar sua estratégia agora.</p><button class="secondary" type="button" data-retry-strategy>Tentar novamente</button></div>`;
+  } catch (error) {
+    console.error("Falha ao carregar a estratégia", error);
+    target.innerHTML = `<div class="strategy-error" role="alert"><p>Não foi possível carregar sua estratégia agora.</p><small>${html(friendlyError(error))}</small><div class="strategy-error-actions"><button class="secondary" type="button" data-retry-strategy>Tentar novamente</button><button type="button" data-open-starter-error>Explorar Income Starter</button></div></div>`;
     target.querySelector("[data-retry-strategy]").addEventListener("click", loadStrategy);
+    target.querySelector("[data-open-starter-error]").addEventListener("click", event => openStarterCatalog({ classes: [] }, event.currentTarget));
   }
 }
 export function bindStrategy() { loadStrategy(); }

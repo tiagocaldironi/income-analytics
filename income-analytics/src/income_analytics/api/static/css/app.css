@@ -26,14 +26,13 @@
 .understand-period { margin:8px 0 16px; }
 .period-disclosure { border-top:1px solid var(--ia-border); border-bottom:1px solid var(--ia-border); }
 .period-disclosure-summary { display:flex; min-height:42px; align-items:center; gap:.65rem; padding:.45rem .15rem; cursor:pointer; list-style:none; }
-.period-disclosure-summary:focus-visible { outline:2px solid var(--ia-brand); outline-offset:3px; }
 .period-disclosure-summary::-webkit-details-marker { display:none; }
 .period-disclosure-summary::before { width:.8rem; color:var(--ia-text-secondary); content:"▸"; font-size:.8rem; transition:transform .15s ease; }
 .period-disclosure[open] > .period-disclosure-summary::before { transform:rotate(90deg); }
 .period-disclosure-title { color:var(--ia-text-secondary); font-size:.82rem; }
 .period-disclosure-value { color:var(--ia-text-primary); font-size:.88rem; font-weight:600; font-variant-numeric:tabular-nums; }
 .period-disclosure-action { margin-left:auto; color:var(--ia-brand); font-size:.8rem; }
-.period-form { display:flex; flex-wrap:wrap; align-items:end; gap:.55rem; padding:.65rem .1rem .8rem 1.45rem; }
+.period-form { display:flex; align-items:end; gap:.55rem; padding:.65rem .1rem .8rem 1.45rem; }
 .period-form label { display:grid; gap:.2rem; color:var(--ia-text-secondary); font-size:.72rem; }
 .period-form input { width:148px; min-height:36px; padding:.35rem .5rem; font-size:.84rem; }
 .period-form-separator { padding-bottom:.55rem; color:var(--ia-text-secondary); font-size:.8rem; }
@@ -46,6 +45,7 @@
 .understand-period-status { margin:-6px 0 14px; padding:.65rem .8rem; border:1px solid var(--ia-border); border-radius:8px; background:var(--ia-surface); color:var(--ia-text-secondary); font-size:.85rem; }
 .understand-period-status.error { border-color:#70424a; color:#ff9da4; }
 .understand-period input[aria-invalid="true"] { border-color:var(--ia-negative); }
+.strategy-error-actions { display:flex; justify-content:center; gap:.6rem; flex-wrap:wrap; }
 .explanation-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-top:1rem; }
 .explanation-summary div { border-left:2px solid var(--ia-brand); padding-left:.75rem; display:grid; gap:.25rem; }
 .data-quality-notice { display:grid; gap:.35rem; margin-top:1rem; padding:.85rem 1rem; border-left:3px solid #b7791f; border-radius:.4rem; background:#fffbeb; color:#744210; }

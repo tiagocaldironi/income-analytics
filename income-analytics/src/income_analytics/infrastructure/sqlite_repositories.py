@@ -392,6 +392,7 @@ class SqlitePortfolioRepository:
         return Portfolio(
             id=UUID(row.id),
             name=row.name,
+            owner_user_id=UUID(row.owner_user_id) if row.owner_user_id else None,
             base_currency=row.base_currency,
             status=row.status,
             created_at=SqliteAssetRepository._utc(row.created_at),
@@ -409,6 +410,7 @@ class SqlitePortfolioRepository:
             Portfolio(
                 id=UUID(row.id),
                 name=row.name,
+                owner_user_id=UUID(row.owner_user_id) if row.owner_user_id else None,
                 base_currency=row.base_currency,
                 status=row.status,
                 created_at=SqliteAssetRepository._utc(row.created_at),
@@ -424,6 +426,7 @@ class SqlitePortfolioRepository:
                 PortfolioRecord(
                     id=str(portfolio.id),
                     name=portfolio.name,
+                    owner_user_id=str(portfolio.owner_user_id) if portfolio.owner_user_id else None,
                     base_currency=portfolio.base_currency.upper(),
                     status=portfolio.status,
                     created_at=portfolio.created_at,

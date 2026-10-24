@@ -120,6 +120,7 @@ def rename_portfolio(portfolio_id: UUID, body: PortfolioUpdate) -> dict[str, str
     _ensure_unique_name(repository, name, exclude=portfolio_id)
     updated = Portfolio(
         id=current.id,
+        owner_user_id=current.owner_user_id,
         name=name,
         base_currency=current.base_currency,
         status=current.status,
@@ -151,6 +152,7 @@ def _change_status(portfolio_id: UUID, target_status: str) -> dict[str, str]:
             raise HTTPException(status_code=409, detail="Mantenha ao menos uma carteira ativa.")
     updated = Portfolio(
         id=current.id,
+        owner_user_id=current.owner_user_id,
         name=current.name,
         base_currency=current.base_currency,
         status=target_status,
