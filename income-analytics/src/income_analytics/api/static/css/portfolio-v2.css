@@ -267,3 +267,15 @@ html.income-v2[data-theme="light"] .metric.metric-primary>small,html.income-v2[d
 .income-v2 .onboarding-note{font-size:.8rem;line-height:1.6;color:var(--income-secondary)}
 .income-v2 .onboarding-skeleton{height:160px;margin:22px 0;background:var(--income-raised);border-radius:var(--income-radius)}
 @media(max-width:700px){.income-v2 .onboarding-intents,.income-v2 .onboarding-classes,.income-v2 .onboarding-achievements{grid-template-columns:1fr}.income-v2 .onboarding-actions button{flex:1}.income-v2 .onboarding-card{padding:18px}}
+
+.income-v2 .composition-explorer{display:grid;justify-items:center;gap:12px;padding:12px 0;min-width:0}
+.income-v2 .composition-hint{font-size:.8rem;line-height:1.6;color:var(--income-secondary);text-align:center;margin:0}
+.income-v2 .composition-interactive{display:block;width:min(100%,360px);height:auto;overflow:visible}
+.income-v2 .composition-interactive path{cursor:pointer;stroke:var(--income-surface);stroke-width:.5;transition:filter .15s ease}
+.income-v2 .composition-interactive path.is-highlighted{filter:brightness(1.12);stroke:var(--income-text);stroke-width:1.5}
+.income-v2 .composition-interactive path:focus-visible{outline:none;stroke:var(--income-text);stroke-width:3}
+.income-v2 .composition-tooltip{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 16px;max-width:100%;padding:12px 18px;border:1px solid var(--income-line);border-radius:10px;background:var(--income-raised);color:var(--income-text);font-size:.88rem;pointer-events:none}
+.income-v2 .composition-details{width:100%;max-width:680px;margin-top:6px;color:var(--income-secondary)}
+.income-v2 .composition-details summary{cursor:pointer;text-align:center;font-size:.8rem;padding:12px;min-height:44px}
+.income-v2 .composition-details .allocation-legend{padding:16px 0;text-align:left}
+@media(max-width:700px){.income-v2 .composition-interactive{width:min(100%,280px)}}
