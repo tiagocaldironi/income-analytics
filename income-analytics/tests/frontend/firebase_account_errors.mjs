@@ -7,7 +7,7 @@ const end = source.indexOf("async function action(callback)", start);
 const context = vm.createContext({});
 vm.runInContext(source.slice(start, end), context);
 for (const [code, expected] of [
-  ["auth/internal-error", "Chrome ou Edge"],
+  ["auth/internal-error", "contate o suporte"],
   ["auth/unauthorized-domain", "endereço ainda não está autorizado"],
   ["auth/popup-blocked", "bloqueou a janela"],
   ["auth/network-request-failed", "conexão"],

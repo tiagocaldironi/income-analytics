@@ -14,7 +14,7 @@ function pane(id, title, description) {
   $("#account-description").textContent = description;
 }
 function readableError(error) {
-  if (error.code === "auth/internal-error") return "O serviço de acesso encontrou um erro. Se estiver no navegador interno, abra este endereço no Chrome ou Edge e tente novamente.";
+  if (error.code === "auth/internal-error") return "O serviço de acesso encontrou um erro. Tente novamente em instantes. Se persistir, contate o suporte.";
   if (error.code === "auth/unauthorized-domain") return "Este endereço ainda não está autorizado para entrar com Google. A configuração do acesso precisa ser concluída.";
   if (error.code === "auth/popup-blocked") return "O navegador bloqueou a janela do Google. Permita pop-ups para este site ou abra o Income no Chrome ou Edge.";
   if (error.code === "auth/operation-not-supported-in-this-environment") return "Abra o Income no Chrome ou Edge para entrar com Google.";

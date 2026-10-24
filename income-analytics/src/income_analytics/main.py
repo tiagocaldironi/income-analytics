@@ -112,7 +112,7 @@ async def security_headers(request, call_next):
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; script-src 'self' https://www.gstatic.com "
-            "https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' "
+            "https://cdn.jsdelivr.net https://apis.google.com; style-src 'self' 'unsafe-inline' "
             "https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data: https:; connect-src 'self' "
             "https://identitytoolkit.googleapis.com https://securetoken.googleapis.com "
