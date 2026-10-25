@@ -125,6 +125,7 @@ class PortfolioSession:
     portfolio_id: UUID
     account_id: UUID = field(default_factory=uuid4)
     persistent: bool = False
+    history_only: bool = False
     _assets: dict[str, Asset] = field(default_factory=dict, init=False)
     _events: list[FinancialEvent] = field(default_factory=list, init=False)
     _market_prices: list[MarketPrice] = field(default_factory=list, init=False)
@@ -160,17 +161,18 @@ class PortfolioSession:
                 for asset in SqliteAssetRepository(self.portfolio_id).list()
             }
             self._events = list(SqliteFinancialEventRepository(self.portfolio_id).list())
-            market_prices = SqliteMarketPriceRepository()
-            self._market_prices = list(market_prices.list())
-            self._market_prices_by_asset = market_prices.list_by_asset()
-            self._market_prices_indexed_source = self._market_prices
-            self._market_prices_indexed_length = len(self._market_prices)
-            self._benchmark_rates = list(SqliteBenchmarkRateRepository().list())
-            observations = SqliteBenchmarkObservationRepository()
-            self._benchmark_observations = {
-                name: list(observations.list(name))
-                for name in ("IPCA", "IBOV", "TR", "SELIC_TARGET")
-            }
+            if not self.history_only:
+                market_prices = SqliteMarketPriceRepository()
+                self._market_prices = list(market_prices.list())
+                self._market_prices_by_asset = market_prices.list_by_asset()
+                self._market_prices_indexed_source = self._market_prices
+                self._market_prices_indexed_length = len(self._market_prices)
+                self._benchmark_rates = list(SqliteBenchmarkRateRepository().list())
+                observations = SqliteBenchmarkObservationRepository()
+                self._benchmark_observations = {
+                    name: list(observations.list(name))
+                    for name in ("IPCA", "IBOV", "TR", "SELIC_TARGET")
+                }
             self._allocation_policy = SqliteAllocationPolicyRepository(self.portfolio_id).get()
             self._asset_allocation_policy = SqliteAssetAllocationPolicyRepository(
                 self.portfolio_id
