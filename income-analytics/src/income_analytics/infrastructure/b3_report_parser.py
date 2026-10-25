@@ -8,7 +8,7 @@ non-empty source row is returned with an explicit status.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from enum import StrEnum
@@ -310,4 +310,37 @@ class B3MovementReportParser:
                     ),
                 )
             )
+        # A settlement with a same-day loan reference is not enough evidence
+        # of a cash trade, even when the movement carries a reference price.
+        # Retain every source row for review; never infer a loan or a sale.
+        loan_keys = {
+            (
+                row.normalized_symbol,
+                row.event_date,
+                _normalized(row.institution or ""),
+                row.quantity,
+            )
+            for row in parsed
+            if _normalized(row.original_movement or "") == "EMPRESTIMO"
+            and row.quantity is not None
+            and row.quantity > 0
+        }
+        parsed = [
+            replace(
+                row,
+                status=B3RowStatus.REVIEW_REQUIRED,
+                detail="SETTLEMENT_WITH_STOCK_LOAN_REQUIRES_RECONCILIATION",
+            )
+            if row.source_date_type == "SETTLEMENT_DATE"
+            and row.status is B3RowStatus.NEW
+            and (
+                row.normalized_symbol,
+                row.event_date,
+                _normalized(row.institution or ""),
+                row.quantity,
+            )
+            in loan_keys
+            else row
+            for row in parsed
+        ]
         return tuple(parsed)
