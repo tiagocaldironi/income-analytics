@@ -1299,6 +1299,59 @@ class PortfolioSession:
         asset_class: AssetClass | None = None,
     ) -> PerformanceProjection:
         """Return TWR and XIRR for the whole portfolio or one asset class."""
+        if end_date < start_date:
+            raise ValueError("A data final deve ser posterior à data inicial.")
+        # Quote coverage cannot certify missing cash proceeds. Earlier gaps also
+        # affect opening cash/capital, so do not restrict this check to the window.
+        incomplete_trades = [
+            event
+            for event in self._events
+            if event.effective_date <= end_date
+            and event.event_type in {FinancialEventType.BUY, FinancialEventType.SELL}
+            and (event.financial_status == "DATA_GAP" or event.known_total_amount is None)
+            and (
+                asset_class is None
+                or event.asset is not None and event.asset.asset_class is asset_class
+            )
+        ]
+        if incomplete_trades:
+            external = [
+                event for event in self._events
+                if start_date <= event.effective_date <= end_date
+                and event.capital_flow_type is not CapitalFlowType.INTERNAL_TRANSFER
+            ]
+            tickers = sorted(
+                {str(event.asset.ticker) for event in incomplete_trades if event.asset}
+            )
+            return PerformanceProjection(
+                start_date=start_date,
+                end_date=end_date,
+                beginning_equity=None,
+                ending_equity=None,
+                total_contributions=sum(
+                    (
+                        event.total_amount for event in external
+                        if event.event_type is FinancialEventType.DEPOSIT
+                    ),
+                    Money.zero(),
+                ),
+                total_withdrawals=sum(
+                    (
+                        event.total_amount for event in external
+                        if event.event_type is FinancialEventType.WITHDRAWAL
+                    ),
+                    Money.zero(),
+                ),
+                twr=None,
+                xirr=None,
+                performance_status="INSUFFICIENT_DATA",
+                unavailable_reason=(
+                    f"Há {len(incomplete_trades)} movimentação(ões) com valor financeiro pendente "
+                    f"até o fim do período ({', '.join(tickers)}). Concilie os registros de origem "
+                    "antes de calcular a rentabilidade; cotações não substituem "
+                    "valores de execução."
+                ),
+            )
         valuation_dates = {start_date, end_date}
         valuation_dates.update(
             event.effective_date
