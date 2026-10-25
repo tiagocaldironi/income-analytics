@@ -9,6 +9,7 @@ from decimal import ROUND_CEILING, ROUND_DOWN, Decimal, localcontext
 from math import lcm
 
 from income_analytics.application.base_currency_valuation import MAX_FX_STALE_AGE_DAYS
+from income_analytics.application.global_contribution_allocator import allocate_quantities
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.projectors.contribution_target_allocator import (
     ContributionTargetAllocator,
@@ -85,92 +86,6 @@ class Instrument:
         )
 
 
-def allocate_quantities(instruments, class_values, class_targets, budget, unavailable=ZERO):
-    """Seed with the existing allocator, then re-evaluate residual feasibility.
-
-    The objective includes uninvested contribution as zero-target cash. Thus a
-    purchase must close a positive class AND asset gap in the intended after-state.
-    Batch to a gap boundary, then consider the next indivisible unit. Every pass
-    exhausts cash or closes a gap, giving a bound independent of decimal precision.
-    """
-    with localcontext() as context:
-        context.prec = 50
-        available = budget - unavailable
-        quantities = {item.ticker: ZERO for item in instruments}
-        wealth = sum(class_values.values(), ZERO)
-        desired_total = wealth + budget
-        class_added = {key: ZERO for key in class_targets}
-        ordered = sorted(instruments, key=lambda item: item.ticker)
-
-        def add(item, quantity):
-            nonlocal available
-            previous = quantities[item.ticker]
-            extra_cost = item.cost(previous + quantity) - item.cost(previous)
-            assert ZERO < extra_cost <= available
-            quantities[item.ticker] += quantity
-            class_added[item.asset_class] = (
-                class_added.get(item.asset_class, ZERO) + quantity * item.unit_base
-            )
-            available -= extra_cost
-
-        for item in ordered:
-            quantity = min(
-                floor_units(item.ideal / item.unit_base, item.step), item.affordable(available)
-            )
-            class_gap = (
-                class_targets.get(item.asset_class, ZERO) * desired_total
-                - class_values.get(item.asset_class, ZERO)
-                - class_added.get(item.asset_class, ZERO)
-            )
-            asset_gap = item.target * desired_total - item.current
-            principal = quantity * item.unit_base
-            gain = (
-                min(principal, class_gap)
-                + min(principal, asset_gap)
-                - (item.cost(quantity) - principal)
-            )
-            if quantity >= item.minimum() and quantity > 0 and gain > 0:
-                add(item, quantity)
-
-        iterations = 0
-        while available > 0:
-            choices = []
-            for item in ordered:
-                previous = quantities[item.ticker]
-                class_gap = (
-                    class_targets.get(item.asset_class, ZERO) * desired_total
-                    - class_values.get(item.asset_class, ZERO)
-                    - class_added.get(item.asset_class, ZERO)
-                )
-                asset_gap = item.target * desired_total - item.current - previous * item.unit_base
-                if class_gap <= 0 or asset_gap <= 0:
-                    continue
-                minimum = item.step if previous else item.minimum()
-                maximum = item.affordable(available + item.cost(previous)) - previous
-                if maximum < minimum:
-                    continue
-                gap_quantity = floor_units(min(class_gap, asset_gap) / item.unit_base, item.step)
-                quantity = min(maximum, max(minimum, gap_quantity))
-                extra_cost = item.cost(previous + quantity) - item.cost(previous)
-                principal = quantity * item.unit_base
-                # Cash reduction plus both L1 gap reductions, less known costs.
-                gain = (
-                    min(principal, class_gap) + min(principal, asset_gap) - (extra_cost - principal)
-                )
-                if gain > 0 and ZERO < extra_cost <= available:
-                    choices.append((gain / extra_cost, item.ticker, item, quantity))
-            if not choices:
-                break
-            _, _, item, quantity = sorted(choices, key=lambda item: (-item[0], item[1]))[0]
-            add(item, quantity)
-            iterations += 1
-            if iterations > 4 * len(ordered) + 1:
-                raise ValueError(
-                    "Limite seguro da simulação atingido; nenhum plano foi confirmado."
-                )
-        return quantities, available, iterations
-
-
 def build_executable_plan(session, *, amount, rules=None, as_of=None):
     """Adapter to an already owner-scoped PortfolioSession; reads existing data only."""
     with localcontext() as context:
@@ -213,6 +128,7 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
         session._asset_allocation_policy.targets if session._asset_allocation_policy else {}
     )
     candidates, blocked, options = [], [], []
+    strategy_assets = {}
     unavailable = ZERO
     for asset_class, target in sorted(policy.targets.items(), key=lambda item: item[0].value):
         if target <= 0:
@@ -230,7 +146,8 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
                     "asset_class": asset_class.value,
                     "ticker": None,
                     "reason": "NEEDS_ASSET_STRATEGY",
-                    "reserved_amount": class_budget,
+                    "reserved_amount": ZERO,
+                    "reference_amount": class_budget,
                 }
             )
             unavailable += class_budget
@@ -238,6 +155,7 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
         current = {ticker: base_values.get(ticker, ZERO) or ZERO for ticker in weights}
         seed = ContributionTargetAllocator.allocate(current, weights, class_budget, key=str)
         for ticker, weight in sorted(weights.items()):
+            strategy_assets[ticker] = {"current": current[ticker], "target": target * weight}
             if weight <= 0:
                 continue
             asset = eligible[ticker]
@@ -358,7 +276,8 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
                         "ticker": ticker,
                         "asset_class": name,
                         "reason": reason,
-                        "reserved_amount": reserved,
+                        "reserved_amount": ZERO,
+                        "reference_amount": reserved,
                     }
                 )
                 continue
@@ -408,9 +327,17 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
             "residual_amount": ZERO,
             "total_estimated": ZERO,
         }
+    diagnostics = {"initial_unavailable_reference": unavailable}
     quantities, residual, iterations = allocate_quantities(
-        candidates, class_values, targets, budget, unavailable
+        candidates,
+        class_values,
+        targets,
+        budget,
+        strategy_assets=strategy_assets,
+        diagnostics=diagnostics,
     )
+    # Missing inputs constrain eligibility, not an immutable slice of the budget.
+    unavailable = ZERO
     principal = sum((quantities[item.ticker] * item.unit_base for item in candidates), ZERO)
     total = sum((item.cost(quantities[item.ticker]) for item in candidates), ZERO)
     wealth = sum(class_values.values(), ZERO)
@@ -450,7 +377,13 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
                 if wealth + principal
                 else None,
                 "target_weight": item.target,
-                "reason": "REDUCES_STRATEGY_GAP",
+                "reason": (
+                    "GLOBAL_DISTANCE_REDUCED"
+                    if diagnostics["final_class_distance"] < diagnostics["initial_class_distance"]
+                    else "ASSET_DISTANCE_REDUCED"
+                    if diagnostics["final_asset_distance"] < diagnostics["initial_asset_distance"]
+                    else "GLOBAL_STRATEGY_PRESERVED"
+                ),
             }
         )
     assert total + residual + unavailable == budget
@@ -489,6 +422,15 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
         "residual_amount": residual,
         "remaining_amount": budget - total,
         "iterations": iterations,
+        "allocation_diagnostics": diagnostics,
+        "residual_reasons": sorted(
+            (
+                {item["reason"] for item in diagnostics["discarded_candidates"]}
+                | {item["reason"] for item in blocked}
+            )
+            if residual > 0
+            else set()
+        ),
         "comparison": comparison,
         "price_policy": {
             "listed_max_age_days": 7,
