@@ -549,3 +549,34 @@ def test_executable_simulation_owned_read_only_and_validated(saas):
     assert a.get("/api/portfolio", headers=headers).json() == before
     with SessionFactory() as db:
         assert db.scalar(select(func.count()).select_from(FinancialEventRecord)) == count
+
+
+def test_scoped_quote_timestamp_survives_sqlite_roundtrip_without_breaking_routes(saas):
+    from datetime import UTC, date, datetime
+    from sqlalchemy import select
+    from income_analytics.infrastructure.models import PortfolioAssetRecord, PortfolioMarketPriceRecord
+    login, _, _ = saas
+    client, _, _ = login()
+    wid = wallet(client, "timestamp-roundtrip")
+    assert trade(client, wid, ticker="UTC3").status_code == 201
+    headers = {"X-Portfolio-Id": wid}
+    assert client.put("/api/allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": "1"}}).status_code == 200
+    assert client.put("/api/asset-allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": {"UTC3": "1"}}}).status_code == 200
+    observed = datetime.now(UTC).replace(microsecond=0)
+    quote_id = str(uuid4())
+    with SessionFactory.begin() as db:
+        asset_id = db.scalar(select(PortfolioAssetRecord.asset_id).where(PortfolioAssetRecord.portfolio_id == wid))
+        db.add(PortfolioMarketPriceRecord(id=quote_id, portfolio_id=wid, asset_id=asset_id, price="12", effective_date=date.today(), registered_at=observed, provider="coingecko", price_timestamp=observed))
+    with SessionFactory() as db:
+        raw = db.get(PortfolioMarketPriceRecord, quote_id)
+        assert raw.price_timestamp.tzinfo is None, "SQLite strips timezone metadata"
+        raw_timestamp = raw.price_timestamp
+    for path in ("/api/portfolio", "/api/portfolio/dashboard", "/api/portfolio/allocation-analysis", "/api/operations"):
+        response = client.get(path, headers=headers)
+        assert response.status_code == 200, (path, response.text)
+    response = client.post("/api/portfolio/simulation/executable-contribution", headers=headers, json={"amount": "50"})
+    assert response.status_code == 200, response.text
+    order = response.json()["orders"][0]
+    assert order["price_timestamp"] == observed.isoformat()
+    with SessionFactory() as db:
+        assert db.get(PortfolioMarketPriceRecord, quote_id).price_timestamp == raw_timestamp
