@@ -1251,7 +1251,11 @@ class SqliteMarketPriceRepository:
                             effective_date=row.effective_date,
                             registered_at=SqliteAssetRepository._utc(row.registered_at),
                             provider=row.provider,
-                            price_timestamp=row.price_timestamp,
+                            price_timestamp=(
+                                SqliteAssetRepository._utc(row.price_timestamp)
+                                if row.price_timestamp
+                                else None
+                            ),
                         )
                     )
         return tuple(sorted(result, key=lambda price: (price.effective_date, price.registered_at)))
