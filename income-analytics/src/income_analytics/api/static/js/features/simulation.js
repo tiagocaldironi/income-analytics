@@ -1,6 +1,7 @@
 import { portfolioApi } from "../api.js";
 import { assetClassLabel } from "../shared/asset-class-labels.js";
 import { friendlyError, money } from "../shared/ui.js";
+import { renderExecutablePlan, collectTradingRules, bindTradingRules } from "./simulation-executable.js";
 
 const percent = value => value == null ? "—" : `${(Number(value) * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}%`;
 const points = value => value == null ? "—" : `${Number(value * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 2 })} p.p.`;
@@ -9,6 +10,7 @@ const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character =>
 
 let latestResult = null;
 let strategy = null;
+let simulationGeneration = 0;
 
 function strategyContext() {
   if (!strategy) return "";
@@ -42,15 +44,23 @@ async function run(target, button) {
   }
   error.textContent = "";
   const result = target.querySelector("#simulation-result");
+  const rules = collectTradingRules(target);
+  const rulePanel = result.querySelector(".simulation-trading-rules");
+  const generation = ++simulationGeneration;
   result.innerHTML = loadingResult();
   const original = button.textContent;
   button.disabled = true;
   if (button.id === "run-simulation") button.textContent = latestResult ? "Atualizando…" : "Simulando…";
   try {
-    latestResult = await portfolioApi.simulateContribution({ amount: input.value, mode: "STRATEGY_GUIDED", include_asset_distribution: true });
+    const response = await portfolioApi.simulateExecutableContribution({ amount: input.value, rules });
+    if (generation !== simulationGeneration) return;
+    latestResult = response;
     result.innerHTML = renderResult(latestResult);
+    bindTradingRules(result);
   } catch (requestError) {
+    if (generation !== simulationGeneration) return;
     result.innerHTML = `<div class="simulation-error card" role="alert"><b>Não foi possível calcular este cenário.</b><p>${escapeHtml(friendlyError(requestError))}</p></div>`;
+    if (rulePanel) result.append(rulePanel);
   } finally {
     button.disabled = false;
     button.textContent = button.id === "run-simulation" && latestResult ? "Atualizar cenário" : original;
@@ -63,6 +73,7 @@ function issueMessage(issues = []) {
 }
 
 export function renderResult(data) {
+  if (data.kind === "EXECUTABLE_CONTRIBUTION") return renderExecutablePlan(data, data.comparison ? renderClassComparison(data.comparison.class_changes) : "");
   if (data.status !== "COMPLETE") return `<section class="simulation-insufficient card"><h2>Não foi possível montar o cenário</h2><p>${issueMessage(data.issues)}</p></section>`;
   const scenario = data.scenario;
   const comparison = data.comparison;
@@ -106,10 +117,14 @@ export async function bindSimulation() {
   const target = document.querySelector("#simulation-experience");
   if (!target) return;
   latestResult = null;
+  const generation = ++simulationGeneration;
   try {
-    strategy = await portfolioApi.allocationAnalysis();
+    const response = await portfolioApi.allocationAnalysis();
+    if (generation !== simulationGeneration) return;
+    strategy = response;
     renderSetup(target);
   } catch (error) {
+    if (generation !== simulationGeneration) return;
     strategy = null;
     renderSetup(target, { noStrategy: String(error?.message || error).toLowerCase().includes("política") });
   }

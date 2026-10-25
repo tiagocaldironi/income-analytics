@@ -133,6 +133,7 @@ export const portfolioApi = {
   rebalancing: () => request("/portfolio/rebalancing"),
   contribution: amount => request("/portfolio/rebalancing/contribution-only", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount }) }),
   simulateContribution: payload => request("/portfolio/simulation/contribution", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
+  simulateExecutableContribution: payload => request("/portfolio/simulation/executable-contribution", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
   assetRebalancing: payload => request("/portfolio/rebalancing/assets", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
   benchmark: (name, payload) => request(`/benchmarks/${name}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
   refreshBenchmark: (name, start, end) => request(`/benchmarks/${encodeURIComponent(name)}/refresh?start_date=${start}&end_date=${end}`, { method: "POST" }),

@@ -78,3 +78,26 @@ html.income-v2 :is(.simulation-class-detail,.simulation-explorer) dl div{backgro
 html.income-v2 .simulation-amount:focus-within{border-color:var(--income-focus);box-shadow:0 0 0 3px var(--income-context)}
 html.income-v2 .simulation-loading span{background:var(--income-raised)}
 html.income-v2 .simulation-bullet{background:transparent}
+
+/* Executable contribution plan: same setup, readable order cards on every width. */
+html.income-v2 :is(.simulation-executable,.simulation-trading-rules){grid-column:1/-1;min-width:0}
+.simulation-order-list{display:grid;gap:16px;margin-top:20px}
+html.income-v2 .simulation-order{padding:20px;border:1px solid var(--income-line);border-radius:12px;background:var(--income-surface);min-width:0}
+.simulation-order>header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.simulation-order h3{margin:0;font-size:1.05rem}
+html.income-v2 .simulation-order p{color:var(--income-secondary);font-size:.85rem;line-height:1.65}
+.simulation-order dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:18px 0}
+html.income-v2 .simulation-order dt{color:var(--income-secondary);font-size:.78rem}
+.simulation-order dd{margin:6px 0;font-size:.95rem;font-weight:700;overflow-wrap:anywhere}
+html.income-v2 .simulation-order small{color:var(--income-secondary);line-height:1.5}
+html.income-v2 .simulation-plan-balance{margin-top:20px;padding:16px;border:1px solid var(--income-line);border-radius:12px;background:var(--income-context)}
+.simulation-trading-rules>summary,.simulation-blocked>summary{cursor:pointer;font-weight:700;min-height:44px;padding:10px 0}
+.simulation-rule-list{display:grid;gap:16px;margin-top:16px}
+html.income-v2 .simulation-rule-list fieldset{min-width:0;border:1px solid var(--income-line);border-radius:12px;padding:16px}
+.simulation-rule-list legend{padding:0 8px;font-weight:700}
+.simulation-rule-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.simulation-rule-check{display:flex;align-items:center;gap:10px;padding:10px 0}
+.simulation-rule-check input{width:20px;min-height:20px;margin:0;flex:none}
+.simulation-rule-fields input{min-width:0;min-height:44px}
+.simulation-blocked li{margin:12px 0;line-height:1.6}
+@media(max-width:700px){.simulation-order>header{flex-direction:column}.simulation-order dl,.simulation-rule-fields{grid-template-columns:1fr}.simulation-order dd{font-size:1rem}}

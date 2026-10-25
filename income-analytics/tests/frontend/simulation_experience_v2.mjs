@@ -74,8 +74,8 @@ invalid.scenario.class_allocations[0].asset_distribution_status = "INCOMPLETE_OR
 assert.match(context.renderResult(invalid), /composição-alvo da classe está incompleta/);
 
 assert.match(context.renderResult({ status: "INSUFFICIENT", issues: ["MISSING_FX"] }), /converter uma ou mais posições/);
-assert.match(source, /mode: "STRATEGY_GUIDED"/);
-assert.match(source, /include_asset_distribution: true/);
+assert.match(source, /simulateExecutableContribution/);
+assert.match(source, /amount: input.value, rules/);
 assert.match(source, /Informe um valor maior que zero/);
 assert.doesNotMatch(source, /target_weight.*\/.*wealth|strategy_distance.*[-+]/);
 console.log("Simulation Experience V2 frontend checks passed.");
