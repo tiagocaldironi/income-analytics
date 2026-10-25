@@ -673,13 +673,17 @@ function getAssetTransactionsDialog() {
     if (groupButton) loadAssetTransactions(dialog, 1, groupButton.dataset.openEventGroup);
     const backButton = event.target.closest("[data-events-back]");
     if (backButton) loadAssetTransactions(dialog, 1, "SUMMARY");
-    if (event.target.matches("[data-delete-asset-transaction]")) {
-      const id = event.target.dataset.deleteAssetTransaction;
+    const deleteButton = event.target.closest("[data-delete-asset-transaction]");
+    if (deleteButton && !deleteButton.disabled) {
+      const id = deleteButton.dataset.deleteAssetTransaction;
       if (!confirm("Excluir este lançamento? A carteira será recalculada.")) return;
+      deleteButton.disabled = true;
       portfolioApi.deleteOperation(id).then(async () => {
         await loadAssetTransactions(dialog, 1);
         await loadPortfolio();
-      }).catch(() => { alert("Não foi possível excluir o lançamento."); });
+      }).catch(error => {
+        alert(error.message || "Não foi possível excluir o lançamento.");
+      }).finally(() => { deleteButton.disabled = false; });
     }
   });
   dialog.addEventListener("close", () => {
