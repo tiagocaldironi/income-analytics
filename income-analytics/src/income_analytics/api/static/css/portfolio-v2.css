@@ -63,6 +63,13 @@
 .income-v2 .holding-class table{font-size:.82rem;font-variant-numeric:tabular-nums}
 .income-v2 .holding-class th{background:var(--income-surface);color:var(--income-secondary);font-size:.72rem;white-space:nowrap;padding:14px 12px}
 .income-v2 .holding-class td{padding:16px 12px;color:var(--income-text);border-color:var(--income-line)}
+@media(min-width:851px){
+ .income-v2 .holding-class .table-wrap{position:relative;isolation:isolate}
+ .income-v2 .holding-class th:first-child,.income-v2 .holding-class td:first-child{position:sticky;left:0;z-index:2;min-width:180px;width:200px;max-width:220px;white-space:normal;background:var(--income-surface);box-shadow:1px 0 0 var(--income-line),6px 0 10px -7px var(--income-secondary)}
+ .income-v2 .holding-class th:first-child{z-index:3}
+ .income-v2 .holding-class tr:hover>td:first-child,.income-v2 .holding-class tr:focus-within>td:first-child{background:var(--income-raised)}
+}
+.income-v2 .holding-class .holding-identity-details>summary{display:block;grid-template-columns:none;padding:4px 0;background:transparent;border-radius:6px}
 .income-v2 .asset-identity{min-width:160px;gap:10px}.income-v2 .asset-identity strong{color:var(--income-text);font-size:.86rem}.income-v2 .asset-identity small{color:var(--income-secondary);font-size:.74rem;line-height:1.5}
 .income-v2 .asset-identity i{background:var(--income-context);color:var(--income-action);border-radius:12px;font-style:normal}
 .income-v2 .metric-pill{background:var(--income-raised);color:var(--income-text);padding:5px 7px;border-radius:6px;font-weight:650;white-space:nowrap}
