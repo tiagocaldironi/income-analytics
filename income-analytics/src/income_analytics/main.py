@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from pathlib import Path
 from threading import Thread
 from time import perf_counter
@@ -90,8 +91,14 @@ async def serve_portfolio(request, call_next, portfolio_id):
     portfolio_token = set_active_portfolio_id(portfolio_id)
     session_token = None
     try:
+        history_only = request.method == "GET" and (
+            request.url.path in {"/api/operations", "/api/operations/history"}
+            or re.fullmatch(r"/api/portfolio/assets/[^/]+/transactions", request.url.path)
+            is not None
+        )
         financial_session = await run_in_threadpool(
-            PortfolioSession, portfolio_id=portfolio_id, persistent=True
+            PortfolioSession, portfolio_id=portfolio_id, persistent=True,
+            history_only=history_only,
         )
         session_token = set_request_session(financial_session)
         return await call_next(request)
