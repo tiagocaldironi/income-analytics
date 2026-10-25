@@ -285,3 +285,8 @@ html.income-v2[data-theme="light"] .metric.metric-primary>small,html.income-v2[d
 .holding-identity-details>summary:focus-visible{outline:2px solid var(--income-focus);outline-offset:4px}
 .holding-identity-info{margin-top:10px;padding:12px;border:1px solid var(--income-border);border-radius:8px;background:var(--income-context);color:var(--income-text);font-size:.78rem;white-space:normal;overflow-wrap:anywhere}
 .holding-identity-info p{margin:4px 0;color:var(--income-secondary)}
+.income-v2 .return-direction{display:inline-flex;align-items:center;gap:8px}
+.income-v2 .return-direction>svg{width:.8em;height:.8em;flex:none}
+.income-v2 .return-positive{color:var(--income-positive)}
+.income-v2 .return-negative{color:var(--income-negative)}
+.income-v2 .return-neutral{color:var(--income-text)}
