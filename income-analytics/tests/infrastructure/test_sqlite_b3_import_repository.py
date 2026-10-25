@@ -108,3 +108,123 @@ def test_apply_batch_rolls_back_audit_write_when_operation_fails() -> None:
     persisted_batch = repository.get_batch(batch.id)
     assert persisted_batch is not None
     assert persisted_batch.status is B3ImportBatchStatus.PREVIEWED
+
+
+def _applied_trade():
+    from dataclasses import replace
+
+    from income_analytics.application.portfolio_session import PortfolioSession
+    from income_analytics.domain.enums.financial_event_type import FinancialEventType
+
+    session = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=True)
+    session.register_trade(
+        event_type=FinancialEventType.BUY,
+        ticker="T" + uuid4().hex[:8].upper(),
+        quantity=Decimal("2"),
+        unit_price=Decimal("10"),
+        effective_date=date(2026, 1, 2),
+    )
+    trade = session.history()[-1]
+    repository = SqliteB3ImportRepository(MAIN_PORTFOLIO_ID)
+    batch = _batch()
+    repository.create_batch(batch)
+    record = replace(
+        _record(batch),
+        status=B3ImportedRecordStatus.APPLIED,
+        event_type="BUY",
+        asset_id=trade.asset.id,
+        financial_event_id=trade.id,
+    )
+    repository.save_record(record)
+    return trade, record, repository
+
+
+def test_delete_imported_trade_retains_source_tombstone_and_audit():
+    from sqlalchemy import text
+
+    from income_analytics.infrastructure.database import SessionFactory
+    from income_analytics.infrastructure.models import SecurityAuditRecord
+    from income_analytics.infrastructure.sqlite_repositories import SqliteFinancialEventRepository
+
+    trade, source, imports = _applied_trade()
+    repo = SqliteFinancialEventRepository(MAIN_PORTFOLIO_ID)
+    assert repo.delete(str(trade.id))
+    assert all(item.id != trade.id for item in repo.list())
+    retained = imports.get_record_by_identity(source.fingerprint, 1)
+    assert retained.financial_event_id is None
+    assert retained.status is B3ImportedRecordStatus.APPLIED
+    assert str(trade.id) in retained.detail
+    assert retained.raw_payload == source.raw_payload
+    with SessionFactory() as db:
+        assert db.query(SecurityAuditRecord).filter_by(evidence_ref=str(trade.id)).count() == 1
+        assert db.execute(text("PRAGMA foreign_key_check")).all() == []
+    assert not repo.delete(str(trade.id))
+
+
+def test_delete_cannot_detach_another_portfolios_import():
+    from income_analytics.infrastructure.sqlite_repositories import SqliteFinancialEventRepository
+
+    trade, source, imports = _applied_trade()
+    assert not SqliteFinancialEventRepository(uuid4()).delete(str(trade.id))
+    assert imports.get_record_by_identity(source.fingerprint, 1).financial_event_id == trade.id
+
+
+def test_delete_failure_rolls_back_import_detachment_and_audit():
+    from sqlalchemy import event
+
+    from income_analytics.infrastructure.database import SessionFactory, engine
+    from income_analytics.infrastructure.models import SecurityAuditRecord
+    from income_analytics.infrastructure.sqlite_repositories import SqliteFinancialEventRepository
+
+    trade, source, imports = _applied_trade()
+
+    def fail_delete(conn, cursor, statement, parameters, context, executemany):
+        if statement.startswith("DELETE FROM financial_events"):
+            raise RuntimeError("simulated delete failure")
+
+    event.listen(engine, "before_cursor_execute", fail_delete)
+    try:
+        with pytest.raises(RuntimeError, match="simulated delete failure"):
+            SqliteFinancialEventRepository(MAIN_PORTFOLIO_ID).delete(str(trade.id))
+    finally:
+        event.remove(engine, "before_cursor_execute", fail_delete)
+    assert imports.get_record_by_identity(source.fingerprint, 1).financial_event_id == trade.id
+    assert any(
+        item.id == trade.id for item in SqliteFinancialEventRepository(MAIN_PORTFOLIO_ID).list()
+    )
+    with SessionFactory() as db:
+        assert db.query(SecurityAuditRecord).filter_by(evidence_ref=str(trade.id)).count() == 0
+
+
+def test_delete_preserves_paid_income_fingerprint_and_import_status():
+    from income_analytics.infrastructure.database import SessionFactory
+    from income_analytics.infrastructure.models import ImportedPaidIncomeRecord
+    from income_analytics.infrastructure.sqlite_repositories import SqliteFinancialEventRepository
+
+    trade, _, _ = _applied_trade()
+    ref_id = str(uuid4())
+    now = datetime.now(UTC)
+    with SessionFactory.begin() as db:
+        db.add(
+            ImportedPaidIncomeRecord(
+                id=ref_id,
+                portfolio_id=str(MAIN_PORTFOLIO_ID),
+                provider="fixture",
+                raw_fingerprint=uuid4().hex,
+                asset_id=str(trade.asset.id),
+                income_type="DIVIDEND",
+                amount_per_unit="1",
+                financial_event_id=str(trade.id),
+                import_status="IMPORTED",
+                detail="original evidence",
+                created_at=now,
+                updated_at=now,
+            )
+        )
+    assert SqliteFinancialEventRepository(MAIN_PORTFOLIO_ID).delete(str(trade.id))
+    with SessionFactory() as db:
+        retained = db.get(ImportedPaidIncomeRecord, ref_id)
+        assert retained.financial_event_id is None
+        assert retained.import_status == "IMPORTED"
+        assert retained.raw_fingerprint
+        assert "original evidence" in retained.detail and str(trade.id) in retained.detail

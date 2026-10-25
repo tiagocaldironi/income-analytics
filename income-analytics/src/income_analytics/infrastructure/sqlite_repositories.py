@@ -8,7 +8,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from functools import lru_cache
 from typing import cast
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session
@@ -82,6 +82,7 @@ from income_analytics.infrastructure.models import (
     ProviderHealthRecord,
     RealEstateDetailsRecord,
     RecurringRuleRecord,
+    SecurityAuditRecord,
 )
 from income_analytics.infrastructure.models import (
     B3ImportedRecord as B3ImportedRecordRow,
@@ -1080,6 +1081,34 @@ class SqliteFinancialEventRepository:
     def delete(self, event_id: str) -> bool:
         initialize_database()
         with SessionFactory.begin() as session:
+            target = session.query(FinancialEventRecord).filter_by(
+                id=event_id, portfolio_id=self.portfolio_id
+            ).first()
+            if target is None:
+                return False
+            # Keep source fingerprints/statuses as tombstones so an intentional
+            # deletion cannot be silently recreated by a later import/sync.
+            for model in (B3ImportedRecordRow, ImportedPaidIncomeRecord):
+                references = session.query(model).filter_by(
+                    financial_event_id=event_id, portfolio_id=self.portfolio_id
+                ).all()
+                for reference in references:
+                    previous = reference.detail
+                    reference.financial_event_id = None
+                    reference.detail = (
+                        f"USER_DELETED_OPERATION:{event_id}"
+                        + (f"; {previous}" if previous else "")
+                    )
+            principal = current_principal()
+            session.add(SecurityAuditRecord(
+                id=str(uuid4()),
+                actor_id=str(principal.user_id) if principal else None,
+                action="USER_DELETED_OPERATION",
+                evidence_ref=event_id,
+                resource_id=self.portfolio_id,
+                created_at=int(datetime.now(UTC).timestamp()),
+            ))
+            session.flush()
             deleted = (
                 session.query(FinancialEventRecord)
                 .filter_by(id=event_id, portfolio_id=self.portfolio_id)
