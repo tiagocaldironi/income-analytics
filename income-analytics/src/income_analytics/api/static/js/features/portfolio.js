@@ -467,10 +467,17 @@ function renderPerformanceSummary(performance) {
     : '<span class="unavailable">Indisponível</span>';
   if (returnTarget) {
     const period = performance?.twelve_months;
-    returnTarget.textContent = period?.twr !== null && period?.twr !== undefined
-      && ["AVAILABLE", "PARTIAL"].includes(period.status)
-      ? `${percentage(Number(period.twr) * 100)}${period.status === "PARTIAL" ? " · parcial" : ""}`
-      : "Indisponível";
+    const amount = Number(period?.twr);
+    if (period?.twr !== null && period?.twr !== undefined && Number.isFinite(amount)
+      && ["AVAILABLE", "PARTIAL"].includes(period.status)) {
+      const direction = amount > 0 ? "positive" : amount < 0 ? "negative" : "neutral";
+      const label = `${amount > 0 ? "+" : ""}${percentage(amount * 100)}${period.status === "PARTIAL" ? " · parcial" : ""}`;
+      const description = amount > 0 ? "Rentabilidade positiva" : amount < 0 ? "Rentabilidade negativa" : "Sem variação";
+      const arrow = amount === 0 ? "" : `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${amount > 0 ? "m5 17 14-14M7 3h12v12" : "m5 7 14 14M7 21h12V9"}"/></svg>`;
+      returnTarget.innerHTML = `<span class="return-direction return-${direction}" aria-label="${escapeHtml(`${description}: ${label}`)}">${arrow}<span>${escapeHtml(label)}</span></span>`;
+    } else {
+      returnTarget.textContent = "Indisponível";
+    }
     returnTarget.title = periodTooltip(period);
   }
 }
