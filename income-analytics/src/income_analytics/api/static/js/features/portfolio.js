@@ -328,6 +328,29 @@ function updatePortfolioPerformanceLegend() {
 function bindPortfolioInteractions() {
   if (portfolioInteractionsBound) return;
   portfolioInteractionsBound = true;
+  document.addEventListener("pointerover", event => {
+    const details = event.target.closest(".holding-identity-details");
+    if (!details || event.pointerType !== "mouse" || details.open) return;
+    details.dataset.hoverOpen = "true";
+    details.open = true;
+  });
+  document.addEventListener("pointerout", event => {
+    const details = event.target.closest(".holding-identity-details");
+    if (!details || details.contains(event.relatedTarget) || !details.dataset.hoverOpen) return;
+    details.open = false;
+    delete details.dataset.hoverOpen;
+  });
+  document.addEventListener("click", event => {
+    const summary = event.target.closest(".holding-identity-details > summary");
+    if (!summary) return;
+    const details = summary.parentElement;
+    if (details.dataset.hoverOpen) {
+      event.preventDefault();
+      delete details.dataset.hoverOpen;
+      details.open = true;
+    }
+  });
+
   document.addEventListener("click", event => {
     const trigger = event.target.closest("[data-asset-options]");
     if (trigger) {
@@ -359,6 +382,10 @@ function bindPortfolioInteractions() {
   });
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;
+    document.querySelectorAll(".holding-identity-details[open]").forEach(details => {
+      details.open = false;
+      delete details.dataset.hoverOpen;
+    });
     if (openAssetMenu) {
       event.preventDefault();
       closeAssetMenu(true);
@@ -511,8 +538,9 @@ function renderHoldingRow(asset, fixedIncome, assetClass, classLabel = assetClas
     : "";
   const menu = `<td class="asset-options-cell"><button type="button" class="holding-details-toggle" data-holding-details aria-expanded="false" aria-label="Detalhes de ${escapeHtml(title)}">Mais detalhes</button><button class="asset-options-button" type="button" title="Opções" aria-label="Opções de ${escapeHtml(title)}" aria-haspopup="menu" aria-expanded="false" data-asset-options>⋯</button><div class="asset-context-menu" role="menu" hidden><button type="button" role="menuitem" data-asset-transactions data-asset-id="${escapeHtml(asset.asset_id)}" data-asset-title="${escapeHtml(title)}"><span aria-hidden="true">≡</span> Lançamentos</button>${tradeActions}</div></td>`;
   const fullName = asset.name || title;
-  const tickerHint = `title="${escapeHtml(fullName)}" aria-label="${escapeHtml(`${title} — ${fullName}`)}"`;
-  return `<tr><td data-label="Ativo"><span class="asset-identity"><i>${escapeHtml(title.slice(0, 2))}</i><span><strong ${tickerHint}>${escapeHtml(title)}</strong><small>${escapeHtml(fullName)}</small><small>${escapeHtml(subtitle)}</small><small class="holding-class-label">${escapeHtml(classLabel)}</small></span></span></td><td data-label="Quantidade">${escapeHtml(quantity)}</td><td data-label="PM">${money(asset.average_price, asset.currency_code)}</td><td data-label="Cotação">${asset.current_price == null ? "Preço não disponível." : money(asset.current_price, asset.currency_code)}</td><td data-label="Saldo">${asset.market_value === null ? "—" : money(asset.market_value, asset.currency_code)}</td><td data-label="Resultado"><b class="metric-pill ${asset.total_result === null ? "" : Number(asset.total_result) < 0 ? "negative" : Number(asset.total_result) > 0 ? "positive" : ""}">${asset.total_result === null ? "Resultado indisponível" : `${Number(asset.total_result) > 0 ? "+" : Number(asset.total_result) < 0 ? "" : "Sem variação "}${money(asset.total_result, asset.currency_code)}`}</b></td><td data-label="Valorização"><b class="metric-pill ${asset.return_percentage === null ? "" : Number(asset.return_percentage) < 0 ? "negative" : Number(asset.return_percentage) > 0 ? "positive" : ""}">${asset.return_percentage === null ? "—" : `${Number(asset.return_percentage) > 0 ? "+" : ""}${percentage(asset.return_percentage)}`}</b></td><td data-label="Rendimentos">${money(asset.income_received, asset.currency_code)}</td><td data-label="Peso">${asset.portfolio_weight === null ? "—" : percentage(asset.portfolio_weight * 100)}</td><td data-label="Alvo classe">${asset.target_weight === null ? "—" : percentage(asset.target_weight * 100)}</td>${menu.replace('<td class="asset-options-cell"', '<td class="asset-options-cell" data-label="Opções"')}</tr>`;
+  const quoteDate = asset.price_as_of ? `Cotação de ${formatDate(asset.price_as_of)}` : "Cotação sem data disponível";
+  const identity = `<details class="holding-identity-details"><summary aria-label="Detalhes de ${escapeHtml(asset.ticker || title)}"><span class="asset-identity"><span><strong>${escapeHtml(asset.ticker || title)}</strong><small>${escapeHtml(quoteDate)}</small></span></span></summary><div class="holding-identity-info"><strong>${escapeHtml(fullName)}</strong>${fixedIncome ? `<p>${escapeHtml(title)}</p>` : ""}<p>${escapeHtml(subtitle)}</p><p>${escapeHtml(classLabel)}</p><p>${escapeHtml(asset.currency_code || "BRL")}${asset.country ? ` · ${escapeHtml(asset.country)}` : ""}${asset.sector ? ` · ${escapeHtml(asset.sector)}` : ""}</p></div></details>`;
+  return `<tr><td data-label="Ativo">${identity}</td><td data-label="Quantidade">${escapeHtml(quantity)}</td><td data-label="PM">${money(asset.average_price, asset.currency_code)}</td><td data-label="Cotação">${asset.current_price == null ? "Preço não disponível." : money(asset.current_price, asset.currency_code)}</td><td data-label="Saldo">${asset.market_value === null ? "—" : money(asset.market_value, asset.currency_code)}</td><td data-label="Resultado"><b class="metric-pill ${asset.total_result === null ? "" : Number(asset.total_result) < 0 ? "negative" : Number(asset.total_result) > 0 ? "positive" : ""}">${asset.total_result === null ? "Resultado indisponível" : `${Number(asset.total_result) > 0 ? "+" : Number(asset.total_result) < 0 ? "" : "Sem variação "}${money(asset.total_result, asset.currency_code)}`}</b></td><td data-label="Valorização"><b class="metric-pill ${asset.return_percentage === null ? "" : Number(asset.return_percentage) < 0 ? "negative" : Number(asset.return_percentage) > 0 ? "positive" : ""}">${asset.return_percentage === null ? "—" : `${Number(asset.return_percentage) > 0 ? "+" : ""}${percentage(asset.return_percentage)}`}</b></td><td data-label="Rendimentos">${money(asset.income_received, asset.currency_code)}</td><td data-label="Peso">${asset.portfolio_weight === null ? "—" : percentage(asset.portfolio_weight * 100)}</td><td data-label="Alvo classe">${asset.target_weight === null ? "—" : percentage(asset.target_weight * 100)}</td>${menu.replace('<td class="asset-options-cell"', '<td class="asset-options-cell" data-label="Opções"')}</tr>`;
 }
 
 function renderPortfolio(data, holdings, performance) {
