@@ -5,6 +5,21 @@ import { financialConcepts } from "../shared/financial-concepts.js";
 import { emptyState, errorState, loadingState, money, percentage, table } from "../shared/ui.js";
 import { loadECharts, chartTheme } from "../shared/charts.js";
 
+function responsiveDateAxis(chart, target) {
+  const compact = target.clientWidth < 600;
+  chart.setOption({
+    grid: { bottom: compact ? 60 : 36, containLabel: true },
+    xAxis: { axisLabel: {
+      formatter: value => /^\d{4}-\d{2}-\d{2}/.test(String(value)) ? String(value).slice(0, 7) : value,
+      rotate: compact ? 40 : 0,
+      hideOverlap: true,
+      interval: "auto",
+      margin: 12,
+    } },
+  });
+  chart.resize();
+}
+
 let currentHoldings = null;
 let holdingsClass = "";
 let holdingsQuery = "";
@@ -295,9 +310,11 @@ async function renderPortfolioPerformanceChart(data, requestId) {
     if (!input) return;
     portfolioPerformanceChart.dispatchAction({ type: input.checked ? "legendSelect" : "legendUnSelect", name: item.code === "portfolio" ? "Minha carteira (TWR)" : item.label });
   });
-  portfolioPerformanceResizeObserver = new ResizeObserver(() => portfolioPerformanceChart?.resize());
+  portfolioPerformanceResizeObserver = new ResizeObserver(() => {
+    if (portfolioPerformanceChart && !portfolioPerformanceChart.isDisposed()) responsiveDateAxis(portfolioPerformanceChart, chartTarget);
+  });
   portfolioPerformanceResizeObserver.observe(chartTarget);
-  portfolioPerformanceChart.resize();
+  responsiveDateAxis(portfolioPerformanceChart, chartTarget);
 }
 
 function updatePortfolioPerformanceLegend() {
@@ -804,9 +821,11 @@ async function renderEquityChart(points, requestId, baseCurrency) {
     yAxis: { type: "value", axisLabel: { color: chartTheme().muted, formatter: value => money(value, baseCurrency) }, splitLine: { lineStyle: { color: chartTheme().border } } },
     series: [{ name: "Patrimônio", type: "line", smooth: true, connectNulls: false, data: wealth, symbol: "circle", symbolSize: 5, lineStyle: { color: chartTheme().accent, width: 3 }, itemStyle: { color: chartTheme().accent }, areaStyle: { color: chartTheme().accent, opacity: .12 } }],
   });
-  equityChartResizeObserver = new ResizeObserver(() => equityChart?.resize());
+  equityChartResizeObserver = new ResizeObserver(() => {
+    if (equityChart && !equityChart.isDisposed()) responsiveDateAxis(equityChart, target);
+  });
   equityChartResizeObserver.observe(target);
-  equityChart.resize();
+  responsiveDateAxis(equityChart, target);
 }
 
 function renderAllocation(data) {
