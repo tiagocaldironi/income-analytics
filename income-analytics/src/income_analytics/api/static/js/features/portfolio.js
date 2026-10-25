@@ -922,14 +922,15 @@ function renderMonthlyIncome(data) {
       const chart = echarts.init(chartTarget, null, { renderer: "svg" });
       chart.setOption({
         backgroundColor: "transparent",
-        tooltip: { trigger: "axis", formatter: params => `${params[0]?.axisValue}<br><strong>${money(params[0]?.value, currency)}</strong>` },
+        tooltip: { trigger: "axis", formatter: params => `${months[params[0]?.dataIndex]?.label || params[0]?.axisValue}<br><strong>${money(params[0]?.value, currency)}</strong>` },
         grid: { left: 62, right: 14, top: 12, bottom: 34 },
-        xAxis: { type: "category", data: months.map(month => month.label), axisLabel: { color: chartTheme().muted, hideOverlap: true }, axisLine: { lineStyle: { color: chartTheme().border } } },
+        xAxis: { type: "category", data: months.map(month => month.key), axisLabel: { color: chartTheme().muted, hideOverlap: true }, axisLine: { lineStyle: { color: chartTheme().border } } },
         yAxis: { type: "value", axisLabel: { color: chartTheme().muted, formatter: value => money(value, currency) }, splitLine: { lineStyle: { color: chartTheme().border } } },
         series: [{ type: "bar", data: months.map(month => Number(values[month.key] || 0)), barMaxWidth: 32, itemStyle: { color: "#46c98b", borderRadius: [4, 4, 0, 0] } }],
       });
-      const observer = new ResizeObserver(() => chart.resize());
+      const observer = new ResizeObserver(() => responsiveDateAxis(chart, chartTarget));
       observer.observe(chartTarget);
+      responsiveDateAxis(chart, chartTarget);
       incomeChartInstances.push({ resize: () => chart.resize(), isDisposed: () => chart.isDisposed(), setOption: option => chart.setOption(option), dispose: () => { observer.disconnect(); chart.dispose(); } });
     });
   }).catch(error => {
