@@ -46,3 +46,11 @@ assert.equal(Number(minimum.value), .000001);
 minimum.value = ".1"; precision.value = "8"; events.precision();
 assert.equal(Number(step.value), .00000001);
 assert.equal(minimum.value, ".1", "an explicit broker minimum stays intact");
+
+const globalPlan = context.renderExecutablePlan({...data, unavailable_budget:"0", blocked:[{ticker:"MISSING",reason:"MISSING_PRICE",reserved_amount:"0"}], residual_reasons:["MINIMUM_EXCEEDS_BALANCE","GLOBAL_STRATEGY_LIMIT","MISSING_PRICE"]});
+assert.match(globalPlan, /uma unidade ou lote mínimo supera/);
+assert.match(globalPlan, /não melhoram a aderência global/);
+assert.match(globalPlan, /cotação ou câmbio válidos/);
+assert.doesNotMatch(globalPlan, /0,00 a aguardar dados/);
+const limited = context.renderExecutablePlan({...data, residual_reasons:["SEARCH_LIMIT"]});
+assert.match(limited, /não é considerado inevitável/);

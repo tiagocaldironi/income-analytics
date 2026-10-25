@@ -153,11 +153,12 @@ def test_fixed_income_minimum_increment_and_observed_quote():
 
 
 @pytest.mark.parametrize("price,age,reason", [(None, 0, "MISSING_PRICE"), ("10", 8, "STALE_PRICE")])
-def test_unavailable_quote_reserves_money_but_eligible_asset_continues(price, age, reason):
+def test_unavailable_quote_does_not_reserve_money_against_eligible_global_buys(price, age, reason):
     result = plan([("A", "FII", price, "0", age, "BRL"), ("B", "FII", "10", "0", 0, "BRL")])
     assert result["blocked"][0]["reason"] == reason
-    assert result["unavailable_budget"] == 25
-    assert result["total_estimated"] <= 25
+    assert result["unavailable_budget"] == 0
+    assert result["blocked"][0]["reference_amount"] == 25
+    assert result["total_estimated"] == 50
     assert result["orders"][0]["ticker"] == "B"
     assert (
         result["total_estimated"] + result["residual_amount"] + result["unavailable_budget"] == 50
@@ -268,7 +269,8 @@ def test_no_asset_policy_does_not_invent_equal_weight_targets():
     result = build_executable_plan(session, amount=D(50), as_of=TODAY)
     assert result["orders"] == []
     assert result["blocked"][0]["reason"] == "NEEDS_ASSET_STRATEGY"
-    assert result["unavailable_budget"] == 50
+    assert result["unavailable_budget"] == 0
+    assert result["residual_amount"] == 50
 
 
 def test_missing_fx_and_inactive_asset_remain_non_simulable():
