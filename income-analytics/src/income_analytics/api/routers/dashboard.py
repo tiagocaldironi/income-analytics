@@ -27,6 +27,7 @@ from income_analytics.application.b3_import import (
 from income_analytics.application.benchmark_comparison import build_performance_comparison
 from income_analytics.application.benchmark_data import BenchmarkDataUnavailable
 from income_analytics.application.capital_applied import calculate_capital_applied
+from income_analytics.application.executable_contribution import build_executable_plan
 from income_analytics.application.fx_data import FxRateUnavailable
 from income_analytics.application.historical_portfolio_reconstruction import (
     HistoricalPortfolioReconstructionService,
@@ -576,6 +577,38 @@ class ContributionSimulationInput(BaseModel):
     amount: Decimal = Field(gt=0)
     mode: Literal["LEGACY_BEFORE_DEFICIT", "STRATEGY_GUIDED"] = "LEGACY_BEFORE_DEFICIT"
     include_asset_distribution: bool = False
+
+
+class SimulationTradingRuleInput(BaseModel):
+    model_config = {"extra": "forbid", "allow_inf_nan": False}
+    fractional_supported: bool = False
+    quantity_precision: int | None = Field(default=None, ge=0, le=12)
+    quantity_step: Decimal | None = Field(default=None, gt=0, max_digits=24, decimal_places=12)
+    minimum_quantity: Decimal | None = Field(default=None, ge=0, max_digits=24, decimal_places=12)
+    minimum_amount: Decimal | None = Field(default=None, ge=0, max_digits=20, decimal_places=8)
+    amount_increment: Decimal | None = Field(default=None, gt=0, max_digits=20, decimal_places=8)
+    fixed_fee_base: Decimal = Field(default=Decimal("0"), ge=0, max_digits=16, decimal_places=2)
+    fee_rate: Decimal = Field(default=Decimal("0"), ge=0, le=1, decimal_places=8)
+    costs_known: bool = False
+
+
+class ExecutableContributionInput(BaseModel):
+    model_config = {"extra": "forbid", "allow_inf_nan": False}
+    amount: Decimal = Field(gt=0, le=Decimal("1000000000000"), max_digits=15, decimal_places=2)
+    rules: dict[str, SimulationTradingRuleInput] = Field(default_factory=dict, max_length=500)
+
+
+@router.post("/portfolio/simulation/executable-contribution")
+def project_executable_contribution(simulation: ExecutableContributionInput) -> dict[str, object]:
+    """Price existing strategy targets without writing events or executing orders."""
+    try:
+        plan = build_executable_plan(
+            session, amount=simulation.amount,
+            rules={ticker: rule.model_dump(exclude_none=True) for ticker, rule in simulation.rules.items()},
+        )
+        return jsonable_encoder(plan, custom_encoder={Decimal: str})
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
 
 
 class AssetRebalancingInput(BaseModel):

@@ -506,3 +506,46 @@ def test_data_sources_exposes_only_public_catalog(saas):
         assert item["next_execution"] is None
     anonymous = TestClient(app, base_url=ORIGIN)
     assert anonymous.get("/api/data-sources").status_code == 401
+
+
+def test_executable_simulation_owned_read_only_and_validated(saas):
+    from datetime import date
+    from decimal import Decimal
+    from sqlalchemy import select, func
+    from income_analytics.infrastructure.models import FinancialEventRecord
+    login, _, _ = saas
+    a, _, _ = login()
+    b, _, _ = login()
+    aid, bid = wallet(a, "plan-A"), wallet(b, "plan-B")
+    assert trade(a, aid, ticker="PLAN3").status_code == 201
+    headers = {"X-Portfolio-Id": aid}
+    assert a.put("/api/market-prices/PLAN3", headers=headers, json={"current_price": "34.50", "effective_date": date.today().isoformat()}).status_code == 200
+    assert a.put("/api/allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": "1"}}).status_code == 200
+    assert a.put("/api/asset-allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": {"PLAN3": "1"}}}).status_code == 200
+    path = "/api/portfolio/simulation/executable-contribution"
+    before = a.get("/api/portfolio", headers=headers).json()
+    with SessionFactory() as db:
+        count = db.scalar(select(func.count()).select_from(FinancialEventRecord))
+    response = a.post(path, headers=headers, json={"amount": "50"})
+    assert response.status_code == 200, response.text
+    plan = response.json()
+    assert plan["orders"][0]["quantity"] == "1"
+    assert Decimal(plan["total_estimated"]) == Decimal("34.50")
+    assert Decimal(plan["residual_amount"]) == Decimal("15.50")
+    assert b.post(path, headers=headers, json={"amount": "50"}).status_code == 404
+    assert a.post(path, headers={"X-Portfolio-Id": bid}, json={"amount": "50"}).status_code == 404
+    assert a.post(path, json={"amount": "50"}).status_code == 400
+    for payload in [
+        {"amount": "0"}, {"amount": "NaN"}, {"amount": "0.001"},
+        {"amount": "50", "unit_price": "1"},
+        {"amount": "50", "rules": {"PLAN3": {"quantity_step": ".5"}}},
+        {"amount": "50", "rules": {"PLAN3": {"fixed_fee_base": "-1"}}},
+        {"amount": "50", "rules": {"OTHER3": {}}},
+    ]:
+        assert a.post(path, headers=headers, json=payload).status_code == 422, payload
+    token = a.headers.pop("X-CSRF-Token")
+    assert a.post(path, headers=headers, json={"amount": "50"}).status_code == 403
+    a.headers["X-CSRF-Token"] = token
+    assert a.get("/api/portfolio", headers=headers).json() == before
+    with SessionFactory() as db:
+        assert db.scalar(select(func.count()).select_from(FinancialEventRecord)) == count
