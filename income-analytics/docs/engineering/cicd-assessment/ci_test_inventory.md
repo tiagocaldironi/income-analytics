@@ -1,3 +1,5 @@
+> Este ledger registra a validação D (1066 casos). A revisão E acrescenta cinco testes do parser mypy; consulte [publicação E](pr51e_publication.md) para o total candidato de 1071 e seus resultados.
+
 # PR5.1D — Inventário completo dos testes e seleção dos gates
 
 Data: 28/10/2026. Coleta/execução local em clone novo do HEAD 1bbd2d42686ab0c893790772a05a7845cfbc0295 com overlay explícito de integração, sem arquivos ignorados. Fingerprint de execução: bdb3cd620e91bc4b04a5dc9c7cbfade08aa4af8c65d2d89d366164d0c22dbaec. Não é execução de commit D publicado nem GitHub Actions hospedado.
