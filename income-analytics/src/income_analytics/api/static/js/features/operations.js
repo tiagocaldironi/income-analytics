@@ -917,7 +917,6 @@ export function bindOperations() {
             await portfolioApi.createTrade(payload);
           }
         }
-        await Promise.all([loadPortfolio(), loadOperations({ reset: true })]);
       });
       window.dispatchEvent(new CustomEvent("income:operation-confirmed",{detail:{portfolioId:operationPortfolioId}}));
       setMessage(message, "Operação registrada com sucesso.");
@@ -931,6 +930,10 @@ export function bindOperations() {
       setOperationFields("BUY");
       syncQuickOperationButtons();
       updateOperationSummary();
+      const refreshed = await Promise.allSettled([loadPortfolio(), loadOperations({ reset: true })]);
+      if (refreshed.some(result => result.status === "rejected")) {
+        setMessage(message, "Operação registrada. Atualize a tela para consultar os dados atualizados.");
+      }
     } catch (error) { setMessage(message, friendlyError(error), "error"); }
   });
   const quoteForm = document.querySelector("#quote-form");

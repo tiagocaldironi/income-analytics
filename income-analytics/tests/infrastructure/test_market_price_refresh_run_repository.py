@@ -1,4 +1,5 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
+from decimal import Decimal
 
 from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.infrastructure.sqlite_repositories import (
@@ -25,6 +26,9 @@ def test_refresh_run_history_keeps_structured_errors_queryable() -> None:
                 }
             ],
             "warnings": [],
+            "effective_date": date(2026, 10, 28),
+            "observed_at": started,
+            "rate": Decimal("5.1234567890123456789"),
         }
     ]
     repository.save(
@@ -44,3 +48,6 @@ def test_refresh_run_history_keeps_structured_errors_queryable() -> None:
     assert runs[0]["status"] == "PARTIAL"
     assert runs[0]["providers"][0]["errors"][0]["asset"] == "AAA3"
     assert runs[0]["providers"][0]["errors"][0]["message"] == "Sem cotação para o ticker."
+    assert runs[0]["providers"][0]["effective_date"] == "2026-10-28"
+    assert runs[0]["providers"][0]["observed_at"] == started.isoformat()
+    assert runs[0]["providers"][0]["rate"] == "5.1234567890123456789"
