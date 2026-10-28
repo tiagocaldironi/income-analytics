@@ -622,7 +622,23 @@ class SqliteAssetRepository:
                 .filter(PortfolioAssetRecord.portfolio_id == self.portfolio_id)
                 .all()
             )
-            return tuple(self._scoped_asset(session, record) for record in records)
+            # Fetch portfolio overrides in one query instead of one per asset.
+            metadata = {}
+            if saas_enabled():
+                metadata = {
+                    row.asset_id: json.loads(row.payload)
+                    for row in session.query(PortfolioAssetMetadataRecord)
+                    .filter_by(portfolio_id=self.portfolio_id).all()
+                }
+            assets = []
+            for record in records:
+                asset = self._to_domain(record)
+                values = metadata.get(record.id)
+                if values:
+                    asset.name = values["name"]
+                    asset.asset_class = AssetClass(values["asset_class"])
+                assets.append(asset)
+            return tuple(assets)
 
     @staticmethod
     def list_all() -> tuple[Asset, ...]:
@@ -1119,15 +1135,21 @@ class SqliteFinancialEventRepository:
             _cached_financial_events.cache_clear()
         return deleted
 
-    def list(self) -> tuple[FinancialEvent, ...]:
+    def list(self, *, assets: dict[str, Asset] | None = None) -> tuple[FinancialEvent, ...]:
+        if assets is not None:
+            return self._list_uncached(assets=assets)
         if saas_enabled():
             return self._list_uncached()
         return _cached_financial_events(database_url(), self.portfolio_id)
 
-    def _list_uncached(self) -> tuple[FinancialEvent, ...]:
-        assets = {
-            str(asset.id): asset for asset in SqliteAssetRepository(UUID(self.portfolio_id)).list()
-        }
+    def _list_uncached(
+        self, *, assets: dict[str, Asset] | None = None
+    ) -> tuple[FinancialEvent, ...]:
+        if assets is None:
+            assets = {
+                str(asset.id): asset
+                for asset in SqliteAssetRepository(UUID(self.portfolio_id)).list()
+            }
         with SessionFactory() as session:
             rows = (
                 session.query(FinancialEventRecord)

@@ -160,19 +160,30 @@ class PortfolioSession:
                 str(asset.ticker): asset
                 for asset in SqliteAssetRepository(self.portfolio_id).list()
             }
-            self._events = list(SqliteFinancialEventRepository(self.portfolio_id).list())
-            if not self.history_only:
-                market_prices = SqliteMarketPriceRepository()
-                self._market_prices = list(market_prices.list())
-                self._market_prices_by_asset = market_prices.list_by_asset()
-                self._market_prices_indexed_source = self._market_prices
-                self._market_prices_indexed_length = len(self._market_prices)
-                self._benchmark_rates = list(SqliteBenchmarkRateRepository().list())
-                observations = SqliteBenchmarkObservationRepository()
-                self._benchmark_observations = {
-                    name: list(observations.list(name))
-                    for name in ("IPCA", "IBOV", "TR", "SELIC_TARGET")
+            events = SqliteFinancialEventRepository(self.portfolio_id)
+            self._events = list(
+                events.list(assets={str(asset.id): asset for asset in self._assets.values()})
+                if self.history_only else events.list()
+            )
+            if self.history_only:
+                # History formatting needs fixed-income labels, but no strategy,
+                # prices, benchmarks, pension/property valuations or recurrence rules.
+                self._fixed_income_details = {
+                    details.asset_id: details
+                    for details in SqliteFixedIncomeDetailsRepository(self.portfolio_id).list()
                 }
+                return
+            market_prices = SqliteMarketPriceRepository()
+            self._market_prices = list(market_prices.list())
+            self._market_prices_by_asset = market_prices.list_by_asset()
+            self._market_prices_indexed_source = self._market_prices
+            self._market_prices_indexed_length = len(self._market_prices)
+            self._benchmark_rates = list(SqliteBenchmarkRateRepository().list())
+            observations = SqliteBenchmarkObservationRepository()
+            self._benchmark_observations = {
+                name: list(observations.list(name))
+                for name in ("IPCA", "IBOV", "TR", "SELIC_TARGET")
+            }
             self._allocation_policy = SqliteAllocationPolicyRepository(self.portfolio_id).get()
             self._asset_allocation_policy = SqliteAssetAllocationPolicyRepository(
                 self.portfolio_id
