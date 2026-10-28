@@ -1299,6 +1299,14 @@ class SqliteMarketPriceRepository:
         return dict(_cached_market_prices_by_asset(database_url()))
 
 
+def _refresh_run_json_value(value: object) -> str:
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return str(value)
+    raise TypeError(f"Unsupported refresh history value: {type(value).__name__}")
+
+
 class SqliteMarketPriceRefreshRunRepository:
     def __init__(self, portfolio_id: UUID) -> None:
         self.portfolio_id = str(portfolio_id)
@@ -1313,7 +1321,9 @@ class SqliteMarketPriceRefreshRunRepository:
                     started_at=cast(datetime, run["started_at"]),
                     finished_at=cast(datetime, run["finished_at"]),
                     status=str(run["status"]),
-                    outcomes_json=json.dumps(run["providers"], ensure_ascii=False),
+                    outcomes_json=json.dumps(
+                        run["providers"], ensure_ascii=False, default=_refresh_run_json_value
+                    ),
                 )
             )
 

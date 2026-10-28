@@ -3,6 +3,44 @@ from decimal import Decimal
 from income_analytics.api.routers import dashboard
 
 
+def test_refresh_with_ptax_date_persists_history(monkeypatch):
+    from datetime import date
+    from types import SimpleNamespace
+
+    from fastapi.encoders import jsonable_encoder
+
+    from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
+    from income_analytics.infrastructure.sqlite_repositories import (
+        SqliteMarketPriceRefreshRunRepository,
+    )
+
+    repository = SqliteMarketPriceRefreshRunRepository(MAIN_PORTFOLIO_ID)
+    monkeypatch.setattr(dashboard, "market_price_refresh_runs", repository)
+    monkeypatch.setattr(dashboard, "session", SimpleNamespace(
+        refresh_open_market_prices_report=lambda *args, **kwargs: {
+            "updated": 1, "unavailable": [], "providers": [],
+        },
+    ))
+    monkeypatch.setattr(dashboard, "_refresh_open_fx_rates", lambda **kwargs: [{
+        "provider": "bcb_ptax", "status": "SUCCESS",
+        "effective_date": date(2026, 10, 28),
+    }])
+    rebuilt = []
+    monkeypatch.setattr(
+        dashboard, "rebuild_portfolio_dashboard_snapshot", lambda: rebuilt.append(True)
+    )
+    monkeypatch.setattr(dashboard, "provider_health", SimpleNamespace(success=lambda *args: None))
+
+    result = jsonable_encoder(dashboard.refresh_market_prices())
+
+    assert result["status"] == "SUCCESS"
+    assert result["providers"][0]["effective_date"] == "2026-10-28"
+    assert rebuilt == [True]
+    saved = repository.list_recent(1)[0]
+    assert saved["id"] == result["run_id"]
+    assert saved["providers"] == result["providers"]
+
+
 def test_refresh_run_history_endpoint_returns_recent_logs(monkeypatch):
     expected = ({"id": "run-1", "status": "PARTIAL", "providers": []},)
 
