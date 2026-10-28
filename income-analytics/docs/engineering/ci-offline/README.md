@@ -65,6 +65,8 @@ O resolvedor usa PyPI explícito e aceita somente wheels de `files.pythonhosted.
 
 `tests/conftest.py` continua intacto e seleciona outro SQLite UUID nesse TEMP. Importar o app pode executar migrations **somente nesse banco descartável**, como os testes existentes já fazem. Testes de migration em subprocessos também usam bancos de fixture, nunca o banco pessoal. Nenhum launcher produtivo é chamado.
 
+O sandbox é canonicalizado antes de configurar o ambiente, evitando divergência entre aliases 8.3 de TEMP no Windows hospedado e `Path.resolve()` usado pelo teste de segurança do banco. Esse comportamento tem regressão própria em `ci/test_ci.py`.
+
 `ci/sitecustomize.py`, carregado apenas com `INCOME_CI_OFFLINE=1`, bloqueia conexões TCP/DNS/UDP do Python. Socketpair interno usado por asyncio no Windows é permitido. A guarda acompanha subprocessos Python que preservem o PYTHONPATH. Alguns testes de migration definem seu próprio PYTHONPATH: executam apenas Alembic em banco temporário, mas essa guarda não é um firewall do sistema e não deve ser anunciada como sandbox contra código malicioso.
 
 Node usa preload `ci/node-offline.mjs`, bloqueando fetch, conexões net, datagramas e resoluções DNS comuns. Testes de VM continuam usando seus próprios doubles. O runner rejeita `data/` como symlink ou junction para evitar referências ao diretório pessoal; o workflow executa checkout novo e não copia dados de nenhum host/worktree. Dados sintéticos gerados por testes ficam no sandbox ou em diretórios ignorados do checkout descartável.

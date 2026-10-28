@@ -19,6 +19,9 @@ CHECKS = ("ruff", "mypy", "python", "cert48", "node", "runtime")
 
 
 def isolated_environment(sandbox: Path) -> dict[str, str]:
+    # Hosted Windows can expose TEMP through an 8.3 alias (RUNNER~1).
+    # Keep database_url(), Path.resolve() and tempfile on the same canonical path.
+    sandbox = sandbox.resolve()
     allowed = {
         "PATH",
         "SYSTEMROOT",
@@ -225,7 +228,7 @@ def main() -> int:
     output = ROOT / "ci-reports" / args.check
     output.mkdir(parents=True, exist_ok=True)
     sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-    sandbox = Path(tempfile.mkdtemp(prefix="income-offline-ci-"))
+    sandbox = Path(tempfile.mkdtemp(prefix="income-offline-ci-")).resolve()
     env = isolated_environment(sandbox)
     started = time.monotonic()
     report = {

@@ -23,6 +23,12 @@ Os 13 failures Python além de CERT_48 e os 9 errors estão relacionados a arqui
 
 Isso comprova uma dependência de parte da suíte existente em estado não versionado. O workflow **não precisa nem aceita o banco pessoal para funcionar**: executa e reporta a falha. Para tornar esses testes herméticos, é necessária revisão futura de evidências públicas/sintéticas e critérios financeiros. Não copiar `data/`, credenciais ou snapshots reais do host e não inventar expected financeiros neste PR.
 
+## Verificação por commit e checkout LF
+
+No clone limpo de `e023ade90345e2393806932558cb2bfbbb9f9f2a`, com os bytes LF dos objetos Git, a suíte teve **994 passed, 15 failed, 9 errors e 5 skipped**, mantendo cobertura 80,69%. A falha adicional, em relação à execução exploratória CRLF, é `tests/infrastructure/test_historical_identity_fixture.py::test_versioned_official_identity_and_price_recovery`: o manifesto `tests/fixtures/cvm/price_identity_v1/manifest.json` também tem expectativas de bytes incompatíveis com esse checkout, começando por `cotahist-record.txt`. Essa fixture e seu manifesto não foram alterados nem o teste foi omitido. É outra pendência de evidência congelada a reconciliar independentemente.
+
+A primeira execução GitHub teve ainda uma falha no teste de segurança do banco, não reproduzida no host local: caminhos TEMP do Windows hospedado podem usar aliases 8.3. O runner foi corrigido para canonicalizar o sandbox **antes** de configurar as variáveis, sem modificar o teste de segurança. Foi acrescentado um teste da infraestrutura CI para caminhos não canônicos. O resultado remoto posterior deve ser consultado em [validation.md](validation.md); falha de segurança não será classificada automaticamente como dívida aceitável do produto.
+
 ## Separação das pendências
 
 1. **Infraestrutura CI:** instalação, execução de todos os checks, isolamento e geração de relatórios podem ser avaliados mesmo com dívida do produto visível.

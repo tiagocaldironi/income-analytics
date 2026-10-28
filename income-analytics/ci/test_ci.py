@@ -45,6 +45,14 @@ def test_report_omits_failure_payload_and_captured_output(tmp_path):
     assert "SYNTHETIC_PRIVATE" not in json.dumps(report)
 
 
+def test_sandbox_paths_are_canonical_before_they_enter_environment(tmp_path):
+    alias = tmp_path / "nested" / ".." / "sandbox"
+    env = runner.isolated_environment(alias)
+    database = Path(env["INCOME_ANALYTICS_DATABASE"])
+    assert database.as_posix() == database.resolve().as_posix()
+    assert Path(env["TEMP"]).as_posix() == Path(env["TEMP"]).resolve().as_posix()
+
+
 def test_network_is_blocked_in_python_and_inherited_subprocess():
     with pytest.raises(RuntimeError, match="CI_OFFLINE_NETWORK_BLOCKED"):
         socket.create_connection(("127.0.0.1", 8002))
