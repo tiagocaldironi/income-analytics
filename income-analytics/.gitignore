@@ -1,5 +1,6 @@
 # Ambiente virtual
 .venv/
+.venv-runtime/
 venv/
 
 # Python
@@ -17,6 +18,8 @@ __pycache__/
 # Testes
 .pytest_cache/
 .coverage
+ci-reports/
+.mypy_cache/
 htmlcov/
 
 # Banco local

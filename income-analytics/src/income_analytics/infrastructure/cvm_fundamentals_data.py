@@ -56,7 +56,9 @@ class CvmStatementParser:
                 with archive.open(name) as raw:
                     reader = csv.DictReader(TextIOWrapper(raw, encoding="latin-1"), delimiter=";")
                     if not reader.fieldnames or not self.required.issubset(reader.fieldnames):
-                        raise CvmSourceSchemaError(f"{self.code}: colunas ausentes em {name}.")
+                        raise CvmSourceSchemaError(
+                            f"{CvmSourceSchemaError.code}: colunas ausentes em {name}."
+                        )
                     for row in reader:
                         if row.get("ORDEM_EXERC") != "ÚLTIMO":
                             continue

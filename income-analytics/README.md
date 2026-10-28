@@ -1,5 +1,7 @@
 # Roadmap
 
+CI offline (Python 3.14 / Node 24): veja [execução, isolamento e limitações](docs/engineering/ci-offline/README.md).
+
 ## Executar em modo local/LAN
 
 No PowerShell, a partir da raiz do projeto:
