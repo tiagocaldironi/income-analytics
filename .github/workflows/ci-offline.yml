@@ -1,4 +1,4 @@
-name: CI offline
+name: CI governance
 
 on:
   pull_request:
@@ -22,13 +22,20 @@ concurrency:
 
 jobs:
   python:
-    name: CI / ${{ matrix.check }} (windows-py314)
+    name: CI / ${{ matrix.label }}
     runs-on: windows-2025
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        check: [runtime, ruff, mypy, python, cert48]
+        include:
+          - {check: runtime, label: Runtime installation}
+          - {check: engineering, label: Python engineering}
+          - {check: financial, label: Financial certification}
+          - {check: python, label: Full Python diagnostic}
+          - {check: ruff, label: Ruff diagnostics}
+          - {check: mypy, label: mypy diagnostics}
+          - {check: quality, label: Quality non-regression}
     defaults:
       run:
         shell: pwsh
@@ -61,22 +68,23 @@ jobs:
           ./.venv/Scripts/python.exe -m pip check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run isolated check (failure is not waived)
-        run: ./.venv/Scripts/python.exe ci/run.py ${{ matrix.check }}
+        run: ./.venv/Scripts/python.exe ci/governance.py ${{ matrix.check }}
       - name: Upload payload-free reports even on failure
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: offline-${{ matrix.check }}-${{ github.sha }}
+          name: governance-${{ matrix.check }}-${{ github.sha }}
           path: |
             income-analytics/ci-reports/${{ matrix.check }}/result.json
             income-analytics/ci-reports/${{ matrix.check }}/*-junit.xml
             income-analytics/ci-reports/${{ matrix.check }}/coverage.xml
+            income-analytics/ci-reports/${{ matrix.check }}/inventory.json
           if-no-files-found: error
           retention-days: 14
           include-hidden-files: false
 
   node:
-    name: CI / node (windows-node24)
+    name: CI / Frontend
     runs-on: windows-2025
     timeout-minutes: 15
     defaults:
@@ -97,13 +105,47 @@ jobs:
         with:
           node-version: '24.19.0'
       - name: Run all frontend suites offline, without npm dependencies
-        run: python ci/run.py node
+        run: python ci/governance.py node
       - name: Upload suite status only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: offline-node-${{ github.sha }}
+          name: governance-node-${{ github.sha }}
           path: income-analytics/ci-reports/node/result.json
+          if-no-files-found: error
+          retention-days: 14
+          include-hidden-files: false
+
+  engineering_gate:
+    name: CI / Engineering
+    if: always()
+    needs: [python, node]
+    runs-on: windows-2025
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: income-analytics
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.7'
+      - name: Download same-run payload-free reports
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: governance-*-${{ github.sha }}
+          path: income-analytics/gate-inputs
+      - name: Evaluate engineering independently of financial certification
+        run: python ci/governance.py summary --reports gate-inputs
+      - name: Publish independent gate states
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: gate-summary-${{ github.sha }}
+          path: income-analytics/gate-inputs/gate-summary.json
           if-no-files-found: error
           retention-days: 14
           include-hidden-files: false

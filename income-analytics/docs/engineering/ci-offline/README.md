@@ -1,3 +1,10 @@
+> Consolidação PR5.1D (candidata local): o workflow passa a usar `ci/governance.py`.
+> Consulte [política dos quatro gates](../cicd-assessment/ci_gate_policy.md),
+> [inventário completo](../cicd-assessment/ci_test_inventory.md) e
+> [validação D](../cicd-assessment/pr51d_validation.md).
+> Engineering PASS não certifica finanças, release ou deploy. Os comandos
+> legados abaixo continuam disponíveis para diagnóstico histórico.
+
 # PR5.1 — CI offline reproduzível
 
 Baseline: `develop@ca627ac72f110d0f4d62faaa9c51a08eaed54965`. Implementação em branch/worktree separado, sem modificar os checkouts existentes. A avaliação original está em [cicd-assessment](../cicd-assessment/cicd_readiness_assessment.md); esses seis documentos foram copiados sem alterações para preservar a referência diagnóstica.
