@@ -73,10 +73,11 @@ let portfolioPerformanceRequestId = 0;
 let portfolioPerformancePeriod = "MAX";
 const portfolioBenchmarkSelection = new Set(["portfolio", "CDI", "IBOV", "IFIX"]);
 
-export async function loadPortfolio(asOf = "", { refreshAttention = true } = {}) {
+export async function loadPortfolio(asOf = "", { refreshAttention = true, preserveTransactions = false } = {}) {
   const sequence = ++portfolioLoadSequence;
   invalidatePortfolioGuidance();
   const wallet = typeof localStorage === "undefined" ? null : localStorage.getItem("income.activePortfolioId");
+  const preserveTransactionDialog = preserveTransactions && wallet === holdingsWallet;
   if (wallet !== holdingsWallet) {
     saveHoldingsPreferences(); holdingsWallet = wallet;
     const saved = holdingsPreferences.get(wallet);
@@ -87,9 +88,11 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true } = {})
   if (openAssetMenu) { openAssetMenu.hidden=true;openAssetMenu=null; }
   const policy = document.querySelector("#allocation-policy-dialog");
   if (policy?.open) policy.close();
-  ++assetTransactionsRequestId;
   const transactions = document.querySelector("#asset-transactions-modal");
-  if (transactions?.open) transactions.close();
+  if (!preserveTransactionDialog) {
+    ++assetTransactionsRequestId;
+    if (transactions?.open) transactions.close();
+  }
   const distribution = document.querySelector("#group-distribution-modal");
   if (distribution?.open) distribution.close();
   const categories = document.querySelector("#holdings-categories");
@@ -643,13 +646,16 @@ function openAssetTransactions(assetId, assetTitle, trigger) {
   if (!assetId) return;
   assetTransactionsTrigger = trigger || document.activeElement;
   const dialog = getAssetTransactionsDialog();
+  if (dialog._deleting) return;
+  dismissAssetDeletion(dialog, false);
+  dialog.querySelector("[data-history-feedback]").hidden = true;
   dialog.dataset.assetId = assetId;
   dialog.dataset.assetTitle = assetTitle;
   dialog._eventViews = { movement: { page: 1 }, income: { page: 1 } };
   dialog.querySelector("[data-asset-transactions-title]").textContent = `Lançamentos de ${assetTitle}`;
   dialog.querySelector("[data-asset-transactions-content]").innerHTML = loadingState;
   if (!dialog.open) dialog.showModal();
-  loadAssetTransactions(dialog, 1, "SUMMARY");
+  loadAssetTransactions(dialog, 1, "MOVEMENT");
 }
 
 function getAssetTransactionsDialog() {
@@ -659,35 +665,41 @@ function getAssetTransactionsDialog() {
   dialog.id = "asset-transactions-modal";
   dialog.className = "asset-transactions-dialog";
   dialog.setAttribute("aria-labelledby", "asset-transactions-modal-title");
-  dialog.innerHTML = `<div class="dialog-heading"><div><h2 id="asset-transactions-modal-title" data-asset-transactions-title></h2><p data-asset-transactions-subtitle></p></div><button class="dialog-close" type="button" aria-label="Fechar lançamentos" data-close-asset-transactions>×</button></div><div class="asset-transactions-content" data-asset-transactions-content></div>`;
+  dialog.innerHTML = `<div class="dialog-heading"><div><h2 id="asset-transactions-modal-title" data-asset-transactions-title></h2><p>Compras, vendas e rendimentos do ativo.</p></div><button class="dialog-close" type="button" aria-label="Fechar lançamentos" data-close-asset-transactions>×</button></div><div class="asset-history-tabs" role="tablist" aria-label="Tipos de lançamentos">${[ ["MOVEMENT", "Movimentações"], ["INCOME", "Rendimentos"] ].map(([key,label]) => `<button type="button" id="asset-history-tab-${key}" role="tab" aria-controls="asset-history-panel" aria-selected="${key === "MOVEMENT"}" tabindex="${key === "MOVEMENT" ? 0 : -1}" data-events-tab="${key}">${label}<span data-events-count="${key}">—</span></button>`).join("")}</div><div class="asset-history-feedback" role="status" data-history-feedback hidden></div><section class="asset-delete-confirmation" data-delete-confirmation role="group" aria-labelledby="asset-delete-title" hidden><div><h3 id="asset-delete-title">Excluir lançamento?</h3><p data-delete-description></p><small>A carteira será recalculada após a exclusão.</small></div><div class="asset-delete-actions"><button type="button" class="secondary" data-cancel-asset-delete>Cancelar</button><button type="button" class="asset-delete-submit" data-confirm-asset-delete>Excluir lançamento</button></div><p role="alert" data-delete-error hidden></p></section><div id="asset-history-panel" role="tabpanel" aria-labelledby="asset-history-tab-MOVEMENT" class="asset-transactions-content" data-asset-transactions-content></div>`;
   dialog.addEventListener("click", event => {
-    if (event.target.matches("[data-close-asset-transactions]")) dialog.close();
-    if (event.target.matches("[data-asset-transactions-page]")) loadAssetTransactions(dialog, Number(event.target.dataset.assetTransactionsPage), event.target.dataset.assetTransactionsGroup);
-    if (event.target.matches("[data-retry-asset-transactions]")) loadAssetTransactions(dialog, 1);
-    if (event.target.matches("[data-events-tab]")) {
-      const key = event.target.dataset.eventsTab;
-      const group = key === "income" ? "INCOME" : "MOVEMENT";
-      loadAssetTransactions(dialog, dialog._eventViews[key].page, group);
+    const button = event.target.closest("button");
+    if (!button) return;
+    if (button.matches("[data-close-asset-transactions]")) dialog.close();
+    if (button.matches("[data-asset-transactions-page]")) loadAssetTransactions(dialog, Number(button.dataset.assetTransactionsPage));
+    if (button.matches("[data-retry-asset-transactions]")) loadAssetTransactions(dialog, 1);
+    if (button.matches("[data-events-tab]") && !dialog._deleting) {
+      dismissAssetDeletion(dialog, false);
+      const group = button.dataset.eventsTab;
+      loadAssetTransactions(dialog, dialog._eventViews[group === "INCOME" ? "income" : "movement"].page, group);
     }
-    const groupButton = event.target.closest("[data-open-event-group]");
-    if (groupButton) loadAssetTransactions(dialog, 1, groupButton.dataset.openEventGroup);
-    const backButton = event.target.closest("[data-events-back]");
-    if (backButton) loadAssetTransactions(dialog, 1, "SUMMARY");
-    const deleteButton = event.target.closest("[data-delete-asset-transaction]");
-    if (deleteButton && !deleteButton.disabled) {
-      const id = deleteButton.dataset.deleteAssetTransaction;
-      if (!confirm("Excluir este lançamento? A carteira será recalculada.")) return;
-      deleteButton.disabled = true;
-      portfolioApi.deleteOperation(id).then(async () => {
-        await loadAssetTransactions(dialog, 1);
-        await loadPortfolio();
-      }).catch(error => {
-        alert(error.message || "Não foi possível excluir o lançamento.");
-      }).finally(() => { deleteButton.disabled = false; });
-    }
+    if (button.matches("[data-delete-asset-transaction]")) showAssetDeletion(dialog, button);
+    if (button.matches("[data-cancel-asset-delete]")) dismissAssetDeletion(dialog);
+    if (button.matches("[data-confirm-asset-delete]")) deleteAssetTransaction(dialog);
   });
+  dialog.addEventListener("keydown", event => {
+    if (event.key === "Escape" && dialog._pendingDeletion && !dialog._deleting) {
+      event.preventDefault();
+      dismissAssetDeletion(dialog);
+      return;
+    }
+    const tab = event.target.closest("[data-events-tab]");
+    if (!tab || dialog._deleting) return;
+    const tabs = [...dialog.querySelectorAll("[data-events-tab]")];
+    let next;
+    if (["ArrowRight", "ArrowLeft"].includes(event.key)) next = tabs[(tabs.indexOf(tab) + 1) % tabs.length];
+    if (event.key === "Home") next = tabs[0];
+    if (event.key === "End") next = tabs.at(-1);
+    if (next) { event.preventDefault(); next.focus(); next.click(); }
+  });
+  dialog.addEventListener("cancel", event => { if (dialog._deleting) event.preventDefault(); });
   dialog.addEventListener("close", () => {
     assetTransactionsRequestId += 1;
+    dismissAssetDeletion(dialog, false);
     assetTransactionsTrigger?.focus();
     assetTransactionsTrigger = null;
   });
@@ -695,32 +707,98 @@ function getAssetTransactionsDialog() {
   return dialog;
 }
 
-async function loadAssetTransactions(dialog, page, group = "MOVEMENT") {
+function showAssetDeletion(dialog, trigger) {
+  if (dialog._deleting) return;
+  const item = dialog._eventItems?.find(item => item.id === trigger.dataset.deleteAssetTransaction);
+  if (!item) return;
+  dialog._pendingDeletion = { id: item.id, assetId: dialog.dataset.assetId, trigger };
+  dialog.querySelector("[data-delete-description]").textContent = `${item.operation} · ${formatDate(item.effective_date)} · ${item.amount === null ? "Valor não informado" : money(item.amount, item.currency_code)}`;
+  dialog.querySelector("[data-delete-error]").hidden = true;
+  dialog.querySelector("[data-history-feedback]").hidden = true;
+  dialog.querySelector("[data-delete-confirmation]").hidden = false;
+  dialog.querySelector("[data-cancel-asset-delete]").focus();
+}
+
+function dismissAssetDeletion(dialog, restoreFocus = true) {
+  if (dialog._deleting) return;
+  const pending = dialog._pendingDeletion;
+  dialog._pendingDeletion = null;
+  dialog.querySelector("[data-delete-confirmation]").hidden = true;
+  if (restoreFocus && pending?.trigger?.isConnected) pending.trigger.focus();
+}
+
+async function deleteAssetTransaction(dialog) {
+  const pending = dialog._pendingDeletion;
+  if (!pending || dialog._deleting || pending.assetId !== dialog.dataset.assetId) return;
+  dialog._deleting = true;
+  const submit = dialog.querySelector("[data-confirm-asset-delete]");
+  const cancel = dialog.querySelector("[data-cancel-asset-delete]");
+  submit.disabled = cancel.disabled = true;
+  dialog.querySelectorAll("[data-events-tab], [data-close-asset-transactions]").forEach(button => { button.disabled = true; });
+  submit.textContent = "Excluindo…";
+  const error = dialog.querySelector("[data-delete-error]");
+  error.hidden = true;
+  try {
+    await portfolioApi.deleteOperation(pending.id);
+  } catch (failure) {
+    error.textContent = failure.message || "Não foi possível excluir. Tente novamente.";
+    error.hidden = false;
+    return;
+  } finally {
+    dialog._deleting = false;
+    submit.disabled = cancel.disabled = false;
+    submit.textContent = "Excluir lançamento";
+    dialog.querySelectorAll("[data-events-tab], [data-close-asset-transactions]").forEach(button => { button.disabled = false; });
+  }
+  if (!dialog.open || dialog.dataset.assetId !== pending.assetId) return;
+  dismissAssetDeletion(dialog, false);
+  const group = dialog.dataset.eventsGroup;
+  const page = dialog._eventViews[group === "INCOME" ? "income" : "movement"].page;
+  await loadAssetTransactions(dialog, page, group);
+  const feedback = dialog.querySelector("[data-history-feedback]");
+  feedback.textContent = "Lançamento excluído. Atualizando a carteira…";
+  feedback.hidden = false;
+  dialog.querySelector(`[data-events-tab="${group}"]`)?.focus();
+  await loadPortfolio("", { preserveTransactions: true, refreshAttention: false });
+  feedback.textContent = "Lançamento excluído.";
+}
+
+async function loadAssetTransactions(dialog, page, group = dialog.dataset.eventsGroup || "MOVEMENT") {
   const requestId = ++assetTransactionsRequestId;
+  dialog.dataset.eventsGroup = group;
+  dialog.querySelectorAll("[data-events-tab]").forEach(button => {
+    const active = button.dataset.eventsTab === group;
+    button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
+  });
   const content = dialog.querySelector("[data-asset-transactions-content]");
+  content.setAttribute("aria-labelledby", `asset-history-tab-${group}`);
+  content.setAttribute("aria-busy", "true");
   content.innerHTML = loadingState;
   try {
-    const data = await portfolioApi.assetTransactions(dialog.dataset.assetId, { page, page_size: 10, sort: "effective_date_desc", ...(group === "SUMMARY" ? {} : { group }) });
+    const data = await portfolioApi.assetTransactions(dialog.dataset.assetId, { page, page_size: 10, sort: "effective_date_desc", group });
     if (requestId !== assetTransactionsRequestId || !dialog.open) return;
-    if (group !== "SUMMARY") dialog._eventViews[group === "INCOME" ? "income" : "movement"].page = page;
+    if (page > Math.max(1, data.total_pages)) return loadAssetTransactions(dialog, Math.max(1, data.total_pages), group);
+    dialog._eventItems = data.items;
+    dialog._eventViews[group === "INCOME" ? "income" : "movement"].page = page;
+    dialog.querySelector('[data-events-count="MOVEMENT"]').textContent = data.movement_count;
+    dialog.querySelector('[data-events-count="INCOME"]').textContent = data.income_count;
     content.innerHTML = renderAssetTransactions(data, group);
   } catch (error) {
     if (requestId !== assetTransactionsRequestId || !dialog.open) return;
     content.innerHTML = `<div class="asset-transactions-error">${errorState("Não foi possível carregar os lançamentos.")}<button type="button" class="secondary" data-retry-asset-transactions>Tentar novamente</button></div>`;
+  } finally {
+    if (requestId === assetTransactionsRequestId) content.setAttribute("aria-busy", "false");
   }
 }
 
 function renderAssetTransactions(data, group = "MOVEMENT") {
-  if (group === "SUMMARY") return `<div class="asset-events-hub"><section><h3>Movimentações</h3><strong>${data.movement_count}</strong><p>Compras e vendas do ativo.</p><button type="button" data-open-event-group="MOVEMENT">Ver movimentações →</button></section><section><h3>Rendimentos</h3><strong>${data.income_count}</strong><p>Dividendos, JCP e rendimentos.</p><button type="button" data-open-event-group="INCOME">Ver rendimentos →</button></section></div>`;
-  if (!data.items.length) return emptyState("Nenhum lançamento encontrado para este ativo.");
-  const renderRows = (items, income) => items.map(item => `<tr><td>${escapeHtml(item.operation)}</td><td>${formatDate(item.effective_date)}</td>${income ? "" : `<td>${item.quantity === null ? "—" : item.quantity}</td><td>${item.unit_price === null ? "—" : money(item.unit_price, item.currency_code)}</td>`}<td>${item.amount === null ? "—" : money(item.amount, item.currency_code)}</td><td>${item.source ? escapeHtml(item.source) : "—"}</td><td><button type="button" class="icon-button danger" data-delete-asset-transaction="${item.id}">🗑</button></td></tr>`);
-  const movements = group === "MOVEMENT" ? data.items : [];
-  const incomes = group === "INCOME" ? data.items : [];
+  if (!data.items.length) return emptyState(group === "INCOME" ? "Nenhum rendimento registrado para este ativo." : "Nenhuma movimentação registrada para este ativo.");
+  const income = group === "INCOME";
+  const trash = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';
+  const renderRows = data.items.map(item => `<tr><td>${escapeHtml(item.operation)}</td><td>${formatDate(item.effective_date)}</td>${income ? "" : `<td>${item.quantity === null ? "—" : item.quantity}</td><td>${item.unit_price === null ? "—" : money(item.unit_price, item.currency_code)}</td>`}<td>${item.amount === null ? "—" : money(item.amount, item.currency_code)}</td><td class="asset-history-source">${item.source === "B3_MOVEMENT_STATEMENT" ? "B3 · movimentação" : item.source === "B3_NEGOTIATION_REPORT" ? "B3 · negociação" : item.source ? escapeHtml(item.source) : "—"}</td><td><button type="button" class="asset-history-delete" aria-label="Excluir ${escapeHtml(item.operation)} de ${formatDate(item.effective_date)}" data-delete-asset-transaction="${escapeHtml(item.id)}">${trash}</button></td></tr>`);
   const pager = data.total_pages > 1 ? `<nav class="asset-transactions-pagination" aria-label="Paginação dos lançamentos"><button class="secondary" type="button" data-asset-transactions-page="${data.page - 1}" ${data.has_previous ? "" : "disabled"}>Anterior</button><span>Página ${data.page} de ${data.total_pages}</span><button class="secondary" type="button" data-asset-transactions-page="${data.page + 1}" ${data.has_next ? "" : "disabled"}>Próximo</button></nav>` : "";
-  const movementSection = `<div data-events-pane="movement">${movements.length ? table(["Tipo", "Data", "Quantidade", "Preço unitário", "Valor", "Fonte", "Ações"], renderRows(movements, false)) : emptyState("Nenhuma movimentação registrada para este ativo.")}</div>`;
-  const incomeSection = `<div data-events-pane="income" hidden>${incomes.length ? table(["Tipo", "Data", "Valor", "Fonte", "Ações"], renderRows(incomes, true)) : emptyState("Nenhum rendimento registrado para este ativo.")}</div>`;
-  const activeMovement = group === "MOVEMENT";
-  return `<button class="secondary" type="button" data-events-back>← Lançamentos</button><h3>${activeMovement ? "Movimentações" : "Rendimentos"}</h3>${activeMovement ? movementSection : incomeSection}${pager.replaceAll('data-asset-transactions-page=', `data-asset-transactions-group="${group}" data-asset-transactions-page=`)}`;
+  return `<div data-events-pane="${income ? "income" : "movement"}">${table(income ? ["Tipo", "Data", "Valor", "Fonte", "Ações"] : ["Tipo", "Data", "Quantidade", "Preço unitário", "Valor", "Fonte", "Ações"], renderRows)}</div>${pager}`;
 }
 
 function formatDate(value) {
