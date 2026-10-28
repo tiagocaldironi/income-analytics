@@ -1,0 +1,8 @@
+# Proposed ownership only. Required reviews are NOT enabled by this file.
+# Only verified eligible collaborator as of 2026-10-28: @tiagocaldironi.
+# Before requiring owner reviews, add an independently verified second owner
+# on these same lines. The PR author cannot provide independent approval.
+/.github/workflows/ @tiagocaldironi
+/.github/CODEOWNERS @tiagocaldironi
+/income-analytics/ci/ @tiagocaldironi
+/income-analytics/docs/engineering/cicd-assessment/ @tiagocaldironi
