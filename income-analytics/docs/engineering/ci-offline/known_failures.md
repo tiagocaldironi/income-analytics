@@ -29,6 +29,8 @@ No clone limpo de `e023ade90345e2393806932558cb2bfbbb9f9f2a`, com os bytes LF do
 
 A primeira execução GitHub teve ainda uma falha no teste de segurança do banco, não reproduzida no host local: caminhos TEMP do Windows hospedado podem usar aliases 8.3. O runner foi corrigido para canonicalizar o sandbox **antes** de configurar as variáveis, sem modificar o teste de segurança. Foi acrescentado um teste da infraestrutura CI para caminhos não canônicos. O resultado remoto posterior deve ser consultado em [validation.md](validation.md); falha de segurança não será classificada automaticamente como dívida aceitável do produto.
 
+**Confirmação após correção:** o run remoto `40690965160` aprovou o teste de segurança e os cinco testes novos da CI. Resultado Python final do código CI `2e3491f`: **995 passed, 15 failed, 9 errors, 5 skipped**, cobertura 80,69%. As falhas remanescentes são as dependências de evidência e os dois gates congelados descritos acima. A correção de caminho não foi contada como dívida financeira nem ignorada.
+
 ## Separação das pendências
 
 1. **Infraestrutura CI:** instalação, execução de todos os checks, isolamento e geração de relatórios podem ser avaliados mesmo com dívida do produto visível.
