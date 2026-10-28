@@ -40,6 +40,30 @@ def source_fingerprint() -> str:
     return hashlib.sha256(json.dumps(selected, sort_keys=True).encode()).hexdigest()
 
 
+def parse_mypy_output(output: str) -> list[dict]:
+    """Reject partially parsed output instead of hiding new diagnostics."""
+    findings = []
+    for line in output.splitlines():
+        match = re.match(r"(.+\.pyi?):(\d+): error: (.*)  \[([^]]+)\]$", line)
+        if match:
+            findings.append(
+                {
+                    "tool": "mypy",
+                    "file": match[1].replace("\\", "/"),
+                    "line": int(match[2]),
+                    "column": None,
+                    "code": match[4],
+                    "message": normalized_message(match[3]),
+                }
+            )
+        elif ": error:" in line or line.lstrip().startswith("error:"):
+            raise ValueError("UNPARSED_MYPY_DIAGNOSTIC")
+        summary = re.match(r"Found (\d+) errors?\b", line)
+        if summary and int(summary[1]) != len(findings):
+            raise ValueError("MYPY_DIAGNOSTIC_COUNT_MISMATCH")
+    return findings
+
+
 def quality_findings(check: str, env: dict, sandbox: Path) -> tuple[int, list[dict]]:
     if check == "ruff":
         args = [sys.executable, "-m", "ruff", "check", ".", "--no-cache", "--output-format=json"]
@@ -68,19 +92,7 @@ def quality_findings(check: str, env: dict, sandbox: Path) -> tuple[int, list[di
                 }
             )
     else:
-        for line in result.stdout.splitlines():
-            match = re.match(r"(.+\.py):(\d+): error: (.*)  \[([^]]+)\]$", line)
-            if match:
-                findings.append(
-                    {
-                        "tool": check,
-                        "file": match[1].replace("\\", "/"),
-                        "line": int(match[2]),
-                        "column": None,
-                        "code": match[4],
-                        "message": normalized_message(match[3]),
-                    }
-                )
+        findings = parse_mypy_output(result.stdout)
     if result.returncode not in (0, 1) or (result.returncode == 1 and not findings):
         raise ValueError("QUALITY_TOOL_OR_PARSER_FAILURE")
     return result.returncode, findings

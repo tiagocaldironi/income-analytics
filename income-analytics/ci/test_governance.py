@@ -16,6 +16,7 @@ from gate_policy import (
     summarize_reports,
     test_scope,
 )
+from governance import parse_mypy_output
 
 
 def diagnostic(**changes):
@@ -164,3 +165,34 @@ def test_workflow_preserves_read_only_untrusted_pr_boundary():
                 action, revision = step["uses"].split("@")
                 assert action.startswith("actions/") and len(revision) == 40
     assert workflow["jobs"]["engineering_gate"]["if"] == "always()"
+
+
+@pytest.mark.parametrize("suffix", ["py", "pyi"])
+def test_mypy_parser_includes_source_and_stub_errors(suffix):
+    findings = parse_mypy_output(
+        f"src/types.{suffix}:7: error: Incompatible assignment  [assignment]\n"
+        "Found 1 error in 1 file (checked 1 source file)\n"
+    )
+    assert len(findings) == 1
+    assert findings[0]["file"] == f"src/types.{suffix}"
+    assert findings[0]["code"] == "assignment"
+
+
+@pytest.mark.parametrize(
+    "unknown",
+    [
+        "error: unexpected diagnostic format",
+        "src/config.txt:8: error: Unsupported input",
+    ],
+)
+def test_mypy_partial_parse_fails_instead_of_approving_old_debt(unknown):
+    with pytest.raises(ValueError, match="UNPARSED_MYPY_DIAGNOSTIC"):
+        parse_mypy_output("src/a.py:2: error: Existing error  [arg-type]\n" + unknown)
+
+
+def test_mypy_summary_must_match_all_parsed_diagnostics():
+    with pytest.raises(ValueError, match="MYPY_DIAGNOSTIC_COUNT_MISMATCH"):
+        parse_mypy_output(
+            "src/a.py:2: error: Existing error  [arg-type]\n"
+            "Found 2 errors in 1 file (checked 1 source file)\n"
+        )
