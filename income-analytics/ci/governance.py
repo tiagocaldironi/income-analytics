@@ -14,30 +14,13 @@ from pathlib import Path
 
 import run as legacy
 from gate_policy import BASELINE, ROOT, compare_diagnostics, normalized_message, summarize_reports
+from pipeline_identity import FINGERPRINT_VERSION, execution_fingerprint, governance_policy_identity
 
 CHECKS = ("runtime", "engineering", "financial", "python", "node", "ruff", "mypy", "quality")
 
 
 def source_fingerprint() -> str:
-    paths = subprocess.check_output(
-        ["git", "ls-files", "--cached", "--others", "--exclude-standard"], cwd=ROOT, text=True
-    ).splitlines()
-    selected = []
-    for file in sorted(set(paths)):
-        if file.startswith(("src/", "tests/", "ci/", "alembic/")) or file in {
-            "pyproject.toml",
-            "alembic.ini",
-            "docs/engineering/cicd-assessment/ci_quality_baseline.json",
-            "docs/engineering/cicd-assessment/magic_formula_reference_provenance.json",
-        }:
-            path = ROOT / file
-            if path.is_file():
-                selected.append((file, hashlib.sha256(path.read_bytes()).hexdigest()))
-    workflow = ROOT.parent / ".github/workflows/ci-offline.yml"
-    selected.append(
-        (".github/workflows/ci-offline.yml", hashlib.sha256(workflow.read_bytes()).hexdigest())
-    )
-    return hashlib.sha256(json.dumps(selected, sort_keys=True).encode()).hexdigest()
+    return execution_fingerprint(ROOT)
 
 
 def parse_mypy_output(output: str) -> list[dict]:
@@ -114,6 +97,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         "tests",
         "ci/test_ci.py",
         "ci/test_governance.py",
+        "ci/test_pr52_governance.py",
         f"--ci-gate={gate}",
         "-ra",
         "--tb=short",
@@ -227,12 +211,14 @@ def main() -> int:
     output.mkdir(parents=True, exist_ok=True)
     sandbox = Path(tempfile.mkdtemp(prefix="income-governance-")).resolve()
     report = {
-        "schema": 2,
+        "schema": 3,
         "check": args.check,
         "checkout_sha": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip(),
         "source_fingerprint": source_fingerprint(),
+        "fingerprint_version": FINGERPRINT_VERSION,
+        "governance_policy_sha256": governance_policy_identity(ROOT),
         "pr_head_sha": os.getenv("CI_PR_HEAD_SHA", ""),
         "event_sha": os.getenv("GITHUB_SHA", ""),
         "worktree_dirty": bool(

@@ -68,6 +68,8 @@ jobs:
           ./.venv/Scripts/python.exe -m pip check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run isolated check (failure is not waived)
+        # Python scopes explicitly include test_ci.py, test_governance.py and
+        # test_pr52_governance.py via governance.py; collection failures are fatal.
         run: ./.venv/Scripts/python.exe ci/governance.py ${{ matrix.check }}
       - name: Upload payload-free reports even on failure
         if: always()

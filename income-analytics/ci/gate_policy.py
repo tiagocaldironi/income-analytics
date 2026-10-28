@@ -106,10 +106,15 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
     required = ("runtime", "engineering", "node", "quality")
     missing = [name for name in required if name not in reports]
     identities = {
-        (report.get("checkout_sha"), report.get("source_fingerprint"))
+        (
+            report.get("checkout_sha"),
+            report.get("source_fingerprint"),
+            report.get("governance_policy_sha256"),
+            report.get("fingerprint_version"),
+        )
         for report in reports.values()
     }
-    valid_identity = len(identities) == 1 and all(all(pair) for pair in identities)
+    valid_identity = len(identities) == 1 and all(all(pair) and pair[3] == 2 for pair in identities)
     engineering = (
         not missing
         and valid_identity
@@ -119,7 +124,14 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
     financial_pass = (
         certification.get("status") == "PASS"
         and certification.get("exit_code") == 0
-        and (certification.get("checkout_sha"), certification.get("source_fingerprint"))
+        and not certification.get("blockers")
+        and valid_identity
+        and (
+            certification.get("checkout_sha"),
+            certification.get("source_fingerprint"),
+            certification.get("governance_policy_sha256"),
+            certification.get("fingerprint_version"),
+        )
         in identities
     )
     return {

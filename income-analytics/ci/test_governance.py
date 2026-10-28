@@ -6,6 +6,7 @@ import subprocess
 import sys
 from copy import deepcopy
 
+import pipeline_identity
 import pytest
 import yaml
 from gate_policy import (
@@ -84,7 +85,13 @@ def test_external_scope_requires_documented_real_dependency():
 
 def engineering_reports():
     return {
-        name: {"checkout_sha": "candidate-sha", "source_fingerprint": "content-id", "exit_code": 0}
+        name: {
+            "checkout_sha": "candidate-sha",
+            "source_fingerprint": "content-id",
+            "exit_code": 0,
+            "fingerprint_version": 2,
+            "governance_policy_sha256": "policy-id",
+        }
         for name in ("runtime", "engineering", "node", "quality")
     }
 
@@ -97,6 +104,8 @@ def test_engineering_pass_never_authorizes_financial_release_or_deploy():
         "blockers": ["CERT_48"],
         "checkout_sha": "candidate-sha",
         "source_fingerprint": "content-id",
+        "fingerprint_version": 2,
+        "governance_policy_sha256": "policy-id",
     }
     result = summarize_reports(reports)
     assert result["engineering_ci"] == "PASS"
@@ -196,3 +205,67 @@ def test_mypy_summary_must_match_all_parsed_diagnostics():
             "src/a.py:2: error: Existing error  [arg-type]\n"
             "Found 2 errors in 1 file (checked 1 source file)\n"
         )
+
+
+@pytest.fixture
+def policy_tree(tmp_path, monkeypatch):
+    """Temporary unit inputs, never a replacement for remote/financial evidence."""
+    root = tmp_path / "income-analytics"
+    root.mkdir()
+    for file in pipeline_identity.POLICY_FILES:
+        target = tmp_path / file
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("unit-policy-content\n", encoding="utf-8")
+    monkeypatch.setattr(pipeline_identity.subprocess, "check_output", lambda *a, **k: "")
+    return root
+
+
+@pytest.mark.parametrize("file", pipeline_identity.POLICY_FILES)
+def test_each_governance_file_changes_both_identities(policy_tree, file):
+    before_policy = pipeline_identity.governance_policy_identity(policy_tree)
+    before_execution = pipeline_identity.execution_fingerprint(policy_tree)
+    (policy_tree.parent / file).write_text("changed-unit-input\n", encoding="utf-8")
+    assert pipeline_identity.governance_policy_identity(policy_tree) != before_policy
+    assert pipeline_identity.execution_fingerprint(policy_tree) != before_execution
+
+
+def test_missing_governance_test_is_fatal_before_check_execution(policy_tree):
+    missing = policy_tree / "ci/test_pr52_governance.py"
+    missing.unlink()
+    with pytest.raises(FileNotFoundError):
+        pipeline_identity.governance_policy_identity(policy_tree)
+    with pytest.raises(FileNotFoundError):
+        pipeline_identity.execution_fingerprint(policy_tree)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("governance_policy_sha256", "other-policy"),
+        ("fingerprint_version", 1),
+        ("governance_policy_sha256", None),
+    ],
+)
+def test_inconsistent_or_legacy_policy_identity_cannot_approve(field, value):
+    reports = engineering_reports()
+    reports["node"][field] = value
+    assert summarize_reports(reports)["engineering_ci"] == "FAIL"
+
+
+def test_pr52_tests_are_explicit_inputs_to_the_actual_python_command(monkeypatch, tmp_path):
+    import governance
+
+    class StopBeforeExecution(Exception):
+        pass
+
+    def capture(args, *unused):
+        assert "tests" in args
+        assert "ci/test_ci.py" in args
+        assert "ci/test_governance.py" in args
+        assert "ci/test_pr52_governance.py" in args
+        assert "--ci-gate=engineering" in args
+        raise StopBeforeExecution
+
+    monkeypatch.setattr(governance.legacy, "execute", capture)
+    with pytest.raises(StopBeforeExecution):
+        governance.python_check("engineering", {}, tmp_path, tmp_path)

@@ -1,15 +1,12 @@
-"""Manual PR5.2 checks of proposed governance; no remote writes or financial changes.
+"""Hermetic PR5.2 governance checks, explicitly included in Engineering.
 
-Not added to the published workflow: run explicitly alongside existing CI tests.
 Server-side review enforcement cannot be proven by these local checks.
 """
 
 import hashlib
 import json
-import os
 import subprocess
 import sys
-from pathlib import Path
 
 import pytest
 import yaml
@@ -45,7 +42,7 @@ def owners_for(path, rules):
 
 
 def protection():
-    return json.loads((DOCS / "ci_branch_protection_proposal.json").read_text())
+    return json.loads((DOCS / "ci_branch_protection_bootstrap.json").read_text())
 
 
 def test_critical_paths_have_verified_owner_and_valid_anchored_patterns():
@@ -59,7 +56,7 @@ def test_critical_paths_have_verified_owner_and_valid_anchored_patterns():
         "income-analytics/ci/governance.py",
         "income-analytics/docs/engineering/cicd-assessment/ci_quality_baseline.json",
         "income-analytics/docs/engineering/cicd-assessment/ci_gate_policy.md",
-        "income-analytics/docs/engineering/cicd-assessment/ci_branch_protection_proposal.json",
+        "income-analytics/docs/engineering/cicd-assessment/ci_branch_protection_bootstrap.json",
     ]
     assert all(owners_for(p, rules) == ["@tiagocaldironi"] for p in paths)
     assert not owners_for("other-project/ci/governance.py", rules)
@@ -71,15 +68,24 @@ def test_missing_workflow_ownership_is_detected():
     assert not owners_for(".github/workflows/ci-offline.yml", mutated)
 
 
-def test_proposal_requires_independent_review_before_activation():
+def test_single_maintainer_proposal_defers_independent_review_to_level_two():
     plan = protection()
-    assert plan["state"] == "PROPOSAL_ONLY_DO_NOT_APPLY"
-    assert len(plan["activation_blockers"]) == 4
+    assert plan["state"] == "PROPOSAL_ONLY_NOT_APPLIED"
+    assert plan["risk"] == "INDEPENDENT_REVIEW_NOT_AVAILABLE"
     payload = plan["proposed_branch_protection_payload"]
     reviews = payload["required_pull_request_reviews"]
-    assert reviews["required_approving_review_count"] == 1
-    assert reviews["require_last_push_approval"] and reviews["dismiss_stale_reviews"]
-    assert reviews["require_code_owner_reviews"] and payload["enforce_admins"]
+    assert reviews["required_approving_review_count"] == 0
+    assert not any(
+        reviews[k]
+        for k in (
+            "require_last_push_approval",
+            "dismiss_stale_reviews",
+            "require_code_owner_reviews",
+        )
+    )
+    assert payload["enforce_admins"]
+    assert plan["future_level"]["required_approving_review_count"] == 1
+    assert plan["future_level"]["require_code_owner_reviews"]
     assert payload["required_conversation_resolution"]
     assert payload["allow_force_pushes"] is payload["allow_deletions"] is False
 
@@ -139,12 +145,16 @@ def test_real_new_tool_diagnostic_rejects_non_regression(tool, tmp_path):
 def test_baseline_mutation_is_identifiable_without_changing_original(tmp_path):
     baseline = DOCS / "ci_quality_baseline.json"
     original = baseline.read_bytes()
-    archive = json.loads((DOCS / "ci_evidence_archive_manifest.json").read_text())
-    quality = next(a for a in archive["artifacts"] if a["name"].startswith("governance-quality-"))
-    expected_file = next(f for f in quality["files"] if f["path"] == "result.json")
-    archived = Path(os.environ["PR52_ARCHIVE_ROOT"]) / "reports" / quality["name"] / "result.json"
-    assert hashlib.sha256(archived.read_bytes()).hexdigest() == expected_file["sha256"]
-    expected = json.loads(archived.read_text())["baseline_sha256"]
+    # Versioned blob is the reference, not a personal archive or invented hosted result.
+    versioned = subprocess.check_output(
+        [
+            "git",
+            "show",
+            "HEAD:income-analytics/docs/engineering/cicd-assessment/ci_quality_baseline.json",
+        ],
+        cwd=ROOT,
+    )
+    expected = hashlib.sha256(versioned).hexdigest()
     assert hashlib.sha256(original).hexdigest() == expected
     mutated = json.loads(original)
     mutated["findings"] = []
@@ -154,20 +164,52 @@ def test_baseline_mutation_is_identifiable_without_changing_original(tmp_path):
     assert baseline.read_bytes() == original
 
 
-def test_real_financial_blockers_are_not_green():
-    manifest = json.loads((DOCS / "ci_evidence_archive_manifest.json").read_text())
-    reports = {}
-    for artifact in manifest["artifacts"]:
-        if artifact["name"].startswith("governance-"):
-            path = (
-                Path(os.environ["PR52_ARCHIVE_ROOT"]) / "reports" / artifact["name"] / "result.json"
-            )
-            doc = json.loads(path.read_text())
-            reports[doc["check"]] = doc
+def test_financial_blockers_cannot_be_relabelled_as_pass():
+    # Synthetic unit inputs only; actual financial tests still run in their own job.
+    identity = {
+        "checkout_sha": "unit-sha",
+        "source_fingerprint": "unit-content",
+        "fingerprint_version": 2,
+        "governance_policy_sha256": "unit-policy",
+    }
+    reports = {
+        check: {**identity, "exit_code": 0}
+        for check in ("runtime", "engineering", "node", "quality")
+    }
+    reports["financial"] = {
+        **identity,
+        "exit_code": 0,
+        "status": "PASS",
+        "blockers": ["CERT_48"],
+    }
     summary = summarize_reports(reports)
     assert summary["engineering_ci"] == "PASS"
     assert summary["financial_certification"] == summary["release_readiness"] == "BLOCKED"
     assert summary["deployment_authorized"] is False
-    assert reports["financial"]["exit_code"] == 1
-    blocked = [c for c in reports["financial"]["cases"] if c["status"] in {"failed", "errors"}]
-    assert any(c["name"] == "test_shares_unit_020_frozen_engine" for c in blocked)
+
+
+def test_bootstrap_local_model_requires_pr_checks_and_conversations_not_reviewers():
+    """Policy simulation only, not evidence of remote enforcement."""
+    payload = protection()["proposed_branch_protection_payload"]
+
+    def allowed(action, *, check=True, current=True, conversations=True):
+        if action == "force_push":
+            return payload["allow_force_pushes"]
+        if action == "delete":
+            return payload["allow_deletions"]
+        if action != "merge_pr" and payload["required_pull_request_reviews"] is not None:
+            return False
+        return (
+            check
+            and (current or not payload["required_status_checks"]["strict"])
+            and (conversations or not payload["required_conversation_resolution"])
+            and payload["required_pull_request_reviews"]["required_approving_review_count"] == 0
+        )
+
+    assert allowed("merge_pr")
+    assert not allowed("direct_push")
+    assert not allowed("force_push")
+    assert not allowed("delete")
+    assert not allowed("merge_pr", check=False)
+    assert not allowed("merge_pr", current=False)
+    assert not allowed("merge_pr", conversations=False)
