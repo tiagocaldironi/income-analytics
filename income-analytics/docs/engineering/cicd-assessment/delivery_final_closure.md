@@ -208,7 +208,15 @@ O primeiro ensaio identificou I/O em SQLite após encerramento abrupto; a camada
 passou a encerrar Uvicorn/conexões graciosamente, e o ensaio foi repetido com sucesso.
 Essa medição local não representa promoção de PR não integrado.
 
-Evidências hospedadas, PR integrado e run pós-merge: pendentes nesta revisão.
+Primeiro run hospedado [40864238615](https://github.com/tiagocaldironi/income-analytics/actions/runs/40864238615):
+Engineering e build aprovados, mas preview SKIPPED pela condição implícita success()
+sobre ancestrais diagnósticos falhos. Isso não foi aceito como homologação. A condição
+passou a usar always() + sucesso explícito de Engineering/build + evento PR,
+preservando os diagnósticos reprovados. A revisão também distingue a identidade do
+workflow CI no preview da identidade do workflow separado no delivery, e usa IDs
+sem caminhos absolutos nos relatórios dos testes de proteção de produção.
+
+Evidência hospedada da revisão corrigida, PR integrado e run pós-merge: pendentes nesta revisão.
 O relatório final incluirá os runs, commits, artifact IDs e digests reais; nenhuma
 conclusão será inferida apenas do desenho ou dos testes locais.
 

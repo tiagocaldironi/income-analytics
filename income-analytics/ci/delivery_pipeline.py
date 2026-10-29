@@ -4,6 +4,7 @@ import io
 import json
 import os
 import re
+import subprocess
 import urllib.error
 import urllib.request
 import zipfile
@@ -257,7 +258,11 @@ def main():
             )
         },
         "workflow_identity": {
-            "path": ".github/workflows/delivery-validation.yml",
+            "path": (
+                ".github/workflows/ci-offline.yml"
+                if mode == "premerge"
+                else ".github/workflows/delivery-validation.yml"
+            ),
             "delivery_run_id": os.getenv("GITHUB_RUN_ID", "LOCAL_VALIDATION"),
             "workflow_ref": os.getenv("GITHUB_WORKFLOW_REF", "LOCAL_VALIDATION"),
             "workflow_sha": os.getenv("GITHUB_WORKFLOW_SHA", "LOCAL_VALIDATION"),
@@ -273,6 +278,15 @@ def main():
             os.getenv("DELIVERY_TARGET", "staging"), os.getenv("DELIVERY_PRODUCTION_AUTHORIZATION")
         )
         require(mode in {"delivery", "premerge"}, "UNKNOWN_DELIVERY_MODE")
+        result["workflow_identity"]["controller_checkout_sha"] = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+        require(
+            not subprocess.check_output(
+                ["git", "status", "--porcelain"], cwd=ROOT, text=True
+            ).strip(),
+            "CONTROLLER_DIRTY",
+        )
         run_id = int(os.environ["DELIVERY_SOURCE_RUN"])
         expected = os.environ["DELIVERY_SOURCE_COMMIT"]
         current_run = int(os.environ.get("GITHUB_RUN_ID", "0"))

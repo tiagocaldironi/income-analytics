@@ -208,7 +208,7 @@ jobs:
 
   staging_preview:
     name: CD / Staging validation
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ always() && github.event_name == 'pull_request' && needs.engineering_gate.result == 'success' && needs.build.result == 'success' }}
     needs: [engineering_gate, build]
     runs-on: windows-2025
     timeout-minutes: 30

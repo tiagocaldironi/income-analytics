@@ -351,6 +351,7 @@ def test_incompatible_schema_blocks_rollback_without_downgrade(owned):
         "C:/Users/tiago/.codex/worktrees/firebase-official-merge/Projetos/income-analytics/income_analytics.db",
         "C:/Users/tiago/AppData/Local/IncomeAnalytics/production.db",
     ],
+    ids=["legacy-production-worktree", "https-production-runtime"],
 )
 def test_known_production_paths_rejected_before_database_access(owned, name):
     with pytest.raises(DeliveryError, match="PATH_NOT_OWNED"):
