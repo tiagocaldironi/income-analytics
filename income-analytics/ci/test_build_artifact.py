@@ -13,6 +13,16 @@ from gate_policy import summarize_reports
 from test_governance import engineering_reports
 
 
+def test_runtime_policy_requires_only_real_versioned_files_and_all_migrations():
+    root = Path(__file__).resolve().parents[1]
+    policy = json.loads((root / "ci/build_policy.json").read_text())
+    reverse = {target: source for source, target in artifact.SUPPORT.items()}
+    for name in artifact.REQUIRED | set(policy["required_files"]):
+        assert (root / reverse.get(name, name)).is_file()
+    migrations = {p.relative_to(root).as_posix() for p in (root / "alembic/versions").glob("*.py")}
+    assert migrations.issubset(policy["required_files"])
+
+
 @pytest.fixture
 def built(tmp_path):
     root = tmp_path / "repo"
