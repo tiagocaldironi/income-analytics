@@ -19,6 +19,7 @@ from delivery import (
     DeliveryError,
     production_request,
     require,
+    security_delivery_gate,
     trusted_source,
 )
 from delivery_stage import exercise, expect_failure
@@ -93,7 +94,7 @@ def one(artifacts, name):
     return values[0]
 
 
-def acquire(client, run_id, commit, mode, destination, current_run=None):
+def acquire(client, run_id, commit, mode, destination, current_run=None, rollback=False):
     require(isinstance(run_id, int) and run_id > 0, "INVALID_BUILD_RUN")
     require(re.fullmatch(r"[a-f0-9]{40}", commit) is not None, "INVALID_SOURCE_COMMIT")
     run = client.json(f"actions/runs/{run_id}")
@@ -139,7 +140,9 @@ def acquire(client, run_id, commit, mode, destination, current_run=None):
     build = json.loads(build_files["result.json"])
     gate = json.loads(gate_files["gate-summary.json"])
     app_meta = one(artifacts, f"application-{commit}-windows-x64")
+    security_status = security_delivery_gate(gate, jobs, run_id, commit, rollback)
     identity = trusted_source(run, app_meta, jobs, build, gate, commit, mode, current_run)
+    identity["security_baseline"] = security_status
     app_files = envelope(client, app_meta)
     package_name = f"income-analytics-{commit}-windows-x64.zip"
     require(
@@ -300,6 +303,7 @@ def main():
                 os.getenv("DELIVERY_PREVIOUS_COMMIT", BASELINE_COMMIT),
                 "delivery",
                 previous_archive,
+                rollback=True,
             )
             candidate = acquire(client, run_id, expected, mode, candidate_archive, current_run)
             result["candidate"] = candidate

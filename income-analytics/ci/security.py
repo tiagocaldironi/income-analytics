@@ -1,6 +1,7 @@
 """Payload-free security evidence. Scanner errors fail closed; no production access."""
 
 import argparse
+import base64
 import hashlib
 import importlib.metadata
 import io
@@ -297,13 +298,66 @@ def components():
             "hashes": {sha(file.read_bytes())} if name == "echarts" else set(),
             "locations": [location],
         }
+    for item in javascript_components():
+        packages[(item["ecosystem"], item["name"], item["version"])] = item
+    vendor = ROOT / "src/income_analytics/api/static/vendor/echarts-6.1.0.min.js"
+    if b"6.1.0" not in re.findall(rb'\.version\s*=\s*["\x27](\d+\.\d+\.\d+)', vendor.read_bytes()):
+        raise ValueError("VENDORED_VERSION_MISMATCH")
     return [dict(v, hashes=sorted(v["hashes"])) for _, v in sorted(packages.items())]
+
+
+def javascript_components():
+    document = json.loads((ROOT / "ci/javascript-components.json").read_text(encoding="utf-8"))
+    result = []
+    for item in document["components"]:
+        algorithm, encoded = item["integrity"].split("-", 1)
+        if algorithm != "sha512":
+            raise ValueError("UNSUPPORTED_NPM_INTEGRITY")
+        result.append(
+            {
+                "ecosystem": "npm",
+                "name": item["name"],
+                "version": item["version"],
+                "hashes": set(),
+                "locations": [item["metadata_url"]],
+                "additional_hashes": [
+                    {"alg": "SHA-512", "content": base64.b64decode(encoded, validate=True).hex()}
+                ],
+                "hash_scope": "Published npm tarball metadata; CDN bytes audited separately",
+            }
+        )
+    for item in document["unresolved_ranges"]:
+        result.append(
+            {
+                "ecosystem": "npm",
+                "name": item["name"],
+                "version": "NOT_VERIFIED",
+                "package_only": True,
+                "hashes": set(),
+                "locations": ["ci/javascript-components.json"],
+                "declared_range": item["declared_range"],
+            }
+        )
+    allowed_assets = {
+        "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js",
+        "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js",
+    }
+    if {item["url"] for item in document["external_assets"]} != allowed_assets:
+        raise ValueError("UNREVIEWED_CDN_ORIGIN")
+    for item in document["external_assets"]:
+        with urllib.request.urlopen(item["url"], timeout=60) as response:
+            if sha(response.read()) != item["sha256"]:
+                raise ValueError("CDN_BUNDLE_DIGEST_MISMATCH")
+    return result
 
 
 def query_dependencies(items, opener=urllib.request.urlopen):
     payload = {
         "queries": [
-            {"package": {"ecosystem": p["ecosystem"], "name": p["name"]}, "version": p["version"]}
+            {
+                "package": {"ecosystem": p["ecosystem"], "name": p["name"]},
+                **({} if p.get("package_only") else {"version": p["version"]}),
+            }
             for p in items
         ]
     }
@@ -436,6 +490,11 @@ def sbom(items, commit, artifact_digest):
         "specVersion": "1.6",
         "version": 1,
         "metadata": {
+            "component": {"type": "application", "name": "income-analytics", "version": commit},
+            "properties": [
+                {"name": "income:source:commit", "value": commit},
+                {"name": "income:artifact:sha256", "value": artifact_digest},
+            ],
             "tools": {
                 "components": [
                     {
@@ -449,29 +508,58 @@ def sbom(items, commit, artifact_digest):
                     }
                 ]
             },
-            "component": {"type": "application", "name": "income-analytics", "version": commit},
-            "properties": [
-                {"name": "income:source:commit", "value": commit},
-                {"name": "income:artifact:sha256", "value": artifact_digest},
-            ],
         },
-        "components": [
+        "components": [bom_component(package) for package in items],
+    }
+
+
+def bom_component(package):
+    result = {
+        "type": "library",
+        "name": package["name"],
+        "bom-ref": package_url(package),
+        "purl": package_url(package),
+        "hashes": (
+            [{"alg": "SHA-256", "content": value} for value in package["hashes"]]
+            + package.get("additional_hashes", [])
+        ),
+        "properties": [
             {
-                "type": "library",
-                "name": p["name"],
-                "version": p["version"],
-                "bom-ref": package_url(p),
-                "purl": package_url(p),
-                "hashes": [{"alg": "SHA-256", "content": h} for h in p["hashes"]],
-            }
-            for p in items
+                "name": "income:hash-scope",
+                "value": package.get("hash_scope", "Locked wheel/source"),
+            },
+            {
+                "name": "income:declared-range",
+                "value": package.get("declared_range", "EXACT_VERSION"),
+            },
         ],
     }
+    if not package.get("package_only"):
+        result["version"] = package["version"]
+    else:
+        result["properties"][0]["value"] = (
+            "Bundled helper version NOT_VERIFIED; package-wide OSV scan"
+        )
+    if package["ecosystem"] == "npm" and package["name"] == "firebase":
+        javascript = json.loads(
+            (ROOT / "ci/javascript-components.json").read_text(encoding="utf-8")
+        )
+        result["externalReferences"] = [
+            {
+                "type": "distribution",
+                "url": item["url"],
+                "hashes": [{"alg": "SHA-256", "content": item["sha256"]}],
+            }
+            for item in javascript["external_assets"]
+        ]
+    return result
 
 
 def package_url(package):
     ecosystem = "pypi" if package["ecosystem"] == "PyPI" else "npm"
-    return f"pkg:{ecosystem}/{package['name']}@{package['version']}"
+    name = package["name"].replace("@", "%40")
+    suffix = "" if package.get("package_only") else "@" + package["version"]
+    return f"pkg:{ecosystem}/{name}{suffix}"
 
 
 def main():

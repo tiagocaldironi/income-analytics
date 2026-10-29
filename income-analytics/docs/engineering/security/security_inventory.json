@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "scope": "Versioned source on isolated branch; no production host, databases, private configuration or credentials inspected",
-  "asset_count": 407,
+  "asset_count": 408,
   "assets": [
     {
       "asset": "src/income_analytics/api/__init__.py",
@@ -4598,6 +4598,19 @@
       "dependencies": "Ephemeral local and GitHub CI Windows process; pinned executable; no code/data upload",
       "risks": [
         "Go transitive dependencies and host/runner OS not independently certified"
+      ]
+    },
+    {
+      "asset": "ci/javascript-components.json",
+      "technical_owner": "maintainer / dependency security",
+      "sensitivity": "PUBLIC_DEPENDENCY_METADATA",
+      "exposure": "Registry metadata and two public CDN ESM assets",
+      "trust_boundary": "Published package versions -> pinned metadata -> OSV and CDN byte verification",
+      "authentication": "No account credentials; HTTPS and expected hashes",
+      "data_accessed": "Versions, dependency declarations, public tarball integrity and static JS bytes",
+      "dependencies": "Firebase app/auth, util/logger/component/idb, ECharts/zrender/tslib",
+      "risks": [
+        "Firebase bundled tslib exact version NOT_VERIFIED; package-wide OSV query, no invented version; browser runtime SRI not enforced"
       ]
     }
   ],

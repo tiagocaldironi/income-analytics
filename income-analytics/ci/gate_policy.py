@@ -122,10 +122,18 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
         and build.get("reproducibility") == build.get("manifest") == "PASS"
         and build.get("independent_builds") == 2
         and re.fullmatch(r"[a-f0-9]{64}", build.get("artifact_sha256", "")) is not None
-        and all(installation.get(key) == "PASS" for key in (
-            "status", "installation", "migrations_temporary_sqlite", "backend_import",
-            "startup_health", "static_files", "cleanup",
-        ))
+        and all(
+            installation.get(key) == "PASS"
+            for key in (
+                "status",
+                "installation",
+                "migrations_temporary_sqlite",
+                "backend_import",
+                "startup_health",
+                "static_files",
+                "cleanup",
+            )
+        )
         and installation.get("external_network") == "DENIED"
         and installation.get("production_access") is False
     )
@@ -165,3 +173,12 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
         "deployment_authorized": False,
         "external_integrations": "NOT_RUN_OFFLINE; see full-suite external cases",
     }
+
+
+def require_security_baseline(summary: dict, job_status: str | None) -> dict:
+    result = dict(summary)
+    result["engineering_without_security"] = summary["engineering_ci"]
+    result["security_baseline"] = "PASS" if job_status == "success" else "NOT_APPROVED"
+    if job_status != "success":
+        result["engineering_ci"] = "FAIL"
+    return result

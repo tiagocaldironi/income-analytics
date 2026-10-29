@@ -13,7 +13,14 @@ import time
 from pathlib import Path
 
 import run as legacy
-from gate_policy import BASELINE, ROOT, compare_diagnostics, normalized_message, summarize_reports
+from gate_policy import (
+    BASELINE,
+    ROOT,
+    compare_diagnostics,
+    normalized_message,
+    require_security_baseline,
+    summarize_reports,
+)
 from pipeline_identity import FINGERPRINT_VERSION, execution_fingerprint, governance_policy_identity
 
 CHECKS = ("runtime", "engineering", "financial", "python", "node", "ruff", "mypy", "quality")
@@ -217,6 +224,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("check", choices=(*CHECKS, "summary"))
     parser.add_argument("--reports", type=Path, default=ROOT / "ci-reports")
+    parser.add_argument("--security-status")
     args = parser.parse_args()
     if args.check == "summary":
         reports = {}
@@ -225,7 +233,7 @@ def main() -> int:
             if document["check"] in reports:
                 raise ValueError("DUPLICATE_CHECK_REPORT")
             reports[document["check"]] = document
-        summary = summarize_reports(reports)
+        summary = require_security_baseline(summarize_reports(reports), args.security_status)
         args.reports.mkdir(parents=True, exist_ok=True)
         (args.reports / "gate-summary.json").write_text(json.dumps(summary, indent=2) + "\n")
         print(json.dumps(summary, indent=2))

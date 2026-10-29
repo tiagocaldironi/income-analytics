@@ -125,7 +125,7 @@
       "applied_fix": "No production action; controls documented",
       "regression_test": "saas_xss_characterization.mjs; frontend CI",
       "state": "MITIGATED",
-      "residual": "CDN SRI unavailable for transitive dynamic imports; browser/independent pentest NOT_VERIFIED"
+      "residual": "Browser runtime SRI not implemented; exact bundled Firebase tslib version NOT_VERIFIED, queried package-wide in OSV. CDN bytes are digest-checked in CI. Independent pentest and real browser/Firebase integration NOT_VERIFIED."
     },
     {
       "id": "SEC-008",
@@ -162,6 +162,24 @@
       "regression_test": "Gitleaks negative synthetic credential fixture must be detected; changed public-config bytes require renewed triage",
       "state": "FALSE_POSITIVE",
       "residual": "Cloud API restrictions NOT_VERIFIED; no live credential probe or rotation"
+    },
+    {
+      "id": "SEC-010",
+      "category": "supply-chain",
+      "asset": "Controlled staging candidate provenance",
+      "location": "ci/delivery.py / ci/delivery_pipeline.py / gate_policy.py / governance.py",
+      "evidence": "A historical develop run can have Engineering/build PASS without a Security baseline job; manual source selection previously checked only those older gates.",
+      "exploitation_condition": "Selecting a pre-security CI artifact as a new B staging candidate after security governance is installed.",
+      "impact": "Missing security certification of the staged candidate; production remains unconditionally unauthorized.",
+      "severity": "MEDIUM",
+      "cwe_cve": "CWE-693",
+      "confidence": "HIGH",
+      "scope": "Engineering/staging trust boundary, no productive deployment path",
+      "proposed_fix": "Require actual Security job success and aggregate Security PASS for every new candidate; permit only the exact pinned legacy A as rollback-only fixture.",
+      "applied_fix": "Acquisition gate enforces role and job state; Engineering gate-summary includes Security and fails on missing/skipped/cancelled status.",
+      "regression_test": "test_old_ci_without_security_cannot_be_a_new_delivery_candidate; aggregate status matrix; existing PR7 source/digest/production negatives",
+      "state": "FIXED",
+      "residual": "Pinned legacy A is an explicit synthetic rollback fixture, not a newly approved candidate or production certification."
     }
   ]
 }

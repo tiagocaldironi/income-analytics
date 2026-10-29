@@ -245,7 +245,7 @@ jobs:
       - name: Evaluate engineering independently of financial certification
         if: always()
         run: |
-          python ci/governance.py summary --reports gate-inputs
+          python ci/governance.py summary --reports gate-inputs --security-status '${{ needs.security.result }}'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if ('${{ needs.build.result }}' -ne 'success') { exit 1 }
           if ('${{ needs.security.result }}' -ne 'success') { exit 1 }

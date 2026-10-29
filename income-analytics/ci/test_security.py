@@ -119,3 +119,78 @@ def test_private_persistence_and_key_files_cannot_enter_source_distribution():
 
     blocked = ["data/private.db", "private.pem", "secrets/.env", "wallet.sqlite3"]
     assert forbidden_source_files(blocked + [".env.example", "src/app.py"]) == sorted(blocked)
+
+
+def test_unknown_bundled_helper_version_is_not_invented():
+    from security import bom_component, package_url
+
+    package = dict(
+        ecosystem="npm",
+        name="tslib",
+        version="NOT_VERIFIED",
+        package_only=True,
+        hashes=[],
+        declared_range="^2.1.0",
+    )
+
+    def response(request, **kwargs):
+        assert "version" not in json.loads(request.data)["queries"][0]
+        return io.BytesIO(b'{"results":[{}]}')
+
+    assert query_dependencies([package], response)["status"] == "PASS"
+    assert "version" not in bom_component(package)
+    assert package_url(package) == "pkg:npm/tslib"
+    assert package_url(dict(ecosystem="npm", name="@firebase/auth", version="1.13.8")) == (
+        "pkg:npm/%40firebase/auth@1.13.8"
+    )
+
+
+@pytest.mark.parametrize("status", [None, "failure", "skipped", "cancelled", "timed_out"])
+def test_security_missing_or_unsuccessful_blocks_protected_aggregate(status):
+    from gate_policy import require_security_baseline
+
+    original = {
+        "engineering_ci": "PASS",
+        "financial_certification": "BLOCKED",
+        "deployment_authorized": False,
+    }
+    result = require_security_baseline(original, status)
+    assert result["engineering_ci"] == "FAIL"
+    assert result["security_baseline"] != "PASS"
+    assert original["engineering_ci"] == "PASS"
+    assert result["financial_certification"] == "BLOCKED"
+    assert result["deployment_authorized"] is False
+
+
+def test_security_success_cannot_override_other_engineering_failures():
+    from gate_policy import require_security_baseline
+
+    assert (
+        require_security_baseline({"engineering_ci": "FAIL"}, "success")["engineering_ci"] == "FAIL"
+    )
+    assert (
+        require_security_baseline({"engineering_ci": "PASS"}, "success")["engineering_ci"] == "PASS"
+    )
+
+
+def test_old_ci_without_security_cannot_be_a_new_delivery_candidate():
+    from delivery import BASELINE_COMMIT, BASELINE_RUN, DeliveryError, security_delivery_gate
+
+    with pytest.raises(DeliveryError, match="SECURITY_GATE_NOT_APPROVED"):
+        security_delivery_gate({}, [], BASELINE_RUN, BASELINE_COMMIT)
+    assert security_delivery_gate({}, [], BASELINE_RUN, BASELINE_COMMIT, rollback=True) == (
+        "LEGACY_PINNED_ROLLBACK_ONLY"
+    )
+    with pytest.raises(DeliveryError):
+        security_delivery_gate({}, [], BASELINE_RUN + 1, BASELINE_COMMIT, rollback=True)
+    with pytest.raises(DeliveryError, match="SECURITY_JOB_NOT_APPROVED"):
+        security_delivery_gate({"security_baseline": "PASS"}, [], 1, "a" * 40)
+    assert (
+        security_delivery_gate(
+            {"security_baseline": "PASS"},
+            [{"name": "CI / Security baseline", "conclusion": "success"}],
+            1,
+            "a" * 40,
+        )
+        == "PASS"
+    )
