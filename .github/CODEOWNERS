@@ -7,3 +7,8 @@
 /.github/CODEOWNERS @tiagocaldironi
 /income-analytics/ci/ @tiagocaldironi
 /income-analytics/docs/engineering/cicd-assessment/ @tiagocaldironi
+/income-analytics/docs/engineering/security/ @tiagocaldironi
+/income-analytics/tests/security/ @tiagocaldironi
+/income-analytics/src/income_analytics/api/saas_security.py @tiagocaldironi
+/income-analytics/src/income_analytics/infrastructure/auth_config.py @tiagocaldironi
+/income-analytics/src/income_analytics/infrastructure/security_logging.py @tiagocaldironi

@@ -51,3 +51,7 @@ tmp/paid-income-b3-cvm/
 service-account*.json
 *-firebase-adminsdk-*.json
 .firebase/
+
+# Same-run security inputs; scanned explicitly, never source or distributable.
+security-package/
+security-build/

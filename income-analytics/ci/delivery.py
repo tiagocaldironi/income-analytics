@@ -314,3 +314,13 @@ def verify_selection(workspace, slot, archive, candidate):
     require(
         sha(workspace.safe(archive).read_bytes()) == candidate["package_sha256"], "PARTIAL_ROLLBACK"
     )
+
+
+def security_delivery_gate(gate, jobs, run_id, commit, rollback=False):
+    """Legacy A is a pinned rollback fixture, never a new approved candidate."""
+    if rollback and run_id == BASELINE_RUN and commit == BASELINE_COMMIT:
+        return "LEGACY_PINNED_ROLLBACK_ONLY"
+    states = {job["name"]: job.get("conclusion") for job in jobs}
+    require(gate.get("security_baseline") == "PASS", "SECURITY_GATE_NOT_APPROVED")
+    require(states.get("CI / Security baseline") == "success", "SECURITY_JOB_NOT_APPROVED")
+    return "PASS"

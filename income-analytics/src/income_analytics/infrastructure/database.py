@@ -7,6 +7,7 @@ import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 from threading import RLock
+from typing import Any
 
 from sqlalchemy import create_engine, event, inspect
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
@@ -17,15 +18,17 @@ class Base(DeclarativeBase):
 
 
 def database_url() -> str:
+    from income_analytics.infrastructure.auth_config import validate_database_path
+
     path = Path(os.environ.get("INCOME_ANALYTICS_DATABASE", "income_analytics.db"))
-    return f"sqlite:///{path.as_posix()}"
+    return f"sqlite:///{validate_database_path(path).as_posix()}"
 
 
 engine = create_engine(database_url())
 
 
 @event.listens_for(engine, "connect")
-def _enable_sqlite_foreign_keys(connection, _record) -> None:
+def _enable_sqlite_foreign_keys(connection: Any, _record: Any) -> None:
     if connection.__class__.__module__.startswith("sqlite3"):
         cursor = connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")

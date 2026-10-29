@@ -13,7 +13,14 @@ import time
 from pathlib import Path
 
 import run as legacy
-from gate_policy import BASELINE, ROOT, compare_diagnostics, normalized_message, summarize_reports
+from gate_policy import (
+    BASELINE,
+    ROOT,
+    compare_diagnostics,
+    normalized_message,
+    require_security_baseline,
+    summarize_reports,
+)
 from pipeline_identity import FINGERPRINT_VERSION, execution_fingerprint, governance_policy_identity
 
 CHECKS = ("runtime", "engineering", "financial", "python", "node", "ruff", "mypy", "quality")
@@ -100,6 +107,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         "ci/test_pr52_governance.py",
         "ci/test_build_artifact.py",
         "ci/test_delivery.py",
+        "ci/test_security.py",
         f"--ci-gate={gate}",
         "-ra",
         "--tb=short",
@@ -163,14 +171,36 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
         return code, {"status": "FAIL_WITH_DEBT" if findings else "PASS", "findings": findings}
     if check == "quality":
         baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
+        compatibility = json.loads(
+            (ROOT / "docs/engineering/security/quality_compatibility.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        if hashlib.sha256(BASELINE.read_bytes()).hexdigest() != compatibility["baseline_sha256"]:
+            raise ValueError("ORIGINAL_QUALITY_BASELINE_CHANGED")
+        expected_findings = json.loads(json.dumps(baseline["findings"]))
+        for relocation in compatibility["relocated"]:
+            matching = [
+                row
+                for row in expected_findings
+                if (
+                    row["file"] == "src/income_analytics/main.py"
+                    and row["line"] == relocation["before"]
+                    and row["code"] == relocation["code"]
+                    and row["message"] == relocation["message"]
+                )
+            ]
+            if len(matching) != 1 or relocation["after"] != relocation["before"] + 2:
+                raise ValueError("UNREVIEWED_DIAGNOSTIC_RELOCATION")
+            matching[0]["line"] = relocation["after"]
         if (
             hashlib.sha256((ROOT / "pyproject.toml").read_bytes()).hexdigest()
-            != baseline["quality_configuration_sha256"]
+            != compatibility["quality_configuration_sha256"]
         ):
             raise ValueError("QUALITY_CONFIGURATION_REVIEW_REQUIRED")
         if (
             hashlib.sha256((ROOT / "ci/requirements-windows-py314.lock").read_bytes()).hexdigest()
-            != baseline["lock_sha256"]
+            != compatibility["lock_sha256"]
         ):
             raise ValueError("QUALITY_LOCK_REVIEW_REQUIRED")
         actual, exits = [], {}
@@ -180,7 +210,7 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
             code, findings = quality_findings(tool, env, sandbox)
             actual.extend(findings)
             exits[tool] = code
-        comparison = compare_diagnostics(actual, baseline["findings"])
+        comparison = compare_diagnostics(actual, expected_findings)
         comparison["raw_tool_exit_codes"] = exits
         comparison["baseline_sha256"] = hashlib.sha256(BASELINE.read_bytes()).hexdigest()
         comparison["diagnostics_clean"] = not actual
@@ -194,6 +224,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("check", choices=(*CHECKS, "summary"))
     parser.add_argument("--reports", type=Path, default=ROOT / "ci-reports")
+    parser.add_argument("--security-status")
     args = parser.parse_args()
     if args.check == "summary":
         reports = {}
@@ -202,7 +233,7 @@ def main() -> int:
             if document["check"] in reports:
                 raise ValueError("DUPLICATE_CHECK_REPORT")
             reports[document["check"]] = document
-        summary = summarize_reports(reports)
+        summary = require_security_baseline(summarize_reports(reports), args.security_status)
         args.reports.mkdir(parents=True, exist_ok=True)
         (args.reports / "gate-summary.json").write_text(json.dumps(summary, indent=2) + "\n")
         print(json.dumps(summary, indent=2))

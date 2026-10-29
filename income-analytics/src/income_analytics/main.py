@@ -29,7 +29,7 @@ from income_analytics.api.routers.dashboard import (
 from income_analytics.api.routers.health import router as health_router
 from income_analytics.api.routers.income_starter import router as income_starter_router
 from income_analytics.api.routers.portfolios import router as portfolios_router
-from income_analytics.api.saas_security import authorize_request
+from income_analytics.api.saas_security import authorize_request, local_mode_rejection
 from income_analytics.application.portfolio_context import (
     current_portfolio_id,
     reset_active_portfolio_id,
@@ -63,6 +63,8 @@ if os.environ.get("INCOME_ANALYTICS_PERF_LOG", "").strip().lower() in {"1", "tru
 
 @app.middleware("http")
 async def portfolio_request_context(request, call_next):
+    if rejection := local_mode_rejection(request):
+        return rejection
     if saas_enabled():
 
         async def scoped(portfolio_id):

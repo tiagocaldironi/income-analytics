@@ -580,3 +580,18 @@ def test_scoped_quote_timestamp_survives_sqlite_roundtrip_without_breaking_route
     assert order["price_timestamp"] == observed.isoformat()
     with SessionFactory() as db:
         assert db.get(PortfolioMarketPriceRecord, quote_id).price_timestamp == raw_timestamp
+
+
+def test_sql_payload_is_bound_and_foreign_identifier_is_invalid(saas):
+    login, _, _ = saas
+    client, response, _ = login()
+    assert response.status_code == 200
+    name = "synthetic'); DROP TABLE portfolios;--"
+    created = client.post("/api/portfolios", json={"name": name})
+    assert created.status_code == 201
+    rows = client.get("/api/portfolios").json()["portfolios"]
+    assert any(row["name"] == name for row in rows)
+    assert (
+        client.get("/api/portfolio", headers={"X-Portfolio-Id": "synthetic' OR '1'='1"}).status_code
+        == 400
+    )

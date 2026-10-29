@@ -5,7 +5,7 @@ import os
 import secrets
 from uuid import UUID
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from fastapi.routing import APIRoute
 from starlette.concurrency import run_in_threadpool
 from starlette.responses import JSONResponse, RedirectResponse
@@ -237,3 +237,26 @@ async def authorize_request(request, call_next, *, portfolio_handler):
     finally:
         if context_token is not None:
             principal_context.reset(context_token)
+
+
+def local_mode_rejection(request: Request) -> JSONResponse | None:
+    from income_analytics.infrastructure.auth_config import saas_enabled
+
+    if saas_enabled():
+        return None
+    peer = request.client.host if request.client else ""
+    allowed = {"127.0.0.1", "::1"}
+    hosts = {"localhost", "127.0.0.1", "::1"}
+    if os.getenv("INCOME_ANALYTICS_TESTING") == "1":
+        allowed.add("testclient")
+        hosts.add("testserver")
+    invalid_origin = (
+        request.method not in {"GET", "HEAD", "OPTIONS"}
+        and request.headers.get("origin") is not None
+        and request.headers["origin"] != str(request.base_url).rstrip("/")
+    )
+    if peer not in allowed or request.url.hostname not in hosts or invalid_origin:
+        return JSONResponse(
+            {"detail": "Modo local disponível apenas em loopback."}, status_code=403
+        )
+    return None
