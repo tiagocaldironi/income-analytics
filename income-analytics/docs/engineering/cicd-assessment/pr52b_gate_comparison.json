@@ -1,0 +1,602 @@
+{
+  "schema": 1,
+  "state": "HOSTED_VALIDATED",
+  "recorded_at_utc": "2026-10-28T21:22:38.291130+00:00",
+  "repository": "tiagocaldironi/income-analytics",
+  "pr_url": "https://github.com/tiagocaldironi/income-analytics/pull/48",
+  "run_url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788",
+  "run_id": 40770225788,
+  "remote_before": "a2f6d64bb55210bb7514c2f172efa37116eeec6e",
+  "commits": [
+    {
+      "sha": "56aa85624446064c8edd9870ac25d9a935b427a9",
+      "subject": "ci: record PR5.2 ownership and governance proposals",
+      "files": [
+        ".github/CODEOWNERS",
+        "income-analytics/ci/test_pr52_governance.py",
+        "income-analytics/docs/engineering/cicd-assessment/ci_branch_protection_plan.md",
+        "income-analytics/docs/engineering/cicd-assessment/ci_branch_protection_proposal.json",
+        "income-analytics/docs/engineering/cicd-assessment/ci_branch_protection_proposal.md",
+        "income-analytics/docs/engineering/cicd-assessment/ci_evidence_archive_manifest.json",
+        "income-analytics/docs/engineering/cicd-assessment/ci_governance_review.md",
+        "income-analytics/docs/engineering/cicd-assessment/pr51e_hosted_validation.md",
+        "income-analytics/docs/engineering/cicd-assessment/pr51e_validation.md",
+        "income-analytics/docs/engineering/cicd-assessment/pr52_validation.md"
+      ]
+    },
+    {
+      "sha": "405b29d7c9bbd98bb373c4827b702ecaada3fc86",
+      "subject": "ci: bootstrap single-maintainer gates with versioned policy identity",
+      "files": [
+        ".github/CODEOWNERS",
+        ".github/workflows/ci-offline.yml",
+        "income-analytics/ci/gate_policy.py",
+        "income-analytics/ci/governance.py",
+        "income-analytics/ci/pipeline_identity.py",
+        "income-analytics/ci/test_governance.py",
+        "income-analytics/ci/test_pr52_governance.py",
+        "income-analytics/docs/engineering/cicd-assessment/ci_branch_protection_bootstrap.json",
+        "income-analytics/docs/engineering/cicd-assessment/ci_pr52a_validation.md",
+        "income-analytics/docs/engineering/cicd-assessment/ci_single_maintainer_governance.md",
+        "income-analytics/docs/engineering/cicd-assessment/pr48_bootstrap_description.md"
+      ]
+    }
+  ],
+  "published_head_sha": "405b29d7c9bbd98bb373c4827b702ecaada3fc86",
+  "local_tested_checkout_sha": "405b29d7c9bbd98bb373c4827b702ecaada3fc86",
+  "hosted_checkout_sha": "b3f313265ef52768acd49120a70d902c23981869",
+  "fingerprint_version": 2,
+  "source_fingerprint": "c049a052e93d37b54b80841e538dd694029975e5d27a325e59a3d1603ad1df7f",
+  "governance_policy_sha256": "73db10df451889f01ab20a25a17090f0e88e0fed7aeb26551630ca83fda95e48",
+  "report_schema": 3,
+  "all_check_reports_clean": true,
+  "python": "3.14.7",
+  "node": "24.19.0",
+  "ruff": "0.16.6",
+  "mypy": "2.3.1",
+  "local_vs_pr52a": {
+    "runtime": {
+      "status": true,
+      "exit_code": true,
+      "source_fingerprint": true,
+      "governance_policy_sha256": true,
+      "fingerprint_version": true,
+      "python": true,
+      "schema": true,
+      "clean": true,
+      "commit": true
+    },
+    "engineering": {
+      "totals": true,
+      "cases": true,
+      "status": true,
+      "exit_code": true,
+      "source_fingerprint": true,
+      "governance_policy_sha256": true,
+      "fingerprint_version": true,
+      "python": true,
+      "schema": true,
+      "clean": true,
+      "commit": true
+    },
+    "financial": {
+      "totals": true,
+      "cases": true,
+      "status": true,
+      "exit_code": true,
+      "blockers": true,
+      "source_fingerprint": true,
+      "governance_policy_sha256": true,
+      "fingerprint_version": true,
+      "python": true,
+      "schema": true,
+      "clean": true,
+      "commit": true
+    },
+    "python": {
+      "totals": true,
+      "cases": true,
+      "status": true,
+      "exit_code": true,
+      "source_fingerprint": true,
+      "governance_policy_sha256": true,
+      "fingerprint_version": true,
+      "python": true,
+      "schema": true,
+      "clean": true,
+      "commit": true
+    },
+    "node": {
+      "suites": true,
+      "status": true,
+      "exit_code": true,
+      "source_fingerprint": true,
+      "governance_policy_sha256": true,
+      "fingerprint_version": true,
+      "python": true,
+      "schema": true,
+      "clean": true,
+      "commit": true
+    },
+    "ruff": {
+      "findings": true,
+      "status": true,
+      "exit_code": true,
+      "source_fingerprint": true,
+      "governance_policy_sha256": true,
+      "fingerprint_version": true,
+      "python": true,
+      "schema": true,
+      "clean": true,
+      "commit": true
+    },
+    "mypy": {
+      "findings": true,
+      "status": true,
+      "exit_code": true,
+      "source_fingerprint": true,
+      "governance_policy_sha256": true,
+      "fingerprint_version": true,
+      "python": true,
+      "schema": true,
+      "clean": true,
+      "commit": true
+    },
+    "quality": {
+      "status": true,
+      "exit_code": true,
+      "current_debt": true,
+      "baseline_debt": true,
+      "added": true,
+      "removed": true,
+      "baseline_sha256": true,
+      "raw_tool_exit_codes": true,
+      "source_fingerprint": true,
+      "governance_policy_sha256": true,
+      "fingerprint_version": true,
+      "python": true,
+      "schema": true,
+      "clean": true,
+      "commit": true
+    }
+  },
+  "hosted_vs_committed_local": {
+    "engineering": {
+      "equal": {
+        "totals": true,
+        "cases": true,
+        "status": true,
+        "exit_code": true,
+        "source_fingerprint": true,
+        "governance_policy_sha256": true,
+        "fingerprint_version": true,
+        "schema": true,
+        "python": true,
+        "clean": true,
+        "head": true,
+        "synthetic_checkout": true,
+        "inventory": true
+      },
+      "equivalent": true,
+      "totals": {
+        "passed": 1069,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "status": "PASS",
+      "exit_code": 0,
+      "checkout_sha": "b3f313265ef52768acd49120a70d902c23981869"
+    },
+    "financial": {
+      "equal": {
+        "totals": true,
+        "cases": true,
+        "status": true,
+        "exit_code": true,
+        "blockers": true,
+        "source_fingerprint": true,
+        "governance_policy_sha256": true,
+        "fingerprint_version": true,
+        "schema": true,
+        "python": true,
+        "clean": true,
+        "head": true,
+        "synthetic_checkout": true,
+        "inventory": true
+      },
+      "equivalent": true,
+      "totals": {
+        "passed": 73,
+        "failed": 15,
+        "errors": 9,
+        "skipped": 0
+      },
+      "status": "BLOCKED",
+      "exit_code": 1,
+      "checkout_sha": "b3f313265ef52768acd49120a70d902c23981869"
+    },
+    "mypy": {
+      "equal": {
+        "findings": true,
+        "status": true,
+        "exit_code": true,
+        "source_fingerprint": true,
+        "governance_policy_sha256": true,
+        "fingerprint_version": true,
+        "schema": true,
+        "python": true,
+        "clean": true,
+        "head": true,
+        "synthetic_checkout": true
+      },
+      "equivalent": true,
+      "totals": null,
+      "status": "FAIL_WITH_DEBT",
+      "exit_code": 1,
+      "checkout_sha": "b3f313265ef52768acd49120a70d902c23981869"
+    },
+    "node": {
+      "equal": {
+        "suites": true,
+        "status": true,
+        "exit_code": true,
+        "source_fingerprint": true,
+        "governance_policy_sha256": true,
+        "fingerprint_version": true,
+        "schema": true,
+        "python": true,
+        "clean": true,
+        "head": true,
+        "synthetic_checkout": true
+      },
+      "equivalent": true,
+      "totals": null,
+      "status": "PASS",
+      "exit_code": 0,
+      "checkout_sha": "b3f313265ef52768acd49120a70d902c23981869"
+    },
+    "python": {
+      "equal": {
+        "totals": true,
+        "cases": true,
+        "status": true,
+        "exit_code": true,
+        "source_fingerprint": true,
+        "governance_policy_sha256": true,
+        "fingerprint_version": true,
+        "schema": true,
+        "python": true,
+        "clean": true,
+        "head": true,
+        "synthetic_checkout": true,
+        "inventory": true
+      },
+      "equivalent": true,
+      "totals": {
+        "passed": 1069,
+        "failed": 15,
+        "errors": 9,
+        "skipped": 5
+      },
+      "status": "FAIL",
+      "exit_code": 1,
+      "checkout_sha": "b3f313265ef52768acd49120a70d902c23981869"
+    },
+    "quality": {
+      "equal": {
+        "status": true,
+        "exit_code": true,
+        "current_debt": true,
+        "baseline_debt": true,
+        "added": true,
+        "removed": true,
+        "baseline_sha256": true,
+        "raw_tool_exit_codes": true,
+        "source_fingerprint": true,
+        "governance_policy_sha256": true,
+        "fingerprint_version": true,
+        "schema": true,
+        "python": true,
+        "clean": true,
+        "head": true,
+        "synthetic_checkout": true
+      },
+      "equivalent": true,
+      "totals": null,
+      "status": "PASS",
+      "exit_code": 0,
+      "checkout_sha": "b3f313265ef52768acd49120a70d902c23981869"
+    },
+    "ruff": {
+      "equal": {
+        "findings": true,
+        "status": true,
+        "exit_code": true,
+        "source_fingerprint": true,
+        "governance_policy_sha256": true,
+        "fingerprint_version": true,
+        "schema": true,
+        "python": true,
+        "clean": true,
+        "head": true,
+        "synthetic_checkout": true
+      },
+      "equivalent": true,
+      "totals": null,
+      "status": "FAIL_WITH_DEBT",
+      "exit_code": 1,
+      "checkout_sha": "b3f313265ef52768acd49120a70d902c23981869"
+    },
+    "runtime": {
+      "equal": {
+        "status": true,
+        "exit_code": true,
+        "source_fingerprint": true,
+        "governance_policy_sha256": true,
+        "fingerprint_version": true,
+        "schema": true,
+        "python": true,
+        "clean": true,
+        "head": true,
+        "synthetic_checkout": true
+      },
+      "equivalent": true,
+      "totals": null,
+      "status": "PASS",
+      "exit_code": 0,
+      "checkout_sha": "b3f313265ef52768acd49120a70d902c23981869"
+    }
+  },
+  "governance_cases": {
+    "passed": 58,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "gate_summary": {
+    "engineering_ci": "PASS",
+    "engineering_missing_reports": [],
+    "consistent_identity": true,
+    "financial_certification": "BLOCKED",
+    "financial_reasons": [
+      "CERT_48_REQUIRES_INDEPENDENT_RECONCILIATION",
+      "IDENTITY_FROZEN_BYTES_UNRESOLVED",
+      "22_HISTORICAL_REFERENCES_UNAPPROVED"
+    ],
+    "release_readiness": "BLOCKED",
+    "release_reasons": [
+      "Reproducible release artifact/homologation/backup/rollback evidence not implemented",
+      "Financial certification requires independent closure"
+    ],
+    "deployment_authorization": "NOT_IMPLEMENTED",
+    "deployment_authorized": false,
+    "external_integrations": "NOT_RUN_OFFLINE; see full-suite external cases"
+  },
+  "jobs": [
+    {
+      "name": "CI / Frontend",
+      "conclusion": "success",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788/job/123105104996"
+    },
+    {
+      "name": "CI / Quality non-regression",
+      "conclusion": "success",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788/job/123105105241"
+    },
+    {
+      "name": "CI / Python engineering",
+      "conclusion": "success",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788/job/123105105270"
+    },
+    {
+      "name": "CI / Financial certification",
+      "conclusion": "failure",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788/job/123105105287"
+    },
+    {
+      "name": "CI / Full Python diagnostic",
+      "conclusion": "failure",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788/job/123105105291"
+    },
+    {
+      "name": "CI / mypy diagnostics",
+      "conclusion": "failure",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788/job/123105105326"
+    },
+    {
+      "name": "CI / Ruff diagnostics",
+      "conclusion": "failure",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788/job/123105105351"
+    },
+    {
+      "name": "CI / Runtime installation",
+      "conclusion": "success",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788/job/123105105660"
+    },
+    {
+      "name": "CI / Engineering",
+      "conclusion": "success",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40770225788/job/123108017459"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12853020810,
+      "name": "gate-summary-b3f313265ef52768acd49120a70d902c23981869",
+      "digest": "sha256:56723e7cc514b00c62da29c63f940008adb2e1db9e8eed17cec7eb55a2aa95a2",
+      "size_in_bytes": 552,
+      "expires_at": "2026-11-11T21:21:00Z",
+      "zip_digest_verified": true,
+      "files": [
+        {
+          "path": "gate-summary.json",
+          "sha256": "5604dc7b039fceb5f01d1c2f4328bb0c8b4db2c8707770a30a261686ae0b4a44",
+          "bytes": 693
+        }
+      ]
+    },
+    {
+      "id": 12853005028,
+      "name": "governance-ruff-b3f313265ef52768acd49120a70d902c23981869",
+      "digest": "sha256:4162317eb3a7b97b227411c3fae30a2c22b190429c9d6ff3f520cd3cff8e2b0e",
+      "size_in_bytes": 1847,
+      "expires_at": "2026-11-11T21:15:23Z",
+      "zip_digest_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "4bd88678efb6cc45d7d3d7762cf1aca568991a40bd3ed2105a399c1fbc953630",
+          "bytes": 28867
+        }
+      ]
+    },
+    {
+      "id": 12852686809,
+      "name": "governance-financial-b3f313265ef52768acd49120a70d902c23981869",
+      "digest": "sha256:706fde7e5c7aeb21732e9a8d4d8a58c8e283778c9ddab7e8876ade0f23f0c154",
+      "size_in_bytes": 58739,
+      "expires_at": "2026-11-11T21:17:22Z",
+      "zip_digest_verified": true,
+      "files": [
+        {
+          "path": "financial-junit.xml",
+          "sha256": "b770b19e40ca10fee2dc507a2eb3838e3e16d5ef697e95d900577a1a2e692ede",
+          "bytes": 15060
+        },
+        {
+          "path": "inventory.json",
+          "sha256": "034caf10a4018008b6eb8ab65f73ac5a51f827f9ce52170d256dc035da8a6d83",
+          "bytes": 699522
+        },
+        {
+          "path": "result.json",
+          "sha256": "aab258f8d4268c15df0880e2d40fa5c97f8a559574c7f81adacd447a122d1780",
+          "bytes": 135350
+        }
+      ]
+    },
+    {
+      "id": 12852561245,
+      "name": "governance-node-b3f313265ef52768acd49120a70d902c23981869",
+      "digest": "sha256:7ce4ccdc31867b0e1821083f8c29d1104ae4a74974e38804fde69609df5b6425",
+      "size_in_bytes": 873,
+      "expires_at": "2026-11-11T21:15:10Z",
+      "zip_digest_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "e718b7c41773dd3257a3fe7643ab7adb403b85565bdc820f8e2821834a84edf4",
+          "bytes": 3124
+        }
+      ]
+    },
+    {
+      "id": 12851932116,
+      "name": "governance-quality-b3f313265ef52768acd49120a70d902c23981869",
+      "digest": "sha256:9847027274434e66a9aeead515fb85f8e0388d968707446e241457e2b7739999",
+      "size_in_bytes": 711,
+      "expires_at": "2026-11-11T21:15:23Z",
+      "zip_digest_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "898238365776c858845748e4387ca0c681c9755a2cfa9c15db58dfd1d8097882",
+          "bytes": 979
+        }
+      ]
+    },
+    {
+      "id": 12851872214,
+      "name": "governance-runtime-b3f313265ef52768acd49120a70d902c23981869",
+      "digest": "sha256:8afb99d89301d7dd2eaf0a6bf59cd5dbdcaf5252b633d2805191d4f2a1c04144",
+      "size_in_bytes": 520,
+      "expires_at": "2026-11-11T21:15:32Z",
+      "zip_digest_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "dc51007bc0bf2a909e96124890794bdc4218296c654ea46c44c57cebf102e8e3",
+          "bytes": 639
+        }
+      ]
+    },
+    {
+      "id": 12851689830,
+      "name": "governance-engineering-b3f313265ef52768acd49120a70d902c23981869",
+      "digest": "sha256:bc0db5d0508cedc95541e6699a837e55d4c82bb1d18bd6e315571919063ebd5d",
+      "size_in_bytes": 79006,
+      "expires_at": "2026-11-11T21:19:51Z",
+      "zip_digest_verified": true,
+      "files": [
+        {
+          "path": "engineering-junit.xml",
+          "sha256": "ea4e7083b0cc914b9a058c14b01a68d80ed9e0b771ead84008b2c5cd08b90629",
+          "bytes": 145055
+        },
+        {
+          "path": "inventory.json",
+          "sha256": "e88f02bc096540a1629c7a8e7de57a0adb447483da3cac72e0d4a2bafe4c007d",
+          "bytes": 672306
+        },
+        {
+          "path": "result.json",
+          "sha256": "920f7a04c681f145942ad38423f1766d0f6853ec653403f4cecc9a115ce9b018",
+          "bytes": 199345
+        }
+      ]
+    },
+    {
+      "id": 12851204184,
+      "name": "governance-mypy-b3f313265ef52768acd49120a70d902c23981869",
+      "digest": "sha256:04d6facb834196d4df9cea652d953203050f078049361bd6c34bca6276d67fd0",
+      "size_in_bytes": 9137,
+      "expires_at": "2026-11-11T21:15:19Z",
+      "zip_digest_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "1395ea54d094751842acfa9dc7db8e8f5afdbe6ab7e3b423d52c471a0ee142d2",
+          "bytes": 182836
+        }
+      ]
+    },
+    {
+      "id": 12851199653,
+      "name": "governance-python-b3f313265ef52768acd49120a70d902c23981869",
+      "digest": "sha256:a2beae26e3332d7286d99575c24bdc00e4e24fd49a67f9b27aa4e2bc771a51bf",
+      "size_in_bytes": 111880,
+      "expires_at": "2026-11-11T21:19:49Z",
+      "zip_digest_verified": true,
+      "files": [
+        {
+          "path": "python-junit.xml",
+          "sha256": "9498dcb0f1475dc0c009b7a5d16253b4f6e3653fd82e43e300e30c4b6061dea9",
+          "bytes": 151236
+        },
+        {
+          "path": "coverage.xml",
+          "sha256": "c8cd12aa41e3676551bbe0da4149ee6cdf8da8bcf805dbf52dce3f31a4a7b112",
+          "bytes": 554826
+        },
+        {
+          "path": "inventory.json",
+          "sha256": "45ca37ab65030dfc7371340f7bea58516023bbfc31251f6d3a0e2bce13664d2d",
+          "bytes": 671499
+        },
+        {
+          "path": "result.json",
+          "sha256": "1a9582c03031fa8107da385bacff4212ceafd5859812644d49002847250038c3",
+          "bytes": 201292
+        }
+      ]
+    }
+  ],
+  "archive_destination": "%USERPROFILE%/.codex/evidence/income-analytics/pr52b/40770225788",
+  "divergences": [],
+  "independent_review": "INDEPENDENT_REVIEW_NOT_AVAILABLE",
+  "develop_protected": false,
+  "rulesets": [],
+  "codeowners_validation_errors": [],
+  "post_run_documentation": "Four local reports written after run; not committed/pushed or attributed to tested SHA"
+}
