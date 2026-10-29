@@ -1,0 +1,261 @@
+{
+  "baseline_sha": "c76132b4398434fb8a196f895b78b7f46ed3845e",
+  "policy_id": "MF_BR_2027_V1",
+  "policy_hash": "96d5d54ab1b1320ddc14f1a3c9cd6764b1bf8d68f1e6d79ffd0faa6d1b72cbac",
+  "rows": [
+    {
+      "manifest": "tests/fixtures/cvm/shares_unit_v1/manifest.json",
+      "manifest_sha256": "89606138e88fa458ed1afb51c46683f5301ac797a81c57e539a0dbc4ae3773b9",
+      "file": "src/income_analytics/application/magic_formula_stocks.py",
+      "expected_sha256": "27b58d132b461afe867ca2af05757b1309739c40156549ac0bf1785ae5ad27a4",
+      "observed_sha256": "44fe1057b14dc45d13e0d302d7b24e361921ee2dab87b1dfde674c30dc344a9d",
+      "git_blob_sha256": "44fe1057b14dc45d13e0d302d7b24e361921ee2dab87b1dfde674c30dc344a9d",
+      "lf_sha256": "44fe1057b14dc45d13e0d302d7b24e361921ee2dab87b1dfde674c30dc344a9d",
+      "crlf_sha256": "27b58d132b461afe867ca2af05757b1309739c40156549ac0bf1785ae5ad27a4",
+      "crlf_count": 0,
+      "lf_count": 215,
+      "expected_matches": {
+        "actual": false,
+        "lf": false,
+        "crlf": true
+      },
+      "historical_versions": [
+        {
+          "commit": "4d5781ce1d09b8317207f653e0bde8e5a4580cc9",
+          "sha256": "44fe1057b14dc45d13e0d302d7b24e361921ee2dab87b1dfde674c30dc344a9d",
+          "matches_expected": false
+        }
+      ],
+      "approval": "NOT_VERIFIED",
+      "certification": "BLOCKED"
+    },
+    {
+      "manifest": "tests/fixtures/cvm/shares_unit_v1/manifest.json",
+      "manifest_sha256": "89606138e88fa458ed1afb51c46683f5301ac797a81c57e539a0dbc4ae3773b9",
+      "file": "src/income_analytics/application/magic_formula_ranking_validation.py",
+      "expected_sha256": "47140198ac099487f4160be411c46ef549a1d3ac3e8db25dbbc672d7133e6a37",
+      "observed_sha256": "47140198ac099487f4160be411c46ef549a1d3ac3e8db25dbbc672d7133e6a37",
+      "git_blob_sha256": "47140198ac099487f4160be411c46ef549a1d3ac3e8db25dbbc672d7133e6a37",
+      "lf_sha256": "47140198ac099487f4160be411c46ef549a1d3ac3e8db25dbbc672d7133e6a37",
+      "crlf_sha256": "039656c877d516ce2e2cdcf5d6bba7efadf948a92958875ecd140a16349ce83d",
+      "crlf_count": 0,
+      "lf_count": 211,
+      "expected_matches": {
+        "actual": true,
+        "lf": true,
+        "crlf": false
+      },
+      "historical_versions": [
+        {
+          "commit": "4d5781ce1d09b8317207f653e0bde8e5a4580cc9",
+          "sha256": "47140198ac099487f4160be411c46ef549a1d3ac3e8db25dbbc672d7133e6a37",
+          "matches_expected": true
+        }
+      ],
+      "approval": "NOT_VERIFIED",
+      "certification": "PROVENANCE_NOT_VERIFIED"
+    },
+    {
+      "manifest": "tests/fixtures/cvm/shares_unit_v1/manifest.json",
+      "manifest_sha256": "89606138e88fa458ed1afb51c46683f5301ac797a81c57e539a0dbc4ae3773b9",
+      "file": "src/income_analytics/application/magic_formula_contract.py",
+      "expected_sha256": "9e299489a57c049fcbcc940a0d3fdfa573d174cc8c57b97c14f4fcc63204163f",
+      "observed_sha256": "9e299489a57c049fcbcc940a0d3fdfa573d174cc8c57b97c14f4fcc63204163f",
+      "git_blob_sha256": "9e299489a57c049fcbcc940a0d3fdfa573d174cc8c57b97c14f4fcc63204163f",
+      "lf_sha256": "9e299489a57c049fcbcc940a0d3fdfa573d174cc8c57b97c14f4fcc63204163f",
+      "crlf_sha256": "40b1def756c8cde12f556835ac7e989adab18907b1a0d7364aff3bfd6aa032f9",
+      "crlf_count": 0,
+      "lf_count": 316,
+      "expected_matches": {
+        "actual": true,
+        "lf": true,
+        "crlf": false
+      },
+      "historical_versions": [
+        {
+          "commit": "4d5781ce1d09b8317207f653e0bde8e5a4580cc9",
+          "sha256": "9e299489a57c049fcbcc940a0d3fdfa573d174cc8c57b97c14f4fcc63204163f",
+          "matches_expected": true
+        }
+      ],
+      "approval": "NOT_VERIFIED",
+      "certification": "PROVENANCE_NOT_VERIFIED"
+    },
+    {
+      "manifest": "tests/fixtures/cvm/price_identity_v1/manifest.json",
+      "manifest_sha256": "835e672abd4129f04cb45e9aff66bf5e3ed95aefc0bbdee5afa63f41507ad770",
+      "file": "tests/fixtures/cvm/price_identity_v1/cotahist-record.txt",
+      "expected_sha256": "67fdbb7e6f3e56f235635240b3c4057876afb20b055b11562bdf532c457a45d9",
+      "observed_sha256": "3890cfc22c50bb9ff0cdb35af7f754fa3bf5f47ee4022a3769ff1f88913b9293",
+      "git_blob_sha256": "3890cfc22c50bb9ff0cdb35af7f754fa3bf5f47ee4022a3769ff1f88913b9293",
+      "lf_sha256": "3890cfc22c50bb9ff0cdb35af7f754fa3bf5f47ee4022a3769ff1f88913b9293",
+      "crlf_sha256": "67fdbb7e6f3e56f235635240b3c4057876afb20b055b11562bdf532c457a45d9",
+      "crlf_count": 0,
+      "lf_count": 1,
+      "expected_matches": {
+        "actual": false,
+        "lf": false,
+        "crlf": true
+      },
+      "historical_versions": [
+        {
+          "commit": "4d5781ce1d09b8317207f653e0bde8e5a4580cc9",
+          "sha256": "3890cfc22c50bb9ff0cdb35af7f754fa3bf5f47ee4022a3769ff1f88913b9293",
+          "matches_expected": false
+        }
+      ],
+      "approval": "NOT_VERIFIED",
+      "certification": "BLOCKED"
+    },
+    {
+      "manifest": "tests/fixtures/cvm/price_identity_v1/manifest.json",
+      "manifest_sha256": "835e672abd4129f04cb45e9aff66bf5e3ed95aefc0bbdee5afa63f41507ad770",
+      "file": "tests/fixtures/cvm/price_identity_v1/current-directory.json",
+      "expected_sha256": "d0c14ea112fc242b17b87e590a0f93fa272d9e8f88d4605bc8a0f2ab4b1eafad",
+      "observed_sha256": "931cc5afc0683d998e69e6300f271ab92982f85cf309d50cceafb37f2cf12fe7",
+      "git_blob_sha256": "931cc5afc0683d998e69e6300f271ab92982f85cf309d50cceafb37f2cf12fe7",
+      "lf_sha256": "931cc5afc0683d998e69e6300f271ab92982f85cf309d50cceafb37f2cf12fe7",
+      "crlf_sha256": "d0c14ea112fc242b17b87e590a0f93fa272d9e8f88d4605bc8a0f2ab4b1eafad",
+      "crlf_count": 0,
+      "lf_count": 29,
+      "expected_matches": {
+        "actual": false,
+        "lf": false,
+        "crlf": true
+      },
+      "historical_versions": [
+        {
+          "commit": "4d5781ce1d09b8317207f653e0bde8e5a4580cc9",
+          "sha256": "931cc5afc0683d998e69e6300f271ab92982f85cf309d50cceafb37f2cf12fe7",
+          "matches_expected": false
+        }
+      ],
+      "approval": "NOT_VERIFIED",
+      "certification": "BLOCKED"
+    },
+    {
+      "manifest": "tests/fixtures/cvm/price_identity_v1/manifest.json",
+      "manifest_sha256": "835e672abd4129f04cb45e9aff66bf5e3ed95aefc0bbdee5afa63f41507ad770",
+      "file": "tests/fixtures/cvm/price_identity_v1/issuer-before.json",
+      "expected_sha256": "a4b0734c50046306f46448bd3f496fad2c20e98923cd38307b5fd3f7a5c1edfc",
+      "observed_sha256": "14eb2403e55a2d2017caaf7cdde16238dd455a48f94d9ec26d250b94a6c36b8a",
+      "git_blob_sha256": "14eb2403e55a2d2017caaf7cdde16238dd455a48f94d9ec26d250b94a6c36b8a",
+      "lf_sha256": "14eb2403e55a2d2017caaf7cdde16238dd455a48f94d9ec26d250b94a6c36b8a",
+      "crlf_sha256": "a4b0734c50046306f46448bd3f496fad2c20e98923cd38307b5fd3f7a5c1edfc",
+      "crlf_count": 0,
+      "lf_count": 295,
+      "expected_matches": {
+        "actual": false,
+        "lf": false,
+        "crlf": true
+      },
+      "historical_versions": [
+        {
+          "commit": "4d5781ce1d09b8317207f653e0bde8e5a4580cc9",
+          "sha256": "14eb2403e55a2d2017caaf7cdde16238dd455a48f94d9ec26d250b94a6c36b8a",
+          "matches_expected": false
+        }
+      ],
+      "approval": "NOT_VERIFIED",
+      "certification": "BLOCKED"
+    },
+    {
+      "manifest": "tests/fixtures/cvm/price_identity_v1/manifest.json",
+      "manifest_sha256": "835e672abd4129f04cb45e9aff66bf5e3ed95aefc0bbdee5afa63f41507ad770",
+      "file": "tests/fixtures/cvm/price_identity_v1/offer-identity.json",
+      "expected_sha256": "10924734efc14d6d247f8e57d6683bb3b158dd451ebad3ca3f72b3dfb8411057",
+      "observed_sha256": "6446ab9e39d8fefbb065d194f3809a944890261505fa6d406ab7aa8fa0e2b56c",
+      "git_blob_sha256": "6446ab9e39d8fefbb065d194f3809a944890261505fa6d406ab7aa8fa0e2b56c",
+      "lf_sha256": "6446ab9e39d8fefbb065d194f3809a944890261505fa6d406ab7aa8fa0e2b56c",
+      "crlf_sha256": "10924734efc14d6d247f8e57d6683bb3b158dd451ebad3ca3f72b3dfb8411057",
+      "crlf_count": 0,
+      "lf_count": 18,
+      "expected_matches": {
+        "actual": false,
+        "lf": false,
+        "crlf": true
+      },
+      "historical_versions": [
+        {
+          "commit": "4d5781ce1d09b8317207f653e0bde8e5a4580cc9",
+          "sha256": "6446ab9e39d8fefbb065d194f3809a944890261505fa6d406ab7aa8fa0e2b56c",
+          "matches_expected": false
+        }
+      ],
+      "approval": "NOT_VERIFIED",
+      "certification": "BLOCKED"
+    },
+    {
+      "manifest": "tests/fixtures/cvm/price_identity_v1/manifest.json",
+      "manifest_sha256": "835e672abd4129f04cb45e9aff66bf5e3ed95aefc0bbdee5afa63f41507ad770",
+      "file": "tests/fixtures/cvm/price_identity_v1/offer-notice.pdf",
+      "expected_sha256": "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e",
+      "observed_sha256": "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e",
+      "git_blob_sha256": "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e",
+      "lf_sha256": "b0cd7bf98a38bce88af126c3dfa72b4f01092120e4994bc5d5d0d2f419570a30",
+      "crlf_sha256": "c0dc0c7fdcd9331938c772d3683f1854aab711415b1dd76a6a6aec451eb33ed8",
+      "crlf_count": 249,
+      "lf_count": 1977,
+      "expected_matches": {
+        "actual": true,
+        "lf": false,
+        "crlf": false
+      },
+      "historical_versions": [
+        {
+          "commit": "4d5781ce1d09b8317207f653e0bde8e5a4580cc9",
+          "sha256": "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e",
+          "matches_expected": true
+        }
+      ],
+      "approval": "NOT_VERIFIED",
+      "certification": "PROVENANCE_NOT_VERIFIED"
+    }
+  ],
+  "manifests": [
+    {
+      "file": "tests/fixtures/cvm/petrobras_canonical_v2/manifest.json",
+      "sha256": "528f5f3a00aa6bbc66196fbfdda19370f5c94307bdb9f222242670aa351ad05d",
+      "schema": "PETROBRAS_RAW_EXCERPTS_V1",
+      "signatures": "No independently verified approval signature located in scoped evidence",
+      "state": "INVENTORIED_NOT_RECERTIFIED"
+    },
+    {
+      "file": "tests/fixtures/cvm/phase2_v1/manifest.json",
+      "sha256": "f0f920acad668556be340813c866cacdf907b971be934a772a58a16b59883673",
+      "schema": null,
+      "signatures": "No independently verified approval signature located in scoped evidence",
+      "state": "INVENTORIED_NOT_RECERTIFIED"
+    },
+    {
+      "file": "tests/fixtures/cvm/price_identity_v1/manifest.json",
+      "sha256": "835e672abd4129f04cb45e9aff66bf5e3ed95aefc0bbdee5afa63f41507ad770",
+      "schema": "PRICE_IDENTITY_FIXTURE_V1",
+      "signatures": "No independently verified approval signature located in scoped evidence",
+      "state": "INVENTORIED_NOT_RECERTIFIED"
+    },
+    {
+      "file": "tests/fixtures/cvm/shares_unit_v1/manifest.json",
+      "sha256": "89606138e88fa458ed1afb51c46683f5301ac797a81c57e539a0dbc4ae3773b9",
+      "schema": "CVM_DFP_EXPLICIT_SHARE_UNITS_V1",
+      "signatures": "No independently verified approval signature located in scoped evidence",
+      "state": "INVENTORIED_NOT_RECERTIFIED"
+    },
+    {
+      "file": "tests/fixtures/cvm/universe_discovery_v1/manifest.json",
+      "sha256": "d762e17cec5d2cff9d81ab1ac9669938f9465ea5e54bf4cb725327c4e80c94f0",
+      "schema": "CVM_B3_UNIVERSE_RAW_EXCERPTS_V1",
+      "signatures": "No independently verified approval signature located in scoped evidence",
+      "state": "INVENTORIED_NOT_RECERTIFIED"
+    }
+  ],
+  "distinctions": {
+    "bytes": "Exact digest match only",
+    "semantics": "Not established by EOL comparison; no financial formula changed",
+    "provenance": "Git transport origin known; historical approval absent/conflicting",
+    "certification": "BLOCKED"
+  },
+  "newline_config": "file:C:/Program Files/Git/etc/gitconfig\tcore.autocrlf true\n",
+  "attributes": "tests/fixtures/cvm/price_identity_v1/offer-notice.pdf: diff: astextplain\n",
+  "decision": "No digest/manifest or certified byte edits. Git blob checkout is diagnostic reproduction, not financial certification."
+}

@@ -33,6 +33,7 @@
     "tests/security/test_firebase_live.py": "Requires real cloud identities and credentials; forbidden in untrusted PR."
   },
   "financial_modules": [
+    "ci/test_financial_certification.py",
     "tests/application/test_historical_shares_units.py",
     "tests/infrastructure/test_historical_identity_fixture.py",
     "tests/application/test_magic_formula_point_in_time.py",
