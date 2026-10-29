@@ -98,6 +98,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         "ci/test_ci.py",
         "ci/test_governance.py",
         "ci/test_pr52_governance.py",
+        "ci/test_build_artifact.py",
         f"--ci-gate={gate}",
         "-ra",
         "--tb=short",

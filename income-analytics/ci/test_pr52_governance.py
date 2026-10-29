@@ -174,7 +174,7 @@ def test_financial_blockers_cannot_be_relabelled_as_pass():
     }
     reports = {
         check: {**identity, "exit_code": 0}
-        for check in ("runtime", "engineering", "node", "quality")
+        for check in ("runtime", "engineering", "node", "quality", "build")
     }
     reports["financial"] = {
         **identity,

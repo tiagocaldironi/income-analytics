@@ -84,7 +84,7 @@ def test_external_scope_requires_documented_real_dependency():
 
 
 def engineering_reports():
-    return {
+    reports = {
         name: {
             "checkout_sha": "candidate-sha",
             "source_fingerprint": "content-id",
@@ -92,8 +92,20 @@ def engineering_reports():
             "fingerprint_version": 2,
             "governance_policy_sha256": "policy-id",
         }
-        for name in ("runtime", "engineering", "node", "quality")
+        for name in ("runtime", "engineering", "node", "quality", "build")
     }
+    reports["build"].update(
+        status="PASS", reproducibility="PASS", manifest="PASS", independent_builds=2,
+        artifact_sha256="a" * 64,
+        installation={
+            **{key: "PASS" for key in (
+                "status", "installation", "migrations_temporary_sqlite", "backend_import",
+                "startup_health", "static_files", "cleanup",
+            )},
+            "external_network": "DENIED", "production_access": False,
+        },
+    )
+    return reports
 
 
 def test_engineering_pass_never_authorizes_financial_release_or_deploy():
@@ -114,7 +126,7 @@ def test_engineering_pass_never_authorizes_financial_release_or_deploy():
     assert result["deployment_authorized"] is False
 
 
-@pytest.mark.parametrize("check", ["runtime", "engineering", "node", "quality"])
+@pytest.mark.parametrize("check", ["runtime", "engineering", "node", "quality", "build"])
 def test_missing_or_failed_required_check_blocks_engineering(check):
     reports = engineering_reports()
     failed = deepcopy(reports)

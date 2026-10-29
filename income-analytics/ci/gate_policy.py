@@ -103,7 +103,7 @@ def compare_diagnostics(actual: list[dict], expected: list[dict]) -> dict:
 
 
 def summarize_reports(reports: dict[str, dict]) -> dict:
-    required = ("runtime", "engineering", "node", "quality")
+    required = ("runtime", "engineering", "node", "quality", "build")
     missing = [name for name in required if name not in reports]
     identities = {
         (
@@ -115,9 +115,24 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
         for report in reports.values()
     }
     valid_identity = len(identities) == 1 and all(all(pair) and pair[3] == 2 for pair in identities)
+    build = reports.get("build", {})
+    installation = build.get("installation", {})
+    build_valid = (
+        build.get("status") == "PASS"
+        and build.get("reproducibility") == build.get("manifest") == "PASS"
+        and build.get("independent_builds") == 2
+        and re.fullmatch(r"[a-f0-9]{64}", build.get("artifact_sha256", "")) is not None
+        and all(installation.get(key) == "PASS" for key in (
+            "status", "installation", "migrations_temporary_sqlite", "backend_import",
+            "startup_health", "static_files", "cleanup",
+        ))
+        and installation.get("external_network") == "DENIED"
+        and installation.get("production_access") is False
+    )
     engineering = (
         not missing
         and valid_identity
+        and build_valid
         and all(reports[name].get("exit_code") == 0 for name in required)
     )
     certification = reports.get("financial", {})
@@ -138,11 +153,12 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
         "engineering_ci": "PASS" if engineering else "FAIL",
         "engineering_missing_reports": missing,
         "consistent_identity": valid_identity,
+        "reproducible_build": "PASS" if build_valid else "FAIL",
         "financial_certification": "PASS" if financial_pass else "BLOCKED",
         "financial_reasons": certification.get("blockers", ["NO_CERTIFICATION_REPORT"]),
         "release_readiness": "BLOCKED",
         "release_reasons": [
-            "Reproducible release artifact/homologation/backup/rollback evidence not implemented",
+            "Homologation/backup/rollback and financial certification not implemented",
             "Financial certification requires independent closure",
         ],
         "deployment_authorization": "NOT_IMPLEMENTED",
