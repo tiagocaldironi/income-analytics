@@ -221,3 +221,21 @@ def test_removing_labels_or_evidence_requirements_does_not_approve_history():
     assert historical_provenance(ROOT, policy) == [
         {"id": "REQUIRED_REFERENCE_SCOPE", "state": "CONFLICTING"}
     ]
+
+
+def test_financial_runner_failure_is_explicitly_not_verified(tmp_path, monkeypatch):
+    import governance
+
+    def unavailable(*args):
+        raise ValueError("SYNTHETIC_PRIVATE_PAYLOAD_DO_NOT_EMIT")
+
+    monkeypatch.setattr(governance, "run_check", unavailable)
+    monkeypatch.setattr(governance, "source_fingerprint", lambda: "synthetic-fingerprint")
+    monkeypatch.setattr(governance, "governance_policy_identity", lambda root: "synthetic-policy")
+    monkeypatch.setattr("sys.argv", ["governance.py", "financial", "--reports", str(tmp_path)])
+    assert governance.main() == 2
+    report = json.loads((tmp_path / "financial/result.json").read_text())
+    assert report["status"] == "FAIL" and report["financial_state"] == "FINANCIAL_NOT_VERIFIED"
+    assert not report["mandatory_coverage_verified"] and not report["production_authorized"]
+    assert report["blockers"] == ["FINANCIAL_RUNNER_NOT_VERIFIED"]
+    assert "SYNTHETIC_PRIVATE_PAYLOAD_DO_NOT_EMIT" not in json.dumps(report)

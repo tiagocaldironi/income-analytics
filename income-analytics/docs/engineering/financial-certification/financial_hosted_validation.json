@@ -1,5 +1,5 @@
 {
-  "state": "PENDING_PR9_HOSTED_VALIDATION",
+  "state": "HOSTED_INITIAL_REVISION_VALIDATED_FINANCIAL_BLOCKED",
   "preflight": {
     "develop_sha": "c76132b4398434fb8a196f895b78b7f46ed3845e",
     "pr53": "MERGED",
@@ -13,7 +13,336 @@
     "ruleset_active": true,
     "bypass": false
   },
-  "pr9": null,
+  "pr9": {
+    "run_id": 40970166275,
+    "run_attempt": 1,
+    "workflow_id": 399392307,
+    "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40970166275",
+    "event": "pull_request",
+    "conclusion": "failure",
+    "source_head": "1ad8ec85e9b3aa41d2096cbe025dea3dd4930b24",
+    "checkout_sha": "c3579e6603f07ff0dc09acccf561885bddeeb485",
+    "governance_policy_sha256": "d3f23d6c1e0474e80fd2b97ab4055ec6b13ad3ae0af8d223d4a36f15c1915101",
+    "source_fingerprint": "00bd3860a9e4d6da6ac668dcc17e7f2a6ce12e3ef06e19938086eb03ba7d234a",
+    "artifact_id": 12939529001,
+    "package_sha256": "637d7ffa7d3b0ba617413b5af2b7f92649749947e638c1441ed6a083658ffe86",
+    "manifest_sha256": "3a20bfc884dd271ca400227bb01c0c51ac8269efa4fc2fbeeb2978969fc6e6f7",
+    "security_artifact_id": 12940097381,
+    "financial_policy_sha256": "48354b3d153c4ec5ea74f74457bdd009e92056d01ff1c00db2ecf0ccee078a25",
+    "jobs": {
+      "CI / Reproducible build": "success",
+      "CI / Quality non-regression": "success",
+      "CI / Financial certification": "failure",
+      "CI / Frontend": "success",
+      "CI / Ruff diagnostics": "failure",
+      "CI / Python engineering": "success",
+      "CI / Full Python diagnostic": "failure",
+      "CI / Runtime installation": "success",
+      "CI / mypy diagnostics": "failure",
+      "CI / Security baseline": "success",
+      "CI / Engineering": "success",
+      "CD / Staging validation": "success"
+    },
+    "engineering_tests": {
+      "passed": 1264,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "security_tests": {
+      "passed": 137,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "financial": {
+      "passed": 103,
+      "failed": 15,
+      "errors": 9,
+      "skipped": 0
+    },
+    "financial_state": "FINANCIAL_BLOCKED",
+    "financial_blockers": [
+      "22_HISTORICAL_REFERENCES_UNAPPROVED",
+      "CERT_48_REQUIRES_INDEPENDENT_RECONCILIATION",
+      "FROZEN_IDENTITY_MISMATCH",
+      "HISTORICAL_PROVENANCE_INCOMPLETE",
+      "IDENTITY_PROVENANCE_UNAPPROVED"
+    ],
+    "failure_causes": {
+      "tests/api/test_magic_formula_product_api.py::test_magic_formula_api_reads_persisted_snapshot_and_searches_ticker": "MISSING_HISTORICAL_FILE",
+      "tests/api/test_magic_formula_product_api.py::test_sector_metadata_covers_the_165_ranked_companies_without_changing_hash": "MISSING_HISTORICAL_FILE",
+      "tests/api/test_magic_formula_product_api.py::test_tools_catalog_marks_available_magic_formula_as_partial": "MISSING_HISTORICAL_FILE",
+      "tests/api/test_magic_formula_product_api.py::test_magic_formula_company_detail_returns_source_provenance": "MISSING_HISTORICAL_FILE",
+      "tests/api/test_magic_formula_product_api.py::test_detail_does_not_build_a_company_outside_the_requested_snapshot": "MISSING_HISTORICAL_FILE",
+      "tests/api/test_magic_formula_product_api.py::test_csna3_has_no_detail_when_it_is_blocked_from_the_published_ranking": "MISSING_HISTORICAL_FILE",
+      "tests/api/test_magic_formula_product_api.py::test_runtime_http_endpoint_returns_the_published_point_in_time_contract": "MISSING_HISTORICAL_FILE",
+      "tests/application/test_historical_shares_units.py::test_shares_unit_020_frozen_engine": "FROZEN_IDENTITY_MISMATCH",
+      "tests/application/test_magic_formula_canonical_ranking.py::test_builds_a_deterministic_ranking_with_temporal_provenance": "MISSING_HISTORICAL_FILE",
+      "tests/application/test_magic_formula_canonical_ranking.py::test_screening_search_and_pagination_preserve_global_rank": "MISSING_HISTORICAL_FILE",
+      "tests/application/test_magic_formula_canonical_ranking.py::test_snapshot_repository_is_append_only_and_idempotent": "MISSING_HISTORICAL_FILE",
+      "tests/application/test_magic_formula_historical_price_sources_v5.py::test_production_snapshot_readback_is_independent_and_idempotent": "MISSING_HISTORICAL_DATABASE",
+      "tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_27_v8_baseline_statuses_sum_to_307": "MISSING_HISTORICAL_FILE",
+      "tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_28_methodological_coverage_denominator_is_complete_plus_blocked": "MISSING_HISTORICAL_FILE",
+      "tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_29_conservative_coverage_includes_reviews": "MISSING_HISTORICAL_FILE",
+      "tests/application/test_magic_formula_preview.py::test_preview_001_only_complete_data_universe_is_counted": "MISSING_HISTORICAL_DATABASE",
+      "tests/application/test_magic_formula_preview.py::test_preview_002_uses_the_validated_ranking_engine": "MISSING_HISTORICAL_DATABASE",
+      "tests/application/test_magic_formula_preview.py::test_preview_003_production_gate_stays_blocked": "MISSING_HISTORICAL_DATABASE",
+      "tests/application/test_magic_formula_preview.py::test_preview_current_snapshot_counts_are_derived_from_eligible_issuers": "MISSING_HISTORICAL_DATABASE",
+      "tests/application/test_magic_formula_price_availability_audit.py::test_dry_run_does_not_persist_universe_snapshot": "MISSING_HISTORICAL_DATABASE",
+      "tests/application/test_magic_formula_price_availability_audit.py::test_ranking_stays_blocked_in_saved_snapshot": "MISSING_HISTORICAL_DATABASE",
+      "tests/application/test_magic_formula_price_availability_audit.py::test_snapshot_ordering_audit_resolves_duplicate_timestamp_with_rowid": "MISSING_HISTORICAL_DATABASE",
+      "tests/application/test_magic_formula_price_availability_audit.py::test_csna3_and_v3_recoveries_survive_current_snapshot": "MISSING_HISTORICAL_DATABASE",
+      "tests/infrastructure/test_historical_identity_fixture.py::test_versioned_official_identity_and_price_recovery": "FROZEN_IDENTITY_MISMATCH"
+    },
+    "mandatory_coverage_verified": true,
+    "additional_financial_controls": 30,
+    "quality": {
+      "baseline_debt": 803,
+      "current_debt": 802,
+      "added": [],
+      "removed": [
+        {
+          "code": "no-untyped-def",
+          "column": null,
+          "file": "src/income_analytics/infrastructure/database.py",
+          "line": 28,
+          "message": "Function is missing a type annotation for one or more parameters",
+          "tool": "mypy"
+        }
+      ]
+    },
+    "sast_findings": 321,
+    "gitleaks": {
+      "version": "8.30.1",
+      "negative_fixture": "REJECTED",
+      "findings": 2,
+      "archive_sha256": "d29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e",
+      "executable_sha256": "17157e2ee8b76fc8b1d8bee607a250e34b8a8023c8bc81822d4b5ee4d78fcb7c"
+    },
+    "dependency_components": 87,
+    "sbom_components": 87,
+    "artifacts": [
+      {
+        "id": 12940720253,
+        "name": "governance-build-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:4abff7c2d85ac2ef6443a86e8c3111a745351eb1466c5bea46d1a11817a9db4a",
+        "expires_at": "2026-11-12T23:03:55Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "13ccb07a249038a9d72e0aa28935c3fe6b3ec9db793ee64938a857530ac9148e"
+          }
+        ]
+      },
+      {
+        "id": 12940670934,
+        "name": "governance-engineering-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:0dcfd7e19368ca75189535df4fb4ec737d9655df04fcd4d6915018d9b421edaf",
+        "expires_at": "2026-11-12T23:07:21Z",
+        "files": [
+          {
+            "name": "engineering-junit.xml",
+            "sha256": "57821bdd608d729b567c56203fab5f49f53f60cce4997aef226734ad27601595"
+          },
+          {
+            "name": "inventory.json",
+            "sha256": "799417b00513e0d34aa07e1100a3378254e3567a8bb72f3f9b28b403d5a0cbbe"
+          },
+          {
+            "name": "result.json",
+            "sha256": "4feb7de29c97add0fd13c50f182fd359f04a8d7701bee3a4b2f2c592719b4dcd"
+          }
+        ]
+      },
+      {
+        "id": 12940097381,
+        "name": "security-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:f0a264dab9ffcc9a1058df48fff32ab087c9e2fe5ddc957c4f58e6fed7b70929",
+        "expires_at": "2026-11-12T23:07:23Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "c8d9d0334471058cc91c416b16908c2ee0bde20c83c12cf3251c07507d863a39"
+          },
+          {
+            "name": "security-junit.xml",
+            "sha256": "527bd80b2e22c9f72c8630dcf1796c24dbd4ba61e4b2c00a0aa039fb5fc902b0"
+          },
+          {
+            "name": "sbom.cdx.json",
+            "sha256": "5e0b221c668ebd27c49ff1dfacaaa7580d97d13273c2f7dc7c51ddc82cd68629"
+          }
+        ]
+      },
+      {
+        "id": 12940009422,
+        "name": "gate-summary-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:8ff3c467cea2e4101455f31fea1b6dbc200d862ab52f38c16d2230bc6b679636",
+        "expires_at": "2026-11-12T23:13:21Z",
+        "files": [
+          {
+            "name": "gate-summary.json",
+            "sha256": "9546de8370e1e87526eff879846611cddb9c294c862d98f6de33f053dd1e6af9"
+          }
+        ]
+      },
+      {
+        "id": 12939973450,
+        "name": "delivery-preview-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:a0eeb602cebd8360ed78da703b848e129118070bd10f0988a9f955600cc78be9",
+        "expires_at": "2026-11-12T23:15:51Z",
+        "files": [
+          {
+            "name": "validation.json",
+            "sha256": "f8b4c08459abbb9a573643ea8f639bc5a4d65eda22092cf06f9bf368f18a9793"
+          },
+          {
+            "name": "candidate.json",
+            "sha256": "1443360d7cab076a631a912b55f4698d3e918847bcb25382fc818b0562aebc08"
+          }
+        ]
+      },
+      {
+        "id": 12939972086,
+        "name": "governance-financial-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:7fad2033a7ec2317b59e217988e2dc3d61bb5dfe5ee66e8002571b3424807780",
+        "expires_at": "2026-11-12T23:04:36Z",
+        "files": [
+          {
+            "name": "financial-junit.xml",
+            "sha256": "6c734ad0ec0a610178acd3961888c2372e71f0ae4c404ecd5b5866207d280656"
+          },
+          {
+            "name": "result.json",
+            "sha256": "9cbb3fb33dddc68572281f63f2d185a6a623f990c577858a64c34f3640f07baf"
+          },
+          {
+            "name": "inventory.json",
+            "sha256": "4daad55d7969c2127f2498f9cdc0049aca7dd9dfe2b8c0f50bc565b5b5223ab7"
+          }
+        ]
+      },
+      {
+        "id": 12939923185,
+        "name": "governance-python-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:c56cc81124efa9b111f3999fde2455876653294594617802a0aa825447c4d733",
+        "expires_at": "2026-11-12T23:11:33Z",
+        "files": [
+          {
+            "name": "coverage.xml",
+            "sha256": "044486a7f9271aac6d81c1c1da75eebdea94f866ac1153dac1aa379305205f42"
+          },
+          {
+            "name": "python-junit.xml",
+            "sha256": "3d41d3e678b12465784e6ea34221eb28ae8c33d942eedbadca6571d09e797313"
+          },
+          {
+            "name": "inventory.json",
+            "sha256": "d19814b3b54a359043d12e76b5ebed110da0a4284f9d0be016512e6024a26331"
+          },
+          {
+            "name": "result.json",
+            "sha256": "d1b28d3d8536bbbf490af012192485515353de385a93d091b212ec5254a022bb"
+          }
+        ]
+      },
+      {
+        "id": 12939787186,
+        "name": "governance-ruff-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:12414867ea3f72e4cefc8ab087d46ca06d073170083cc3df020b9e23601bceb4",
+        "expires_at": "2026-11-12T23:02:44Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "083a07f665f34f419feb38a13db0b8e264daa71d80db803b696761de74a9db5d"
+          }
+        ]
+      },
+      {
+        "id": 12939529001,
+        "name": "application-c3579e6603f07ff0dc09acccf561885bddeeb485-windows-x64",
+        "digest": "sha256:95a44f12dd6ea4b2d616500e4de29d05fbd700ba4939fcc2d1ebf31bf9ea3bf8",
+        "expires_at": "2026-11-12T23:03:56Z",
+        "files": [
+          {
+            "name": "income-analytics-c3579e6603f07ff0dc09acccf561885bddeeb485-windows-x64.sha256",
+            "sha256": "a069d27693dda274676e97bb47ff2a3467ef63149dd10a6e1ccbea41ede4d921"
+          },
+          {
+            "name": "income-analytics-c3579e6603f07ff0dc09acccf561885bddeeb485-windows-x64.zip",
+            "sha256": "637d7ffa7d3b0ba617413b5af2b7f92649749947e638c1441ed6a083658ffe86"
+          },
+          {
+            "name": "manifest.json",
+            "sha256": "334f0aefe56b8dc9cec9f759c18391f9ef636bbd6eeb2067b54ab3c1cf588af1"
+          }
+        ]
+      },
+      {
+        "id": 12939468739,
+        "name": "governance-quality-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:d92a12d0258956b7cf80739733974a65ab2937f39ef16a4a73a05fa86241af5e",
+        "expires_at": "2026-11-12T23:03:06Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "6a44efab067f556a3fce929ecd0b7934af38c78b3e5dcca1d6e6fada5203f7b6"
+          }
+        ]
+      },
+      {
+        "id": 12939284248,
+        "name": "governance-node-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:f889d960bfcd957ee411d27e3e1c34d2bc1ee030b8a6b92162d10a24fd788377",
+        "expires_at": "2026-11-12T23:02:26Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "1ad01214ef876129157f7e45d49adf419ffb1487cbc418a5f350c1af939779ce"
+          }
+        ]
+      },
+      {
+        "id": 12939229408,
+        "name": "governance-mypy-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:ed5ca21f5c655278db0831e021c45661b31c570cb782fc380c99ffb370aa33d6",
+        "expires_at": "2026-11-12T23:04:07Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "acb5a64256c4e4f2282312b0cd08217ae61d3fd9bf23c9ca0629a7f62d07bbec"
+          }
+        ]
+      },
+      {
+        "id": 12939113445,
+        "name": "governance-runtime-c3579e6603f07ff0dc09acccf561885bddeeb485",
+        "digest": "sha256:5e0d9b85c9b28bdbd81de0ffc4c88bdd276f89e7c860373dfc2c98949605d885",
+        "expires_at": "2026-11-12T23:02:49Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "20581b12588a94b4fafa37be61eb3db1b5a206010e8a452bf66e9aaa17a4430e"
+          }
+        ]
+      }
+    ]
+  },
   "production_authorized": false,
-  "note": "Will be updated only from actual run metadata/artifact digests. Final merged PR receipt records definitive postmerge SHA/run, avoiding self-referential documentation commits."
+  "note": "This versioned snapshot proves the initial source revision. The final merged PR receipt links definitive head/develop SHAs and final hosted/postmerge CI/delivery artifacts. The final revision is not approved by reusing this earlier run.",
+  "first_revision_original_cases_verified": true,
+  "final_revision": {
+    "state": "LOCAL_VALIDATED_HOSTED_RERUN_REQUIRED",
+    "change": "Only explicit FINANCIAL_NOT_VERIFIED on financial runner exceptions plus negative regression and evidence documentation; no calculation/fixture/expectation changes",
+    "local_financial_totals": {
+      "passed": 104,
+      "failed": 15,
+      "errors": 9,
+      "skipped": 0
+    },
+    "local_focused_tests": 107,
+    "integrity_controls": 31,
+    "sast_reviewed_occurrences": 326
+  }
 }

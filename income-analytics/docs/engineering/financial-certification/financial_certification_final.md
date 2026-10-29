@@ -52,6 +52,12 @@ Os seis ZIPs CVM DFP2023/2024/2025, ITR2025 e FCA2024/2025 e o COTAHIST_A2025.ZI
 
 ## Validação local concluída
 
-Seleção financeira:103 PASS/15 FAIL/9 ERROR/0 SKIP; os97 casos originais mantêm exatamente seus estados e30 controles novos passam. Duas execuções descartáveis com seeds0/97 preservam casos e causas. Foco governança/integridade:106 PASS. Qualidade802 diagnósticos atuais/803 históricos, zero novos. Nenhum diff em src/tests/alembic/scripts ou baseline original. Gates hospedados ainda pendentes nesta revisão.
+Seleção financeira:104 PASS/15 FAIL/9 ERROR/0 SKIP; os97 casos originais mantêm exatamente seus estados e31 controles novos passam. Duas execuções descartáveis com seeds0/97 preservam casos e causas. Foco governança/integridade:107 PASS. Qualidade802 diagnósticos atuais/803 históricos, zero novos. Nenhum diff em src/tests/alembic/scripts ou baseline original. A primeira revisão hospedada foi validada; a revisão final com tratamento explícito de falha do executor requer seu próprio rerun, apontado no recibo do PR.
 
 O harness de teste negativo de tamanho foi corrigido com IDs explícitos curtos, preservando o payload grande e as asserções; erros intermediários de limite de variável de ambiente foram rejeitados e não tratados como aprovação. O parser JUnit é limitado a16MiB, UTF-8 sem NUL/DOCTYPE/ENTITY. As novas ocorrências SAST e relocações de contexto foram revisadas individualmente; não houve ignore global.
+
+## Evidência hospedada da primeira revisão
+
+[CI40970166275](https://github.com/tiagocaldironi/income-analytics/actions/runs/40970166275), attempt1, head `1ad8ec85e9b3aa41d2096cbe025dea3dd4930b24`, checkout efetivo `c3579e6603f07ff0dc09acccf561885bddeeb485`: Engineering1264 PASS, Security137 PASS, frontend31 suítes PASS, build/runtime/qualidade/homologação PASS. Financial103P/15F/9E/0S, estados/causas originais preservados, FINANCIAL_BLOCKED. Conclusão global failure, não verde. Pacote artifact12939529001, SHA-256 `637d7ffa7d3b0ba617413b5af2b7f92649749947e638c1441ed6a083658ffe86`; segurança/SBOM artifact12940097381. Política `d3f23d6c1e0474e80fd2b97ab4055ec6b13ad3ae0af8d223d4a36f15c1915101` e fingerprint `00bd3860a9e4d6da6ac668dcc17e7f2a6ce12e3ef06e19938086eb03ba7d234a` recalculados dos blobs Git; envelopes e manifest/pacote/SBOM verificados.
+
+A revisão final acrescenta apenas o tratamento explícito NOT_VERIFIED quando o runner falha (exit2, mensagem bruta não publicada), com31 controles/107 testes focados e104P/15F/9E locais. O recibo final do PR registra a validação específica desse head, a integração e o pós-merge; esta medição antiga não substitui os checks finais. Produção continua não autorizada.
