@@ -13,6 +13,8 @@ import time
 from pathlib import Path
 
 import run as legacy
+from financial_certification import evaluate as evaluate_financial_evidence
+from financial_certification import failure_causes
 from gate_policy import (
     BASELINE,
     ROOT,
@@ -108,6 +110,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         "ci/test_build_artifact.py",
         "ci/test_delivery.py",
         "ci/test_security.py",
+        "ci/test_financial_certification.py",
         f"--ci-gate={gate}",
         "-ra",
         "--tb=short",
@@ -144,13 +147,16 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         if details["totals"]["skipped"] or details["totals"]["passed"] == 0:
             return 1, {**details, "status": "FAIL", "reason": "SKIP_OR_EMPTY_ENGINEERING_SCOPE"}
     if check == "financial":
-        details["status"] = "BLOCKED"
-        details["blockers"] = [
-            "CERT_48_REQUIRES_INDEPENDENT_RECONCILIATION",
-            "IDENTITY_FROZEN_BYTES_UNRESOLVED",
-            "22_HISTORICAL_REFERENCES_UNAPPROVED",
-        ]
-        return 1, details  # Explicit, non-approved check even if future assertions happen to pass.
+        details["failure_causes"] = failure_causes(raw)
+        evidence = evaluate_financial_evidence(ROOT, details)
+        details.update(evidence)
+        approved = evidence["financial_state"] == "FINANCIAL_PASS" and result.returncode == 0
+        details["status"] = (
+            "PASS"
+            if approved
+            else ("BLOCKED" if evidence["financial_state"] == "FINANCIAL_BLOCKED" else "FAIL")
+        )
+        return (0 if approved else max(result.returncode, 1)), details
     coverage = sandbox / "coverage.xml"
     if coverage.exists():
         import xml.etree.ElementTree as ET

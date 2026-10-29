@@ -1,0 +1,1058 @@
+{
+  "baseline_sha": "c76132b4398434fb8a196f895b78b7f46ed3845e",
+  "baseline_totals": {
+    "passed": 73,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 0
+  },
+  "failure_records": [
+    {
+      "test_id": "tests/api/test_magic_formula_product_api.py::test_magic_formula_api_reads_persisted_snapshot_and_searches_ticker",
+      "file": "tests/api/test_magic_formula_product_api.py",
+      "line": 48,
+      "component": "Magic Formula historical replay",
+      "failure_type": "error",
+      "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v12_2//ranking_snapshot.json'\"",
+      "sanitized_frames": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v12_2/ranking_snapshot.json",
+        "data/magic_formula/universe_snapshots.db (ID/digest sector provenance)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert response[\"snapshot_available\"] is True",
+        "assert response[\"total\"] == 1",
+        "assert response[\"items\"][0][\"selected_security\"] == \"WEGE3\"",
+        "assert response[\"summary\"][\"ranked\"] == 165",
+        "assert response[\"global_rank_preserved\"] is True",
+        "assert response[\"items\"][0][\"sector\"]",
+        "assert response[\"items\"][0][\"sector_source_reference\"].startswith(\n        \"fca_cia_aberta_2025.zip|fca_cia_aberta_geral_2025.csv\"\n    )"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/api/test_magic_formula_product_api.py::test_sector_metadata_covers_the_165_ranked_companies_without_changing_hash",
+      "file": "tests/api/test_magic_formula_product_api.py",
+      "line": 64,
+      "component": "Magic Formula historical replay",
+      "failure_type": "error",
+      "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v12_2//ranking_snapshot.json'\"",
+      "sanitized_frames": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v12_2/ranking_snapshot.json",
+        "data/magic_formula/universe_snapshots.db (ID/digest sector provenance)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert len(rows) == 165",
+        "assert all(row.get(\"sector\") for row in rows)",
+        "assert all(\n        row[\"sector_source_reference\"].startswith(\"fca_cia_aberta_2025.zip|\") for row in rows\n    )",
+        "assert published_point_in_time_ranking[\"ranking_snapshot_id\"] == \"mf-f1ee50809c83979ba221d84e\"",
+        "assert (\n        published_point_in_time_ranking[\"ranking_hash\"]\n        == json.loads(\n            Path(\"docs/appendices/magic_formula_v12_2/ranking_snapshot.json\").read_text(\n                encoding=\"utf-8\"\n            )\n        )[\"ranking_hash\"]\n    )"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/api/test_magic_formula_product_api.py::test_tools_catalog_marks_available_magic_formula_as_partial",
+      "file": "tests/api/test_magic_formula_product_api.py",
+      "line": 87,
+      "component": "Magic Formula historical replay",
+      "failure_type": "error",
+      "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v12_2//ranking_snapshot.json'\"",
+      "sanitized_frames": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v12_2/ranking_snapshot.json",
+        "data/magic_formula/universe_snapshots.db (ID/digest sector provenance)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert tools[0][\"status\"] == \"PARTIAL\"",
+        "assert tools[0][\"version\"] == \"MF_BR_2027_V1\""
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/api/test_magic_formula_product_api.py::test_magic_formula_company_detail_returns_source_provenance",
+      "file": "tests/api/test_magic_formula_product_api.py",
+      "line": 96,
+      "component": "Magic Formula historical replay",
+      "failure_type": "error",
+      "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v12_2//ranking_snapshot.json'\"",
+      "sanitized_frames": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v12_2/ranking_snapshot.json",
+        "data/magic_formula/universe_snapshots.db (ID/digest sector provenance)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert detail[\"item\"][\"selected_security\"] == \"WEGE3\"",
+        "assert detail[\"provenance\"][\"filing_date\"] <= \"2025-12-30\"",
+        "assert detail[\"provenance\"][\"selected_security_source\"][\"price_source_reference\"].startswith(\n        \"COTAHIST\"\n    )",
+        "assert detail[\"snapshot\"][\"ranking_snapshot_id\"] == listed[\"snapshot\"][\"ranking_snapshot_id\"]",
+        "assert detail[\"company\"][\"ticker\"] == listed[\"items\"][0][\"selected_security\"]",
+        "assert detail[\"company\"][\"sector\"] == listed[\"items\"][0][\"sector\"]",
+        "assert detail[\"company\"][\"sector_point_in_time_safe\"] == \"UNKNOWN\"",
+        "assert detail[\"company\"][\"listing_segment\"] is None",
+        "assert detail[\"ranking\"][\"global_rank\"] == listed[\"items\"][0][\"global_rank\"]",
+        "assert detail[\"calculation\"][\"ebit\"] == listed[\"items\"][0][\"ebit\"]",
+        "assert detail[\"calculation\"][\"enterprise_value\"] == listed[\"items\"][0][\"enterprise_value\"]",
+        "assert detail[\"calculation\"][\"cash\"] is not None",
+        "assert detail[\"calculation\"][\"debt\"] is not None",
+        "assert detail[\"calculation\"][\"value_types\"][\"enterprise_value\"] == \"DERIVED\"",
+        "assert detail[\"calculation\"][\"lineage\"][\"enterprise_value\"][\"accounting_sources\"]",
+        "assert detail[\"data_basis\"][\"financial_reference_period\"] == \"2024-12-31\"",
+        "assert detail[\"data_basis\"][\"price_date\"] == \"2025-12-30\""
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/api/test_magic_formula_product_api.py::test_detail_does_not_build_a_company_outside_the_requested_snapshot",
+      "file": "tests/api/test_magic_formula_product_api.py",
+      "line": 127,
+      "component": "Magic Formula historical replay",
+      "failure_type": "error",
+      "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v12_2//ranking_snapshot.json'\"",
+      "sanitized_frames": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v12_2/ranking_snapshot.json",
+        "data/magic_formula/universe_snapshots.db (ID/digest sector provenance)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert getattr(error.value, \"status_code\", None) == 404"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/api/test_magic_formula_product_api.py::test_csna3_has_no_detail_when_it_is_blocked_from_the_published_ranking",
+      "file": "tests/api/test_magic_formula_product_api.py",
+      "line": 135,
+      "component": "Magic Formula historical replay",
+      "failure_type": "error",
+      "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v12_2//ranking_snapshot.json'\"",
+      "sanitized_frames": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v12_2/ranking_snapshot.json",
+        "data/magic_formula/universe_snapshots.db (ID/digest sector provenance)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert listed[\"total\"] == 0",
+        "assert all(row[\"selected_security\"] != \"CSNA3\" for row in listed[\"items\"])",
+        "assert blocked[\"status\"] == \"ELIGIBLE_DATA_BLOCKED\"",
+        "assert error.value.status_code == 404"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/api/test_magic_formula_product_api.py::test_runtime_http_endpoint_returns_the_published_point_in_time_contract",
+      "file": "tests/api/test_magic_formula_product_api.py",
+      "line": 159,
+      "component": "Magic Formula historical replay",
+      "failure_type": "error",
+      "message": "failed on setup with \"FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v12_2//ranking_snapshot.json'\"",
+      "sanitized_frames": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v12_2/ranking_snapshot.json",
+        "data/magic_formula/universe_snapshots.db (ID/digest sector provenance)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/api/test_magic_formula_product_api.py:32: in published_point_in_time_ranking"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert response.status_code == 200",
+        "assert body[\"status\"] == \"AVAILABLE\"",
+        "assert body[\"methodology_version\"] == \"MF_BR_2027_V1\"",
+        "assert body[\"snapshot\"][\"ranking_snapshot_id\"] == \"mf-f1ee50809c83979ba221d84e\"",
+        "assert body[\"summary\"][\"ranked\"] == 165",
+        "assert body[\"total\"] == 165",
+        "assert len(body[\"items\"]) == 25",
+        "assert body[\"items\"][0][\"global_rank\"] == 1"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_historical_shares_units.py::test_shares_unit_020_frozen_engine",
+      "file": "tests/application/test_historical_shares_units.py",
+      "line": 230,
+      "component": "Frozen identity",
+      "failure_type": "failure",
+      "message": "AssertionError: assert '44fe1057b14d...74c30dc344a9d' == '27b58d132b46...1785ae5ad27a4'\n  \n  - 27b58d132b461afe867ca2af05757b1309739c40156549ac0bf1785ae5ad27a4\n  + 44fe1057b14dc45d13e0d302d7b24e361921ee2dab87b1dfde674c30dc344a9d",
+      "sanitized_frames": [
+        "tests/application/test_historical_shares_units.py:233: in test_shares_unit_020_frozen_engine"
+      ],
+      "dependencies": [
+        "versioned frozen manifest and exact bytes"
+      ],
+      "required_evidence": "Approved original bytes and independent approval/canonical authority; EOL variants are not approval.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Approved original bytes and independent approval/canonical authority; EOL variants are not approval.",
+      "expected_hash": [
+        "27b58d132b461afe867ca2af05757b1309739c40156549ac0bf1785ae5ad27a4",
+        "47140198ac099487f4160be411c46ef549a1d3ac3e8db25dbbc672d7133e6a37",
+        "9e299489a57c049fcbcc940a0d3fdfa573d174cc8c57b97c14f4fcc63204163f"
+      ],
+      "observed_hash": [
+        "44fe1057b14dc45d13e0d302d7b24e361921ee2dab87b1dfde674c30dc344a9d",
+        "47140198ac099487f4160be411c46ef549a1d3ac3e8db25dbbc672d7133e6a37",
+        "9e299489a57c049fcbcc940a0d3fdfa573d174cc8c57b97c14f4fcc63204163f"
+      ],
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "FROZEN_IDENTITY_MISMATCH",
+      "root_cause": "FROZEN_IDENTITY_MISMATCH",
+      "classification_evidence": [
+        "tests/application/test_historical_shares_units.py:233: in test_shares_unit_020_frozen_engine"
+      ],
+      "possible_fix": "Do not rewrite fixtures, manifest or expected hashes.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == expected"
+      ],
+      "observed_result": "FROZEN_IDENTITY_MISMATCH",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_canonical_ranking.py::test_builds_a_deterministic_ranking_with_temporal_provenance",
+      "file": "tests/application/test_magic_formula_canonical_ranking.py",
+      "line": 16,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v9_2//methodological_universe.csv'",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_canonical_ranking.py:17: in test_builds_a_deterministic_ranking_with_temporal_provenance",
+        "src/income_analytics/application/magic_formula_canonical_ranking.py:40: in build_canonical_snapshot"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v9_2/methodological_universe.csv",
+        "data/magic_formula/universe_snapshots.db",
+        "data/cvm/dfp_cia_aberta_2025.zip"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_canonical_ranking.py:17: in test_builds_a_deterministic_ranking_with_temporal_provenance",
+        "src/income_analytics/application/magic_formula_canonical_ranking.py:40: in build_canonical_snapshot"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert first[\"policy_id\"] == \"MF_BR_2027_V1\"",
+        "assert (\n        first[\"policy_hash\"] == \"96d5d54ab1b1320ddc14f1a3c9cd6764b1bf8d68f1e6d79ffd0faa6d1b72cbac\"\n    )",
+        "assert first[\"ranking_hash\"] == second[\"ranking_hash\"]",
+        "assert first[\"rankable_companies\"] == 174",
+        "assert len(first[\"metric_non_rankable\"]) == 6",
+        "assert len(first[\"provenance\"]) == 174",
+        "assert all(row[\"filing_date\"] <= first[\"accounting_cutoff\"] for row in first[\"results\"])",
+        "assert all(\n        row[\"price_reference_date\"] <= first[\"ranking_reference_date\"] for row in first[\"results\"]\n    )",
+        "assert all(\n        row[\"combined_score\"] == row[\"earnings_yield_rank\"] + row[\"return_on_capital_rank\"]\n        for row in first[\"results\"]\n    )",
+        "assert digest(first[\"results\"]) != first[\"ranking_hash\"]"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_canonical_ranking.py::test_screening_search_and_pagination_preserve_global_rank",
+      "file": "tests/application/test_magic_formula_canonical_ranking.py",
+      "line": 39,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v9_2//methodological_universe.csv'",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_canonical_ranking.py:40: in test_screening_search_and_pagination_preserve_global_rank",
+        "src/income_analytics/application/magic_formula_canonical_ranking.py:40: in build_canonical_snapshot"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v9_2/methodological_universe.csv",
+        "data/magic_formula/universe_snapshots.db",
+        "data/cvm/dfp_cia_aberta_2025.zip"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_canonical_ranking.py:40: in test_screening_search_and_pagination_preserve_global_rank",
+        "src/income_analytics/application/magic_formula_canonical_ranking.py:40: in build_canonical_snapshot"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert full[\"total\"] == 174",
+        "assert filtered[\"total\"] < full[\"total\"]",
+        "assert {row[\"global_rank\"] for row in filtered[\"items\"]}.issubset(\n        {row[\"global_rank\"] for row in snapshot[\"results\"]}\n    )",
+        "assert search[\"total\"] == 1",
+        "assert search[\"items\"][0][\"selected_security\"] == \"WEGE3\"",
+        "assert second_page[\"page\"] == 2",
+        "assert second_page[\"items\"][0][\"global_rank\"] > 1"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_canonical_ranking.py::test_snapshot_repository_is_append_only_and_idempotent",
+      "file": "tests/application/test_magic_formula_canonical_ranking.py",
+      "line": 57,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: 'docs//appendices//magic_formula_v9_2//methodological_universe.csv'",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_canonical_ranking.py:58: in test_snapshot_repository_is_append_only_and_idempotent",
+        "src/income_analytics/application/magic_formula_canonical_ranking.py:40: in build_canonical_snapshot"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_v9_2/methodological_universe.csv",
+        "data/magic_formula/universe_snapshots.db",
+        "data/cvm/dfp_cia_aberta_2025.zip"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_canonical_ranking.py:58: in test_snapshot_repository_is_append_only_and_idempotent",
+        "src/income_analytics/application/magic_formula_canonical_ranking.py:40: in build_canonical_snapshot"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert repository.latest() is None",
+        "assert (\n        repository.read(snapshot[\"ranking_snapshot_id\"])[\"ranking_hash\"] == snapshot[\"ranking_hash\"]\n    )",
+        "assert repository.latest()[\"ranking_hash\"] == snapshot[\"ranking_hash\"]",
+        "assert repository.latest() is None"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_historical_price_sources_v5.py::test_production_snapshot_readback_is_independent_and_idempotent",
+      "file": "tests/application/test_magic_formula_historical_price_sources_v5.py",
+      "line": 231,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "sqlite3.OperationalError: unable to open database file",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_historical_price_sources_v5.py:233: in test_production_snapshot_readback_is_independent_and_idempotent",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "dependencies": [
+        "data/magic_formula/universe_snapshots.db (historical IDs/order)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_DATABASE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_historical_price_sources_v5.py:233: in test_production_snapshot_readback_is_independent_and_idempotent",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert first_read == second_read",
+        "assert after == before",
+        "assert first_read[\"ranking_status\"] == \"INACTIVE\"",
+        "assert first_read[\"tool_status\"] == \"VALIDATION_REQUIRED\""
+      ],
+      "observed_result": "MISSING_HISTORICAL_DATABASE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_27_v8_baseline_statuses_sum_to_307",
+      "file": "tests/application/test_magic_formula_methodology_policy_v1.py",
+      "line": 226,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: '<private-path>'",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_methodology_policy_v1.py:227: in test_v1_27_v8_baseline_statuses_sum_to_307",
+        "tests/application/test_magic_formula_methodology_policy_v1.py:59: in _universe_status_counts"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_policy_review_resolution_v8/methodological_universe_v8.csv"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_methodology_policy_v1.py:227: in test_v1_27_v8_baseline_statuses_sum_to_307",
+        "tests/application/test_magic_formula_methodology_policy_v1.py:59: in _universe_status_counts"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert sum(counts.values()) == 307"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_28_methodological_coverage_denominator_is_complete_plus_blocked",
+      "file": "tests/application/test_magic_formula_methodology_policy_v1.py",
+      "line": 231,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: '<private-path>'",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_methodology_policy_v1.py:232: in test_v1_28_methodological_coverage_denominator_is_complete_plus_blocked",
+        "tests/application/test_magic_formula_methodology_policy_v1.py:59: in _universe_status_counts"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_policy_review_resolution_v8/methodological_universe_v8.csv"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_methodology_policy_v1.py:232: in test_v1_28_methodological_coverage_denominator_is_complete_plus_blocked",
+        "tests/application/test_magic_formula_methodology_policy_v1.py:59: in _universe_status_counts"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert Decimal(complete) / Decimal(complete + blocked) == Decimal(180) / Decimal(243)"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_29_conservative_coverage_includes_reviews",
+      "file": "tests/application/test_magic_formula_methodology_policy_v1.py",
+      "line": 238,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "FileNotFoundError: [Errno 2] No such file or directory: '<private-path>'",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_methodology_policy_v1.py:239: in test_v1_29_conservative_coverage_includes_reviews",
+        "tests/application/test_magic_formula_methodology_policy_v1.py:59: in _universe_status_counts"
+      ],
+      "dependencies": [
+        "docs/appendices/magic_formula_policy_review_resolution_v8/methodological_universe_v8.csv"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_FILE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_methodology_policy_v1.py:239: in test_v1_29_conservative_coverage_includes_reviews",
+        "tests/application/test_magic_formula_methodology_policy_v1.py:59: in _universe_status_counts"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert Decimal(complete) / Decimal(\n        complete + blocked + security_review + liquidity_review\n    ) == Decimal(180) / Decimal(262)"
+      ],
+      "observed_result": "MISSING_HISTORICAL_FILE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_preview.py::test_preview_001_only_complete_data_universe_is_counted",
+      "file": "tests/application/test_magic_formula_preview.py",
+      "line": 25,
+      "component": "Magic Formula historical replay",
+      "failure_type": "error",
+      "message": "failed on setup with \"sqlite3.OperationalError: unable to open database file\"",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_preview.py:21: in preview",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:70: in read",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "dependencies": [
+        "data/magic_formula/universe_snapshots.db (historical IDs/order)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_DATABASE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_preview.py:21: in preview",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:70: in read",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert preview[\"preview_status\"] == \"ACTIVE\"",
+        "assert preview[\"preview_eligible_count\"] == 178",
+        "assert preview[\"preview_coverage\"] == \"57.98\"",
+        "assert preview[\"coverage\"] == {\n        \"companies_analyzed\": 178,\n        \"universe_identified\": 307,\n        \"coverage_percentage\": \"57.98\",\n        \"awaiting_complete_data\": 129,\n        \"ranked_companies\": 174,\n        \"not_ranked\": 4,\n    }"
+      ],
+      "observed_result": "MISSING_HISTORICAL_DATABASE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_preview.py::test_preview_002_uses_the_validated_ranking_engine",
+      "file": "tests/application/test_magic_formula_preview.py",
+      "line": 39,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "sqlite3.OperationalError: unable to open database file",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_preview.py:42: in test_preview_002_uses_the_validated_ranking_engine",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:70: in read",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "dependencies": [
+        "data/magic_formula/universe_snapshots.db (historical IDs/order)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_DATABASE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_preview.py:42: in test_preview_002_uses_the_validated_ranking_engine",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:70: in read",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert calls == [174]",
+        "assert len(preview[\"items\"]) == 174"
+      ],
+      "observed_result": "MISSING_HISTORICAL_DATABASE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_preview.py::test_preview_003_production_gate_stays_blocked",
+      "file": "tests/application/test_magic_formula_preview.py",
+      "line": 56,
+      "component": "Magic Formula historical replay",
+      "failure_type": "error",
+      "message": "failed on setup with \"sqlite3.OperationalError: unable to open database file\"",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_preview.py:21: in preview",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:70: in read",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "dependencies": [
+        "data/magic_formula/universe_snapshots.db (historical IDs/order)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_DATABASE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_preview.py:21: in preview",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:70: in read",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert preview[\"ranking_gate\"] == \"BLOCKED\"",
+        "assert preview[\"ranking_status\"] == \"INACTIVE\"",
+        "assert all(item[\"final_rank\"] >= 1 for item in preview[\"items\"])",
+        "assert {item[\"reason_code\"] for item in preview[\"not_ranked\"]} == {\n        \"NON_POSITIVE_INVESTED_CAPITAL\"\n    }"
+      ],
+      "observed_result": "MISSING_HISTORICAL_DATABASE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_preview.py::test_preview_current_snapshot_counts_are_derived_from_eligible_issuers",
+      "file": "tests/application/test_magic_formula_preview.py",
+      "line": 65,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "sqlite3.OperationalError: unable to open database file",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_preview.py:68: in test_preview_current_snapshot_counts_are_derived_from_eligible_issuers",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:84: in latest",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "dependencies": [
+        "data/magic_formula/universe_snapshots.db (historical IDs/order)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_DATABASE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_preview.py:68: in test_preview_current_snapshot_counts_are_derived_from_eligible_issuers",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:84: in latest",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert result[\"preview_eligible_count\"] == len(complete)",
+        "assert {i[\"issuer_id\"] for i in result[\"items\"] + result[\"not_ranked\"]} == complete",
+        "assert result[\"coverage\"][\"ranked_companies\"] + result[\"coverage\"][\"not_ranked\"] == len(\n        complete\n    )",
+        "assert result[\"ranking_gate\"] == \"BLOCKED\"",
+        "assert result[\"ranking_status\"] == \"INACTIVE\""
+      ],
+      "observed_result": "MISSING_HISTORICAL_DATABASE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_price_availability_audit.py::test_dry_run_does_not_persist_universe_snapshot",
+      "file": "tests/application/test_magic_formula_price_availability_audit.py",
+      "line": 129,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "sqlite3.OperationalError: unable to open database file",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_price_availability_audit.py:131: in test_dry_run_does_not_persist_universe_snapshot",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "dependencies": [
+        "data/magic_formula/universe_snapshots.db (historical IDs/order)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_DATABASE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_price_availability_audit.py:131: in test_dry_run_does_not_persist_universe_snapshot",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert after == before"
+      ],
+      "observed_result": "MISSING_HISTORICAL_DATABASE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_price_availability_audit.py::test_ranking_stays_blocked_in_saved_snapshot",
+      "file": "tests/application/test_magic_formula_price_availability_audit.py",
+      "line": 143,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "sqlite3.OperationalError: unable to open database file",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_price_availability_audit.py:146: in test_ranking_stays_blocked_in_saved_snapshot",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:84: in latest",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "dependencies": [
+        "data/magic_formula/universe_snapshots.db (historical IDs/order)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_DATABASE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_price_availability_audit.py:146: in test_ranking_stays_blocked_in_saved_snapshot",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:84: in latest",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert snapshot[\"ranking_status\"] == \"INACTIVE\"",
+        "assert snapshot[\"tool_status\"] == \"VALIDATION_REQUIRED\""
+      ],
+      "observed_result": "MISSING_HISTORICAL_DATABASE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_price_availability_audit.py::test_snapshot_ordering_audit_resolves_duplicate_timestamp_with_rowid",
+      "file": "tests/application/test_magic_formula_price_availability_audit.py",
+      "line": 151,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "sqlite3.OperationalError: unable to open database file",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_price_availability_audit.py:153: in test_snapshot_ordering_audit_resolves_duplicate_timestamp_with_rowid",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "dependencies": [
+        "data/magic_formula/universe_snapshots.db (historical IDs/order)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_DATABASE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_price_availability_audit.py:153: in test_snapshot_ordering_audit_resolves_duplicate_timestamp_with_rowid",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert result[\"selection_query\"] == \"ORDER BY created_at DESC, rowid DESC\"",
+        "assert result[\"duplicate_timestamps_present\"] is True",
+        "assert result[\"deterministic\"] is True and result[\"ordering_risk\"] is False"
+      ],
+      "observed_result": "MISSING_HISTORICAL_DATABASE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/application/test_magic_formula_price_availability_audit.py::test_csna3_and_v3_recoveries_survive_current_snapshot",
+      "file": "tests/application/test_magic_formula_price_availability_audit.py",
+      "line": 164,
+      "component": "Magic Formula historical replay",
+      "failure_type": "failure",
+      "message": "sqlite3.OperationalError: unable to open database file",
+      "sanitized_frames": [
+        "tests/application/test_magic_formula_price_availability_audit.py:167: in test_csna3_and_v3_recoveries_survive_current_snapshot",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:84: in latest",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "dependencies": [
+        "data/magic_formula/universe_snapshots.db (historical IDs/order)"
+      ],
+      "required_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Original complete reference, independent per-row/source anchors, chronological order and permission for redistribution.",
+      "expected_hash": null,
+      "observed_hash": null,
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "MISSING_HISTORICAL_EVIDENCE",
+      "root_cause": "MISSING_HISTORICAL_DATABASE",
+      "classification_evidence": [
+        "tests/application/test_magic_formula_price_availability_audit.py:167: in test_csna3_and_v3_recoveries_survive_current_snapshot",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:84: in latest",
+        "src/income_analytics/infrastructure/magic_formula_universe_repository.py:19: in connection"
+      ],
+      "possible_fix": "Recover independently approved inputs; no synthetic replacement or current-data substitution.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert security[\"price\"] == price",
+        "assert security[\"effective_market_date\"] == \"2025-12-30\""
+      ],
+      "observed_result": "MISSING_HISTORICAL_DATABASE",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    },
+    {
+      "test_id": "tests/infrastructure/test_historical_identity_fixture.py::test_versioned_official_identity_and_price_recovery",
+      "file": "tests/infrastructure/test_historical_identity_fixture.py",
+      "line": 12,
+      "component": "Frozen identity",
+      "failure_type": "failure",
+      "message": "AssertionError: assert '3890cfc22c50...f1f88913b9293' == '67fdbb7e6f3e...f532c457a45d9'\n  \n  - 67fdbb7e6f3e56f235635240b3c4057876afb20b055b11562bdf532c457a45d9\n  + 3890cfc22c50bb9ff0cdb35af7f754fa3bf5f47ee4022a3769ff1f88913b9293",
+      "sanitized_frames": [
+        "tests/infrastructure/test_historical_identity_fixture.py:16: in test_versioned_official_identity_and_price_recovery"
+      ],
+      "dependencies": [
+        "versioned frozen manifest and exact bytes"
+      ],
+      "required_evidence": "Approved original bytes and independent approval/canonical authority; EOL variants are not approval.",
+      "available_evidence": [
+        "Versioned test contract",
+        "Versioned provenance metadata",
+        "Scoped Git/ref and GitHub artifact inventory"
+      ],
+      "missing_evidence": "Approved original bytes and independent approval/canonical authority; EOL variants are not approval.",
+      "expected_hash": [
+        "67fdbb7e6f3e56f235635240b3c4057876afb20b055b11562bdf532c457a45d9",
+        "d0c14ea112fc242b17b87e590a0f93fa272d9e8f88d4605bc8a0f2ab4b1eafad",
+        "a4b0734c50046306f46448bd3f496fad2c20e98923cd38307b5fd3f7a5c1edfc",
+        "10924734efc14d6d247f8e57d6683bb3b158dd451ebad3ca3f72b3dfb8411057",
+        "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e"
+      ],
+      "observed_hash": [
+        "3890cfc22c50bb9ff0cdb35af7f754fa3bf5f47ee4022a3769ff1f88913b9293",
+        "931cc5afc0683d998e69e6300f271ab92982f85cf309d50cceafb37f2cf12fe7",
+        "14eb2403e55a2d2017caaf7cdde16238dd455a48f94d9ec26d250b94a6c36b8a",
+        "6446ab9e39d8fefbb065d194f3809a944890261505fa6d406ab7aa8fa0e2b56c",
+        "eb07e089b89841c770aab32c91fe3e772210a5477e2c52f876f01bd5a511f64e"
+      ],
+      "provenance": "PARTIALLY_VERIFIED: historical expectations exist; complete independent approval absent",
+      "classification": "FROZEN_IDENTITY_MISMATCH",
+      "root_cause": "FROZEN_IDENTITY_MISMATCH",
+      "classification_evidence": [
+        "tests/infrastructure/test_historical_identity_fixture.py:16: in test_versioned_official_identity_and_price_recovery"
+      ],
+      "possible_fix": "Do not rewrite fixtures, manifest or expected hashes.",
+      "applied_fix": "None to financial code, expectations or references; cause-aware fail-closed reporting added.",
+      "final_state": "BLOCKED",
+      "expected_contract_assertions": [
+        "assert (\n        hashlib.sha256((folder / \"offer-notice.pdf\").read_bytes()).hexdigest()\n        == proof[\"source_sha256\"]\n    )",
+        "assert result[\"securities\"][0][\"price\"] == \"5.45\"",
+        "assert result[\"securities\"][0][\"effective_market_date\"] == \"2025-12-30\"",
+        "assert result[\"accounting_readiness\"] == issuer[\"accounting_readiness\"]",
+        "assert (\n        result[\"market_readiness\"][\"normalized_outstanding_by_class\"]\n        == issuer[\"market_readiness\"][\"normalized_outstanding_by_class\"]\n    )",
+        "assert result[\"canonical_ranking_eligible\"] is False",
+        "assert hashlib.sha256((folder / filename).read_bytes()).hexdigest() == expected"
+      ],
+      "observed_result": "FROZEN_IDENTITY_MISMATCH",
+      "effort": "External recovery/approval UNKNOWN; diagnostic work completed"
+    }
+  ],
+  "classification_counts": {
+    "FROZEN_IDENTITY_MISMATCH": 2,
+    "MISSING_HISTORICAL_EVIDENCE": 22
+  },
+  "scope": "No environment/code defect was proved for these 24 cases; assertions and errors remain visible. Additional external blockers are enumerated separately."
+}

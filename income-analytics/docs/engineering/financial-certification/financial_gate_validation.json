@@ -1,0 +1,85 @@
+{
+  "state": "FINANCIAL_CERTIFICATION_BLOCKED",
+  "baseline": {
+    "passed": 73,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 0
+  },
+  "baseline_sha": "c76132b4398434fb8a196f895b78b7f46ed3845e",
+  "local_transport_variant": {
+    "passed": 74,
+    "failed": 14,
+    "errors": 9,
+    "skipped": 0
+  },
+  "baseline_policy_sha256": "0d19985f55335c94995fe1a33d6480121026f712f7776fd9596f1da9724b644a",
+  "baseline_source_fingerprint": "8a35cd2dbd39e425c0435d99250fecbce235b016b74e89fd7253a23c9dd1fb9a",
+  "financial_contract_changed": false,
+  "frozen_manifests_changed": false,
+  "implementation": "Cause-aware financial_state plus mandatory 97-case coverage, immutable original manifest pins, no skipped/empty/missing/inconsistent report PASS; new or changed-cause failures FINANCIAL_FAIL. Explicit provenance blockers remain even if assertions pass.",
+  "negative_control_tests": "ci/test_financial_certification.py",
+  "hosted": "PENDING_CURRENT_PR9_RUN",
+  "production_authorized": false,
+  "after": {
+    "passed": 103,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 0
+  },
+  "financial_state": "FINANCIAL_BLOCKED",
+  "blockers": [
+    "22_HISTORICAL_REFERENCES_UNAPPROVED",
+    "CERT_48_REQUIRES_INDEPENDENT_RECONCILIATION",
+    "FROZEN_IDENTITY_MISMATCH",
+    "HISTORICAL_PROVENANCE_INCOMPLETE",
+    "IDENTITY_PROVENANCE_UNAPPROVED"
+  ],
+  "unexpected_failures": [],
+  "mandatory_coverage_verified": true,
+  "original_97_case_statuses_preserved": true,
+  "new_integrity_tests": 30,
+  "focused_totals": {
+    "passed": 106,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "quality": {
+    "status": "PASS",
+    "baseline_debt": 803,
+    "current_debt": 802,
+    "added": []
+  },
+  "determinism": {
+    "runs": 2,
+    "isolated_sqlite": true,
+    "seeds": [
+      0,
+      97
+    ],
+    "varied_environment": {
+      "second": {
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TZ": "UTC"
+      },
+      "scope": "Environment hints only, not OS timezone/locale certification"
+    },
+    "case_statuses_equal": true,
+    "failure_causes_equal": true,
+    "limitations": [
+      "Historical result replay not certified without complete original inputs",
+      "Only Python3.14.7/Windows tested; no claim for real alternate OS timezones/locales or parallel execution"
+    ]
+  },
+  "financial_sources_changed": false,
+  "original_quality_baseline_changed": false,
+  "local_harness_corrections": [
+    {
+      "cause": "Large synthetic parameter automatically expanded into a pytest node ID exceeded Windows32767-character environment-variable limit and raw JUnit size guard.",
+      "fix": "Explicit short parameter IDs entity/nul-encoding/oversize; same large payload and all assertions retained.",
+      "verification": "Final106 focused PASS and both financial repeats103P/15F/9E/0S; no skip/xfail/waiver."
+    }
+  ]
+}
