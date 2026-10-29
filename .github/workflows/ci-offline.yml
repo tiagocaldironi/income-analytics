@@ -205,3 +205,43 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           include-hidden-files: false
+
+  staging_preview:
+    name: CD / Staging validation
+    if: ${{ always() && github.event_name == 'pull_request' && needs.engineering_gate.result == 'success' && needs.build.result == 'success' }}
+    needs: [engineering_gate, build]
+    runs-on: windows-2025
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: income-analytics
+    env:
+      DELIVERY_SOURCE_RUN: ${{ github.run_id }}
+      DELIVERY_SOURCE_COMMIT: ${{ github.sha }}
+      DELIVERY_MODE: premerge
+      DELIVERY_TARGET: staging
+      DELIVERY_GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.7'
+          architecture: x64
+      - name: Exercise delivery engine without creating an eligible PR candidate
+        run: python ci/delivery_pipeline.py
+      - name: Publish preview evidence; production and promotion remain blocked
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: delivery-preview-${{ github.sha }}
+          path: |
+            income-analytics/ci-reports/delivery/validation.json
+            income-analytics/ci-reports/delivery/candidate.json
+          if-no-files-found: error
+          retention-days: 14

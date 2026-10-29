@@ -7,6 +7,11 @@ from pathlib import Path
 
 FINGERPRINT_VERSION = 2
 POLICY_FILES = (
+    ".github/workflows/delivery-validation.yml",
+    "income-analytics/ci/delivery.py",
+    "income-analytics/ci/delivery_stage.py",
+    "income-analytics/ci/delivery_pipeline.py",
+    "income-analytics/ci/test_delivery.py",
     "income-analytics/ci/artifact.py",
     "income-analytics/ci/build_pipeline.py",
     "income-analytics/ci/smoke_artifact.py",
