@@ -118,10 +118,57 @@ jobs:
           retention-days: 14
           include-hidden-files: false
 
+  build:
+    name: CI / Reproducible build
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: income-analytics
+    env:
+      CI_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.7'
+          architecture: x64
+      - name: Install locked build runtime
+        run: |
+          python -m venv .venv
+          ./.venv/Scripts/python.exe -m pip --isolated install --index-url https://pypi.org/simple --require-hashes --only-binary=:all: -r ci/runtime-windows-py314.lock
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./.venv/Scripts/python.exe -m pip check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build twice independently, verify and install offline in disposable environment
+        run: ./.venv/Scripts/python.exe ci/build_pipeline.py
+      - name: Upload build gate evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: governance-build-${{ github.sha }}
+          path: income-analytics/ci-reports/build/result.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Retain internal application bundle and integrity reports
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: application-${{ github.sha }}-windows-x64
+          path: |
+            income-analytics/ci-reports/build/*.zip
+            income-analytics/ci-reports/build/*.sha256
+            income-analytics/ci-reports/build/manifest.json
+          if-no-files-found: error
+          retention-days: 14
+
   engineering_gate:
     name: CI / Engineering
     if: always()
-    needs: [python, node]
+    needs: [python, node, build]
     runs-on: windows-2025
     timeout-minutes: 10
     defaults:
@@ -140,8 +187,15 @@ jobs:
         with:
           pattern: governance-*-${{ github.sha }}
           path: income-analytics/gate-inputs
+      - name: Reject failed or skipped build job
+        if: ${{ needs.build.result != 'success' }}
+        run: exit 1
       - name: Evaluate engineering independently of financial certification
-        run: python ci/governance.py summary --reports gate-inputs
+        if: always()
+        run: |
+          python ci/governance.py summary --reports gate-inputs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ('${{ needs.build.result }}' -ne 'success') { exit 1 }
       - name: Publish independent gate states
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

@@ -7,6 +7,12 @@ from pathlib import Path
 
 FINGERPRINT_VERSION = 2
 POLICY_FILES = (
+    "income-analytics/ci/artifact.py",
+    "income-analytics/ci/build_pipeline.py",
+    "income-analytics/ci/smoke_artifact.py",
+    "income-analytics/ci/build_policy.json",
+    "income-analytics/ci/build_installation.md",
+    "income-analytics/ci/test_build_artifact.py",
     ".github/CODEOWNERS",
     ".github/workflows/ci-offline.yml",
     "income-analytics/ci/gate_policy.py",

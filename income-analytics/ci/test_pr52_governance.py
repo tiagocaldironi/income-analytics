@@ -12,6 +12,7 @@ import pytest
 import yaml
 from gate_policy import ROOT, compare_diagnostics, summarize_reports
 from governance import parse_mypy_output
+from test_governance import engineering_reports
 
 DOCS = ROOT / "docs/engineering/cicd-assessment"
 GIT_ROOT = ROOT.parent
@@ -172,10 +173,9 @@ def test_financial_blockers_cannot_be_relabelled_as_pass():
         "fingerprint_version": 2,
         "governance_policy_sha256": "unit-policy",
     }
-    reports = {
-        check: {**identity, "exit_code": 0}
-        for check in ("runtime", "engineering", "node", "quality")
-    }
+    reports = engineering_reports()
+    for report in reports.values():
+        report.update(identity)
     reports["financial"] = {
         **identity,
         "exit_code": 0,
