@@ -60,6 +60,15 @@ def tracked_files():
     )
 
 
+def forbidden_source_files(paths):
+    sensitive = {".db", ".sqlite", ".sqlite3", ".pem", ".key", ".p12", ".pfx"}
+    return sorted(
+        name
+        for name in paths
+        if Path(name).suffix.lower() in sensitive or Path(name).name == ".env"
+    )
+
+
 def artifact_secrets(path):
     findings = []
     with zipfile.ZipFile(path) as archive:
@@ -77,6 +86,109 @@ def artifact_secrets(path):
             else:
                 findings += secrets_in(data, "artifact:" + name)
     return findings
+
+
+def gitleaks(sandbox):
+    """Pinned upstream rules; no inline allow comments or repository ignore files."""
+    tool = json.loads((ROOT / "ci/security-tools.json").read_text(encoding="utf-8"))
+    version = tool["version"]
+    expected_url = (
+        f"https://github.com/gitleaks/gitleaks/releases/download/v{version}/"
+        f"gitleaks_{version}_windows_x64.zip"
+    )
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version) or tool["archive_url"] != expected_url:
+        raise ValueError("UNTRUSTED_SECURITY_TOOL_ORIGIN")
+    with urllib.request.urlopen(tool["archive_url"], timeout=90) as response:
+        archive_bytes = response.read()
+    if sha(archive_bytes) != tool["archive_sha256"]:
+        raise ValueError("GITLEAKS_ARCHIVE_DIGEST_MISMATCH")
+    with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+        executable_bytes = archive.read("gitleaks.exe")
+    if sha(executable_bytes) != tool["executable_sha256"]:
+        raise ValueError("GITLEAKS_EXECUTABLE_DIGEST_MISMATCH")
+    executable = sandbox / "gitleaks.exe"
+    executable.write_bytes(executable_bytes)
+    config = sandbox / "gitleaks.toml"
+    config.write_bytes(b"[extend]\nuseDefault = true\n")
+    ignored = sandbox / "empty-ignore"
+    ignored.write_bytes(b"")
+    version = subprocess.run([str(executable), "version"], capture_output=True, timeout=30)
+    if version.returncode or version.stdout.decode().strip() != tool["version"]:
+        raise ValueError("GITLEAKS_VERSION_MISMATCH")
+    current = sandbox / "current"
+    source_files = [(ROOT / name, "income-analytics/" + name) for name in tracked_files()]
+    source_files += [
+        (file, file.relative_to(ROOT.parent).as_posix())
+        for file in (ROOT.parent / ".github").rglob("*")
+        if file.is_file()
+    ]
+    for source, name in source_files:
+        if source.is_file():
+            if not source.resolve().is_relative_to(ROOT.parent.resolve()):
+                raise ValueError("SOURCE_LINK_OUTSIDE_CHECKOUT")
+            destination = current / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(source.read_bytes())
+    findings = []
+    negative = sandbox / "negative"
+    negative.mkdir()
+    (negative / "synthetic.py").write_bytes(
+        b"github_token = 'ghp_" + sha(b"income-synthetic-invalid-credential").encode()[:36] + b"'\n"
+    )
+    for mode, target in (("selftest", negative), ("dir", current), ("git", ROOT.parent)):
+        raw = sandbox / ("gitleaks-" + mode + ".json")
+        command = [
+            str(executable),
+            "dir" if mode == "selftest" else mode,
+            "--redact=100",
+            "--no-banner",
+            "--log-level",
+            "error",
+            "--config",
+            str(config),
+            "--gitleaks-ignore-path",
+            str(ignored),
+            "--ignore-gitleaks-allow",
+            "--report-format=json",
+            "--report-path",
+            str(raw),
+        ]
+        if mode == "git":
+            command.append("--log-opts=--all")
+        result = subprocess.run([*command, str(target)], capture_output=True, timeout=300)
+        if result.returncode not in {0, 1} or not raw.exists() or result.stderr.strip():
+            raise ValueError("GITLEAKS_SCAN_UNAVAILABLE")
+        observed = json.loads(raw.read_text(encoding="utf-8"))
+        if (result.returncode == 1) != bool(observed):
+            raise ValueError("GITLEAKS_SCAN_INCOMPLETE")
+        if mode == "selftest":
+            if not observed:
+                raise ValueError("GITLEAKS_NEGATIVE_FIXTURE_NOT_DETECTED")
+            continue
+        for item in observed:
+            file = item["File"].replace("\\", "/")
+            if mode == "dir":
+                file = Path(item["File"]).relative_to(current).as_posix()
+            row = {
+                "tool": "gitleaks",
+                "mode": mode,
+                "rule": item["RuleID"],
+                "file": file,
+                "line": item["StartLine"],
+                "commit": item.get("Commit", ""),
+                "state": "POTENTIAL",
+            }
+            if mode == "dir":
+                row["content_sha256"] = sha((current / file).read_bytes())
+            row["identity"] = sha(json.dumps(row, sort_keys=True).encode())
+            findings.append(row)
+    return {
+        "version": tool["version"],
+        "archive_sha256": tool["archive_sha256"],
+        "executable_sha256": tool["executable_sha256"],
+        "negative_fixture": "REJECTED",
+        "findings": findings,
+    }
 
 
 def scan_history():
@@ -318,11 +430,25 @@ def enforce_secrets(findings, decisions):
 
 
 def sbom(items, commit, artifact_digest):
+    tool = json.loads((ROOT / "ci/security-tools.json").read_text(encoding="utf-8"))
     return {
         "bomFormat": "CycloneDX",
         "specVersion": "1.6",
         "version": 1,
         "metadata": {
+            "tools": {
+                "components": [
+                    {
+                        "type": "application",
+                        "name": "gitleaks",
+                        "version": tool["version"],
+                        "hashes": [{"alg": "SHA-256", "content": tool["executable_sha256"]}],
+                        "externalReferences": [
+                            {"type": "distribution", "url": tool["archive_url"]}
+                        ],
+                    }
+                ]
+            },
             "component": {"type": "application", "name": "income-analytics", "version": commit},
             "properties": [
                 {"name": "income:source:commit", "value": commit},
@@ -364,9 +490,15 @@ def main():
         "failures": [],
     }
     try:
+        forbidden = forbidden_source_files(tracked_files())
+        report["source_policy"] = {
+            "status": "FAIL" if forbidden else "PASS",
+            "forbidden_files": forbidden,
+        }
         with tempfile.TemporaryDirectory(prefix="income-security-") as temporary:
             sandbox = Path(temporary)
             findings = sast(sandbox)
+            report["gitleaks"] = gitleaks(sandbox)
             import run as isolated
 
             environment = isolated.isolated_environment(sandbox)
@@ -403,6 +535,18 @@ def main():
             )
             report["security_tests"] = tests
         policy = json.loads(POLICY.read_text(encoding="utf-8"))
+        reviewed_gitleaks = {
+            item["identity"]
+            for item in policy.get("gitleaks_decisions", [])
+            if item.get("state") == "FALSE_POSITIVE" and item.get("reason")
+        }
+        gitleaks_untriaged = [
+            item
+            for item in report["gitleaks"]["findings"]
+            if item["identity"] not in reviewed_gitleaks
+        ]
+        report["gitleaks"]["untriaged"] = gitleaks_untriaged
+        report["gitleaks"]["status"] = "FAIL" if gitleaks_untriaged else "PASS"
         rejected = enforce_triage(findings, policy["decisions"])
         report["sast"] = {
             "findings": findings,
@@ -474,7 +618,9 @@ def main():
         report["status"] = (
             "PASS"
             if not rejected
+            and not forbidden
             and not untriaged_secrets
+            and not gitleaks_untriaged
             and report["dependencies"]["status"] == tests["status"] == "PASS"
             else "FAIL"
         )

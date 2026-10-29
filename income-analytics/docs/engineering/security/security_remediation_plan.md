@@ -14,3 +14,5 @@ Nenhum procedimento abaixo foi executado no host produtivo. Não reutilizar auto
 10. Scanner indisponível, feed parcial/paginado, referência/digest divergente ou fixture de segredo alterada devem reprovar o gate. Revisões de baseline exigem identidade específica e justificativa; não aceitar HIGH/CRITICAL como ACCEPTED_RISK.
 
 Prioridades: P0/P1 confirmados no código devem ter correção e testes antes do merge; ações produtivas são separadas e dependem do responsável. Não realizar deploy, reinício, migrations, rotação real, Tailscale ou varredura contra produção neste PR.
+
+O Gitleaks identificou o identificador público do Firebase Web já versionado. Essa classificação não comprova restrições da chave no Google Cloud: o proprietário deve verificar APIs permitidas, quotas e serviços não Firebase, sem republicar o valor nem rotacionar automaticamente. Referência: https://firebase.google.com/docs/projects/api-keys.

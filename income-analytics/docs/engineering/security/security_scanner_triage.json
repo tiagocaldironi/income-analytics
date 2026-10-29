@@ -366,30 +366,30 @@
       "code_sha256": "e4225133ee1f2b0996aa146c1142898c06eae62faabe7a6f90834517b4e6e247"
     },
     {
-      "identity": "254491557162b72be964b9c375124b25ed43e8b9c62065913763885ebf4cb3cf",
+      "identity": "c0bc11d079220606e38d730fbfb099686dd5a84216d269e1489c28972cc4f599",
       "state": "ACCEPTED_RISK",
       "reason": "Executable resolved through PATH of disposable local/hosted engineering process. No privileged production execution. PATH poisoning by an already compromised runner remains a low risk.",
       "tool": "bandit",
       "rule": "B607",
       "file": "ci/pipeline_identity.py",
-      "line": 52,
+      "line": 53,
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 78,
-      "code_sha256": "5b9a679fbadb0032072678af123bd330fe78156a94e7e507548ec36816c9d169"
+      "code_sha256": "1c84a057e9160ba16c63a976043b4d841d9c2bbee957110a408d0212d0561f7b"
     },
     {
-      "identity": "3b5d333da2be2fb75ca7988891edc236f4cd6154adab9f6111e26c1c7e511c02",
+      "identity": "7d7091254819ee9f970003a7e1b0e5fe8a435ac1d6dcb5eb73217096b884c049",
       "state": "MITIGATED",
       "reason": "Reviewed shell=False argv execution: executable/command is controller-selected; no HTTP request is interpolated into a shell. Artifact/workspace identity checks precede application execution.",
       "tool": "bandit",
       "rule": "B603",
       "file": "ci/pipeline_identity.py",
-      "line": 52,
+      "line": 53,
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 78,
-      "code_sha256": "5b9a679fbadb0032072678af123bd330fe78156a94e7e507548ec36816c9d169"
+      "code_sha256": "1c84a057e9160ba16c63a976043b4d841d9c2bbee957110a408d0212d0561f7b"
     },
     {
       "identity": "5c54da9ea26519a8e05103394dc0e3007529426557e36aa324e397bcecec2db0",
@@ -574,108 +574,147 @@
       "code_sha256": "1d2d698601908e05c0cacce5ac593fad4ed64d75793e09a2023f7b64a35af1e8"
     },
     {
-      "identity": "45859e6b94ce8f0143cb7be55593b0b172ef00d74a37516d1a7b12f48be07761",
+      "identity": "ba83a2cdc38928a4f0191c6c82e7ff19a31659b9ae569cefb80c9d78d4f6ba9c",
+      "state": "MITIGATED",
+      "reason": "Gitleaks URL must exactly match the fixed official HTTPS release path for the validated version. Archive and executable SHA-256 are checked before execution. No user URL/file scheme or production request is accepted.",
+      "tool": "bandit",
+      "rule": "B310",
+      "file": "ci/security.py",
+      "line": 101,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "cwe": 22,
+      "code_sha256": "a2a938951a10f1cb12871b8b1bc10cbcc7b81ae25febdc53b3ac3da13756745d"
+    },
+    {
+      "identity": "948391fe9ae365f16b4ab96228da63f6fb1e3deba789eb3c2e85350cc75e5391",
+      "state": "MITIGATED",
+      "reason": "Reviewed shell=False argv execution: executable/command is controller-selected; no HTTP request is interpolated into a shell. Artifact/workspace identity checks precede application execution.",
+      "tool": "bandit",
+      "rule": "B603",
+      "file": "ci/security.py",
+      "line": 115,
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "cwe": 78,
+      "code_sha256": "e494f46cd1ce62a61a790471559bb16f7bf28f7875753a9b72ea84b4b99981b5"
+    },
+    {
+      "identity": "05b5df461d80a9de90f112805ade6a6cf7dfec837b4d6a3b6373fef9c6db5467",
+      "state": "MITIGATED",
+      "reason": "Reviewed shell=False argv execution: executable/command is controller-selected; no HTTP request is interpolated into a shell. Artifact/workspace identity checks precede application execution.",
+      "tool": "bandit",
+      "rule": "B603",
+      "file": "ci/security.py",
+      "line": 158,
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "cwe": 78,
+      "code_sha256": "ee439adf3ee7eff82063a5cf6672b46b3bba7e766e71e926b6d1e91e702c7838"
+    },
+    {
+      "identity": "05a3a0a53631f130e24bfd83a6cb29746fb2650ffd15817924b59407792b352b",
       "state": "ACCEPTED_RISK",
       "reason": "Executable resolved through PATH of disposable local/hosted engineering process. No privileged production execution. PATH poisoning by an already compromised runner remains a low risk.",
       "tool": "bandit",
       "rule": "B607",
       "file": "ci/security.py",
-      "line": 84,
+      "line": 196,
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 78,
-      "code_sha256": "7243043d0399e9eb19d2ba0738f8852810beba8c0a90ed5e9c4aa9744c644537"
+      "code_sha256": "427291dd974f03361d78aa688f7c23c3526bb2b4678a92606e4ad8d61dc9866f"
     },
     {
-      "identity": "da4f8c9776e4b25fa1af4bad8d44e2d0daf284469cf7c83f7be578cdb8f44718",
+      "identity": "60f4b8b45c2c06ed774bb6efaacbcfcb6ddbd1e238e5ffe8f108124e1b465e20",
       "state": "MITIGATED",
       "reason": "Reviewed shell=False argv execution: executable/command is controller-selected; no HTTP request is interpolated into a shell. Artifact/workspace identity checks precede application execution.",
       "tool": "bandit",
       "rule": "B603",
       "file": "ci/security.py",
-      "line": 84,
+      "line": 196,
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 78,
-      "code_sha256": "7243043d0399e9eb19d2ba0738f8852810beba8c0a90ed5e9c4aa9744c644537"
+      "code_sha256": "427291dd974f03361d78aa688f7c23c3526bb2b4678a92606e4ad8d61dc9866f"
     },
     {
-      "identity": "86a5e5a363663514abb54d0052e19b742e359b28aeb1496ba255f88fef639390",
+      "identity": "e263d2214083488240f619818735488de7656232501981535d6196288f6cdeb1",
       "state": "ACCEPTED_RISK",
       "reason": "Executable resolved through PATH of disposable local/hosted engineering process. No privileged production execution. PATH poisoning by an already compromised runner remains a low risk.",
       "tool": "bandit",
       "rule": "B607",
       "file": "ci/security.py",
-      "line": 117,
+      "line": 229,
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 78,
-      "code_sha256": "df97ad82d50874bab3d2bee9be39be4a8ced00cc29952a1bdbe746ae3ad6a3cd"
+      "code_sha256": "bdded27a08dd325bb1df4088f30cbe4d2c7cbee08cf4aa00c4edd3e6337430c1"
     },
     {
-      "identity": "2d778c9e2fb04638085033f6bcdb26c6e6a249d5bc92904a1e78fb6e9e9ea44e",
+      "identity": "265cdd385b6dc671c1b889d2f417e7370e248ee490a0f7cf24fbb563fdbae88b",
       "state": "MITIGATED",
       "reason": "Reviewed shell=False argv execution: executable/command is controller-selected; no HTTP request is interpolated into a shell. Artifact/workspace identity checks precede application execution.",
       "tool": "bandit",
       "rule": "B603",
       "file": "ci/security.py",
-      "line": 117,
+      "line": 229,
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 78,
-      "code_sha256": "df97ad82d50874bab3d2bee9be39be4a8ced00cc29952a1bdbe746ae3ad6a3cd"
+      "code_sha256": "bdded27a08dd325bb1df4088f30cbe4d2c7cbee08cf4aa00c4edd3e6337430c1"
     },
     {
-      "identity": "d4aae41d852965f788e2d7dd9404fa9131122ca48b97f40f6f798c0363aa88df",
+      "identity": "22c9a69968ef4b16c82cfcc40648ecd2fcc12602932eb53514690f473ddf2913",
       "state": "MITIGATED",
       "reason": "Reviewed shell=False argv execution: executable/command is controller-selected; no HTTP request is interpolated into a shell. Artifact/workspace identity checks precede application execution.",
       "tool": "bandit",
       "rule": "B603",
       "file": "ci/security.py",
-      "line": 230,
+      "line": 342,
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 78,
-      "code_sha256": "1819c30b35078edec582f59d5d69d3e6238c0a3c4bed704ddb9e1be46ce35fee"
+      "code_sha256": "f27bb38140e6f958c012b537b13700f91a1932f9f41fe217d312c92e37507132"
     },
     {
-      "identity": "8e3e848d4fa6a25b33b63dd53856dd060b252451e05072cd4f3656a376e922de",
+      "identity": "5bdc7dcda89adae6b76d806f496ef0a95e82ec3d36ce75311eae1d9b1197a3a8",
       "state": "ACCEPTED_RISK",
       "reason": "Executable resolved through PATH of disposable local/hosted engineering process. No privileged production execution. PATH poisoning by an already compromised runner remains a low risk.",
       "tool": "bandit",
       "rule": "B607",
       "file": "ci/security.py",
-      "line": 359,
+      "line": 485,
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 78,
-      "code_sha256": "fccf716bf67d950e83dc7e8d3f24f4381cb28ae238e500cb42bfd3961c36f4fb"
+      "code_sha256": "07c6cd48e3bef40b75e6b480816a1b4ae0e248aa4776788cac5520f26370ab16"
     },
     {
-      "identity": "67bdaba1324ec1e1b0f609d16d8af72b80c815d10a32deb2d494d81c65b7e21b",
+      "identity": "62439a31e32492fed82bede432b30fbac72b6ea4a6c9850e028c6271588fbc35",
       "state": "MITIGATED",
       "reason": "Reviewed shell=False argv execution: executable/command is controller-selected; no HTTP request is interpolated into a shell. Artifact/workspace identity checks precede application execution.",
       "tool": "bandit",
       "rule": "B603",
       "file": "ci/security.py",
-      "line": 359,
+      "line": 485,
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 78,
-      "code_sha256": "fccf716bf67d950e83dc7e8d3f24f4381cb28ae238e500cb42bfd3961c36f4fb"
+      "code_sha256": "07c6cd48e3bef40b75e6b480816a1b4ae0e248aa4776788cac5520f26370ab16"
     },
     {
-      "identity": "1bea454c9cc0699cb3689e4343362017c3bfc724c20c37e2cf03563a469e6e34",
+      "identity": "5bded1e613160e91ff678fda64f77c641524e5772acc9624b5356ac4dabb5cfd",
       "state": "FALSE_POSITIVE",
       "reason": "Reviewed literal is a status/enum, cookie KIND or deliberately synthetic CI fixture, not an authentication credential.",
       "tool": "bandit",
       "rule": "B105",
       "file": "ci/security.py",
-      "line": 461,
+      "line": 605,
       "severity": "LOW",
       "confidence": "MEDIUM",
       "cwe": 259,
-      "code_sha256": "f7dd2660b2e1dffae2c64254c6be302d94ddc37521287c2fa1a5016790109cae"
+      "code_sha256": "5cf6835a0b45e1813ed1b273fad3c0b13e17b73d47ed476bf13003eaf9afbe9b"
     },
     {
       "identity": "9d74480b5ffa98a0ffa57eebc9b3e2e9b702a59a02a247614cfe39db097bfe2c",
@@ -2901,7 +2940,7 @@
       "code_sha256": "f9af65d7251be95d217202b2892ce30a84fe74320b510aa63941af0935f56150"
     },
     {
-      "identity": "edcdceb8f5f90c6f048e5d0f67e42ef20ac21725a58a86c59c3829ef0d837932",
+      "identity": "8900f12444c33c83463e14b2be760a6ce75513a1aa8a41dce74276282ad910ea",
       "state": "FALSE_POSITIVE",
       "reason": "Pytest assertions are the intended test mechanism, not production authorization.",
       "tool": "bandit",
@@ -2911,12 +2950,25 @@
       "severity": "LOW",
       "confidence": "HIGH",
       "cwe": 703,
-      "code_sha256": "3923f347c74a28461bcc67bc6c3e74355e14e8834b18f1b24a4935d68b1d4169"
+      "code_sha256": "f0e557ef9aecaad8434f09cca0f5853b43f92c990b3c4dbb2a92c072f8a9ef19"
+    },
+    {
+      "identity": "e24e528e26fa6f266c76d8f4a9322b3542e49f95b705791b4b616fc729f7d203",
+      "state": "FALSE_POSITIVE",
+      "reason": "Pytest assertions are the intended test mechanism, not production authorization.",
+      "tool": "bandit",
+      "rule": "B101",
+      "file": "ci/test_security.py",
+      "line": 121,
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "cwe": 703,
+      "code_sha256": "05732e81b2148049bae925b01783acdbb459057d0b0e7d0768c27fb820c4e438"
     },
     {
       "identity": "6fd05e0d1897e1921a8c0e60d453b132dbc10221aa55ad3ceaf6fab407511a23",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/api/routers/dashboard.py",
@@ -2929,7 +2981,7 @@
     {
       "identity": "c710f04b6eb871f6295e4f926cc068c528ac64f60cf14af05d62d8c143c24880",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/api/routers/dashboard.py",
@@ -2942,7 +2994,7 @@
     {
       "identity": "7b185162623ada16ca4748162b223a7fa4813816915c4ff93e3b320f358e90c0",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/application/executable_contribution.py",
@@ -2955,7 +3007,7 @@
     {
       "identity": "0122da82e1a4536783703a5ed3f5ef7297775e3808c79cd65161521bd06a7c77",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/application/fixed_income_valuation.py",
@@ -2968,7 +3020,7 @@
     {
       "identity": "49158dd3535add6fbf8d9ea19bf611940f491070d027db19678514ada24c25ca",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/application/fixed_income_valuation.py",
@@ -2981,7 +3033,7 @@
     {
       "identity": "ff64493a6979325b17410e88badc3d933d25d8a7cc0c8548fbedff3786f136ec",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/application/fixed_income_valuation.py",
@@ -2994,7 +3046,7 @@
     {
       "identity": "dea12c3402ab2de4e027dd8d4315cf3fd54225e4f577b4f696f55f23df03691f",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/application/global_contribution_allocator.py",
@@ -3059,7 +3111,7 @@
     {
       "identity": "23b660415a2a7fe7fe0efcf30d3c0b19a2130013ba5842f5be237fd7104caee6",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/application/magic_formula_security_capital_evidence.py",
@@ -3098,7 +3150,7 @@
     {
       "identity": "5ff4e1b51d8f2ccde609777ab6bb74e2733ab3c14a29eea4f5e823d1a81a6a81",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/domain/projectors/hypothetical_portfolio_projector.py",
@@ -3111,7 +3163,7 @@
     {
       "identity": "c6f063dcf56cc86d2fbc62c141b41b8e5f31e0789ca4a2fcbb076fe4563ad967",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/domain/projectors/hypothetical_portfolio_projector.py",
@@ -3124,7 +3176,7 @@
     {
       "identity": "dcf6345b9aa96b75fc3207796f1433a6322dc2707dbfe89febf810d8b5e1ae8e",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/domain/projectors/hypothetical_portfolio_projector.py",
@@ -3137,7 +3189,7 @@
     {
       "identity": "197bf05a016864c9d0fe0b1de2d2a3bcaeedf78e43b9702b49f73795e32bd0be",
       "state": "ACCEPTED_RISK",
-      "reason": "Internal financial invariant assertion, not authentication/authorization; omitted by optimized Python. Existing low-risk financial debt preserved without changing calculation contracts.",
+      "reason": "Internal financial invariant assertion, not access control. Optimized Python can omit it; financial semantics and frozen code remain untouched. Visible low-risk debt.",
       "tool": "bandit",
       "rule": "B101",
       "file": "src/income_analytics/domain/projectors/hypothetical_portfolio_projector.py",
@@ -3615,6 +3667,33 @@
       "content_sha256": "e6b5f106ec9d4fdba0005ddd5092905d67b995502deadd9508528253c730525d",
       "state": "FALSE_POSITIVE",
       "reason": "Exact reviewed synthetic negative fixture (bare key marker without key body, or dummy user:pass URL on income.test). Any changed bytes require review. LF/CRLF exact variants independently recorded."
+    }
+  ],
+  "gitleaks_decisions": [
+    {
+      "identity": "5ae7fdf5ea3f0cef41f27302c8f499c137d8c51d7205991a9e34c70f12f7b8fd",
+      "state": "FALSE_POSITIVE",
+      "reason": "Exact reviewed Firebase Web project identifier, intentionally public in auth/config. It is not an Admin/service-account key or bearer. Actual cloud API restrictions/quota NOT_VERIFIED; owner checklist, no validity probe/rotation.",
+      "evidence": "https://firebase.google.com/docs/projects/api-keys",
+      "tool": "gitleaks",
+      "mode": "dir",
+      "rule": "gcp-api-key",
+      "file": "income-analytics/.env.example",
+      "line": 26,
+      "commit": "",
+      "content_sha256": "43648e9c360d7d9608b24425f495a8105a977471b4b39e61208f868cd3c32766"
+    },
+    {
+      "identity": "80760bdd4bc9a9d841ef84c2ba735e0b58fb24b14089d26685759c68a518fe24",
+      "state": "FALSE_POSITIVE",
+      "reason": "Exact reviewed Firebase Web project identifier, intentionally public in auth/config. It is not an Admin/service-account key or bearer. Actual cloud API restrictions/quota NOT_VERIFIED; owner checklist, no validity probe/rotation.",
+      "evidence": "https://firebase.google.com/docs/projects/api-keys",
+      "tool": "gitleaks",
+      "mode": "git",
+      "rule": "gcp-api-key",
+      "file": "income-analytics/.env.example",
+      "line": 26,
+      "commit": "9a7ee2417f15e20a761e28c34e7d845e0b1196c1"
     }
   ]
 }

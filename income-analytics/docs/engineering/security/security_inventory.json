@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "scope": "Versioned source on isolated branch; no production host, databases, private configuration or credentials inspected",
-  "asset_count": 405,
+  "asset_count": 407,
   "assets": [
     {
       "asset": "src/income_analytics/api/__init__.py",
@@ -4572,6 +4572,32 @@
       "dependencies": "security inventory + SBOM + versioned configuration",
       "risks": [
         "Operational controls NOT_VERIFIED where specified"
+      ]
+    },
+    {
+      "asset": "ci/security-tools.json",
+      "technical_owner": "repository maintainer / engineering security",
+      "sensitivity": "PUBLIC_SOURCE_METADATA",
+      "exposure": "disposable scanner process",
+      "trust_boundary": "GitHub release download -> digest verification -> local scanning",
+      "authentication": "no production credentials; no provider secret verification",
+      "data_accessed": "source and Git history; raw reports redacted/private; authors/Match/Secret omitted from sanitized output",
+      "dependencies": "Gitleaks 8.30.1 archive and executable SHA-256 from official release",
+      "risks": [
+        "Go transitive dependencies and host/runner OS not independently certified"
+      ]
+    },
+    {
+      "asset": "Gitleaks executable / default rules / negative self-test",
+      "technical_owner": "repository maintainer / engineering security",
+      "sensitivity": "PUBLIC_SOURCE_METADATA",
+      "exposure": "disposable scanner process",
+      "trust_boundary": "GitHub release download -> digest verification -> local scanning",
+      "authentication": "no production credentials; no provider secret verification",
+      "data_accessed": "source and Git history; raw reports redacted/private; authors/Match/Secret omitted from sanitized output",
+      "dependencies": "Ephemeral local and GitHub CI Windows process; pinned executable; no code/data upload",
+      "risks": [
+        "Go transitive dependencies and host/runner OS not independently certified"
       ]
     }
   ],

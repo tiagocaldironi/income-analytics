@@ -112,3 +112,10 @@ def test_secret_in_nested_distributable_wheel_is_rejected(tmp_path):
     findings = artifact_secrets(package)
     assert enforce_secrets(findings, [])
     assert value.decode() not in json.dumps(findings)
+
+
+def test_private_persistence_and_key_files_cannot_enter_source_distribution():
+    from security import forbidden_source_files
+
+    blocked = ["data/private.db", "private.pem", "secrets/.env", "wallet.sqlite3"]
+    assert forbidden_source_files(blocked + [".env.example", "src/app.py"]) == sorted(blocked)

@@ -144,6 +144,24 @@
       "regression_test": "documentation consistency",
       "state": "NOT_VERIFIED",
       "residual": "Requires controller/operator decisions, real Firebase integration and authorized host assessment"
+    },
+    {
+      "id": "SEC-009",
+      "category": "secret-scanning",
+      "asset": "Firebase Web project identifier",
+      "location": ".env.example / historical commit identified in sanitized Gitleaks evidence",
+      "evidence": "Gitleaks gcp-api-key; exact reviewed public Web config field; Firebase official documentation: https://firebase.google.com/docs/projects/api-keys",
+      "exploitation_condition": "The web identifier alone does not authorize financial API access. Broader Google API restrictions/quota are not inspected.",
+      "impact": "Potential quota misuse if actual cloud restrictions are incorrect; not a demonstrated Admin/session secret leak.",
+      "severity": "INFO",
+      "cwe_cve": "CWE-200 (scanner hypothesis only)",
+      "confidence": "HIGH for public Web identifier classification; cloud restrictions NOT_VERIFIED",
+      "scope": "Exact finding identities and source bytes, not a global Google-key exclusion",
+      "proposed_fix": "Keep runtime server-side verification; operator verifies Firebase-only restrictions, quota and disabled unused APIs",
+      "applied_fix": "Exact identity triage; Gitleaks inline allow comments and repository ignore files disabled; operator checklist",
+      "regression_test": "Gitleaks negative synthetic credential fixture must be detected; changed public-config bytes require renewed triage",
+      "state": "FALSE_POSITIVE",
+      "residual": "Cloud API restrictions NOT_VERIFIED; no live credential probe or rotation"
     }
   ]
 }
