@@ -1,8 +1,11 @@
 # PR7 — Entrega controlada, homologação técnica e recuperação
 
-Implementação em validação. O encerramento depende da evidência hospedada,
-integração protegida e repetição da entrega após o merge. Não há autorização
-produtiva, mesmo quando a homologação técnica passa.
+Mecanismo implementado e comprovado em homologação técnica hospedada pré-merge.
+O recibo final do [PR #52](https://github.com/tiagocaldironi/income-analytics/pull/52)
+é o registro autoritativo da integração protegida e do workflow de entrega pós-merge,
+com commit, runs, IDs e digests finais. Esta medição versionada fixa o ensaio de
+referência, evitando autorreferência ao SHA do commit que contém o próprio relatório.
+Não há autorização produtiva, mesmo quando a homologação técnica passa.
 
 ## Preflight comprovado
 
@@ -216,9 +219,47 @@ preservando os diagnósticos reprovados. A revisão também distingue a identida
 workflow CI no preview da identidade do workflow separado no delivery, e usa IDs
 sem caminhos absolutos nos relatórios dos testes de proteção de produção.
 
-Evidência hospedada da revisão corrigida, PR integrado e run pós-merge: pendentes nesta revisão.
-O relatório final incluirá os runs, commits, artifact IDs e digests reais; nenhuma
-conclusão será inferida apenas do desenho ou dos testes locais.
+### Evidência hospedada da revisão corrigida
+
+[Run 40865677781](https://github.com/tiagocaldironi/income-analytics/actions/runs/40865677781), head da branch `931b54281de6d4b92cd5134ba736b8c43ab79b18`,
+checkout/artefato `0b552f262049f1884f8422deecc6db033863c0a3` (merge sintético do PR).
+Controller e workflow ref identificam corretamente `ci-offline.yml` no preview;
+a execução pós-merge usa separadamente `delivery-validation.yml`.
+
+- CI / Engineering: PASS, 1173 testes aprovados,
+  sem falhas/erros/skips; 162 de governança/build/entrega incluídos.
+- CI / Reproducible build: PASS; ZIP baixado e conferido.
+- CD / Staging validation: PASS; instalação offline, health/static, backup online,
+  restore semântico exato, rollback com reinício de A e cleanup aprovados.
+- Negativos reais: health HTTP 404, alvo ASGI inexistente, estado alterado após backup,
+  artefato inexistente HTTP 404 observados. Schema futuro permaneceu BLOCKED e seu
+  bloqueio seguro foi verificado antes de restauração separada do banco sintético.
+- 64 testes de entrega aprovados; demais regressões financeiras preservadas por
+  identidade/status; frontend 31/31; qualidade 803 diagnósticos, zero novos/removidos.
+- CERT_48/frozen engine/referências históricas continuam executados e BLOCKED;
+  conclusão global do CI permanece failure pelos diagnósticos conhecidos.
+
+Identidade B de referência:
+
+- Build run/attempt: 40865677781 / 1.
+- Artifact ID: `12892779398`.
+- Envelope digest: `sha256:11c9610c7824c2fe15dd9224f6f5f0e9f61f5efb5cb53b049c2c9ddc48f82b9b`.
+- Package SHA-256: `7eaf423a2f1d56837b4496398927625661c12d55c029177a089b38bb755b555a`.
+- Manifest SHA-256: `569b95b63fd6e91c566822a7120c1bcef9fe860cfa6fef3eb9f7be81af7e92bf`.
+- Build policy: `1594f72e60abd1b2cd93653897e1babcbf73f062538f933b5decf2a834840898`.
+- Governance policy: `998664057ae119a4b3d060b475b1390fecf720cce96bf30b1a0812236dddc6e8`.
+- Estado do preview: STAGING_VALIDATED / **PROMOTION_BLOCKED** /
+  PRODUCTION_NOT_AUTHORIZED. Nenhum PR foi promovido como release.
+
+A cópia em staging conservou exatamente o mesmo package SHA; rebuild/downgrade
+NOT_RUN. Todos os processos/portas foram liberados e a raiz temporária removida.
+Relatório estruturado e digests de transporte:
+[`delivery_hosted_validation.json`](delivery_hosted_validation.json).
+
+O recibo final do PR registra o novo commit real da develop e sua entrega automática,
+incluindo a mudança legítima do digest de proveniência por commit. Não reutilizar
+este digest sintético como se pertencesse ao commit integrado.
+
 
 Pendências fora do escopo: CERT_48, identidade financeira e referências históricas;
 Firebase/cloud, validação funcional completa, certificação de backup/rollback
