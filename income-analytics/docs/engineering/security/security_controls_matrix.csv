@@ -1,0 +1,21 @@
+id,threat,test_evidence,layer,expected
+01,No token,test_anonymous_aliases_and_unknown_paths_never_expose_private_data,HTTP,REJECT
+02,Invalid token,test_unverified_disabled_expired_and_logout_replay / identity policy,HTTP+SDK double,REJECT
+03,Other project,test_identity_failure_propagates_without_fallback,SDK double,REJECT; real Firebase NOT_VERIFIED
+04,A reads B,test_every_registered_private_wallet_route_rejects_foreign_selection,HTTP effective routes,REJECT
+05,A writes/deletes B,test_foreign_event_id_cannot_be_deleted_using_an_owned_wallet,HTTP,REJECT
+06,Foreign imports,test_every_registered_private_wallet_route_rejects_foreign_selection,HTTP effective routes,REJECT
+07,Foreign reports/exports,test_every_registered_private_wallet_route_rejects_foreign_selection,HTTP effective routes,REJECT; complete portability NOT_VERIFIED
+08,Malicious/oversized payload,test_csrf_host_body_size_and_cookies / upload archive test,HTTP/parser,REJECT
+09,SQL injection,test_sql_payload_is_bound_and_foreign_identifier_is_invalid,HTTP + SQLite,BOUND/REJECT
+10,Traversal,test_database_boundary_rejects_traversal_before_open + delivery Workspace tests,filesystem synthetic,REJECT
+11,SSRF,Provider URL construction reviewed; no arbitrary user URL contract found,static review,NOT_APPLICABLE to direct arbitrary URL HTTP input; redirect/DNS medium residual
+12,Artifact secret,test_secret_detection_never_serializes_value / test_benign_marker_approval_cannot_allow_real_key,scanner synthetic + real artifact,REJECT
+13,Vulnerable dependency,test_vulnerable_dependency_fixture_is_rejected,OSV synthetic response,REJECT
+14,Wrong digest,ci/test_delivery.py + ci/test_build_artifact.py,real temp ZIP tamper,REJECT
+15,Wrong source workflow,ci/test_delivery.py trusted_source negatives,synthetic GitHub identity,REJECT
+16,Unsafe production config,test_production_alias_cannot_enable_local_mode,isolated env,REJECT
+17,Improper local mode,test_remote_local_mode_rejected_even_with_forwarded_loopback,HTTP,REJECT
+18,External database,test_database_boundary_rejects_traversal_before_open,temp filesystem,REJECT before open
+19,Sensitive logs,test_log_credentials_email_and_exception_are_redacted,synthetic log record,REDACT
+20,Production promotion,ci/test_delivery.py production_request negatives,controller synthetic,REJECT

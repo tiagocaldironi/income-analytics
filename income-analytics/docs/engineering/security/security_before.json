@@ -1,0 +1,23 @@
+{
+  "baseline_sha": "0cf5921c88f358938fd6c5df6aa3d1a7fb3a1195",
+  "pr52": "MERGED",
+  "postmerge_ci": 40869935442,
+  "postmerge_delivery": [
+    40871039283,
+    40871613070
+  ],
+  "ruleset": 26078982,
+  "required_checks": [
+    "CI / Engineering"
+  ],
+  "production_inspection": "NOT_PERFORMED",
+  "original_workspace_files_hashed": 781,
+  "workflows": [
+    "ci-offline.yml",
+    "delivery-validation.yml"
+  ],
+  "locks": {
+    "ci\\requirements-windows-py314.lock": "33f8b09066f3a0adec7b3fa4a265136531db804ea5cb4f70b1bbebcebfd9b28d",
+    "ci\\runtime-windows-py314.lock": "86fda80ccf019a812933b1de3e1900e0b0b36cbf7a2f0e1bcf15f35264c65850"
+  }
+}

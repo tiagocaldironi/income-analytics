@@ -1,0 +1,6 @@
+{
+  "state": "PENDING_HOSTED_VALIDATION",
+  "baseline_develop": "0cf5921c88f358938fd6c5df6aa3d1a7fb3a1195",
+  "production_access": false,
+  "note": "Updated only with observed hosted runs; not a certification placeholder."
+}

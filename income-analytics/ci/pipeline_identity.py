@@ -7,6 +7,11 @@ from pathlib import Path
 
 FINGERPRINT_VERSION = 2
 POLICY_FILES = (
+    "income-analytics/docs/engineering/security/quality_compatibility.json",
+    "income-analytics/ci/security.py",
+    "income-analytics/ci/test_security.py",
+    "income-analytics/ci/security-tools-windows-py314.lock",
+    "income-analytics/docs/engineering/security/security_scanner_triage.json",
     ".github/workflows/delivery-validation.yml",
     "income-analytics/ci/delivery.py",
     "income-analytics/ci/delivery_stage.py",
