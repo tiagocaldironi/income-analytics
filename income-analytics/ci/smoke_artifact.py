@@ -30,6 +30,15 @@ def guarded_ex(self, address):
         raise RuntimeError("BUILD_SMOKE_NETWORK_DENIED")
     return original_ex(self, address)
 socket.socket.connect_ex = guarded_ex
+original_dns = socket.getaddrinfo
+def guarded_dns(host, *args, **kwargs):
+    if host not in {"127.0.0.1", "::1", "localhost", None}:
+        raise RuntimeError("BUILD_SMOKE_NETWORK_DENIED")
+    return original_dns(host, *args, **kwargs)
+socket.getaddrinfo = guarded_dns
+def denied_datagram(*args, **kwargs):
+    raise RuntimeError("BUILD_SMOKE_NETWORK_DENIED")
+socket.socket.sendto = denied_datagram
 '''
 
 

@@ -115,11 +115,15 @@ def verify(archive, expected_commit, expected_digest=None):
         raise ValueError("ARTIFACT_DIGEST_MISMATCH")
     with zipfile.ZipFile(archive) as bundle:
         names = bundle.namelist()
-        if len(names) != len(set(names)) or names != sorted(names):
+        if len(names) != len({p.casefold() for p in names}) or names != sorted(names):
             raise ValueError("INVALID_ARCHIVE_STRUCTURE")
         for entry in bundle.infolist():
             safe_name(entry.filename)
-            if entry.date_time != (1980, 1, 1, 0, 0, 0) or entry.external_attr >> 16 != 0o100644:
+            if (
+                entry.date_time != (1980, 1, 1, 0, 0, 0)
+                or entry.external_attr >> 16 != 0o100644 or entry.create_system != 3
+                or entry.compress_type != zipfile.ZIP_STORED or entry.extra or entry.comment
+            ):
                 raise ValueError("NONDETERMINISTIC_ARCHIVE_METADATA")
         if "manifest.json" not in names:
             raise ValueError("MISSING_MANIFEST")

@@ -99,6 +99,7 @@ def test_two_builds_ignore_filesystem_times_and_use_git_bytes(built, tmp_path):
     ({"../escape": b"extra"}, ()),
     ({"C:/personal/file": b"extra"}, ()),
     ({"debug.tmp": b"temporary"}, ()),
+    ({"src/income_analytics/MAIN.py": b"case collision"}, ()),
 ])
 def test_tampered_incomplete_or_invalid_structure_rejected(built, change, remove):
     _, _, archive, commit = built
@@ -136,6 +137,13 @@ def test_accidental_secret_is_rejected_before_packaging(built):
 def test_unlocked_dependency_is_rejected():
     with pytest.raises(ValueError, match="UNLOCKED"):
         artifact.lock_entries(b"alembic>=1\n")
+
+
+def test_wheel_bytes_must_match_exact_locked_digest(built):
+    root, wheels, archive, commit = built
+    next(wheels.glob("*.whl")).write_bytes(b"wrong dependency bytes")
+    with pytest.raises(ValueError, match="WHEELHOUSE_LOCK_MISMATCH"):
+        artifact.build(root, wheels, archive, commit)
 
 
 def test_dirty_checkout_is_rejected(built):
