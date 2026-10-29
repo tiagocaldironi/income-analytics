@@ -1,9 +1,10 @@
 # PR6 — Build reproduzível
 
-Estado de validação nesta revisão: implementação concluída; comprovação hospedada e
-integração ainda pendentes. A declaração final depende do run de push pós-merge.
-Este documento registra medições identificadas por commit, sem tentar incluir no
-próprio commit seu SHA futuro. O recibo final também será publicado no PR.
+Build reproduzível implementado e validado no GitHub Actions. O registro
+autoritativo da integração protegida e do push pós-merge é o recibo final do
+[PR #51](https://github.com/tiagocaldironi/income-analytics/pull/51), com SHA de
+`develop`, run e digest final. Este documento fixa a medição hospedada de referência,
+sem autorreferência ao SHA do commit que contém o próprio relatório.
 
 ## Baseline e limites
 
@@ -43,7 +44,9 @@ uma unidade interna de entrega de engenharia, não uma autorização de produç�
 ZIP `income-analytics-<checkout_sha>-windows-x64.zip`, com `src/`, `alembic/`,
 `alembic.ini`, `pyproject.toml`, `wheelhouse/`, `requirements.lock`, `artifact.py`,
 `smoke_artifact.py`, `build-policy.json`, `INSTALL.md`, `manifest.json`.
-O manifest é a lista exaustiva dos arquivos, tamanhos e SHA-256 incluídos.
+O manifest lista os 385 arquivos de payload, tamanhos e SHA-256. O próprio
+manifest é a entrada adicional: 386 entradas no ZIP. Seu conteúdo é coberto pelo
+digest externo do pacote e pelo digest do artifact de transporte, evitando ciclo.
 
 ZIP foi escolhido porque preserva a árvore de execução atual e permite instalação
 offline com wheels; não exige Docker, compilador, npm, caminhos pessoais ou um
@@ -109,7 +112,10 @@ python ci/smoke_artifact.py <ZIP> --commit <SHA> --sha256 <digest-do-run>
 
 O smoke elimina variáveis herdadas, usa HOME/SQLite/cache temporários, desliga jobs
 externos, não usa credenciais, nega conexão/DNS/UDP externos nos subprocessos e
-permite apenas loopback. Cria venv novo, instala sem rede, executa `pip check`,
+permite apenas loopback. Essa guarda cobre sockets Python, não equivale a firewall
+do SO para bibliotecas nativas. Configuração local, ausência de credenciais e jobs
+desligados são controles adicionais; cloud/native networking não é certificado.
+Cria venv novo, instala sem rede, executa `pip check`,
 aplica migrations no SQLite temporário, importa backend, sobe Uvicorn, testa
 `/health`, `/` e CSS, verifica schema=head, termina servidor e remove o ambiente.
 Importação isolada e startup real são verificações distintas.
@@ -149,9 +155,51 @@ Qualidade: 803 diagnósticos existentes,
 zero adicionados/removidos, baseline intacta. Ajustes subsequentes reforçam
 estrutura ZIP, egress e teste de hashes de wheels; medições finais abaixo.
 
-Validação hospedada, SHA do artefato e integração: pendentes nesta revisão.
-O status final será registrado somente após baixar o artifact do Actions,
-validar SHA/manifest e confirmar o run de push na `develop` protegida.
+### Medição hospedada de referência
+
+- [Run 40853584364](https://github.com/tiagocaldironi/income-analytics/actions/runs/40853584364), evento PR para `develop`.
+- Head da branch: `0cba422eb694148e6462f98f6004d385c77273ea`.
+- Checkout construído: `0cf4bdc5bd60fa1a1afa9d4809453da18966c654` (merge sintético, não o head do PR).
+- ZIP SHA-256: `39864da5356e843bba18158b2d4cfdfb37cb56b5b7d1a4ec5cfde4b71b93a762`.
+- Fingerprint distribuído: `f39434e641b35571233b37f5fe0ac3aaf7f88169191404cc0ce20a97b999aad3`.
+- Política de build: `1594f72e60abd1b2cd93653897e1babcbf73f062538f933b5decf2a834840898`.
+- Fingerprint de execução v2: `6eca8283da6dd622d2c5b7f605834a3a451100b80072696536ef0c2a482fdff1`.
+- Política de governança: `98cc8047e6edc173ded67e7ab68496bf0dd3d2317c480879f43b0590ec503fce`.
+
+| Validação | Resultado hospedado |
+|---|---|
+| CI / Engineering | PASS, nome/app preservados |
+| Build independente duplo | PASS, mesmo SHA-256 |
+| ZIP baixado/manifest/proveniência | PASS, SHA conferido com relatório e digest do transporte GitHub |
+| Instalação offline, pip check | PASS, venv novo e wheels travadas |
+| SQLite temporário/head Alembic/import/startup/health/static/cleanup | PASS |
+| Python Engineering | 1104 PASS, 0 falhas/erros/skips |
+| Governança/build, incluídos acima | 93 PASS |
+| Frontend | 31/31 PASS |
+| Qualidade | 803 diagnósticos existentes; zero adições/remoções; baseline intacta |
+| Ruff / mypy | 130 / 673, FAIL_WITH_DEBT explicitamente mantidos |
+| Python completo | 1104 PASS / 15 falhas / 9 erros / 5 skips |
+| Financeiro | 73 PASS / 15 falhas / 9 erros / 0 skips; BLOCKED |
+| Produção/CD | Preservada / NOT_IMPLEMENTED |
+
+A conclusão global do workflow é `failure` pelos diagnósticos e certificação
+bloqueados; o gate independente Engineering e o build são `success`. Nenhuma
+falha foi dispensada. Todos os casos anteriores foram comparados por identidade e
+status com a baseline de CI: preservados; novos casos são somente CI aprovados.
+Inventário de testes da aplicação e diagnósticos Ruff/mypy: equivalência exata.
+`test_shares_unit_020_frozen_engine` continua executado e reportado.
+
+O pacote foi baixado do Actions e validado por `ci/artifact.py` contra o commit e
+SHA do relatório. O digest do ZIP externo do artifact também confere com o digest
+fornecido pela API do GitHub. Manifest externo e interno coincidem. Local e
+hospedado têm os mesmos fingerprints de código/política e resultados de instalação;
+o SHA dos pacotes local e PR difere corretamente pelo commit de proveniência.
+
+Detalhes sanitizados e IDs/digests dos artifacts: [`build_hosted_validation.json`](build_hosted_validation.json).
+O recibo final no PR registra a repetição destas validações após o merge na
+`develop` e o digest do artefato desse commit. Cada commit tem identidade própria;
+não reutilizar o ZIP de referência como se fosse de outro SHA.
+
 
 ## Riscos residuais e fora do escopo
 
