@@ -483,6 +483,19 @@ def enforce_secrets(findings, decisions):
     return [item for item in findings if (item["type"], item["content_sha256"]) not in approved]
 
 
+def enforce_confirmed_findings(findings):
+    """A manually confirmed HIGH/CRITICAL cannot disappear behind a clean scanner."""
+    rejected = []
+    for item in findings:
+        if item["severity"] not in {"HIGH", "CRITICAL"}:
+            continue
+        if item["state"] not in {"FIXED", "MITIGATED", "FALSE_POSITIVE"} or not all(
+            item.get(key) for key in ("evidence", "applied_fix", "regression_test")
+        ):
+            rejected.append(item["id"])
+    return rejected
+
+
 def sbom(items, commit, artifact_digest):
     tool = json.loads((ROOT / "ci/security-tools.json").read_text(encoding="utf-8"))
     return {
@@ -623,6 +636,14 @@ def main():
             )
             report["security_tests"] = tests
         policy = json.loads(POLICY.read_text(encoding="utf-8"))
+        registered = json.loads(
+            (ROOT / "docs/engineering/security/security_findings.json").read_text(encoding="utf-8")
+        )["findings"]
+        unresolved_confirmed = enforce_confirmed_findings(registered)
+        report["findings_policy"] = {
+            "status": "FAIL" if unresolved_confirmed else "PASS",
+            "high_critical_unresolved": unresolved_confirmed,
+        }
         reviewed_gitleaks = {
             item["identity"]
             for item in policy.get("gitleaks_decisions", [])
@@ -706,6 +727,7 @@ def main():
         report["status"] = (
             "PASS"
             if not rejected
+            and not unresolved_confirmed
             and not forbidden
             and not untriaged_secrets
             and not gitleaks_untriaged

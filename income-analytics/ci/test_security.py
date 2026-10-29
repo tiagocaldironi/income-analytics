@@ -194,3 +194,24 @@ def test_old_ci_without_security_cannot_be_a_new_delivery_candidate():
         )
         == "PASS"
     )
+
+
+@pytest.mark.parametrize(
+    "state", ["CONFIRMED", "POTENTIAL", "ACCEPTED_RISK", "BLOCKED", "NOT_VERIFIED"]
+)
+def test_confirmed_high_registry_cannot_be_hidden_by_clean_scanners(state):
+    from security import enforce_confirmed_findings
+
+    record = dict(
+        id="SYNTHETIC-HIGH",
+        severity="HIGH",
+        state=state,
+        evidence="synthetic proof",
+        applied_fix="none",
+        regression_test="synthetic",
+    )
+    assert enforce_confirmed_findings([record]) == ["SYNTHETIC-HIGH"]
+    record["state"] = "FIXED"
+    assert enforce_confirmed_findings([record]) == []
+    record["regression_test"] = ""
+    assert enforce_confirmed_findings([record]) == ["SYNTHETIC-HIGH"]
