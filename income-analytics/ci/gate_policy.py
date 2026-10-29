@@ -158,7 +158,7 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
         "financial_reasons": certification.get("blockers", ["NO_CERTIFICATION_REPORT"]),
         "release_readiness": "BLOCKED",
         "release_reasons": [
-            "Homologation/backup/rollback and financial certification not implemented",
+            "Functional/cloud validation and production backup/rollback not certified",
             "Financial certification requires independent closure",
         ],
         "deployment_authorization": "NOT_IMPLEMENTED",

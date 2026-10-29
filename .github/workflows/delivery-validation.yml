@@ -1,0 +1,89 @@
+name: Controlled delivery validation
+
+on:
+  workflow_run:
+    workflows: [CI governance]
+    branches: [develop]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Immutable CI push run ID from develop
+        required: true
+        type: string
+      source_commit:
+        description: Exact forty-character commit from that build
+        required: true
+        type: string
+
+      previous_build_run_id:
+        description: Trusted known-good CI push run used for rollback (default PR6)
+        required: false
+        default: '40856571402'
+        type: string
+      previous_source_commit:
+        description: Exact known-good source commit (default PR6)
+        required: false
+        default: cc71b0be65d6fe34b97cd3305dfc7956c9a4a065
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: delivery-${{ github.event.workflow_run.id || inputs.build_run_id }}
+  cancel-in-progress: false
+
+jobs:
+  staging:
+    name: CD / Staging validation
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: income-analytics
+    env:
+      DELIVERY_SOURCE_RUN: ${{ github.event.workflow_run.id || inputs.build_run_id }}
+      DELIVERY_SOURCE_COMMIT: ${{ github.event.workflow_run.head_sha || inputs.source_commit }}
+      DELIVERY_PREVIOUS_RUN: ${{ inputs.previous_build_run_id || '40856571402' }}
+      DELIVERY_PREVIOUS_COMMIT: ${{ inputs.previous_source_commit || 'cc71b0be65d6fe34b97cd3305dfc7956c9a4a065' }}
+      DELIVERY_MODE: delivery
+      DELIVERY_TARGET: staging
+      DELIVERY_GITHUB_TOKEN: ${{ github.token }}
+      GIT_CONFIG_COUNT: '1'
+      GIT_CONFIG_KEY_0: core.autocrlf
+      GIT_CONFIG_VALUE_0: 'false'
+    steps:
+      - name: Checkout trusted delivery workflow revision, never an artifact-supplied ref
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.7'
+          architecture: x64
+      - name: Verify source, stage exact artifact, exercise backup restore rollback and cleanup
+        run: python ci/delivery_pipeline.py
+      - name: Publish payload-free audit evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: delivery-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            income-analytics/ci-reports/delivery/validation.json
+            income-analytics/ci-reports/delivery/candidate.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain unchanged technically eligible package and manifest
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: staging-validated-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            income-analytics/ci-reports/delivery/promoted-*.zip
+            income-analytics/ci-reports/delivery/manifest.json
+          if-no-files-found: error
+          retention-days: 90
