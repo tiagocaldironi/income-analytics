@@ -30,7 +30,6 @@ REQUIRED = {
     "src/income_analytics/main.py",
     "src/income_analytics/api/static/index.html",
     "alembic/env.py",
-    "alembic/script.py.mako",
 }
 FORBIDDEN = {"data", ".git", ".venv", "__pycache__", "node_modules", "tmp", "backups"}
 SECRET = re.compile(

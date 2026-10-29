@@ -82,7 +82,7 @@ def main():
             )
     except Exception as error:
         report["failure_category"] = (
-            str(error) if isinstance(error, ValueError) else type(error).__name__
+            str(error) if isinstance(error, (ValueError, RuntimeError)) else type(error).__name__
         )
     (output / "result.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f"build: {report['status']}")
