@@ -15,5 +15,14 @@
   "protected_migration_files": 8,
   "migration_graph_files_verified": 27,
   "tests": "ci/test_engineering_debt.py (exact positive plus mutation/config/version/rule/file/path/multiplicity/missing-observation negatives)",
-  "hosted": "Final revised candidate pending; previous zero-raw approach correctly failed staging schema identity"
+  "hosted": {
+    "run_id": 41089246347,
+    "checkout_sha": "7a5da43bcb03746007d093234f5a96b272453e45",
+    "status": "PASS",
+    "raw_exit_code": 1,
+    "raw_occurrences": 23,
+    "unjustified_occurrences": 0,
+    "version": "0.16.6"
+  },
+  "aggregate_dependency": "Producer records installed version; stdlib-only aggregator checks report version against pinned policy. Absent/different versions fail closed; protected by 46 direct governance tests."
 }

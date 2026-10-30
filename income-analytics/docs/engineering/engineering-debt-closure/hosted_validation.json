@@ -1,5 +1,5 @@
 {
-  "state": "THREE_PRIOR_FAILURES_RECORDED; AGGREGATOR_CORRECTION_PENDING_HOSTED_PROOF",
+  "state": "SUCCESSFUL_PREMERGE_SOURCE_SNAPSHOT; FINAL_HEAD_AND_POSTMERGE_RECEIPTS_IN_PR_BODY",
   "repository": "tiagocaldironi/income-analytics",
   "branch": "codex/pr11-engineering-debt",
   "pr": 56,
@@ -59,9 +59,303 @@
       "staging": "SKIPPED_DUE_TO_FAILED_AGGREGATOR",
       "eligible": false,
       "correction": "Producing Ruff job records installed version; aggregator validates that report against pinned policy without requiring local Ruff. Missing/mismatched versions fail closed."
+    },
+    {
+      "run_id": 41089246347,
+      "attempt": 1,
+      "head_sha": "fd7c173c4780b3fc5ec46a16bbe2b700198c2b2d",
+      "checkout_sha": "7a5da43bcb03746007d093234f5a96b272453e45",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/41089246347",
+      "jobs": {
+        "CI / Operational readiness": "success",
+        "CI / mypy diagnostics": "failure",
+        "CI / Financial certification": "failure",
+        "CI / Runtime installation": "success",
+        "CI / Quality non-regression": "success",
+        "CI / Python engineering": "success",
+        "CI / Ruff diagnostics": "success",
+        "CI / Reproducible build": "success",
+        "CI / Frontend": "success",
+        "CI / Full Python diagnostic": "failure",
+        "CI / Security baseline": "success",
+        "CI / Engineering": "success",
+        "CD / Staging validation": "success"
+      },
+      "engineering": {
+        "passed": 1388,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "security": {
+        "passed": 137,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "operational": {
+        "passed": 64,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "full_python": {
+        "passed": 1388,
+        "failed": 15,
+        "errors": 9,
+        "skipped": 5
+      },
+      "financial": {
+        "passed": 104,
+        "failed": 15,
+        "errors": 9,
+        "skipped": 0
+      },
+      "financial_state": "FINANCIAL_BLOCKED",
+      "mypy_occurrences": 499,
+      "ruff": {
+        "status": "PASS",
+        "version": "0.16.6",
+        "raw_exit": 1,
+        "raw_occurrences": 23,
+        "justified": 23,
+        "unjustified": 0
+      },
+      "package_sha256": "461946ad041e912b79e586f80d445580ce81cf8e2d23a6e0c93f082c19accdd5",
+      "manifest_sha256": "482753287792a4d5edffb001f0ed2e167b0e4c4a8d6a32ec9c59b782dabd3037",
+      "source_fingerprint": "c223d8c09a86bc67813fb2d9ad4c894effea8542725ebc8fc149b916a97fc547",
+      "policy_sha256": "2eb9d13e2a8f89969a574d6e8c56d8711d900aea150b00d891eb6efe157e4cd7",
+      "artifacts": [
+        {
+          "id": 12994550674,
+          "name": "gate-summary-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:3dbafe67b4503689d1b1ed6138a3472f16a3162f00268629f72fe0681f16cbd6",
+          "expires_at": "2026-11-13T16:30:44Z",
+          "files": [
+            {
+              "name": "gate-summary.json",
+              "sha256": "72442e0e396757b186613a4c8d86fc0ae6f04285cf8917c75e599da743066fa8"
+            }
+          ]
+        },
+        {
+          "id": 12994175742,
+          "name": "governance-python-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:af381d228ec3465bd39186b9f4073394cbd23020202004ecf192a0fca651db6f",
+          "expires_at": "2026-11-13T16:29:30Z",
+          "files": [
+            {
+              "name": "coverage.xml",
+              "sha256": "ca98d6a5cbe231f24c4eed07bdb68de24978e10800935f17f5b2f9234cb456bc"
+            },
+            {
+              "name": "python-junit.xml",
+              "sha256": "179b5e8dc19548afd2baa62cbb2e3f8ddf8d8756c20a69cbc05c761c7bc6aae0"
+            },
+            {
+              "name": "inventory.json",
+              "sha256": "07f876f455f7382837da74ff648eb036ad2b1027bdc4f7bce8c586eaf4d0ed02"
+            },
+            {
+              "name": "result.json",
+              "sha256": "ac101f07b823c7398fe3b373cf9d2e5a70a82a913b8c21ee56824b3dbdcd4cdd"
+            }
+          ]
+        },
+        {
+          "id": 12994120073,
+          "name": "governance-financial-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:030d52ecf3f24d4fa4a663df58b696014027de35fdfcc7e2b29112fb8eabd83a",
+          "expires_at": "2026-11-13T16:25:21Z",
+          "files": [
+            {
+              "name": "financial-junit.xml",
+              "sha256": "f859ef5ce66307b8e330af9e97e8076cde2a4a7cb8f50060764eafbe44971078"
+            },
+            {
+              "name": "inventory.json",
+              "sha256": "27e66722117d09746b4bcbae35823ab83dd650c3bfadd0320f3048bafd1e452c"
+            },
+            {
+              "name": "result.json",
+              "sha256": "c059b951591c63923db958a2ea8739783d0f4daa75c0d22789771decc207be73"
+            }
+          ]
+        },
+        {
+          "id": 12994111495,
+          "name": "delivery-preview-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:1026e9ed73f32fa76005c7d4275272954ba56810473dad94a5584237b9a4e68f",
+          "expires_at": "2026-11-13T16:33:16Z",
+          "files": [
+            {
+              "name": "validation.json",
+              "sha256": "65369cf5a48868d367ee152ad35a14c6cfe742a26ed7bbb74acb364902b00ea5"
+            },
+            {
+              "name": "candidate.json",
+              "sha256": "1ee1e6d50a1a6f3c806c12541cbdeabf8cc577d6ca62fd20272463d0b28985b2"
+            }
+          ]
+        },
+        {
+          "id": 12993620910,
+          "name": "governance-mypy-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:a1ec6a47382f14945319990b9306a5dccc173ac1e6154177d2be82ea4b2e4387",
+          "expires_at": "2026-11-13T16:23:44Z",
+          "files": [
+            {
+              "name": "result.json",
+              "sha256": "1c81006fbf271bfc39e865edaf3b2ce2f8fedc41028a5c3e684981b218b260c9"
+            }
+          ]
+        },
+        {
+          "id": 12993566858,
+          "name": "governance-engineering-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:d88a810efb9a9a80974577c05755f97d0071fd8ab305315377746cdae8665baf",
+          "expires_at": "2026-11-13T16:28:25Z",
+          "files": [
+            {
+              "name": "engineering-junit.xml",
+              "sha256": "d1d49eea7adbb84574b5021b58b02c301a5fa4b29ff10e535bde8429cfb6269e"
+            },
+            {
+              "name": "inventory.json",
+              "sha256": "fd98905b73998c754e4ae34e258a88b686956c58b8688f11d6622c5140a57283"
+            },
+            {
+              "name": "result.json",
+              "sha256": "ffa5ae2ae494546e4f641695e79564fbb4cd4924121478eea719b3bf0e2bf309"
+            }
+          ]
+        },
+        {
+          "id": 12993196815,
+          "name": "governance-node-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:92d82f00c6bf278e2d02a39ecf822a879c6235f803f82c0407e48c06e60c9240",
+          "expires_at": "2026-11-13T16:23:21Z",
+          "files": [
+            {
+              "name": "result.json",
+              "sha256": "5b2329cfa194904713f3344456c95535c0a275fd53da59456ffea486111e8d9d"
+            }
+          ]
+        },
+        {
+          "id": 12993161671,
+          "name": "governance-runtime-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:cbf2dc3ff6973fe6ca447521cd87911c6ffb071cddca41d1d325d68f01aff759",
+          "expires_at": "2026-11-13T16:23:35Z",
+          "files": [
+            {
+              "name": "result.json",
+              "sha256": "89d1acb5d509e094be29d739ed1ef7bd2b73619f9a29531ab94234f6a965e2a0"
+            }
+          ]
+        },
+        {
+          "id": 12993016927,
+          "name": "governance-quality-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:1d6328f6dabf18ae6109d29d00400aed9b658ae16971dcb65c50156211c01488",
+          "expires_at": "2026-11-13T16:23:44Z",
+          "files": [
+            {
+              "name": "result.json",
+              "sha256": "e43ef338d043fe3c247543a276b671e0b826ac3429050032c67d1214859c9579"
+            }
+          ]
+        },
+        {
+          "id": 12992982159,
+          "name": "application-7a5da43bcb03746007d093234f5a96b272453e45-windows-x64",
+          "digest": "sha256:270330640206c7645c8e653c44283c815d16a2c900c204743080a070ee0fc220",
+          "expires_at": "2026-11-13T16:24:55Z",
+          "files": [
+            {
+              "name": "income-analytics-7a5da43bcb03746007d093234f5a96b272453e45-windows-x64.sha256",
+              "sha256": "f2eaf1ca0cbd1f91c9adcd6877d8fdd2afab68b62da8d9499161b9bc618e1f4c"
+            },
+            {
+              "name": "income-analytics-7a5da43bcb03746007d093234f5a96b272453e45-windows-x64.zip",
+              "sha256": "461946ad041e912b79e586f80d445580ce81cf8e2d23a6e0c93f082c19accdd5"
+            },
+            {
+              "name": "manifest.json",
+              "sha256": "f609f13aeab28a383bb84567b4fd5b1678fd160ae6d5f15103f227205acbfd85"
+            }
+          ]
+        },
+        {
+          "id": 12992977014,
+          "name": "governance-operational-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:561260ebed90a6915b17bc1222e76d336e272b3ebe2b50fa560b2bf9ab4a7b0c",
+          "expires_at": "2026-11-13T16:23:47Z",
+          "files": [
+            {
+              "name": "operational-junit.xml",
+              "sha256": "f2c0c9484953858bb153fd5ef07052b71600bb5ce1cd08df5d1f9804aa0679c9"
+            },
+            {
+              "name": "result.json",
+              "sha256": "656ef7c9dc6b4f0465a66d6e3ea9a1507c1fdc800a719b625b1f06e27f9b5630"
+            }
+          ]
+        },
+        {
+          "id": 12992892440,
+          "name": "governance-build-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:eca38d752c99496af2cc145744dd2e4219e9b4f5bf0b26e8e027a39d4a31b705",
+          "expires_at": "2026-11-13T16:24:54Z",
+          "files": [
+            {
+              "name": "result.json",
+              "sha256": "b5fe09d58ad62f0286496764dd95dcad6bca42f4c34bffd98ec3a3cf7f74a5ad"
+            }
+          ]
+        },
+        {
+          "id": 12992539971,
+          "name": "security-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:12004679ccc7372c8c457380f1529a2c4ec05318a0629021101812c5918ce716",
+          "expires_at": "2026-11-13T16:27:45Z",
+          "files": [
+            {
+              "name": "result.json",
+              "sha256": "3ccd7ba406b3b1eeb4519b0f3957e6c9af96c3106ea530e4803d6b46500513b9"
+            },
+            {
+              "name": "security-junit.xml",
+              "sha256": "527bd80b2e22c9f72c8630dcf1796c24dbd4ba61e4b2c00a0aa039fb5fc902b0"
+            },
+            {
+              "name": "sbom.cdx.json",
+              "sha256": "00951900dae701eff981a7737fac4f5f74e178eb350036dab842e3f67824b389"
+            }
+          ]
+        },
+        {
+          "id": 12992014899,
+          "name": "governance-ruff-7a5da43bcb03746007d093234f5a96b272453e45",
+          "digest": "sha256:0edf7f1b146c461ac44786a945344c00121fc617d35912ec54add584cd1badf4",
+          "expires_at": "2026-11-13T16:23:17Z",
+          "files": [
+            {
+              "name": "result.json",
+              "sha256": "6398192e6163043f0e8472729fc7851610e88759daea0c5903474edca4c2eb76"
+            }
+          ]
+        }
+      ],
+      "staging": "PASS",
+      "eligible": true,
+      "independent_receipt_sha256": "d9347bf757083853753a670b6af6cb669e05cb17cc5a9adc8b35690f08f954ec",
+      "original_full_test_cases_unchanged": true,
+      "financial_case_identity_unchanged": true
     }
   ],
   "postmerge": [],
-  "canonical_final_receipt": "PR body and immutable same-SHA Actions artifacts; update after acquisition",
-  "production_authorized": false
+  "canonical_final_receipt": "https://github.com/tiagocaldironi/income-analytics/pull/56",
+  "production_authorized": false,
+  "snapshot_limitation": "This records the verified source commit before this documentation-only update. Final-head CI, protected merge and postmerge runs are separately recorded in the PR #56 body and immutable Actions artifacts; do not attribute this snapshot run to another SHA."
 }

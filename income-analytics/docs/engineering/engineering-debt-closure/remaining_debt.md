@@ -1,6 +1,6 @@
 # Remaining engineering debt
 
-Status: ENGINEERING_DEBT_PARTIALLY_CLOSED (candidate; hosted integration not yet verified).
+Status: ENGINEERING_DEBT_PARTIALLY_CLOSED (hosted source snapshot verified; final integration receipt in PR #56).
 
 Ruff has zero unjustified occurrences, with 23 visible and narrowly justified historical migration-style observations. The raw tool exits 1; the hash-pinned exception policy exits 0. mypy remains failed with 499 occurrences; Full Python remains failed on its existing financial/historical contract. Neither is promoted. No skip, xfail, exclusion, financial expected value, frozen file or lint/type rule was changed. Exactly 23 legacy style observations are justified under the specification exception clause, remain visible and have mutation tests.
 

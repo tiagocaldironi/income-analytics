@@ -12,7 +12,12 @@
     "errors": 9,
     "skipped": 5
   },
-  "candidate": "NOT_VERIFIED_AT_DOCUMENT_SNAPSHOT",
+  "candidate": {
+    "passed": 1388,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 5
+  },
   "collection_errors": 0,
   "new_skips": 0,
   "new_xfails": 0,
@@ -28,5 +33,12 @@
     "errors": 9,
     "skipped": 5
   },
-  "initial_full_original_cases_preserved": 1367
+  "initial_full_original_cases_preserved": 1367,
+  "hosted_snapshot": {
+    "run_id": 41089246347,
+    "checkout_sha": "7a5da43bcb03746007d093234f5a96b272453e45",
+    "status": "FAIL"
+  },
+  "original_case_outcomes_verified_unchanged": 1367,
+  "new_passing_cases": 50
 }

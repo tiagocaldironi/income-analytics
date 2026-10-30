@@ -74,5 +74,12 @@
   "exceptions_added": 0,
   "hosted": "NOT_VERIFIED_YET",
   "frozen_source_occurrences": 39,
-  "other_remaining_debt": 460
+  "other_remaining_debt": 460,
+  "hosted_snapshot": {
+    "run_id": 41089246347,
+    "checkout_sha": "7a5da43bcb03746007d093234f5a96b272453e45",
+    "status": "FAIL_WITH_DEBT",
+    "raw_exit": 1,
+    "occurrences": 499
+  }
 }
