@@ -1,0 +1,24 @@
+{
+  "state": "PARTIAL",
+  "required_context": "CI / Engineering",
+  "ruleset": 26078982,
+  "ruleset_modified": false,
+  "promoted": [
+    "ruff: zero unjustified occurrences"
+  ],
+  "unpromoted": [
+    "mypy: 499 open occurrences",
+    "Full Python: unchanged 24 financial failure/error cases and 5 existing external skips"
+  ],
+  "raw_diagnostics_preserved": true,
+  "legacy_style_exceptions": {
+    "count": 23,
+    "files": 8,
+    "reason": "Byte-identical historical migrations are the existing rollback contract; formatting-only changes were blocked by hosted staging",
+    "policy": "ci/ruff-exceptions.json",
+    "scope": "Exact per-occurrence, source/config/tool hash-pinned; runtime rules cannot qualify"
+  },
+  "rollback_guard": "UNCHANGED; altered migration bytes still block",
+  "baseline_policy": "803 historical original occurrences remain in immutable baseline; 802 observed in PR10; ledger preserves every raw occurrence, including 23 justified style observations",
+  "tests": "ci/test_engineering_debt.py: raw failure preserved, source/config/version/rule/file/path/location/multiplicity/missing-report/identity/run/attempt negative controls"
+}

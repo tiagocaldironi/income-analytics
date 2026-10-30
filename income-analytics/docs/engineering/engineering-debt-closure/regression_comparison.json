@@ -1,0 +1,166 @@
+{
+  "state": "HOSTED_SOURCE_SNAPSHOT_PASS; FINANCIAL_BLOCKERS_AND_TYPING_DEBT_UNCHANGED",
+  "baseline_sha": "cfb96a2b405b2821d7b03a6a3546dd8c9241d8c0",
+  "reference_run": 41051244098,
+  "static": {
+    "original": 802,
+    "raw_current": 522,
+    "resolved": 280,
+    "justified_style": 23,
+    "open_mypy": 499
+  },
+  "semantic_equivalence": {
+    "exceptions": [
+      "annotations and type-only declarations/aliases",
+      "explicit persisted-onboarding row invariant (protected by negative regression test)",
+      "alpha-equivalent local names returning/asset_items/initial_candidate",
+      "reviewed import ordering"
+    ],
+    "files": [
+      {
+        "file": "income-analytics/scripts/rematerialize_magic_formula_v2.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/api/onboarding_v2.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/api/routers/dashboard.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/api/routers/portfolios.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/api/saas_security.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/application/executable_contribution.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/application/global_contribution_allocator.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/application/magic_formula_formal_qa.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/application/wealth_explanation.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/auth_repository.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/irpf_xlsx_import.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/magic_formula_snapshot_repository.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/models.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/request_profiling.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/upload_safety.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/main.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/tests/infrastructure/test_onboarding_v2_migration.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/tests/security/test_firebase_authorization.py",
+        "executable_ast_equivalent": true
+      }
+    ],
+    "protected_financial_files_verified": 13,
+    "no_arithmetic_or_predicate_change": true
+  },
+  "frozen_files": "No changed manifests, hashes, fixtures, financial policy or test-group files",
+  "local_results": {
+    "quality": "PASS",
+    "operational": "PASS",
+    "node": "PASS",
+    "financial": "BLOCKED"
+  },
+  "production_access": false,
+  "focused_candidate": {
+    "passed": 126,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "old_candidate_full_case_comparison": {
+    "original_cases": 1367,
+    "changed_original_outcomes": [],
+    "new_passing_cases": 27,
+    "candidate_totals": {
+      "passed": 1365,
+      "failed": 15,
+      "errors": 9,
+      "skipped": 5
+    }
+  },
+  "migration_bytes": {
+    "migrations": 27,
+    "candidate_equals_pr10": true,
+    "candidate_equals_legacy_rollback": true,
+    "rollback_guard_changed": false
+  },
+  "rollback_guard_modified": false,
+  "hosted_snapshot": {
+    "run_id": 41089246347,
+    "checkout_sha": "7a5da43bcb03746007d093234f5a96b272453e45",
+    "engineering": {
+      "passed": 1388,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "full_python": {
+      "passed": 1388,
+      "failed": 15,
+      "errors": 9,
+      "skipped": 5
+    },
+    "security": {
+      "passed": 137,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "operational": {
+      "passed": 64,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "original_cases_preserved": 1367,
+    "original_case_outcomes_changed": 0,
+    "new_passing_cases": 50,
+    "financial_case_identity_unchanged": true,
+    "new_skips": 0,
+    "new_xfails": 0,
+    "staging": "PASS",
+    "sast_findings": 413,
+    "synthetic_secret": "REJECTED",
+    "production_authorized": false
+  }
+}

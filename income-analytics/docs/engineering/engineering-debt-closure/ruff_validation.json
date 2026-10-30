@@ -1,0 +1,28 @@
+{
+  "state": "RUFF_POLICY_PASS_WITH_JUSTIFIED_IMMUTABLE_MIGRATION_STYLE",
+  "baseline_raw": 130,
+  "candidate_raw": 23,
+  "corrected": 107,
+  "justified": 23,
+  "unjustified": 0,
+  "raw_tool_exit_code": 1,
+  "policy_exit_code": 0,
+  "policy_sha256": "2283a2f344a3102ffe445158009f37a6e3533f5d742d7e102f57879b92c63433",
+  "scope": "Unchanged ruff check . --no-cache --output-format=json",
+  "rules": "Unchanged E/F/I; no noqa, excludes or per-file-ignore",
+  "configuration_sha256": "c931b996f37acc74300e2d24b8fb9397d2e9a3dea721bd8ac1cb7b8e504db859",
+  "migration_reference": "Exact bytes of both PR10 and legacy rollback version A",
+  "protected_migration_files": 8,
+  "migration_graph_files_verified": 27,
+  "tests": "ci/test_engineering_debt.py (exact positive plus mutation/config/version/rule/file/path/multiplicity/missing-observation negatives)",
+  "hosted": {
+    "run_id": 41089246347,
+    "checkout_sha": "7a5da43bcb03746007d093234f5a96b272453e45",
+    "status": "PASS",
+    "raw_exit_code": 1,
+    "raw_occurrences": 23,
+    "unjustified_occurrences": 0,
+    "version": "0.16.6"
+  },
+  "aggregate_dependency": "Producer records installed version; stdlib-only aggregator checks report version against pinned policy. Absent/different versions fail closed; protected by 46 direct governance tests."
+}

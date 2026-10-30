@@ -1,0 +1,272 @@
+{
+  "schema": 1,
+  "reference_commit": "cfb96a2b405b2821d7b03a6a3546dd8c9241d8c0",
+  "ruff_version": "0.16.6",
+  "configuration_sha256": "c931b996f37acc74300e2d24b8fb9397d2e9a3dea721bd8ac1cb7b8e504db859",
+  "scope": "Exact historical migration style only; no Ruff rule or analysis exclusion is changed",
+  "source_sha256": {
+    "alembic/versions/0008_paid_income_brapi.py": "8445b0c80883926746e043cb822280ecf8918a8e849ba5bc47e0db9b1378ecb9",
+    "alembic/versions/0009_pension_real_estate_classes.py": "be2038d218cd9a35fec0de2554b068765f4fdd478f050910ec5fb690a496c969",
+    "alembic/versions/0010_portfolio_dashboard_snapshot.py": "8aa55349d70c52d8cc6d5ae995bfbb50dd5c24a66c372fcc12c324b9596872b5",
+    "alembic/versions/0012_pension_market_data.py": "423199d155eaa031ae5c24301c40c56eef344a045e6c8a21f52dee19bbd36c91",
+    "alembic/versions/0013_capital_flow_classification.py": "6cb645f3d754d7d3993998e1a6abe2c224ec300dffbfded9a808b042848463f5",
+    "alembic/versions/0014_b3_import_audit.py": "5863ee8e5af2b64f61270406806bbdcc4a9fea9a1540769419ca0d1d0ee92fce",
+    "alembic/versions/0015_magic_formula_fundamentals_snapshots.py": "6e6e6fd184a0606af68abbe70a6b1b53eb90937b0ffd3d5a716ca4447b5adb58",
+    "alembic/versions/0027_contextual_onboarding_v2.py": "63f4a1c636ae5b80b8feffd82706968997ef263e9aaa2c4aa819913c540c1bc4"
+  },
+  "occurrences": [
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0008_paid_income_brapi.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 13,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (110 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 16,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (108 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 18,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (118 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 20,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (132 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 26,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (105 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0010_portfolio_dashboard_snapshot.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0012_pension_market_data.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0012_pension_market_data.py",
+        "line": 25,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (112 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0012_pension_market_data.py",
+        "line": 26,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (114 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0012_pension_market_data.py",
+        "line": 27,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (130 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0013_capital_flow_classification.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0014_b3_import_audit.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0014_b3_import_audit.py",
+        "line": 34,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (112 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0014_b3_import_audit.py",
+        "line": 56,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (112 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0015_magic_formula_fundamentals_snapshots.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0015_magic_formula_fundamentals_snapshots.py",
+        "line": 27,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (155 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 2,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 11,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (907 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 15,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (315 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 21,
+        "column": 94,
+        "code": "E701",
+        "message": "Multiple statements on one line (colon)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    },
+    {
+      "finding": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 21,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (114 > 100)"
+      },
+      "reason": "Historical migration bytes are the existing rollback schema contract. Formatting changes break exact migration identity, as demonstrated by hosted staging run 41060480364. Preserve bytes and keep this exact style occurrence visible; any source, location, rule or multiplicity change requires re-review."
+    }
+  ]
+}
