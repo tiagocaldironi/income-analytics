@@ -7,6 +7,15 @@ from pathlib import Path
 
 FINGERPRINT_VERSION = 2
 POLICY_FILES = (
+    "income-analytics/ci/operational.py",
+    "income-analytics/ci/test_operational.py",
+    "income-analytics/docs/engineering/operational-readiness/operational_inventory.json",
+    "income-analytics/docs/engineering/operational-readiness/health_readiness_contract.md",
+    "income-analytics/docs/engineering/operational-readiness/observability_contract.md",
+    "income-analytics/docs/engineering/operational-readiness/backup_retention_policy.md",
+    "income-analytics/docs/engineering/operational-readiness/windows_tailscale_checklist.md",
+    "income-analytics/docs/engineering/operational-readiness/firebase_operational_checklist.md",
+    "income-analytics/docs/engineering/operational-readiness/incident_runbooks.md",
     "income-analytics/ci/financial_certification.py",
     "income-analytics/ci/financial_certification_policy.json",
     "income-analytics/ci/test_financial_certification.py",

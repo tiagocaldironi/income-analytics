@@ -244,3 +244,12 @@ def dashboard() -> FileResponse:
 @app.get("/conta", include_in_schema=False)
 def account_page() -> FileResponse:
     return FileResponse(static_directory / "account.html", headers={"Cache-Control": "no-store"})
+
+
+def install_operational_controls() -> None:
+    from income_analytics.infrastructure.operational import OperationalMiddleware
+
+    app.add_middleware(OperationalMiddleware)
+
+
+install_operational_controls()

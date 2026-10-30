@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "state": "NOT_VERIFIED",
+  "reason": "Execution evidence not collected yet",
+  "production": "PRODUCTION_NOT_AUTHORIZED",
+  "host": "HOST_NOT_VERIFIED"
+}

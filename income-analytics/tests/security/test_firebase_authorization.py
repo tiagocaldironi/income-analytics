@@ -562,7 +562,7 @@ def test_scoped_quote_timestamp_survives_sqlite_roundtrip_without_breaking_route
     headers = {"X-Portfolio-Id": wid}
     assert client.put("/api/allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": "1"}}).status_code == 200
     assert client.put("/api/asset-allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": {"UTC3": "1"}}}).status_code == 200
-    observed = datetime.now(UTC).replace(microsecond=0)
+    observed = datetime.combine(date.today(), datetime.min.time(), tzinfo=UTC)
     quote_id = str(uuid4())
     with SessionFactory.begin() as db:
         asset_id = db.scalar(select(PortfolioAssetRecord.asset_id).where(PortfolioAssetRecord.portfolio_id == wid))

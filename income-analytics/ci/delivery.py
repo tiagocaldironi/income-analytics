@@ -6,8 +6,10 @@ import json
 import os
 import sqlite3
 import tempfile
+import time
 import zipfile
 from contextlib import closing
+from datetime import UTC, datetime
 from pathlib import Path
 
 from artifact import canonical, sha, verify
@@ -237,18 +239,32 @@ def database_check(workspace, path, expected_head, signature=None):
 
 def backup_database(workspace, source, destination, head):
     source, destination = workspace.safe(source), workspace.safe(destination)
-    signature = database_check(workspace, source, head)
+    database_check(workspace, source, head)
     require(not destination.exists(), "BACKUP_ALREADY_EXISTS")
-    with closing(sqlite3.connect(source.as_uri() + "?mode=ro", uri=True)) as origin:
-        with closing(sqlite3.connect(destination)) as backup:
-            origin.backup(backup)
-    database_check(workspace, destination, head, signature)
+    require(destination.parent.is_dir(), "BACKUP_DIRECTORY_MISSING")
+    started = time.monotonic()
+    temporary = workspace.safe(destination.with_name(destination.name + ".partial"))
+    require(not temporary.exists(), "PARTIAL_ALREADY_EXISTS")
+
+    def progress(_status, _remaining, _total):
+        require(time.monotonic() - started < 10, "BACKUP_TIMEOUT")
+
+    try:
+        with closing(sqlite3.connect(source.as_uri() + "?mode=ro", uri=True)) as origin:
+            with closing(sqlite3.connect(temporary)) as backup:
+                origin.backup(backup, pages=64, progress=progress, sleep=0.05)
+        signature = database_check(workspace, temporary, head)
+        os.replace(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
     return {
         "status": "PASS",
         "method": "SQLITE_ONLINE_BACKUP_API",
         "sha256": sha(destination.read_bytes()),
         "state_signature": signature,
         "schema_head": head,
+        "created_at": datetime.now(UTC).isoformat(),
+        "duration_seconds": round(time.monotonic() - started, 6),
     }
 
 
@@ -258,10 +274,33 @@ def restore_database(workspace, backup_path, destination, record):
     require(sha(backup_path.read_bytes()) == record["sha256"], "BACKUP_DIGEST_MISMATCH")
     database_check(workspace, backup_path, record["schema_head"], record["state_signature"])
     require(all(p.poll() is not None for p in workspace.processes), "RESTORE_REQUIRES_STOPPED_APP")
-    with closing(sqlite3.connect(backup_path.as_uri() + "?mode=ro", uri=True)) as source:
-        with closing(sqlite3.connect(destination)) as target:
-            source.backup(target)
-    database_check(workspace, destination, record["schema_head"], record["state_signature"])
+    if destination.exists() and any(
+        destination.with_name(destination.name + suffix).exists() for suffix in ("-wal", "-shm")
+    ):
+        # Read-only WAL probes can leave sidecars after their final connection.
+        # Let SQLite prove exclusivity and retire them; never unlink WAL/SHM.
+        try:
+            with closing(sqlite3.connect(destination.as_uri() + "?mode=rw", uri=True,
+                                         timeout=0.1)) as previous:
+                mode = previous.execute("PRAGMA journal_mode=DELETE").fetchone()
+                require(mode == ("delete",), "RESTORE_REQUIRES_QUIESCENT_DATABASE")
+        except sqlite3.Error:
+            raise DeliveryError("RESTORE_REQUIRES_QUIESCENT_DATABASE") from None
+    temporary = workspace.safe(destination.with_name(destination.name + ".restore-partial"))
+    require(not temporary.exists(), "PARTIAL_ALREADY_EXISTS")
+    started = time.monotonic()
+
+    def progress(_status, _remaining, _total):
+        require(time.monotonic() - started < 10, "RESTORE_TIMEOUT")
+
+    try:
+        with closing(sqlite3.connect(backup_path.as_uri() + "?mode=ro", uri=True)) as source:
+            with closing(sqlite3.connect(temporary)) as target:
+                source.backup(target, pages=64, progress=progress, sleep=0.05)
+        database_check(workspace, temporary, record["schema_head"], record["state_signature"])
+        os.replace(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
     return {"status": "PASS", "integrity_check": "PASS", "schema": "PASS", "semantic_state": "PASS"}
 
 

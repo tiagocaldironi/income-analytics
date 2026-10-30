@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "local_disposable_measurement": {
+    "status": "PASS",
+    "environment": "DISPOSABLE_SYNTHETIC_SQLITE_WAL",
+    "backup_seconds": 0.018489,
+    "detection_seconds": 0.002153,
+    "restore_seconds": 0.02393,
+    "validation_seconds": 0.008996,
+    "observed_recovery_seconds": 0.035079,
+    "synthetic_committed_rows": 100,
+    "synthetic_rows_lost": 0,
+    "observed_rpo": "ZERO_COMMITTED_SYNTHETIC_ROWS_AT_BACKUP_BOUNDARY",
+    "last_valid_backup_age_seconds": 0.038114,
+    "host_rpo_rto_certified": false,
+    "target_rpo_hours": 24,
+    "target_rto_hours": 2,
+    "targets": "PROPOSED_NOT_GUARANTEED",
+    "production_access": false
+  },
+  "host_certified": false,
+  "hosted_measurement": "PENDING"
+}

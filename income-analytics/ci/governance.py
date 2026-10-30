@@ -23,9 +23,12 @@ from gate_policy import (
     require_security_baseline,
     summarize_reports,
 )
+from operational import require_operational
+from operational import run as run_operational
 from pipeline_identity import FINGERPRINT_VERSION, execution_fingerprint, governance_policy_identity
 
-CHECKS = ("runtime", "engineering", "financial", "python", "node", "ruff", "mypy", "quality")
+CHECKS = ("runtime", "engineering", "financial", "python", "node", "ruff", "mypy", "quality",
+          "operational")
 
 
 def source_fingerprint() -> str:
@@ -111,6 +114,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         "ci/test_delivery.py",
         "ci/test_security.py",
         "ci/test_financial_certification.py",
+        "ci/test_operational.py",
         f"--ci-gate={gate}",
         "-ra",
         "--tb=short",
@@ -170,6 +174,8 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
 
 
 def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, dict]:
+    if check == "operational":
+        return run_operational(env, sandbox, output)
     if check in {"engineering", "financial", "python"}:
         return python_check(check, env, sandbox, output)
     if check in {"ruff", "mypy"}:
@@ -231,6 +237,7 @@ def main() -> int:
     parser.add_argument("check", choices=(*CHECKS, "summary"))
     parser.add_argument("--reports", type=Path, default=ROOT / "ci-reports")
     parser.add_argument("--security-status")
+    parser.add_argument("--operational-status")
     args = parser.parse_args()
     if args.check == "summary":
         reports = {}
@@ -240,6 +247,9 @@ def main() -> int:
                 raise ValueError("DUPLICATE_CHECK_REPORT")
             reports[document["check"]] = document
         summary = require_security_baseline(summarize_reports(reports), args.security_status)
+        summary = require_operational(
+            summary, reports.get("operational", {}), args.operational_status
+        )
         args.reports.mkdir(parents=True, exist_ok=True)
         (args.reports / "gate-summary.json").write_text(json.dumps(summary, indent=2) + "\n")
         print(json.dumps(summary, indent=2))
