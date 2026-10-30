@@ -1,0 +1,415 @@
+{
+  "schema": 1,
+  "state": "HOSTED_PREMERGE_VERIFIED",
+  "scope": "Exact named premerge revision; final source and postmerge receipts are separate",
+  "verified_source": {
+    "run_id": 41045768631,
+    "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/41045768631",
+    "event": "pull_request",
+    "conclusion": "failure",
+    "source_head": "a9b1980ab1d220bf38370b1f68a1c9f93004d8a8",
+    "checkout_sha": "b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+    "run_attempt": 1,
+    "governance_policy_sha256": "1b2d2c310d9e730467e2546acf0f5b1b2affaea90d6c833a905f58fe2ab51966",
+    "source_fingerprint": "5b121abc1b61097289612441e4b622faa2d90ade453207d8ff0a135aaeeadecd",
+    "artifact_id": 12971489089,
+    "package_sha256": "440f8708edd8b701ca47badcb5a3405dd92ff1061b826ddafb6640344776c9ac",
+    "manifest_sha256": "fa1dd8e30a2415775a7df7837afe3f5167904f42f8bb5e038f88421aee110dee",
+    "security_artifact_id": 12971758991,
+    "engineering_tests": {
+      "passed": 1332,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "security_tests": {
+      "passed": 137,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "operational_tests": {
+      "passed": 58,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "operational_state": "OPERATIONAL_PASS",
+    "financial": {
+      "passed": 104,
+      "failed": 15,
+      "errors": 9,
+      "skipped": 0
+    },
+    "financial_state": "FINANCIAL_BLOCKED",
+    "jobs": {
+      "CI / Reproducible build": "success",
+      "CI / Financial certification": "failure",
+      "CI / Operational readiness": "success",
+      "CI / mypy diagnostics": "failure",
+      "CI / Full Python diagnostic": "failure",
+      "CI / Ruff diagnostics": "failure",
+      "CI / Runtime installation": "success",
+      "CI / Python engineering": "success",
+      "CI / Quality non-regression": "success",
+      "CI / Frontend": "success",
+      "CI / Security baseline": "success",
+      "CI / Engineering": "success",
+      "CD / Staging validation": "success"
+    },
+    "recovery": {
+      "status": "PASS",
+      "environment": "DISPOSABLE_SYNTHETIC_SQLITE_WAL",
+      "backup_seconds": 0.023513,
+      "detection_seconds": 0.00069,
+      "restore_seconds": 0.026312,
+      "validation_seconds": 0.00337,
+      "observed_recovery_seconds": 0.030372,
+      "synthetic_committed_rows": 100,
+      "synthetic_rows_lost": 0,
+      "observed_rpo": "ZERO_COMMITTED_SYNTHETIC_ROWS_AT_BACKUP_BOUNDARY",
+      "last_valid_backup_age_seconds": 0.040037,
+      "host_rpo_rto_certified": false,
+      "target_rpo_hours": 24,
+      "target_rto_hours": 2,
+      "targets": "PROPOSED_NOT_GUARANTEED",
+      "production_access": false
+    },
+    "artifacts": [
+      {
+        "id": 12973410725,
+        "name": "delivery-preview-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:514be35a0290624557a36f2333c566cd66d320426a34d93e6768bad5c9a6682f",
+        "expires_at": "2026-11-13T11:17:38Z",
+        "files": [
+          {
+            "name": "validation.json",
+            "sha256": "68d56be3c7255d4a945933ab492cb83bdfdbeaad4b42091673462eccddb8042f"
+          },
+          {
+            "name": "candidate.json",
+            "sha256": "d254d428fd0b8e0bf3cf674da4faa1a431a3dc9c9618da3109bc73fa4a97eeac"
+          }
+        ]
+      },
+      {
+        "id": 12973050166,
+        "name": "governance-node-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:72de68c9d7c6293217fe648ff48b05691d1b46be3552f9b613949cd7c5218513",
+        "expires_at": "2026-11-13T11:08:32Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "ec378817a3779120628049840b7c3125fcb2b97e28be18d133dd4bdf9a84dc10"
+          }
+        ]
+      },
+      {
+        "id": 12972826929,
+        "name": "gate-summary-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:3405f44f2adce7fd5d4baea4fdccf7963f5fa1d419c32ddbe0d349716f4d2094",
+        "expires_at": "2026-11-13T11:14:55Z",
+        "files": [
+          {
+            "name": "gate-summary.json",
+            "sha256": "0e94fd26724c3fd01089c42fb1671233f549e528011c61fcf70806cc10d4679d"
+          }
+        ]
+      },
+      {
+        "id": 12972796663,
+        "name": "governance-python-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:58336697aec7f44590abccbb31aa9818ea3af72483f7068fc6c0e5858a160110",
+        "expires_at": "2026-11-13T11:13:50Z",
+        "files": [
+          {
+            "name": "coverage.xml",
+            "sha256": "8df3a3fec758e34fff31c19d665d1a4907bcf7037a4a7ba95b77d53beff78014"
+          },
+          {
+            "name": "inventory.json",
+            "sha256": "cf9332b52c43ef5eca5386e6ad2296cba8427eb27469d7d8e17509fea5d79f28"
+          },
+          {
+            "name": "python-junit.xml",
+            "sha256": "c55e2959d1a7841310959cdaef82fea1c211097e3e4f491526fda3485af6c5be"
+          },
+          {
+            "name": "result.json",
+            "sha256": "81b2ff730a80ff7a2c07bbdace3ae01206eabfea31544b2f3b574970cf241312"
+          }
+        ]
+      },
+      {
+        "id": 12972636966,
+        "name": "governance-financial-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:75bd99a8218a2464174ff8b42d356860e903287209de7397ed4dece963326fc0",
+        "expires_at": "2026-11-13T11:12:43Z",
+        "files": [
+          {
+            "name": "financial-junit.xml",
+            "sha256": "f859ef5ce66307b8e330af9e97e8076cde2a4a7cb8f50060764eafbe44971078"
+          },
+          {
+            "name": "inventory.json",
+            "sha256": "ce1d6a0443b1f333cc21e600772db990309f603af5feecca8fa8e0007028eed7"
+          },
+          {
+            "name": "result.json",
+            "sha256": "0fe91d8658dd42bcc85fb98936da8349fdfcef8474b9d12a056f9a8ffcfdb072"
+          }
+        ]
+      },
+      {
+        "id": 12972502172,
+        "name": "governance-engineering-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:5dab5c6cd4028b12da0a370a8a13e2ebdfc14d882f398817fe53fb236aa3b22d",
+        "expires_at": "2026-11-13T11:12:21Z",
+        "files": [
+          {
+            "name": "engineering-junit.xml",
+            "sha256": "a66a10d3b9129c14926476ed4d9a913156dff90cb4c51841a20e9bff183acfc6"
+          },
+          {
+            "name": "inventory.json",
+            "sha256": "a1cedf64a42e98a544086c23e6fce4b71257bac132d5b3f2b5a0d60a53369409"
+          },
+          {
+            "name": "result.json",
+            "sha256": "b90c6e4162b44495b145d277182309356c2255e7ddfe96b47ee492a1fd6b40ae"
+          }
+        ]
+      },
+      {
+        "id": 12972188218,
+        "name": "governance-quality-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:5c6852acb700e629300cabb8b110c5b8eb1036d18efb487294c5ec07e0c96b63",
+        "expires_at": "2026-11-13T11:09:08Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "925decf61043cbb413becc57b25663b52e9f3dc9c606213d07fc199b7987597d"
+          }
+        ]
+      },
+      {
+        "id": 12971953129,
+        "name": "governance-runtime-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:99f856cd2c0dc522babadb4c4cdd233735470f1fd64df6922c14040bb068a334",
+        "expires_at": "2026-11-13T11:08:52Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "e3fe13b3777c104ce66852172dea4ddb4a300f0311577bf304f4c18018944653"
+          }
+        ]
+      },
+      {
+        "id": 12971839319,
+        "name": "governance-mypy-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:cd9d0e2d7e0e7ca1cb54e2354e64c2986c2bb97277e32ec4a57bf2d78a364f58",
+        "expires_at": "2026-11-13T11:09:03Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "6a36d89d616dd76a5c1a0663b819df3ece28cde270e49b0e59badc6d3e023be4"
+          }
+        ]
+      },
+      {
+        "id": 12971758991,
+        "name": "security-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:631e25f52f99a1b803574c6010f0711a0639e1fe484642956c913a7b5a22d086",
+        "expires_at": "2026-11-13T11:12:06Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "3e27d6fe1d4770eccb7dab85d0e703db23a5bc6fcf025acccf506d2a8179733a"
+          },
+          {
+            "name": "security-junit.xml",
+            "sha256": "527bd80b2e22c9f72c8630dcf1796c24dbd4ba61e4b2c00a0aa039fb5fc902b0"
+          },
+          {
+            "name": "sbom.cdx.json",
+            "sha256": "5683a5f5ff313f3b99017c3301f56cfde9ea0f0c0acbc66e08d9a28132fa3095"
+          }
+        ]
+      },
+      {
+        "id": 12971593704,
+        "name": "governance-ruff-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:8435f9c3d201ca7e40638096e9e122a2d1a16c35ca76634f009809b580a9f3b1",
+        "expires_at": "2026-11-13T11:08:43Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "78007b3d53f0c1a4e145ed9943f0d4c5cb7f99beeba856600df16a937ed59b42"
+          }
+        ]
+      },
+      {
+        "id": 12971523966,
+        "name": "governance-operational-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:926505eff9ce1db37e7249a38e35c3fb4323c7ecbdc6d8e37eba3d377111391c",
+        "expires_at": "2026-11-13T11:09:10Z",
+        "files": [
+          {
+            "name": "operational-junit.xml",
+            "sha256": "134d03f7fcd3a1d5a5f0e837b2c6eb65f0ffb0af523b752a798c6ccffe203ffa"
+          },
+          {
+            "name": "result.json",
+            "sha256": "a6a7ecd7b66cfd654255903e31ca47c5bccf7963a5b5ceffdd92d8960a60c51c"
+          }
+        ]
+      },
+      {
+        "id": 12971489089,
+        "name": "application-b9e4b033a8f25e0fe8cde40fde5e326ea49921be-windows-x64",
+        "digest": "sha256:71ceca7b2bc7406fed54e16dd6b1abbce9e22dd99a52a533b0487963e3c7c549",
+        "expires_at": "2026-11-13T11:09:44Z",
+        "files": [
+          {
+            "name": "income-analytics-b9e4b033a8f25e0fe8cde40fde5e326ea49921be-windows-x64.sha256",
+            "sha256": "520727bfaeefc6dba8c02825c0859335cdadba28d9ddc7e5368a2a794b0ce0a3"
+          },
+          {
+            "name": "income-analytics-b9e4b033a8f25e0fe8cde40fde5e326ea49921be-windows-x64.zip",
+            "sha256": "440f8708edd8b701ca47badcb5a3405dd92ff1061b826ddafb6640344776c9ac"
+          },
+          {
+            "name": "manifest.json",
+            "sha256": "255ae3ffba5affc502ce949af86d43f5d8d2dca2c147492f9f3396143b51d55d"
+          }
+        ]
+      },
+      {
+        "id": 12971474161,
+        "name": "governance-build-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:b328ab1016778c9527f154de786250c5abd2aec3fa382911e969acf495a2833f",
+        "expires_at": "2026-11-13T11:09:43Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "c47d0e23b37be29f7545109bdc6bfc080b5f356cbc242908cd9fd4c4ca18d701"
+          }
+        ]
+      }
+    ],
+    "staging_state": "PASS",
+    "integration_eligible": true
+  },
+  "checks": {
+    "backup": {
+      "created_at": "2026-10-30T11:16:46.582845+00:00",
+      "duration_seconds": 0.044706,
+      "method": "SQLITE_ONLINE_BACKUP_API",
+      "schema_head": "0027_contextual_onboarding_v2",
+      "sha256": "b94d5951c6a32408c2796714bf2a034c59d2d875eff41ec07bb8c9ac1df538cb",
+      "state_signature": "f4ff1ebd946e125b1ae73bd788cd585930a069c0a7f6bb1f7b75568e07a48725",
+      "status": "PASS"
+    },
+    "cleanup": {
+      "ports_released": true,
+      "processes_stopped": true,
+      "status": "PASS",
+      "temporary_root_removed": true
+    },
+    "graceful_shutdown": {
+      "exit_code": 0,
+      "forced_stop": false,
+      "seconds": 0.383035,
+      "status": "PASS"
+    },
+    "health": {
+      "bind": "127.0.0.1",
+      "static": "PASS",
+      "status": "PASS"
+    },
+    "immutable_promotion": {
+      "candidate_sha256": "440f8708edd8b701ca47badcb5a3405dd92ff1061b826ddafb6640344776c9ac",
+      "rebuild": "NOT_RUN",
+      "staging_sha256": "440f8708edd8b701ca47badcb5a3405dd92ff1061b826ddafb6640344776c9ac",
+      "status": "PASS"
+    },
+    "incompatible_schema": {
+      "downgrade": "NOT_RUN",
+      "reason": "SCHEMA_INCOMPATIBLE",
+      "required_action": "SEPARATE_VALIDATED_RESTORE_PLAN",
+      "safe_block_verified": true,
+      "status": "BLOCKED"
+    },
+    "installation": {
+      "offline": true,
+      "status": "PASS"
+    },
+    "known_good_A": {
+      "commit": "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065",
+      "sha256": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
+      "status": "PASS"
+    },
+    "negative_health": {
+      "reason": "HEALTH_REJECTED",
+      "status": "EXPECTED_FAILURE_OBSERVED"
+    },
+    "negative_restore_changed_state": {
+      "reason": "RESTORE_STATE_MISMATCH",
+      "status": "EXPECTED_FAILURE_OBSERVED"
+    },
+    "negative_startup": {
+      "reason": "STARTUP_FAILED",
+      "status": "EXPECTED_FAILURE_OBSERVED"
+    },
+    "restore": {
+      "integrity_check": "PASS",
+      "schema": "PASS",
+      "semantic_state": "PASS",
+      "status": "PASS"
+    },
+    "rollback": {
+      "application_digest": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
+      "downgrade": "NOT_RUN",
+      "schema_compatibility": "EXACT_MIGRATION_IDENTITY",
+      "state_signature": "f4ff1ebd946e125b1ae73bd788cd585930a069c0a7f6bb1f7b75568e07a48725",
+      "status": "PASS"
+    },
+    "rollback_events": [
+      "A_HEALTHY",
+      "BACKUP_VERIFIED",
+      "B_SELECTED_AND_HEALTHY",
+      "B_HEALTH_FAILURE_OBSERVED",
+      "B_STARTUP_FAILURE_OBSERVED",
+      "A_RESELECTED",
+      "A_DIGEST_VERIFIED",
+      "A_RESTARTED_HEALTHY"
+    ],
+    "synthetic_restore_after_block": {
+      "integrity_check": "PASS",
+      "schema": "PASS",
+      "semantic_state": "PASS",
+      "status": "PASS"
+    }
+  },
+  "final_receipt_locator": {
+    "pull_request": "https://github.com/tiagocaldironi/income-analytics/pull/55",
+    "authoritative_final_receipt": "PR body after verified protected integration and postmerge runs",
+    "reason": "Do not claim postmerge validation from a premerge checkout or create recursive receipt commits"
+  },
+  "history": [
+    {
+      "run_id": 40978579934,
+      "source_head": "e7de3409b3aa508d11c092e5745e7fc81adc057e",
+      "checkout_sha": "b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+      "staging": "FAIL",
+      "category": "GRACEFUL_STOP_FAILED",
+      "root_cause": "NOT_PROVEN: previous executor discarded child stderr",
+      "promotion": "BLOCKED",
+      "hidden_or_waived": false
+    }
+  ],
+  "host": "HOST_NOT_VERIFIED",
+  "firebase_cloud": "FIREBASE_CLOUD_NOT_VERIFIED",
+  "beta": "BETA_NOT_AUTHORIZED",
+  "production": "PRODUCTION_NOT_AUTHORIZED"
+}
