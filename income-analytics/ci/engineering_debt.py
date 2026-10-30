@@ -13,9 +13,12 @@ def key(finding: dict) -> str:
     return json.dumps({name: finding.get(name) for name in FIELDS}, sort_keys=True)
 
 
-def ruff_exception_findings(root: Path, policy: dict) -> list[dict]:
+def ruff_exception_findings(
+    root: Path, policy: dict, *, observed_version: str | None = None
+) -> list[dict]:
     """Only exact style occurrences in byte-immutable historical migrations qualify."""
-    if policy["ruff_version"] != importlib.metadata.version("ruff"):
+    version = importlib.metadata.version("ruff") if observed_version is None else observed_version
+    if policy["ruff_version"] != version:
         raise ValueError("RUFF_EXCEPTION_TOOL_VERSION_MISMATCH")
     if (
         hashlib.sha256((root / "pyproject.toml").read_bytes()).hexdigest()

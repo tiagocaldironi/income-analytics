@@ -33,8 +33,17 @@ from operational import require_operational
 from operational import run as run_operational
 from pipeline_identity import FINGERPRINT_VERSION, execution_fingerprint, governance_policy_identity
 
-CHECKS = ("runtime", "engineering", "financial", "python", "node", "ruff", "mypy", "quality",
-          "operational")
+CHECKS = (
+    "runtime",
+    "engineering",
+    "financial",
+    "python",
+    "node",
+    "ruff",
+    "mypy",
+    "quality",
+    "operational",
+)
 
 
 def source_fingerprint() -> str:
@@ -189,7 +198,9 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
         code, findings = quality_findings(check, env, sandbox)
         if check == "ruff":
             policy = json.loads((ROOT / "ci/ruff-exceptions.json").read_text(encoding="utf-8"))
-            return classify_ruff(code, findings, ruff_exception_findings(ROOT, policy))
+            result, details = classify_ruff(code, findings, ruff_exception_findings(ROOT, policy))
+            details["ruff_version"] = importlib.metadata.version("ruff")
+            return result, details
         return code, {"status": "FAIL_WITH_DEBT" if findings else "PASS", "findings": findings}
     if check == "quality":
         baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
@@ -267,7 +278,9 @@ def main() -> int:
             summary, reports.get("operational", {}), args.operational_status
         )
         approved_ruff = ruff_exception_findings(
-            ROOT, json.loads((ROOT / "ci/ruff-exceptions.json").read_text(encoding="utf-8"))
+            ROOT,
+            json.loads((ROOT / "ci/ruff-exceptions.json").read_text(encoding="utf-8")),
+            observed_version=reports.get("ruff", {}).get("ruff_version", "MISSING"),
         )
         summary = require_clean_diagnostics(summary, reports, approved_ruff)
         args.reports.mkdir(parents=True, exist_ok=True)
@@ -306,8 +319,10 @@ def main() -> int:
         report.update(status="FAIL", runner_error=type(error).__name__)
         if args.check == "operational":
             report.update(
-                operational_state="OPERATIONAL_NOT_VERIFIED", host="HOST_NOT_VERIFIED",
-                beta="BETA_NOT_AUTHORIZED", production="PRODUCTION_NOT_AUTHORIZED",
+                operational_state="OPERATIONAL_NOT_VERIFIED",
+                host="HOST_NOT_VERIFIED",
+                beta="BETA_NOT_AUTHORIZED",
+                production="PRODUCTION_NOT_AUTHORIZED",
             )
         if args.check == "financial":
             report.update(

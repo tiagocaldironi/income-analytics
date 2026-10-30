@@ -223,6 +223,21 @@ def test_exact_legacy_exception_preserves_raw_tool_failure_and_visibility(tmp_pa
     )
 
 
+def test_report_version_is_checked_without_local_ruff_dependency(tmp_path, monkeypatch):
+    policy = legacy_policy(tmp_path)
+
+    def unavailable_package(name):
+        raise AssertionError("Aggregator must use the producing job's tool version")
+
+    monkeypatch.setattr(importlib.metadata, "version", unavailable_package)
+    assert ruff_exception_findings(tmp_path, policy, observed_version=policy["ruff_version"]) == [
+        row["finding"] for row in policy["occurrences"]
+    ]
+    for invalid in ("MISSING", "", "different"):
+        with pytest.raises(ValueError, match="RUFF_EXCEPTION_TOOL_VERSION_MISMATCH"):
+            ruff_exception_findings(tmp_path, policy, observed_version=invalid)
+
+
 @pytest.mark.parametrize(
     "fault",
     [

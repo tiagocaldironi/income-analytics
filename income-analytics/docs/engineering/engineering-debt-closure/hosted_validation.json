@@ -1,5 +1,5 @@
 {
-  "state": "TWO_PRIOR_FAILURES_RECORDED; REVISED_CANDIDATE_PENDING",
+  "state": "THREE_PRIOR_FAILURES_RECORDED; AGGREGATOR_CORRECTION_PENDING_HOSTED_PROOF",
   "repository": "tiagocaldironi/income-analytics",
   "branch": "codex/pr11-engineering-debt",
   "pr": 56,
@@ -46,6 +46,19 @@
       "staging": "FAIL: ROLLBACK_BLOCKED_SCHEMA_RESTORE_PLAN_REQUIRED",
       "eligible": false,
       "correction": "Restore original historical migration bytes; narrowly justified visible raw style occurrences instead of weakening rollback guard"
+    },
+    {
+      "run_id": 41067370852,
+      "attempt": 1,
+      "head_sha": "c0ebd6832e94feba948f789108ced22339fab8f6",
+      "checkout_sha": "608a621c3d087c44c9a85fed59eb8e52f2ecfad2",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/41067370852",
+      "engineering": "FAIL: PackageNotFoundError for Ruff in stdlib-only aggregate job",
+      "ruff": "PASS: raw exit 1, 23 justified observations",
+      "security": "PASS",
+      "staging": "SKIPPED_DUE_TO_FAILED_AGGREGATOR",
+      "eligible": false,
+      "correction": "Producing Ruff job records installed version; aggregator validates that report against pinned policy without requiring local Ruff. Missing/mismatched versions fail closed."
     }
   ],
   "postmerge": [],
