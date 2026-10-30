@@ -1,11 +1,18 @@
 """Negative controls for occurrence accounting and promoted diagnostics."""
 
+import hashlib
+import importlib.metadata
 from contextlib import contextmanager
 from copy import deepcopy
 from types import SimpleNamespace
 
 import pytest
-from engineering_debt import reconciled_findings, require_clean_diagnostics
+from engineering_debt import (
+    classify_ruff,
+    reconciled_findings,
+    require_clean_diagnostics,
+    ruff_exception_findings,
+)
 from gate_policy import compare_diagnostics
 
 
@@ -108,7 +115,17 @@ def clean_reports():
     )
     return {
         "engineering": dict(identity),
-        "ruff": dict(identity, check="ruff", status="PASS", exit_code=0, findings=[]),
+        "ruff": dict(
+            identity,
+            check="ruff",
+            status="PASS",
+            exit_code=0,
+            findings=[],
+            raw_tool_exit_code=0,
+            justified_findings=[],
+            unjustified_findings=[],
+            missing_approved_observations=[],
+        ),
     }
 
 
@@ -172,3 +189,101 @@ def test_promoted_check_never_approves_silently(failure):
                 }[failure]
             ] = "different"
     assert require_clean_diagnostics(summary, reports)["engineering_ci"] == "FAIL"
+
+
+def legacy_policy(tmp_path):
+    file = "alembic/versions/legacy.py"
+    target = tmp_path / file
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"immutable historical migration\n")
+    (tmp_path / "pyproject.toml").write_bytes(b"original configuration\n")
+    finding = dict(tool="ruff", file=file, line=2, column=101, code="E501", message="Legacy style")
+    return {
+        "ruff_version": importlib.metadata.version("ruff"),
+        "configuration_sha256": hashlib.sha256(
+            (tmp_path / "pyproject.toml").read_bytes()
+        ).hexdigest(),
+        "source_sha256": {file: hashlib.sha256(target.read_bytes()).hexdigest()},
+        "occurrences": [{"finding": finding, "reason": "Byte-immutable rollback contract"}],
+    }
+
+
+def test_exact_legacy_exception_preserves_raw_tool_failure_and_visibility(tmp_path):
+    policy = legacy_policy(tmp_path)
+    approved = ruff_exception_findings(tmp_path, policy)
+    code, report = classify_ruff(1, approved, approved)
+    assert code == 0 and report["status"] == "PASS"
+    assert report["raw_tool_exit_code"] == 1 and report["findings"] == approved
+    assert report["unjustified_findings"] == []
+    reports = clean_reports()
+    reports["ruff"].update(report)
+    assert (
+        require_clean_diagnostics({"engineering_ci": "PASS"}, reports, approved)["engineering_ci"]
+        == "PASS"
+    )
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "bytes",
+        "config",
+        "version",
+        "runtime-rule",
+        "source-file",
+        "escape",
+        "duplicate",
+        "missing-reason",
+        "extra-source",
+    ],
+)
+def test_legacy_style_exception_cannot_expand_or_survive_source_changes(tmp_path, fault):
+    policy = legacy_policy(tmp_path)
+    row = policy["occurrences"][0]
+    if fault == "bytes":
+        (tmp_path / row["finding"]["file"]).write_bytes(b"changed\n")
+    elif fault == "config":
+        (tmp_path / "pyproject.toml").write_bytes(b"changed rules\n")
+    elif fault == "version":
+        policy["ruff_version"] = "different"
+    elif fault == "runtime-rule":
+        row["finding"]["code"] = "F821"
+    elif fault == "source-file":
+        row["finding"]["file"] = "src/runtime.py"
+    elif fault == "escape":
+        row["finding"]["file"] = "alembic/versions/../../outside.py"
+    elif fault == "duplicate":
+        policy["occurrences"].append(deepcopy(row))
+    elif fault == "missing-reason":
+        row["reason"] = ""
+    else:
+        policy["source_sha256"]["alembic/versions/extra.py"] = "0" * 64
+    with pytest.raises(ValueError):
+        ruff_exception_findings(tmp_path, policy)
+
+
+@pytest.mark.parametrize(
+    "fault", ["new-line", "new-rule", "duplicate", "missing", "different-file"]
+)
+def test_ruff_rejects_any_unapproved_or_missing_occurrence(tmp_path, fault):
+    approved = ruff_exception_findings(tmp_path, legacy_policy(tmp_path))
+    findings = deepcopy(approved)
+    if fault == "duplicate":
+        findings *= 2
+    elif fault == "missing":
+        findings = []
+    else:
+        findings[0][{"new-line": "line", "new-rule": "code", "different-file": "file"}[fault]] = {
+            "new-line": 3,
+            "new-rule": "F821",
+            "different-file": "src/new.py",
+        }[fault]
+    code, report = classify_ruff(1 if findings else 0, findings, approved)
+    assert code == 1 and report["status"] == "FAIL"
+
+
+@pytest.mark.parametrize("code", [2, False, 0])
+def test_raw_ruff_error_or_inconsistent_success_cannot_be_waived(tmp_path, code):
+    approved = ruff_exception_findings(tmp_path, legacy_policy(tmp_path))
+    with pytest.raises(ValueError, match="RUFF_RAW_RESULT_INCONSISTENT"):
+        classify_ruff(code, approved, approved)

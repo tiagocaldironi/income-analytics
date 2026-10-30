@@ -1,11 +1,13 @@
 {
-  "state": "LOCAL_FOCUSED_PASS; FINAL_HOSTED_PENDING",
+  "state": "LOCAL_FOCUSED_PASS; REVISED_HOSTED_PENDING",
   "baseline_sha": "cfb96a2b405b2821d7b03a6a3546dd8c9241d8c0",
   "reference_run": 41051244098,
   "static": {
-    "before": 802,
-    "after": 499,
-    "resolved": 303
+    "original": 802,
+    "raw_current": 522,
+    "resolved": 280,
+    "justified_style": 23,
+    "open_mypy": 499
   },
   "semantic_equivalence": {
     "exceptions": [
@@ -15,38 +17,6 @@
       "reviewed import ordering"
     ],
     "files": [
-      {
-        "file": "income-analytics/alembic/versions/0008_paid_income_brapi.py",
-        "executable_ast_equivalent": true
-      },
-      {
-        "file": "income-analytics/alembic/versions/0009_pension_real_estate_classes.py",
-        "executable_ast_equivalent": true
-      },
-      {
-        "file": "income-analytics/alembic/versions/0010_portfolio_dashboard_snapshot.py",
-        "executable_ast_equivalent": true
-      },
-      {
-        "file": "income-analytics/alembic/versions/0012_pension_market_data.py",
-        "executable_ast_equivalent": true
-      },
-      {
-        "file": "income-analytics/alembic/versions/0013_capital_flow_classification.py",
-        "executable_ast_equivalent": true
-      },
-      {
-        "file": "income-analytics/alembic/versions/0014_b3_import_audit.py",
-        "executable_ast_equivalent": true
-      },
-      {
-        "file": "income-analytics/alembic/versions/0015_magic_formula_fundamentals_snapshots.py",
-        "executable_ast_equivalent": true
-      },
-      {
-        "file": "income-analytics/alembic/versions/0027_contextual_onboarding_v2.py",
-        "executable_ast_equivalent": true
-      },
       {
         "file": "income-analytics/scripts/rematerialize_magic_formula_v2.py",
         "executable_ast_equivalent": true
@@ -132,7 +102,7 @@
   },
   "production_access": false,
   "focused_candidate": {
-    "passed": 108,
+    "passed": 126,
     "failed": 0,
     "errors": 0,
     "skipped": 0
@@ -147,5 +117,12 @@
       "errors": 9,
       "skipped": 5
     }
-  }
+  },
+  "migration_bytes": {
+    "migrations": 27,
+    "candidate_equals_pr10": true,
+    "candidate_equals_legacy_rollback": true,
+    "rollback_guard_changed": false
+  },
+  "rollback_guard_modified": false
 }

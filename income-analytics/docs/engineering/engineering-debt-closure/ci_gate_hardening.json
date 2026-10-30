@@ -4,28 +4,21 @@
   "ruleset": 26078982,
   "ruleset_modified": false,
   "promoted": [
-    "ruff"
+    "ruff: zero unjustified occurrences"
   ],
-  "not_promoted": {
-    "mypy": "499 remaining occurrences, including 39 in three byte-frozen source modules; diagnosis remains visible and failed",
-    "python": "Full contract intentionally retains the 24 financial failure/error cases and 5 external skips"
+  "unpromoted": [
+    "mypy: 499 open occurrences",
+    "Full Python: unchanged 24 financial failure/error cases and 5 existing external skips"
+  ],
+  "raw_diagnostics_preserved": true,
+  "legacy_style_exceptions": {
+    "count": 23,
+    "files": 8,
+    "reason": "Byte-identical historical migrations are the existing rollback contract; formatting-only changes were blocked by hosted staging",
+    "policy": "ci/ruff-exceptions.json",
+    "scope": "Exact per-occurrence, source/config/tool hash-pinned; runtime rules cannot qualify"
   },
-  "failure_conditions": [
-    "missing report",
-    "nonzero exit",
-    "cancelled",
-    "skipped",
-    "missing findings",
-    "nonempty findings",
-    "different checkout",
-    "different source fingerprint",
-    "different policy",
-    "different run",
-    "different attempt",
-    "invalid exit type"
-  ],
-  "tests": "ci/test_engineering_debt.py",
-  "baseline_policy": "Original 803 historical quality identities preserved byte-for-byte; 802 observed in PR10. quality_ledger.json reconciles every original occurrence, retaining multiplicity and exact remaining locations. Reintroducing resolved debt fails.",
-  "exceptions_added": 0,
-  "negative_controls": "27 direct new cases plus 3 automatically expanded source/policy identity cases; all included in Engineering"
+  "rollback_guard": "UNCHANGED; altered migration bytes still block",
+  "baseline_policy": "803 historical original occurrences remain in immutable baseline; 802 observed in PR10; ledger preserves every raw occurrence, including 23 justified style observations",
+  "tests": "ci/test_engineering_debt.py: raw failure preserved, source/config/version/rule/file/path/location/multiplicity/missing-report/identity/run/attempt negative controls"
 }

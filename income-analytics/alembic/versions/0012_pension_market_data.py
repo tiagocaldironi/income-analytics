@@ -1,7 +1,6 @@
 """Persist pension investment vehicles and their CVM quota history."""
 
 import sqlalchemy as sa
-
 from alembic import op
 
 revision = "0012_pension_market_data"
@@ -19,21 +18,13 @@ def upgrade() -> None:
         sa.Column("vehicle_cnpj", sa.String(14), nullable=False),
         sa.Column("vehicle_type", sa.String(16), nullable=False),
         sa.Column("source", sa.String(24), nullable=False),
-        sa.Column("valid_from", sa.Date()),
-        sa.Column("valid_to", sa.Date()),
+        sa.Column("valid_from", sa.Date()), sa.Column("valid_to", sa.Date()),
     )
     op.create_table(
         "pension_fund_quotas",
-        sa.Column(
-            "vehicle_id",
-            sa.String(36),
-            sa.ForeignKey("pension_investment_vehicles.id"),
-            nullable=False,
-        ),
-        sa.Column("reference_date", sa.Date(), nullable=False),
-        sa.Column("quota", sa.String(48), nullable=False),
-        sa.Column("source", sa.String(16), nullable=False),
-        sa.Column("retrieved_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("vehicle_id", sa.String(36), sa.ForeignKey("pension_investment_vehicles.id"), nullable=False),
+        sa.Column("reference_date", sa.Date(), nullable=False), sa.Column("quota", sa.String(48), nullable=False),
+        sa.Column("source", sa.String(16), nullable=False), sa.Column("retrieved_at", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("vehicle_id", "reference_date"),
     )
 

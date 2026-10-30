@@ -72,5 +72,7 @@
     "src/income_analytics/api/routers/income_starter.py": 1
   },
   "exceptions_added": 0,
-  "hosted": "NOT_VERIFIED_YET"
+  "hosted": "NOT_VERIFIED_YET",
+  "frozen_source_occurrences": 39,
+  "other_remaining_debt": 460
 }

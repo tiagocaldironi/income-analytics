@@ -31,9 +31,16 @@
         "code": "I001",
         "message": "Import block is un-sorted or un-formatted"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0008_paid_income_brapi.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0002",
@@ -45,9 +52,16 @@
         "code": "I001",
         "message": "Import block is un-sorted or un-formatted"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0003",
@@ -59,9 +73,16 @@
         "code": "E501",
         "message": "Line too long (110 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 13,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (110 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0004",
@@ -73,9 +94,16 @@
         "code": "E501",
         "message": "Line too long (108 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 16,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (108 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0005",
@@ -87,9 +115,16 @@
         "code": "E501",
         "message": "Line too long (118 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 18,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (118 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0006",
@@ -101,9 +136,16 @@
         "code": "E501",
         "message": "Line too long (132 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 20,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (132 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0007",
@@ -115,9 +157,16 @@
         "code": "E501",
         "message": "Line too long (105 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0009_pension_real_estate_classes.py",
+        "line": 26,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (105 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0008",
@@ -129,9 +178,16 @@
         "code": "I001",
         "message": "Import block is un-sorted or un-formatted"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0010_portfolio_dashboard_snapshot.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0009",
@@ -143,9 +199,16 @@
         "code": "I001",
         "message": "Import block is un-sorted or un-formatted"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0012_pension_market_data.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0010",
@@ -157,9 +220,16 @@
         "code": "E501",
         "message": "Line too long (112 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0012_pension_market_data.py",
+        "line": 25,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (112 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0011",
@@ -171,9 +241,16 @@
         "code": "E501",
         "message": "Line too long (114 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0012_pension_market_data.py",
+        "line": 26,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (114 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0012",
@@ -185,9 +262,16 @@
         "code": "E501",
         "message": "Line too long (130 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0012_pension_market_data.py",
+        "line": 27,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (130 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0013",
@@ -199,9 +283,16 @@
         "code": "I001",
         "message": "Import block is un-sorted or un-formatted"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0013_capital_flow_classification.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0014",
@@ -213,9 +304,16 @@
         "code": "I001",
         "message": "Import block is un-sorted or un-formatted"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0014_b3_import_audit.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0015",
@@ -227,9 +325,16 @@
         "code": "E501",
         "message": "Line too long (112 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0014_b3_import_audit.py",
+        "line": 34,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (112 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0016",
@@ -241,9 +346,16 @@
         "code": "E501",
         "message": "Line too long (112 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0014_b3_import_audit.py",
+        "line": 56,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (112 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0017",
@@ -255,9 +367,16 @@
         "code": "I001",
         "message": "Import block is un-sorted or un-formatted"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0015_magic_formula_fundamentals_snapshots.py",
+        "line": 3,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0018",
@@ -269,9 +388,16 @@
         "code": "E501",
         "message": "Line too long (155 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0015_magic_formula_fundamentals_snapshots.py",
+        "line": 27,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (155 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0019",
@@ -283,9 +409,16 @@
         "code": "I001",
         "message": "Import block is un-sorted or un-formatted"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 2,
+        "column": 1,
+        "code": "I001",
+        "message": "Import block is un-sorted or un-formatted"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0020",
@@ -297,9 +430,16 @@
         "code": "E501",
         "message": "Line too long (907 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 11,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (907 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0021",
@@ -311,9 +451,16 @@
         "code": "E501",
         "message": "Line too long (315 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 15,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (315 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0022",
@@ -325,9 +472,16 @@
         "code": "E701",
         "message": "Multiple statements on one line (colon)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 21,
+        "column": 94,
+        "code": "E701",
+        "message": "Multiple statements on one line (colon)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0023",
@@ -339,9 +493,16 @@
         "code": "E501",
         "message": "Line too long (114 > 100)"
       },
-      "after": null,
-      "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "after": {
+        "tool": "ruff",
+        "file": "alembic/versions/0027_contextual_onboarding_v2.py",
+        "line": 21,
+        "column": 101,
+        "code": "E501",
+        "message": "Line too long (114 > 100)"
+      },
+      "status": "OPEN",
+      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
     },
     {
       "id": "historical-0024",

@@ -8,6 +8,7 @@ from pathlib import Path
 FINGERPRINT_VERSION = 2
 POLICY_FILES = (
     "income-analytics/ci/engineering_debt.py",
+    "income-analytics/ci/ruff-exceptions.json",
     "income-analytics/ci/test_engineering_debt.py",
     "income-analytics/docs/engineering/engineering-debt-closure/quality_ledger.json",
     "income-analytics/ci/operational.py",

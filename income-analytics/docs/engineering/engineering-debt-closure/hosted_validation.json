@@ -1,5 +1,5 @@
 {
-  "state": "INITIAL_RUN_FAILED_SECURITY_CHECKSUM_FALSE_POSITIVE",
+  "state": "TWO_PRIOR_FAILURES_RECORDED; REVISED_CANDIDATE_PENDING",
   "repository": "tiagocaldironi/income-analytics",
   "branch": "codex/pr11-engineering-debt",
   "pr": 56,
@@ -27,6 +27,25 @@
       "security": "FAIL: exact source checksum misidentified as generic-api-key",
       "staging": "SKIPPED_DUE_TO_FAILED_SECURITY",
       "eligible": false
+    },
+    {
+      "run_id": 41060480364,
+      "attempt": 1,
+      "head_sha": "2cfa3010522f8161d4bed0819885491e58a36577",
+      "checkout_sha": "106ac72c52bbe6cc68782685e75fab088c6a2063",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/41060480364",
+      "engineering": "PASS",
+      "ruff": "PASS (then zero raw)",
+      "mypy_occurrences": 499,
+      "security": "PASS",
+      "operational": "PASS",
+      "build": "PASS",
+      "runtime": "PASS",
+      "frontend": "PASS",
+      "quality": "PASS",
+      "staging": "FAIL: ROLLBACK_BLOCKED_SCHEMA_RESTORE_PLAN_REQUIRED",
+      "eligible": false,
+      "correction": "Restore original historical migration bytes; narrowly justified visible raw style occurrences instead of weakening rollback guard"
     }
   ],
   "postmerge": [],

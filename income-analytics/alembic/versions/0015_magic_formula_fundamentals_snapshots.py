@@ -1,7 +1,6 @@
 """Persist immutable normalized Magic Formula fundamentals."""
 
 import sqlalchemy as sa
-
 from alembic import op
 
 revision = "0015_magic_formula_fundamentals_snapshots"
@@ -25,13 +24,7 @@ def upgrade() -> None:
         sa.Column("metrics_json", sa.Text(), nullable=False),
         sa.Column("lineage_json", sa.Text(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.UniqueConstraint(
-            "issuer_id",
-            "financial_reference_date",
-            "market_reference_date",
-            "adapter_version",
-            name="uq_magic_formula_snapshot_version",
-        ),
+        sa.UniqueConstraint("issuer_id", "financial_reference_date", "market_reference_date", "adapter_version", name="uq_magic_formula_snapshot_version"),
     )
     op.create_table(
         "company_normalization_validations",

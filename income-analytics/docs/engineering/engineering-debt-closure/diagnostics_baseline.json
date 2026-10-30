@@ -178,5 +178,14 @@
       },
       "by_code": {}
     }
-  }
+  },
+  "local_node": "v24.19.0",
+  "hosted_node": {
+    "run_id": 41060480364,
+    "job_id": 124078656114,
+    "versions": [
+      "v24.19.0"
+    ]
+  },
+  "versions_source": "Exact observed local environment; hosted installations use the unchanged hash-checked locks, referenced in pyproject/workflow and SBOM"
 }

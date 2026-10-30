@@ -2,7 +2,7 @@
 
 Status: ENGINEERING_DEBT_PARTIALLY_CLOSED (candidate; hosted integration not yet verified).
 
-Ruff is locally clean. mypy remains failed with 499 occurrences; Full Python remains failed on its existing financial/historical contract. Neither is promoted. No exception, skip, xfail, exclusion, financial expected value, frozen file or lint/type rule was added to conceal these results.
+Ruff has zero unjustified occurrences, with 23 visible and narrowly justified historical migration-style observations. The raw tool exits 1; the hash-pinned exception policy exits 0. mypy remains failed with 499 occurrences; Full Python remains failed on its existing financial/historical contract. Neither is promoted. No skip, xfail, exclusion, financial expected value, frozen file or lint/type rule was changed. Exactly 23 legacy style observations are justified under the specification exception clause, remain visible and have mutation tests.
 
 Remaining mypy diagnostics by rule:
 

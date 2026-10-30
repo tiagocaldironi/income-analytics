@@ -13,7 +13,12 @@ import time
 from pathlib import Path
 
 import run as legacy
-from engineering_debt import reconciled_findings, require_clean_diagnostics
+from engineering_debt import (
+    classify_ruff,
+    reconciled_findings,
+    require_clean_diagnostics,
+    ruff_exception_findings,
+)
 from financial_certification import evaluate as evaluate_financial_evidence
 from financial_certification import failure_causes
 from gate_policy import (
@@ -182,6 +187,9 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
         return python_check(check, env, sandbox, output)
     if check in {"ruff", "mypy"}:
         code, findings = quality_findings(check, env, sandbox)
+        if check == "ruff":
+            policy = json.loads((ROOT / "ci/ruff-exceptions.json").read_text(encoding="utf-8"))
+            return classify_ruff(code, findings, ruff_exception_findings(ROOT, policy))
         return code, {"status": "FAIL_WITH_DEBT" if findings else "PASS", "findings": findings}
     if check == "quality":
         baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
@@ -258,7 +266,10 @@ def main() -> int:
         summary = require_operational(
             summary, reports.get("operational", {}), args.operational_status
         )
-        summary = require_clean_diagnostics(summary, reports)
+        approved_ruff = ruff_exception_findings(
+            ROOT, json.loads((ROOT / "ci/ruff-exceptions.json").read_text(encoding="utf-8"))
+        )
+        summary = require_clean_diagnostics(summary, reports, approved_ruff)
         args.reports.mkdir(parents=True, exist_ok=True)
         (args.reports / "gate-summary.json").write_text(json.dumps(summary, indent=2) + "\n")
         print(json.dumps(summary, indent=2))
