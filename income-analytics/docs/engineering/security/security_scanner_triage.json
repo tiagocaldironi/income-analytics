@@ -16359,6 +16359,44 @@
       "identity": "27ea3d4af7d446687872ae877df82ab47392d7d31e17287af7c7936171ea5afa",
       "reason": "Reviewed public SHA-256 of the versioned auth_repository.py source file in the quality evidence ledger; this is a checksum, not an authentication secret. Exact full-file/content or historical commit/rule/line identity only. No rule configuration, prefix exception or credential validation.",
       "evidence": "The digest equals hashlib.sha256(source bytes).hexdigest(); synthetic Gitleaks negative fixture remains REJECTED."
+    },
+    {
+      "tool": "gitleaks",
+      "mode": "dir",
+      "rule": "generic-api-key",
+      "file": "income-analytics/ci/ruff-exceptions.json",
+      "line": 8,
+      "commit": "",
+      "state": "FALSE_POSITIVE",
+      "content_sha256": "2283a2f344a3102ffe445158009f37a6e3533f5d742d7e102f57879b92c63433",
+      "identity": "222bbf1ae3814b21079f1b8d764abb635accbdab7e350db774352f9fea99d3ae",
+      "reason": "Exact reviewed source-file SHA-256 in a versioned integrity inventory, not an authentication credential. All listed digests were recomputed from source bytes; migration hashes additionally equal immutable baseline bytes. Only this full-file or historical commit/rule/line identity is reviewed; no scanner rule, prefix or scope suppression.",
+      "evidence": "Pinned real Gitleaks synthetic secret REJECTED; source/configuration hash mutation tests in ci/test_engineering_debt.py; migration byte comparison against PR10 and rollback A."
+    },
+    {
+      "tool": "gitleaks",
+      "mode": "dir",
+      "rule": "generic-api-key",
+      "file": "income-analytics/docs/engineering/engineering-debt-closure/quality_ledger.json",
+      "line": 15,
+      "commit": "",
+      "state": "FALSE_POSITIVE",
+      "content_sha256": "ce5cfadb2eda0a1315abb50e1edff1fd8de1aa164b9121845c29ac7c0f0c25d7",
+      "identity": "8f5590565b55d49cdd6ba05159722c3c8500daf9042e7d430b3e2db1004ed410",
+      "reason": "Exact reviewed source-file SHA-256 in a versioned integrity inventory, not an authentication credential. All listed digests were recomputed from source bytes; migration hashes additionally equal immutable baseline bytes. Only this full-file or historical commit/rule/line identity is reviewed; no scanner rule, prefix or scope suppression.",
+      "evidence": "Pinned real Gitleaks synthetic secret REJECTED; source/configuration hash mutation tests in ci/test_engineering_debt.py; migration byte comparison against PR10 and rollback A."
+    },
+    {
+      "tool": "gitleaks",
+      "mode": "git",
+      "rule": "generic-api-key",
+      "file": "income-analytics/ci/ruff-exceptions.json",
+      "line": 8,
+      "commit": "a496aa54a43b7beed2e45858a8eb6c46efc44993",
+      "state": "FALSE_POSITIVE",
+      "identity": "e9f73c61ef473201ab57766493be85716c95fdee22492829303c1549127cf6f9",
+      "reason": "Exact reviewed source-file SHA-256 in a versioned integrity inventory, not an authentication credential. All listed digests were recomputed from source bytes; migration hashes additionally equal immutable baseline bytes. Only this full-file or historical commit/rule/line identity is reviewed; no scanner rule, prefix or scope suppression.",
+      "evidence": "Pinned real Gitleaks synthetic secret REJECTED; source/configuration hash mutation tests in ci/test_engineering_debt.py; migration byte comparison against PR10 and rollback A."
     }
   ]
 }
