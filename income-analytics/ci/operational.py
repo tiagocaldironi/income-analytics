@@ -1,6 +1,8 @@
 """Fail-closed operational gate and dry-run retention. No host execution path."""
 
+import csv
 import hashlib
+import json
 import re
 import sqlite3
 import time
@@ -86,7 +88,52 @@ def evaluate(details, root=ROOT):
     directory = root / "docs/engineering/operational-readiness"
     if not all((directory / name).is_file() for name in DOCUMENTS):
         return "OPERATIONAL_BLOCKED"
+    if not documentation_valid(root):
+        return "OPERATIONAL_BLOCKED"
     return "OPERATIONAL_PASS"
+
+
+def documentation_valid(root):
+    directory = root / "docs/engineering/operational-readiness"
+    try:
+        inventory = json.loads(
+            (directory / "operational_inventory.json").read_text(encoding="utf-8")
+        )
+        components = inventory["components"]
+        if inventory.get("schema") != 1 or len(components) < 18:
+            return False
+        for component in components:
+            if component.get("state") not in {
+                "VERIFIED", "PARTIALLY_VERIFIED", "NOT_VERIFIED", "BLOCKED"
+            }:
+                return False
+            if not all(component.get(key) for key in (
+                "component", "function", "dependencies", "configuration", "data", "failures",
+                "impact", "detection", "recovery", "evidence",
+            )):
+                return False
+            for name in component["evidence"].split(";"):
+                path = (root / name.strip()).resolve()
+                if not path.is_relative_to(root.resolve()) or not path.exists():
+                    return False
+        runbooks = (directory / "incident_runbooks.md").read_text(encoding="utf-8")
+        if not all(f"INC-{number:02d}" in runbooks for number in range(1, 9)):
+            return False
+        with (directory / "failure_modes_matrix.csv").open(encoding="utf-8", newline="") as file:
+            rows = list(csv.DictReader(file))
+        if len(rows) != 25 or {row["id"] for row in rows} != {
+            f"OP-{number:02d}" for number in range(1, 26)
+        }:
+            return False
+        with (directory / "beta_readiness_matrix.csv").open(encoding="utf-8", newline="") as file:
+            beta = list(csv.DictReader(file))
+        if not beta or any(row["state"] not in {
+            "READY", "NOT_READY", "NOT_VERIFIED", "NOT_APPLICABLE"
+        } for row in beta):
+            return False
+        return True
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return False
 
 
 def require_operational(summary, report, job_status):

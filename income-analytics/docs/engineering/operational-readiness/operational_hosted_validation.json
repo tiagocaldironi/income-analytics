@@ -1,23 +1,23 @@
 {
   "schema": 1,
-  "state": "FIRST_HOSTED_DIAGNOSTIC_STAGING_BLOCKED",
-  "scope": "PREMERGE_SYNTHETIC_CHECKOUT_NOT_POSTMERGE",
+  "state": "HOSTED_PREMERGE_VERIFIED",
+  "scope": "Exact named premerge revision; final source and postmerge receipts are separate",
   "verified_source": {
-    "run_id": 40978579934,
-    "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40978579934",
+    "run_id": 41045768631,
+    "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/41045768631",
     "event": "pull_request",
     "conclusion": "failure",
-    "source_head": "e7de3409b3aa508d11c092e5745e7fc81adc057e",
-    "checkout_sha": "b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+    "source_head": "a9b1980ab1d220bf38370b1f68a1c9f93004d8a8",
+    "checkout_sha": "b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
     "run_attempt": 1,
-    "governance_policy_sha256": "cd63398bec7c3f6add3206bab6969f5fefc9e96ddc2f7bef28a6ebdd9f589faa",
-    "source_fingerprint": "b4b80718128a70a046d2f3169aae3f483d4a59c5dd454d3ad5a1537ed2d7dfc0",
-    "artifact_id": 12944106539,
-    "package_sha256": "776bc7e37b865ebc77a4adbfa2a4efa543e4029f7ece3e74daa5725dded4d10f",
-    "manifest_sha256": "110812ab8b5edd9a00fd5290c71f96bfc9c7d12216a3ec22c751df12b46d8744",
-    "security_artifact_id": 12942859854,
+    "governance_policy_sha256": "1b2d2c310d9e730467e2546acf0f5b1b2affaea90d6c833a905f58fe2ab51966",
+    "source_fingerprint": "5b121abc1b61097289612441e4b622faa2d90ade453207d8ff0a135aaeeadecd",
+    "artifact_id": 12971489089,
+    "package_sha256": "440f8708edd8b701ca47badcb5a3405dd92ff1061b826ddafb6640344776c9ac",
+    "manifest_sha256": "fa1dd8e30a2415775a7df7837afe3f5167904f42f8bb5e038f88421aee110dee",
+    "security_artifact_id": 12971758991,
     "engineering_tests": {
-      "passed": 1326,
+      "passed": 1332,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -29,7 +29,7 @@
       "skipped": 0
     },
     "operational_tests": {
-      "passed": 52,
+      "passed": 58,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -43,32 +43,32 @@
     },
     "financial_state": "FINANCIAL_BLOCKED",
     "jobs": {
-      "CI / Operational readiness": "success",
-      "CI / Frontend": "success",
       "CI / Reproducible build": "success",
-      "CI / Runtime installation": "success",
-      "CI / Ruff diagnostics": "failure",
       "CI / Financial certification": "failure",
-      "CI / Quality non-regression": "success",
+      "CI / Operational readiness": "success",
       "CI / mypy diagnostics": "failure",
-      "CI / Python engineering": "success",
       "CI / Full Python diagnostic": "failure",
+      "CI / Ruff diagnostics": "failure",
+      "CI / Runtime installation": "success",
+      "CI / Python engineering": "success",
+      "CI / Quality non-regression": "success",
+      "CI / Frontend": "success",
       "CI / Security baseline": "success",
       "CI / Engineering": "success",
-      "CD / Staging validation": "failure"
+      "CD / Staging validation": "success"
     },
     "recovery": {
       "status": "PASS",
       "environment": "DISPOSABLE_SYNTHETIC_SQLITE_WAL",
-      "backup_seconds": 0.027971,
-      "detection_seconds": 0.000653,
-      "restore_seconds": 0.031707,
-      "validation_seconds": 0.003211,
-      "observed_recovery_seconds": 0.035571,
+      "backup_seconds": 0.023513,
+      "detection_seconds": 0.00069,
+      "restore_seconds": 0.026312,
+      "validation_seconds": 0.00337,
+      "observed_recovery_seconds": 0.030372,
       "synthetic_committed_rows": 100,
       "synthetic_rows_lost": 0,
       "observed_rpo": "ZERO_COMMITTED_SYNTHETIC_ROWS_AT_BACKUP_BOUNDARY",
-      "last_valid_backup_age_seconds": 0.050119,
+      "last_valid_backup_age_seconds": 0.040037,
       "host_rpo_rto_certified": false,
       "target_rpo_hours": 24,
       "target_rto_hours": 2,
@@ -77,26 +77,38 @@
     },
     "artifacts": [
       {
-        "id": 12944590913,
-        "name": "delivery-preview-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:2f74d530dbfdad296a75572b6ede63dd5334c19a05cfcb92322bdc7e355e380b",
-        "expires_at": "2026-11-13T00:26:03Z",
+        "id": 12973410725,
+        "name": "delivery-preview-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:514be35a0290624557a36f2333c566cd66d320426a34d93e6768bad5c9a6682f",
+        "expires_at": "2026-11-13T11:17:38Z",
         "files": [
           {
             "name": "validation.json",
-            "sha256": "4e73604f79dba307d2e25164bdcae92f9e029fa1d1047deab40debb2f90d4921"
+            "sha256": "68d56be3c7255d4a945933ab492cb83bdfdbeaad4b42091673462eccddb8042f"
           },
           {
             "name": "candidate.json",
-            "sha256": "10d6769673d8a47662dee8efd34b280492e33e0559f4ebf6e790d477a64fc95e"
+            "sha256": "d254d428fd0b8e0bf3cf674da4faa1a431a3dc9c9618da3109bc73fa4a97eeac"
           }
         ]
       },
       {
-        "id": 12944515839,
-        "name": "gate-summary-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:6dfc1ff0293a6d2f6daefb2d164906018adec001181ee5f893dfd25435b132aa",
-        "expires_at": "2026-11-13T00:23:31Z",
+        "id": 12973050166,
+        "name": "governance-node-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:72de68c9d7c6293217fe648ff48b05691d1b46be3552f9b613949cd7c5218513",
+        "expires_at": "2026-11-13T11:08:32Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "ec378817a3779120628049840b7c3125fcb2b97e28be18d133dd4bdf9a84dc10"
+          }
+        ]
+      },
+      {
+        "id": 12972826929,
+        "name": "gate-summary-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:3405f44f2adce7fd5d4baea4fdccf7963f5fa1d419c32ddbe0d349716f4d2094",
+        "expires_at": "2026-11-13T11:14:55Z",
         "files": [
           {
             "name": "gate-summary.json",
@@ -105,106 +117,34 @@
         ]
       },
       {
-        "id": 12944375435,
-        "name": "governance-operational-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:0f113fcf2c47143845afcb8ff3a881ba579667d1bbf5647beca1ca5b6094e521",
-        "expires_at": "2026-11-13T00:17:34Z",
-        "files": [
-          {
-            "name": "result.json",
-            "sha256": "67ff667a47d5b232fdb735c7742470c9d73d4e521a6ec8b25d99464aa6cdace9"
-          },
-          {
-            "name": "operational-junit.xml",
-            "sha256": "5d6f3409c57d5bce4525064e7d7dec4996e8df7cebace2bfbbdbdc556e6bb1a7"
-          }
-        ]
-      },
-      {
-        "id": 12944161337,
-        "name": "governance-build-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:74bb4e6d7208fd0df9112d7ea8f2bc71088e24ec4d48496150e23ba0cb833327",
-        "expires_at": "2026-11-13T00:18:30Z",
-        "files": [
-          {
-            "name": "result.json",
-            "sha256": "f62ab17e5705c9df9399f6285482f749fd483cc0b49496f944a52ccf2d5f6d80"
-          }
-        ]
-      },
-      {
-        "id": 12944106539,
-        "name": "application-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab-windows-x64",
-        "digest": "sha256:4b8f5e3031f0702ee72ea33c368b307e89118a8ee5272aba9f96390a675517fb",
-        "expires_at": "2026-11-13T00:18:31Z",
-        "files": [
-          {
-            "name": "income-analytics-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab-windows-x64.sha256",
-            "sha256": "10b9836d6ce341ff16cbdf02bb772e01a785b0230a0b1c5bcbf5268a148cc081"
-          },
-          {
-            "name": "income-analytics-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab-windows-x64.zip",
-            "sha256": "776bc7e37b865ebc77a4adbfa2a4efa543e4029f7ece3e74daa5725dded4d10f"
-          },
-          {
-            "name": "manifest.json",
-            "sha256": "9f18195eaf98fff92a0a5368821cb996c6d0b6b70bc49f3ad204043349ea3506"
-          }
-        ]
-      },
-      {
-        "id": 12944077224,
-        "name": "governance-python-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:798944496414c08ec1023b53016f950938a41a7aae03085e62569531c04f05d4",
-        "expires_at": "2026-11-13T00:22:26Z",
+        "id": 12972796663,
+        "name": "governance-python-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:58336697aec7f44590abccbb31aa9818ea3af72483f7068fc6c0e5858a160110",
+        "expires_at": "2026-11-13T11:13:50Z",
         "files": [
           {
             "name": "coverage.xml",
-            "sha256": "2b2f237cc3858d83951f46d2bf9355d62432907ee5dc31a2dfccf37bc57214ba"
+            "sha256": "8df3a3fec758e34fff31c19d665d1a4907bcf7037a4a7ba95b77d53beff78014"
           },
           {
             "name": "inventory.json",
-            "sha256": "d9dce7c0a5b6e3f7cd45db11a44895b236516feada92b9753a1ee5d33a1fa32d"
+            "sha256": "cf9332b52c43ef5eca5386e6ad2296cba8427eb27469d7d8e17509fea5d79f28"
           },
           {
             "name": "python-junit.xml",
-            "sha256": "aab14e876a4082b4df5a6b18829352f1c51f341537bc0bfcc6f41ad9a64163fe"
+            "sha256": "c55e2959d1a7841310959cdaef82fea1c211097e3e4f491526fda3485af6c5be"
           },
           {
             "name": "result.json",
-            "sha256": "15c4271a7dd019b382d18b611bd4de4b4f23d770e6ab9559cc131e689b58ac37"
+            "sha256": "81b2ff730a80ff7a2c07bbdace3ae01206eabfea31544b2f3b574970cf241312"
           }
         ]
       },
       {
-        "id": 12943946638,
-        "name": "governance-node-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:d72f2c4ad67545e0a661bc78295f0cf06d9222900c7a15aa5ba8840576e5fdfa",
-        "expires_at": "2026-11-13T00:17:00Z",
-        "files": [
-          {
-            "name": "result.json",
-            "sha256": "dbb20209774487c44251c0dbe6940560a329df2b575fc77c79af38156cfecb44"
-          }
-        ]
-      },
-      {
-        "id": 12943896945,
-        "name": "governance-ruff-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:296b235415cd29966207782a9267044f36f188dc40cc1c4c42d1e7ace5d13935",
-        "expires_at": "2026-11-13T00:17:28Z",
-        "files": [
-          {
-            "name": "result.json",
-            "sha256": "5cc1a32e4217d23ad2feccf51ec413e5b5de824c26cce1882f37ddb35146152b"
-          }
-        ]
-      },
-      {
-        "id": 12943796570,
-        "name": "governance-financial-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:411a9ac658df94a7ef577703c0d8e816ffdcd43a0e1b7645a17469949a1d7250",
-        "expires_at": "2026-11-13T00:18:42Z",
+        "id": 12972636966,
+        "name": "governance-financial-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:75bd99a8218a2464174ff8b42d356860e903287209de7397ed4dece963326fc0",
+        "expires_at": "2026-11-13T11:12:43Z",
         "files": [
           {
             "name": "financial-junit.xml",
@@ -212,79 +152,79 @@
           },
           {
             "name": "inventory.json",
-            "sha256": "e797b5e5e35de0801a20ac841f370795288789570e9294dbdd02c93d9ab7f20f"
+            "sha256": "ce1d6a0443b1f333cc21e600772db990309f603af5feecca8fa8e0007028eed7"
           },
           {
             "name": "result.json",
-            "sha256": "dace0c58feecd57379bf89e9d0803c8c3835e72ee7743ce374756c37f3c02b2f"
+            "sha256": "0fe91d8658dd42bcc85fb98936da8349fdfcef8474b9d12a056f9a8ffcfdb072"
           }
         ]
       },
       {
-        "id": 12943686814,
-        "name": "governance-quality-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:14bfa15ea77a0b4884e871e728ca923d8953258a5879149bbe5c8dd2eaec7aee",
-        "expires_at": "2026-11-13T00:17:38Z",
-        "files": [
-          {
-            "name": "result.json",
-            "sha256": "f0b41d0f6a22e094eec9557be0a4a7728d111eeffeae346cc6329c630deb39b4"
-          }
-        ]
-      },
-      {
-        "id": 12943363193,
-        "name": "governance-engineering-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:c702b91059e811e39cc82cb7f4f9bc282b88b5213d218e4878b22eeaef7dac01",
-        "expires_at": "2026-11-13T00:21:51Z",
+        "id": 12972502172,
+        "name": "governance-engineering-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:5dab5c6cd4028b12da0a370a8a13e2ebdfc14d882f398817fe53fb236aa3b22d",
+        "expires_at": "2026-11-13T11:12:21Z",
         "files": [
           {
             "name": "engineering-junit.xml",
-            "sha256": "b45f88bddbd28c888a1499e34990f8db7c4a9d0624d396d094e4be1bf0127e67"
+            "sha256": "a66a10d3b9129c14926476ed4d9a913156dff90cb4c51841a20e9bff183acfc6"
           },
           {
             "name": "inventory.json",
-            "sha256": "2b0734f57d103f9c17858389549fd725cce67cf1c0a6366e080b22b8e52183a2"
+            "sha256": "a1cedf64a42e98a544086c23e6fce4b71257bac132d5b3f2b5a0d60a53369409"
           },
           {
             "name": "result.json",
-            "sha256": "188df407f4afcc5ea6c4ded564dbbf16b165564fe31ae64f25209383211f4493"
+            "sha256": "b90c6e4162b44495b145d277182309356c2255e7ddfe96b47ee492a1fd6b40ae"
           }
         ]
       },
       {
-        "id": 12943278852,
-        "name": "governance-runtime-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:e1c639537711ddf793def8278cf85613f88434088d2818a533f16ae3116027d2",
-        "expires_at": "2026-11-13T00:17:14Z",
+        "id": 12972188218,
+        "name": "governance-quality-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:5c6852acb700e629300cabb8b110c5b8eb1036d18efb487294c5ec07e0c96b63",
+        "expires_at": "2026-11-13T11:09:08Z",
         "files": [
           {
             "name": "result.json",
-            "sha256": "0d3e5159e5132f8fb4845f208fe0797ce917dc583e098b03b31f85dee5546bfc"
+            "sha256": "925decf61043cbb413becc57b25663b52e9f3dc9c606213d07fc199b7987597d"
           }
         ]
       },
       {
-        "id": 12943029788,
-        "name": "governance-mypy-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:19c69425121f4c742830feef10db45fa52ee00848ec314373a4302cd72ad1b4d",
-        "expires_at": "2026-11-13T00:17:11Z",
+        "id": 12971953129,
+        "name": "governance-runtime-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:99f856cd2c0dc522babadb4c4cdd233735470f1fd64df6922c14040bb068a334",
+        "expires_at": "2026-11-13T11:08:52Z",
         "files": [
           {
             "name": "result.json",
-            "sha256": "4b65b6cd954315276361f50f82e408a3bb51d3f827ce27987c6a8520651574e5"
+            "sha256": "e3fe13b3777c104ce66852172dea4ddb4a300f0311577bf304f4c18018944653"
           }
         ]
       },
       {
-        "id": 12942859854,
-        "name": "security-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
-        "digest": "sha256:807ea00eeabadbbfa2264d89270a491ec5e6961018ed4465deb061aac56bd3b1",
-        "expires_at": "2026-11-13T00:21:32Z",
+        "id": 12971839319,
+        "name": "governance-mypy-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:cd9d0e2d7e0e7ca1cb54e2354e64c2986c2bb97277e32ec4a57bf2d78a364f58",
+        "expires_at": "2026-11-13T11:09:03Z",
         "files": [
           {
             "name": "result.json",
-            "sha256": "c3e7d996e21e907376b07e98145cf2014b640615c73e9325a08d0c274f3d8f1b"
+            "sha256": "6a36d89d616dd76a5c1a0663b819df3ece28cde270e49b0e59badc6d3e023be4"
+          }
+        ]
+      },
+      {
+        "id": 12971758991,
+        "name": "security-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:631e25f52f99a1b803574c6010f0711a0639e1fe484642956c913a7b5a22d086",
+        "expires_at": "2026-11-13T11:12:06Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "3e27d6fe1d4770eccb7dab85d0e703db23a5bc6fcf025acccf506d2a8179733a"
           },
           {
             "name": "security-junit.xml",
@@ -292,80 +232,184 @@
           },
           {
             "name": "sbom.cdx.json",
-            "sha256": "db3c01199fe4bd7e043e0a4e6ba11a67f7a51a2056e7d45d803cb7b94e64a645"
+            "sha256": "5683a5f5ff313f3b99017c3301f56cfde9ea0f0c0acbc66e08d9a28132fa3095"
+          }
+        ]
+      },
+      {
+        "id": 12971593704,
+        "name": "governance-ruff-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:8435f9c3d201ca7e40638096e9e122a2d1a16c35ca76634f009809b580a9f3b1",
+        "expires_at": "2026-11-13T11:08:43Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "78007b3d53f0c1a4e145ed9943f0d4c5cb7f99beeba856600df16a937ed59b42"
+          }
+        ]
+      },
+      {
+        "id": 12971523966,
+        "name": "governance-operational-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:926505eff9ce1db37e7249a38e35c3fb4323c7ecbdc6d8e37eba3d377111391c",
+        "expires_at": "2026-11-13T11:09:10Z",
+        "files": [
+          {
+            "name": "operational-junit.xml",
+            "sha256": "134d03f7fcd3a1d5a5f0e837b2c6eb65f0ffb0af523b752a798c6ccffe203ffa"
+          },
+          {
+            "name": "result.json",
+            "sha256": "a6a7ecd7b66cfd654255903e31ca47c5bccf7963a5b5ceffdd92d8960a60c51c"
+          }
+        ]
+      },
+      {
+        "id": 12971489089,
+        "name": "application-b9e4b033a8f25e0fe8cde40fde5e326ea49921be-windows-x64",
+        "digest": "sha256:71ceca7b2bc7406fed54e16dd6b1abbce9e22dd99a52a533b0487963e3c7c549",
+        "expires_at": "2026-11-13T11:09:44Z",
+        "files": [
+          {
+            "name": "income-analytics-b9e4b033a8f25e0fe8cde40fde5e326ea49921be-windows-x64.sha256",
+            "sha256": "520727bfaeefc6dba8c02825c0859335cdadba28d9ddc7e5368a2a794b0ce0a3"
+          },
+          {
+            "name": "income-analytics-b9e4b033a8f25e0fe8cde40fde5e326ea49921be-windows-x64.zip",
+            "sha256": "440f8708edd8b701ca47badcb5a3405dd92ff1061b826ddafb6640344776c9ac"
+          },
+          {
+            "name": "manifest.json",
+            "sha256": "255ae3ffba5affc502ce949af86d43f5d8d2dca2c147492f9f3396143b51d55d"
+          }
+        ]
+      },
+      {
+        "id": 12971474161,
+        "name": "governance-build-b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+        "digest": "sha256:b328ab1016778c9527f154de786250c5abd2aec3fa382911e969acf495a2833f",
+        "expires_at": "2026-11-13T11:09:43Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "c47d0e23b37be29f7545109bdc6bfc080b5f356cbc242908cd9fd4c4ca18d701"
           }
         ]
       }
     ],
-    "staging_state": "FAIL",
-    "integration_eligible": false
+    "staging_state": "PASS",
+    "integration_eligible": true
   },
-  "staging_failure": {
-    "category": "GRACEFUL_STOP_FAILED",
-    "checks": {
-      "backup": {
-        "created_at": "2026-10-30T00:25:18.859583+00:00",
-        "duration_seconds": 0.037744,
-        "method": "SQLITE_ONLINE_BACKUP_API",
-        "schema_head": "0027_contextual_onboarding_v2",
-        "sha256": "8d2d7ba43daa2563373e02e4e1aba484e4a3c8feeea0879c7f6916db538e2837",
-        "state_signature": "aebb52ff8077ada21a99e62b15d38766c18ce96b6af0f4ebdb10568c6c647c94",
-        "status": "PASS"
-      },
-      "cleanup": {
-        "ports_released": true,
-        "processes_stopped": true,
-        "status": "PASS",
-        "temporary_root_removed": true
-      },
-      "health": {
-        "bind": "127.0.0.1",
-        "static": "PASS",
-        "status": "PASS"
-      },
-      "immutable_promotion": {
-        "status": "NOT_RUN"
-      },
-      "incompatible_schema": {
-        "status": "NOT_RUN"
-      },
-      "installation": {
-        "offline": true,
-        "status": "PASS"
-      },
-      "known_good_A": {
-        "commit": "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065",
-        "sha256": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
-        "status": "PASS"
-      },
-      "negative_health": {
-        "reason": "HEALTH_REJECTED",
-        "status": "EXPECTED_FAILURE_OBSERVED"
-      },
-      "negative_restore_changed_state": {
-        "reason": "RESTORE_STATE_MISMATCH",
-        "status": "EXPECTED_FAILURE_OBSERVED"
-      },
-      "negative_startup": {
-        "status": "NOT_RUN"
-      },
-      "restore": {
-        "integrity_check": "PASS",
-        "schema": "PASS",
-        "semantic_state": "PASS",
-        "status": "PASS"
-      },
-      "rollback": {
-        "status": "NOT_RUN"
-      },
-      "synthetic_restore_after_block": {
-        "status": "NOT_RUN"
-      }
+  "checks": {
+    "backup": {
+      "created_at": "2026-10-30T11:16:46.582845+00:00",
+      "duration_seconds": 0.044706,
+      "method": "SQLITE_ONLINE_BACKUP_API",
+      "schema_head": "0027_contextual_onboarding_v2",
+      "sha256": "b94d5951c6a32408c2796714bf2a034c59d2d875eff41ec07bb8c9ac1df538cb",
+      "state_signature": "f4ff1ebd946e125b1ae73bd788cd585930a069c0a7f6bb1f7b75568e07a48725",
+      "status": "PASS"
     },
-    "cause": "NOT_PROVEN; original child stderr was discarded"
+    "cleanup": {
+      "ports_released": true,
+      "processes_stopped": true,
+      "status": "PASS",
+      "temporary_root_removed": true
+    },
+    "graceful_shutdown": {
+      "exit_code": 0,
+      "forced_stop": false,
+      "seconds": 0.383035,
+      "status": "PASS"
+    },
+    "health": {
+      "bind": "127.0.0.1",
+      "static": "PASS",
+      "status": "PASS"
+    },
+    "immutable_promotion": {
+      "candidate_sha256": "440f8708edd8b701ca47badcb5a3405dd92ff1061b826ddafb6640344776c9ac",
+      "rebuild": "NOT_RUN",
+      "staging_sha256": "440f8708edd8b701ca47badcb5a3405dd92ff1061b826ddafb6640344776c9ac",
+      "status": "PASS"
+    },
+    "incompatible_schema": {
+      "downgrade": "NOT_RUN",
+      "reason": "SCHEMA_INCOMPATIBLE",
+      "required_action": "SEPARATE_VALIDATED_RESTORE_PLAN",
+      "safe_block_verified": true,
+      "status": "BLOCKED"
+    },
+    "installation": {
+      "offline": true,
+      "status": "PASS"
+    },
+    "known_good_A": {
+      "commit": "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065",
+      "sha256": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
+      "status": "PASS"
+    },
+    "negative_health": {
+      "reason": "HEALTH_REJECTED",
+      "status": "EXPECTED_FAILURE_OBSERVED"
+    },
+    "negative_restore_changed_state": {
+      "reason": "RESTORE_STATE_MISMATCH",
+      "status": "EXPECTED_FAILURE_OBSERVED"
+    },
+    "negative_startup": {
+      "reason": "STARTUP_FAILED",
+      "status": "EXPECTED_FAILURE_OBSERVED"
+    },
+    "restore": {
+      "integrity_check": "PASS",
+      "schema": "PASS",
+      "semantic_state": "PASS",
+      "status": "PASS"
+    },
+    "rollback": {
+      "application_digest": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
+      "downgrade": "NOT_RUN",
+      "schema_compatibility": "EXACT_MIGRATION_IDENTITY",
+      "state_signature": "f4ff1ebd946e125b1ae73bd788cd585930a069c0a7f6bb1f7b75568e07a48725",
+      "status": "PASS"
+    },
+    "rollback_events": [
+      "A_HEALTHY",
+      "BACKUP_VERIFIED",
+      "B_SELECTED_AND_HEALTHY",
+      "B_HEALTH_FAILURE_OBSERVED",
+      "B_STARTUP_FAILURE_OBSERVED",
+      "A_RESELECTED",
+      "A_DIGEST_VERIFIED",
+      "A_RESTARTED_HEALTHY"
+    ],
+    "synthetic_restore_after_block": {
+      "integrity_check": "PASS",
+      "schema": "PASS",
+      "semantic_state": "PASS",
+      "status": "PASS"
+    }
   },
-  "final_head_validation": "PENDING",
+  "final_receipt_locator": {
+    "pull_request": "https://github.com/tiagocaldironi/income-analytics/pull/55",
+    "authoritative_final_receipt": "PR body after verified protected integration and postmerge runs",
+    "reason": "Do not claim postmerge validation from a premerge checkout or create recursive receipt commits"
+  },
+  "history": [
+    {
+      "run_id": 40978579934,
+      "source_head": "e7de3409b3aa508d11c092e5745e7fc81adc057e",
+      "checkout_sha": "b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+      "staging": "FAIL",
+      "category": "GRACEFUL_STOP_FAILED",
+      "root_cause": "NOT_PROVEN: previous executor discarded child stderr",
+      "promotion": "BLOCKED",
+      "hidden_or_waived": false
+    }
+  ],
   "host": "HOST_NOT_VERIFIED",
+  "firebase_cloud": "FIREBASE_CLOUD_NOT_VERIFIED",
   "beta": "BETA_NOT_AUTHORIZED",
   "production": "PRODUCTION_NOT_AUTHORIZED"
 }

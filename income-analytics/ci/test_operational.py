@@ -506,6 +506,7 @@ def test_graceful_shutdown_failure_cannot_be_waived(owned, mode):
             self.returncode = -1
 
     server = Server.__new__(Server)
+    server.expected_startup_failure = False
     server.stop_file = owned.file("synthetic-stop.flag")
     server.process = Process()
     if mode == "success":
@@ -528,3 +529,59 @@ def test_retention_bucket_counts_respect_exact_limits_at_calendar_boundaries(own
     result = retention_plan(owned, records, now=now, daily=7, weekly=4, monthly=3)
     assert result["bucket_counts"] == {"daily": 7, "weekly": 4, "monthly": 3}
     assert len(result["keep"]) <= 14 and result["deletion_authorized"] is False
+
+
+@pytest.mark.parametrize("body", ['{"value":1}'.encode("utf-16"), b"[]"],
+                         ids=["non-utf8", "non-object"])
+def test_provider_contract_rejects_unexpected_encoding_and_schema(body):
+    from income_analytics.infrastructure.operational_provider import ProviderUnavailable, fetch_json
+
+    with pytest.raises(ProviderUnavailable):
+        fetch_json(lambda _: (200, body), attempts=1)
+
+
+def test_already_failed_normal_process_cannot_fake_successful_shutdown(owned):
+    from delivery_stage import Server
+
+    class Exited:
+        returncode = 1
+
+        def poll(self):
+            return 1
+
+    server = Server.__new__(Server)
+    server.expected_startup_failure = False
+    server.process = Exited()
+    with pytest.raises(DeliveryError, match="GRACEFUL_STOP_FAILED_EXIT"):
+        server.stop()
+
+
+@pytest.mark.parametrize("fault", ["empty-inventory", "nonexistent-evidence", "missing-runbook"])
+def test_invalid_documentation_cannot_claim_operational_readiness(tmp_path, fault):
+    import shutil
+
+    from operational import ROOT, documentation_valid
+
+    directory = tmp_path / "docs/engineering/operational-readiness"
+    shutil.copytree(ROOT / "docs/engineering/operational-readiness", directory)
+    # Copy only the versioned evidence referenced by inventory, no user data.
+    inventory_file = directory / "operational_inventory.json"
+    inventory = json.loads(inventory_file.read_text(encoding="utf-8"))
+    for component in inventory["components"]:
+        for name in component["evidence"].split(";"):
+            relative = Path(name.strip())
+            source, target = ROOT / relative, tmp_path / relative
+            if source.is_file():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, target)
+            elif source.is_dir():
+                target.mkdir(parents=True, exist_ok=True)
+    assert documentation_valid(tmp_path)
+    if fault == "empty-inventory":
+        inventory_file.write_text("{}", encoding="utf-8")
+    elif fault == "nonexistent-evidence":
+        inventory["components"][0]["evidence"] = "missing-evidence.py"
+        inventory_file.write_text(json.dumps(inventory), encoding="utf-8")
+    else:
+        (directory / "incident_runbooks.md").write_text("missing", encoding="utf-8")
+    assert evaluate(healthy_details(), tmp_path) == "OPERATIONAL_BLOCKED"

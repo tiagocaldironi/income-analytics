@@ -4,7 +4,7 @@
 `GET /health/live` (process can answer, no dependency I/O) and `GET /health/ready` (lifespan startup complete,
 read-only SQLite connection, query and exact Alembic head). Failure returns 503 and only
 `{"status":"unavailable"}`; success 200 and `{"status":"ok"}`. No paths, versions, users or exception messages.
-SQLite probe timeout is 100ms; no writes, migration, checkpoint or external call. Compatibility is
+SQLite probe timeout is 100ms; no financial mutations, migration, checkpoint or external call. SQLite may manage WAL coordination sidecars. Compatibility is
 head-based, not a full structural integrity scan. Offline DR exercises additionally run integrity_check
 and exact synthetic semantic signatures. Health is not evidence of financial correctness.
 

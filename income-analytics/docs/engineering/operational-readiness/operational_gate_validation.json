@@ -1,53 +1,8 @@
 {
   "schema": 1,
-  "state": "LOCAL_VERIFIED_HOSTED_PENDING",
-  "local_worktree_dirty": true,
-  "baseline": "450ff76671a89320d1bb411997d2faeb0efb590c",
-  "operational": {
-    "passed": 52,
-    "failed": 0,
-    "errors": 0,
-    "skipped": 0
-  },
-  "operational_state": "OPERATIONAL_PASS",
-  "recovery": {
-    "status": "PASS",
-    "environment": "DISPOSABLE_SYNTHETIC_SQLITE_WAL",
-    "backup_seconds": 0.018489,
-    "detection_seconds": 0.002153,
-    "restore_seconds": 0.02393,
-    "validation_seconds": 0.008996,
-    "observed_recovery_seconds": 0.035079,
-    "synthetic_committed_rows": 100,
-    "synthetic_rows_lost": 0,
-    "observed_rpo": "ZERO_COMMITTED_SYNTHETIC_ROWS_AT_BACKUP_BOUNDARY",
-    "last_valid_backup_age_seconds": 0.038114,
-    "host_rpo_rto_certified": false,
-    "target_rpo_hours": 24,
-    "target_rto_hours": 2,
-    "targets": "PROPOSED_NOT_GUARANTEED",
-    "production_access": false
-  },
-  "focused_tests": {
-    "passed": 117,
-    "failed": 0,
-    "errors": 0,
-    "skipped": 0
-  },
-  "financial": {
-    "passed": 104,
-    "failed": 15,
-    "errors": 9,
-    "skipped": 0
-  },
-  "financial_state": "FINANCIAL_BLOCKED",
-  "financial_regression": false,
-  "host": "HOST_NOT_VERIFIED",
-  "production": "PRODUCTION_NOT_AUTHORIZED",
-  "beta": "BETA_NOT_AUTHORIZED",
-  "latest_local_uncommitted_controls": {
+  "local_uncommitted": {
     "totals": {
-      "passed": 58,
+      "passed": 64,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -55,28 +10,69 @@
     "recovery": {
       "status": "PASS",
       "environment": "DISPOSABLE_SYNTHETIC_SQLITE_WAL",
-      "backup_seconds": 0.022451,
-      "detection_seconds": 0.00198,
-      "restore_seconds": 0.027912,
-      "validation_seconds": 0.011708,
-      "observed_recovery_seconds": 0.041601,
+      "backup_seconds": 0.021667,
+      "detection_seconds": 0.001823,
+      "restore_seconds": 0.025923,
+      "validation_seconds": 0.012263,
+      "observed_recovery_seconds": 0.040009,
       "synthetic_committed_rows": 100,
       "synthetic_rows_lost": 0,
       "observed_rpo": "ZERO_COMMITTED_SYNTHETIC_ROWS_AT_BACKUP_BOUNDARY",
-      "last_valid_backup_age_seconds": 0.045828,
+      "last_valid_backup_age_seconds": 0.043692,
       "host_rpo_rto_certified": false,
       "target_rpo_hours": 24,
       "target_rto_hours": 2,
       "targets": "PROPOSED_NOT_GUARANTEED",
       "production_access": false
     },
-    "focused_tests": {
-      "passed": 122,
+    "meaning": "Latest source-control tests before final commit; not hosted SHA proof"
+  },
+  "verified_hosted_premerge": {
+    "run_id": 41045768631,
+    "source_head": "a9b1980ab1d220bf38370b1f68a1c9f93004d8a8",
+    "checkout_sha": "b9e4b033a8f25e0fe8cde40fde5e326ea49921be",
+    "operational": {
+      "passed": 58,
       "failed": 0,
       "errors": 0,
       "skipped": 0
     },
-    "source_fingerprint_at_execution": "7e0e51b249a983a45cb3368dee1ffee53facba4942870ef38f36f9ba1440347a",
-    "meaning": "Dirty-worktree validation; hosted proof is revision-specific and separate"
-  }
+    "engineering": {
+      "passed": 1332,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "security": {
+      "passed": 137,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "financial": {
+      "passed": 104,
+      "failed": 15,
+      "errors": 9,
+      "skipped": 0
+    },
+    "state": "OPERATIONAL_PASS"
+  },
+  "required": "Operational job and same-source complete report required by Engineering",
+  "negative_controls": [
+    "failed/skipped/cancelled/missing Operational job",
+    "missing/duplicated/incomplete/skipped/failed tests",
+    "wrong artifact digest/source/run/attempt",
+    "missing or malformed inventory/evidence/runbooks",
+    "normal process already exited nonzero; timeout or forced stop",
+    "financial-blocked production promotion"
+  ],
+  "financial_state": "FINANCIAL_CERTIFICATION_BLOCKED",
+  "final_receipt_locator": {
+    "pull_request": "https://github.com/tiagocaldironi/income-analytics/pull/55",
+    "authoritative_final_receipt": "PR body after verified protected integration and postmerge runs",
+    "reason": "Do not claim postmerge validation from a premerge checkout or create recursive receipt commits"
+  },
+  "host": "HOST_NOT_VERIFIED",
+  "beta": "BETA_NOT_AUTHORIZED",
+  "production": "PRODUCTION_NOT_AUTHORIZED"
 }

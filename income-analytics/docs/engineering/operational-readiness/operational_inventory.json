@@ -107,7 +107,7 @@
       "dependencies": "account; Python; data paths; firewall; reboot policy",
       "configuration": "versioned only; environment values never collected",
       "data": "financial data only in persistence; operational metadata is payload-free",
-      "failures": "versioned script only; host state HOST_NOT_VERIFIED",
+      "failures": "versioned script only; host state HOST_NOT_VERIFIED; versioned helper binds 0.0.0.0; no explicit proxy trust or supervisor",
       "impact": "degraded service or unavailable dependency",
       "detection": "health, local aggregate signals, CI and recovery exercises",
       "recovery": "follow windows_tailscale_checklist.md; no host command executed",
@@ -256,7 +256,7 @@
       "live_service": "NOT_VERIFIED"
     },
     {
-      "component": "CoinGecko/Twelve Data",
+      "component": "Twelve Data",
       "function": "external market/reference source",
       "dependencies": "network, public data, optional provider credential/quota",
       "configuration": "versioned adapter only",
@@ -268,6 +268,207 @@
       "evidence": "src/income_analytics/infrastructure/twelve_data_us_market_data.py",
       "state": "PARTIALLY_VERIFIED",
       "live_service": "NOT_VERIFIED"
+    },
+    {
+      "component": "CoinGecko",
+      "function": "crypto observations; preserve source/effective date; no synthetic price fallback",
+      "dependencies": "network/source availability and existing adapter contracts",
+      "configuration": "versioned adapter only; no credential values collected",
+      "data": "public source/reference observations; no real user payload sent",
+      "failures": "timeout, quota, malformed/unavailable source and stale observations",
+      "impact": "degraded source availability; no silent financial substitution",
+      "detection": "existing engineering adapter tests and sanitized source errors; live service not verified",
+      "recovery": "existing bounded adapter behavior; authorized source recovery preserving effective date",
+      "evidence": "src/income_analytics/infrastructure/coingecko_crypto_data.py",
+      "state": "PARTIALLY_VERIFIED",
+      "live_service": "NOT_VERIFIED"
+    },
+    {
+      "component": "Yahoo Finance",
+      "function": "benchmark and historical quote fallback; live availability not verified",
+      "dependencies": "network/source availability and existing adapter contracts",
+      "configuration": "versioned adapter only; no credential values collected",
+      "data": "public source/reference observations; no real user payload sent",
+      "failures": "timeout, quota, malformed/unavailable source and stale observations",
+      "impact": "degraded source availability; no silent financial substitution",
+      "detection": "existing engineering adapter tests and sanitized source errors; live service not verified",
+      "recovery": "existing bounded adapter behavior; authorized source recovery preserving effective date",
+      "evidence": "src/income_analytics/infrastructure/yahoo_benchmark_data.py;src/income_analytics/infrastructure/brapi_market_data.py",
+      "state": "PARTIALLY_VERIFIED",
+      "live_service": "NOT_VERIFIED"
+    },
+    {
+      "component": "BRAPI asset discovery",
+      "function": "reference discovery; missing token/quota handled by existing adapter",
+      "dependencies": "network/source availability and existing adapter contracts",
+      "configuration": "versioned adapter only; no credential values collected",
+      "data": "public source/reference observations; no real user payload sent",
+      "failures": "timeout, quota, malformed/unavailable source and stale observations",
+      "impact": "degraded source availability; no silent financial substitution",
+      "detection": "existing engineering adapter tests and sanitized source errors; live service not verified",
+      "recovery": "existing bounded adapter behavior; authorized source recovery preserving effective date",
+      "evidence": "src/income_analytics/infrastructure/brapi_asset_discovery.py",
+      "state": "PARTIALLY_VERIFIED",
+      "live_service": "NOT_VERIFIED"
+    },
+    {
+      "component": "BRAPI paid income",
+      "function": "paid-income integration remains unavailable in SaaS; no credential or productive job enabled",
+      "dependencies": "network/source availability and existing adapter contracts",
+      "configuration": "versioned adapter only; no credential values collected",
+      "data": "public source/reference observations; no real user payload sent",
+      "failures": "timeout, quota, malformed/unavailable source and stale observations",
+      "impact": "degraded source availability; no silent financial substitution",
+      "detection": "existing engineering adapter tests and sanitized source errors; live service not verified",
+      "recovery": "existing bounded adapter behavior; authorized source recovery preserving effective date",
+      "evidence": "src/income_analytics/infrastructure/brapi_paid_income.py",
+      "state": "PARTIALLY_VERIFIED",
+      "live_service": "NOT_VERIFIED"
+    },
+    {
+      "component": "B3 ETF",
+      "function": "official ETF source and historical price recovery; no live download performed",
+      "dependencies": "network/source availability and existing adapter contracts",
+      "configuration": "versioned adapter only; no credential values collected",
+      "data": "public source/reference observations; no real user payload sent",
+      "failures": "timeout, quota, malformed/unavailable source and stale observations",
+      "impact": "degraded source availability; no silent financial substitution",
+      "detection": "existing engineering adapter tests and sanitized source errors; live service not verified",
+      "recovery": "existing bounded adapter behavior; authorized source recovery preserving effective date",
+      "evidence": "src/income_analytics/infrastructure/b3_etf_market_data.py",
+      "state": "PARTIALLY_VERIFIED",
+      "live_service": "NOT_VERIFIED"
+    },
+    {
+      "component": "B3 benchmarks",
+      "function": "benchmark reference observations; keep source/date and existing error contract",
+      "dependencies": "network/source availability and existing adapter contracts",
+      "configuration": "versioned adapter only; no credential values collected",
+      "data": "public source/reference observations; no real user payload sent",
+      "failures": "timeout, quota, malformed/unavailable source and stale observations",
+      "impact": "degraded source availability; no silent financial substitution",
+      "detection": "existing engineering adapter tests and sanitized source errors; live service not verified",
+      "recovery": "existing bounded adapter behavior; authorized source recovery preserving effective date",
+      "evidence": "src/income_analytics/infrastructure/b3_benchmark_data.py",
+      "state": "PARTIALLY_VERIFIED",
+      "live_service": "NOT_VERIFIED"
+    },
+    {
+      "component": "Banco Central FX",
+      "function": "PTAX FX observations; missing exchange data remains unavailable, never fabricated",
+      "dependencies": "network/source availability and existing adapter contracts",
+      "configuration": "versioned adapter only; no credential values collected",
+      "data": "public source/reference observations; no real user payload sent",
+      "failures": "timeout, quota, malformed/unavailable source and stale observations",
+      "impact": "degraded source availability; no silent financial substitution",
+      "detection": "existing engineering adapter tests and sanitized source errors; live service not verified",
+      "recovery": "existing bounded adapter behavior; authorized source recovery preserving effective date",
+      "evidence": "src/income_analytics/infrastructure/bcb_fx_data.py",
+      "state": "PARTIALLY_VERIFIED",
+      "live_service": "NOT_VERIFIED"
     }
-  ]
+  ],
+  "declared_url_literals": [
+    {
+      "file": "src/income_analytics/infrastructure/b3_benchmark_data.py",
+      "hosts": [
+        "sistemaswebb3-listados.b3.com.br"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/b3_cotahist_market_data.py",
+      "hosts": [
+        "bvmf.bmfbovespa.com.br"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/b3_etf_market_data.py",
+      "hosts": [
+        "arquivos.b3.com.br"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/bcb_benchmark_data.py",
+      "hosts": [
+        "api.bcb.gov.br"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/bcb_fx_data.py",
+      "hosts": [
+        "olinda.bcb.gov.br"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/brapi_asset_discovery.py",
+      "hosts": [
+        "brapi.dev"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/brapi_market_data.py",
+      "hosts": [
+        "brapi.dev",
+        "query1.finance.yahoo.com"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/brapi_paid_income.py",
+      "hosts": [
+        "brapi.dev"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/coingecko_crypto_data.py",
+      "hosts": [
+        "api.coingecko.com"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/cvm_fundamentals_data.py",
+      "hosts": [
+        "dados.cvm.gov.br"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/cvm_pension_market_data.py",
+      "hosts": [
+        "dados.cvm.gov.br"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/irpf_xlsx_import.py",
+      "hosts": [
+        "schemas.openxmlformats.org"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/twelve_data_us_market_data.py",
+      "hosts": [
+        "api.twelvedata.com",
+        "query1.finance.yahoo.com"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    },
+    {
+      "file": "src/income_analytics/infrastructure/yahoo_benchmark_data.py",
+      "hosts": [
+        "query1.finance.yahoo.com"
+      ],
+      "meaning": "versioned URL literals only; includes config examples/XML namespaces, not proof of runtime calls"
+    }
+  ],
+  "transport_inventory_method": "Read-only source inventory; no external provider, Firebase or productive host request"
 }

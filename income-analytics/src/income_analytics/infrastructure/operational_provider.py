@@ -26,7 +26,7 @@ def fetch_json(
             status, body = transport(5)
             if status != 200 or len(body) > 1024 * 1024:
                 raise ProviderUnavailable("PROVIDER_UNAVAILABLE")
-            data = json.loads(body)
+            data = json.loads(body.decode("utf-8"))
             if not isinstance(data, dict):
                 raise ProviderUnavailable("PROVIDER_SCHEMA_INVALID")
             return data

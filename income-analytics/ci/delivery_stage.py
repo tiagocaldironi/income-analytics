@@ -156,6 +156,7 @@ def verify_installed(workspace, installed):
 class Server:
     def __init__(self, workspace, installed, fault=None):
         require(fault in {None, "startup"}, "INVALID_FAULT_INJECTION")
+        self.expected_startup_failure = fault == "startup"
         verify_installed(workspace, installed)
         with socket.socket() as reserve:
             reserve.bind(("127.0.0.1", 0))
@@ -216,8 +217,9 @@ class Server:
                     self.process.kill()
                     self.process.wait(timeout=10)
                 raise DeliveryError("GRACEFUL_STOP_FAILED_TIMEOUT") from None
-            require(self.process.returncode == 0, "GRACEFUL_STOP_FAILED_EXIT")
         require(self.process.poll() is not None, "PROCESS_STOP_FAILED")
+        require(self.process.returncode == 0 or self.expected_startup_failure,
+                "GRACEFUL_STOP_FAILED_EXIT")
         self.stop_seconds = round(time.monotonic() - started, 6)
 
 
@@ -318,6 +320,7 @@ def exercise(previous_archive, candidate_archive, previous, candidate, result):
             "B_HEALTH_FAILURE_OBSERVED",
             "B_STARTUP_FAILURE_OBSERVED",
         ]
+        recovery_started = time.monotonic()
         rollback_compatibility(workspace, database, version_a["contract"], version_b["contract"])
         select_version(workspace, "A", previous)
         verify(a, previous["source_commit"], previous["package_sha256"])
@@ -327,6 +330,7 @@ def exercise(previous_archive, candidate_archive, previous, candidate, result):
             recovered.static()
             verify_selection(workspace, "A", a, previous)
             database_check(workspace, database, record["schema_head"], record["state_signature"])
+            recovery_seconds = round(time.monotonic() - recovery_started, 6)
         finally:
             recovered.stop()
         result["rollback_events"] += ["A_RESELECTED", "A_DIGEST_VERIFIED", "A_RESTARTED_HEALTHY"]
@@ -336,6 +340,11 @@ def exercise(previous_archive, candidate_archive, previous, candidate, result):
             "schema_compatibility": "EXACT_MIGRATION_IDENTITY",
             "state_signature": record["state_signature"],
             "downgrade": "NOT_RUN",
+            "recovery_seconds": recovery_seconds,
+            "measurement_boundary": (
+                "ROLLBACK_DECISION_TO_APP_HEALTH_STATIC_AND_SEMANTIC_VALIDATION"
+            ),
+            "host_rpo_rto_certified": False,
         }
         with closing(sqlite3.connect(database)) as synthetic:
             synthetic.execute("UPDATE alembic_version SET version_num='synthetic-future-schema'")
