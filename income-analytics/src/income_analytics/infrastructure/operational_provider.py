@@ -34,4 +34,6 @@ def fetch_json(
             signals.event("provider_unavailable", duration=time.monotonic() - started)
             if attempt + 1 < attempts:
                 sleep(min(0.1 * (2 ** attempt), 0.4))
+        finally:
+            signals.dependency(time.monotonic() - started)
     raise ProviderUnavailable("PROVIDER_UNAVAILABLE")

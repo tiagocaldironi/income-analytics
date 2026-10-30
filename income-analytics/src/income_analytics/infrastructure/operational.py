@@ -38,6 +38,7 @@ class Signals:
         self.lock = Lock()
         self.counts: Counter[str] = Counter()
         self.duration_seconds = 0.0
+        self.dependency_seconds = 0.0
         self.started_at = time.monotonic()
         self.started = False
         self.ready: bool | None = None
@@ -80,7 +81,16 @@ class Signals:
                 "counts": dict(self.counts),
                 "http_5xx_rate": self.counts["http_5xx"] / count if count else 0.0,
                 "request_mean_seconds": self.duration_seconds / count if count else 0.0,
+                "dependency_mean_seconds": (
+                    self.dependency_seconds / self.counts["dependency_checks"]
+                    if self.counts["dependency_checks"] else 0.0
+                ),
             }
+
+    def dependency(self, duration: float) -> None:
+        with self.lock:
+            self.counts["dependency_checks"] += 1
+            self.dependency_seconds += max(0.0, duration)
 
 
 signals = Signals()

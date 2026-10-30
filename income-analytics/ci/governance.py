@@ -282,6 +282,11 @@ def main() -> int:
     except Exception as error:
         code = 2
         report.update(status="FAIL", runner_error=type(error).__name__)
+        if args.check == "operational":
+            report.update(
+                operational_state="OPERATIONAL_NOT_VERIFIED", host="HOST_NOT_VERIFIED",
+                beta="BETA_NOT_AUTHORIZED", production="PRODUCTION_NOT_AUTHORIZED",
+            )
         if args.check == "financial":
             report.update(
                 financial_state="FINANCIAL_NOT_VERIFIED",

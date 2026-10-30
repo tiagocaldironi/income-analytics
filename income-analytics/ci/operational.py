@@ -55,13 +55,15 @@ def retention_plan(workspace, records, *, now, daily=7, weekly=4, monthly=3):
             0 <= (now.year - stamp.year) * 12 + now.month - stamp.month < monthly,
         )
         for index, key in enumerate(keys):
-            if eligible[index] and key not in buckets[index]:
+            if (eligible[index] and key not in buckets[index]
+                    and len(buckets[index]) < (daily, weekly, monthly)[index]):
                 keep.add(name)
                 buckets[index].add(key)
     if validated:
         keep.add(max(validated)[1])  # Never discard the only/latest validated restore point.
     return {"mode": "DRY_RUN_ONLY", "keep": sorted(keep),
             "candidates": sorted(name for _, name in validated if name not in keep),
+            "bucket_counts": dict(zip(("daily", "weekly", "monthly"), map(len, buckets))),
             "deletion_authorized": False}
 
 

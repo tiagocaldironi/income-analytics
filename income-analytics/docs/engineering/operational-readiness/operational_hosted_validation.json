@@ -1,7 +1,371 @@
 {
   "schema": 1,
-  "state": "NOT_VERIFIED",
-  "reason": "Execution evidence not collected yet",
-  "production": "PRODUCTION_NOT_AUTHORIZED",
-  "host": "HOST_NOT_VERIFIED"
+  "state": "FIRST_HOSTED_DIAGNOSTIC_STAGING_BLOCKED",
+  "scope": "PREMERGE_SYNTHETIC_CHECKOUT_NOT_POSTMERGE",
+  "verified_source": {
+    "run_id": 40978579934,
+    "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40978579934",
+    "event": "pull_request",
+    "conclusion": "failure",
+    "source_head": "e7de3409b3aa508d11c092e5745e7fc81adc057e",
+    "checkout_sha": "b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+    "run_attempt": 1,
+    "governance_policy_sha256": "cd63398bec7c3f6add3206bab6969f5fefc9e96ddc2f7bef28a6ebdd9f589faa",
+    "source_fingerprint": "b4b80718128a70a046d2f3169aae3f483d4a59c5dd454d3ad5a1537ed2d7dfc0",
+    "artifact_id": 12944106539,
+    "package_sha256": "776bc7e37b865ebc77a4adbfa2a4efa543e4029f7ece3e74daa5725dded4d10f",
+    "manifest_sha256": "110812ab8b5edd9a00fd5290c71f96bfc9c7d12216a3ec22c751df12b46d8744",
+    "security_artifact_id": 12942859854,
+    "engineering_tests": {
+      "passed": 1326,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "security_tests": {
+      "passed": 137,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "operational_tests": {
+      "passed": 52,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "operational_state": "OPERATIONAL_PASS",
+    "financial": {
+      "passed": 104,
+      "failed": 15,
+      "errors": 9,
+      "skipped": 0
+    },
+    "financial_state": "FINANCIAL_BLOCKED",
+    "jobs": {
+      "CI / Operational readiness": "success",
+      "CI / Frontend": "success",
+      "CI / Reproducible build": "success",
+      "CI / Runtime installation": "success",
+      "CI / Ruff diagnostics": "failure",
+      "CI / Financial certification": "failure",
+      "CI / Quality non-regression": "success",
+      "CI / mypy diagnostics": "failure",
+      "CI / Python engineering": "success",
+      "CI / Full Python diagnostic": "failure",
+      "CI / Security baseline": "success",
+      "CI / Engineering": "success",
+      "CD / Staging validation": "failure"
+    },
+    "recovery": {
+      "status": "PASS",
+      "environment": "DISPOSABLE_SYNTHETIC_SQLITE_WAL",
+      "backup_seconds": 0.027971,
+      "detection_seconds": 0.000653,
+      "restore_seconds": 0.031707,
+      "validation_seconds": 0.003211,
+      "observed_recovery_seconds": 0.035571,
+      "synthetic_committed_rows": 100,
+      "synthetic_rows_lost": 0,
+      "observed_rpo": "ZERO_COMMITTED_SYNTHETIC_ROWS_AT_BACKUP_BOUNDARY",
+      "last_valid_backup_age_seconds": 0.050119,
+      "host_rpo_rto_certified": false,
+      "target_rpo_hours": 24,
+      "target_rto_hours": 2,
+      "targets": "PROPOSED_NOT_GUARANTEED",
+      "production_access": false
+    },
+    "artifacts": [
+      {
+        "id": 12944590913,
+        "name": "delivery-preview-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:2f74d530dbfdad296a75572b6ede63dd5334c19a05cfcb92322bdc7e355e380b",
+        "expires_at": "2026-11-13T00:26:03Z",
+        "files": [
+          {
+            "name": "validation.json",
+            "sha256": "4e73604f79dba307d2e25164bdcae92f9e029fa1d1047deab40debb2f90d4921"
+          },
+          {
+            "name": "candidate.json",
+            "sha256": "10d6769673d8a47662dee8efd34b280492e33e0559f4ebf6e790d477a64fc95e"
+          }
+        ]
+      },
+      {
+        "id": 12944515839,
+        "name": "gate-summary-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:6dfc1ff0293a6d2f6daefb2d164906018adec001181ee5f893dfd25435b132aa",
+        "expires_at": "2026-11-13T00:23:31Z",
+        "files": [
+          {
+            "name": "gate-summary.json",
+            "sha256": "0e94fd26724c3fd01089c42fb1671233f549e528011c61fcf70806cc10d4679d"
+          }
+        ]
+      },
+      {
+        "id": 12944375435,
+        "name": "governance-operational-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:0f113fcf2c47143845afcb8ff3a881ba579667d1bbf5647beca1ca5b6094e521",
+        "expires_at": "2026-11-13T00:17:34Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "67ff667a47d5b232fdb735c7742470c9d73d4e521a6ec8b25d99464aa6cdace9"
+          },
+          {
+            "name": "operational-junit.xml",
+            "sha256": "5d6f3409c57d5bce4525064e7d7dec4996e8df7cebace2bfbbdbdc556e6bb1a7"
+          }
+        ]
+      },
+      {
+        "id": 12944161337,
+        "name": "governance-build-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:74bb4e6d7208fd0df9112d7ea8f2bc71088e24ec4d48496150e23ba0cb833327",
+        "expires_at": "2026-11-13T00:18:30Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "f62ab17e5705c9df9399f6285482f749fd483cc0b49496f944a52ccf2d5f6d80"
+          }
+        ]
+      },
+      {
+        "id": 12944106539,
+        "name": "application-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab-windows-x64",
+        "digest": "sha256:4b8f5e3031f0702ee72ea33c368b307e89118a8ee5272aba9f96390a675517fb",
+        "expires_at": "2026-11-13T00:18:31Z",
+        "files": [
+          {
+            "name": "income-analytics-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab-windows-x64.sha256",
+            "sha256": "10b9836d6ce341ff16cbdf02bb772e01a785b0230a0b1c5bcbf5268a148cc081"
+          },
+          {
+            "name": "income-analytics-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab-windows-x64.zip",
+            "sha256": "776bc7e37b865ebc77a4adbfa2a4efa543e4029f7ece3e74daa5725dded4d10f"
+          },
+          {
+            "name": "manifest.json",
+            "sha256": "9f18195eaf98fff92a0a5368821cb996c6d0b6b70bc49f3ad204043349ea3506"
+          }
+        ]
+      },
+      {
+        "id": 12944077224,
+        "name": "governance-python-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:798944496414c08ec1023b53016f950938a41a7aae03085e62569531c04f05d4",
+        "expires_at": "2026-11-13T00:22:26Z",
+        "files": [
+          {
+            "name": "coverage.xml",
+            "sha256": "2b2f237cc3858d83951f46d2bf9355d62432907ee5dc31a2dfccf37bc57214ba"
+          },
+          {
+            "name": "inventory.json",
+            "sha256": "d9dce7c0a5b6e3f7cd45db11a44895b236516feada92b9753a1ee5d33a1fa32d"
+          },
+          {
+            "name": "python-junit.xml",
+            "sha256": "aab14e876a4082b4df5a6b18829352f1c51f341537bc0bfcc6f41ad9a64163fe"
+          },
+          {
+            "name": "result.json",
+            "sha256": "15c4271a7dd019b382d18b611bd4de4b4f23d770e6ab9559cc131e689b58ac37"
+          }
+        ]
+      },
+      {
+        "id": 12943946638,
+        "name": "governance-node-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:d72f2c4ad67545e0a661bc78295f0cf06d9222900c7a15aa5ba8840576e5fdfa",
+        "expires_at": "2026-11-13T00:17:00Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "dbb20209774487c44251c0dbe6940560a329df2b575fc77c79af38156cfecb44"
+          }
+        ]
+      },
+      {
+        "id": 12943896945,
+        "name": "governance-ruff-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:296b235415cd29966207782a9267044f36f188dc40cc1c4c42d1e7ace5d13935",
+        "expires_at": "2026-11-13T00:17:28Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "5cc1a32e4217d23ad2feccf51ec413e5b5de824c26cce1882f37ddb35146152b"
+          }
+        ]
+      },
+      {
+        "id": 12943796570,
+        "name": "governance-financial-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:411a9ac658df94a7ef577703c0d8e816ffdcd43a0e1b7645a17469949a1d7250",
+        "expires_at": "2026-11-13T00:18:42Z",
+        "files": [
+          {
+            "name": "financial-junit.xml",
+            "sha256": "f859ef5ce66307b8e330af9e97e8076cde2a4a7cb8f50060764eafbe44971078"
+          },
+          {
+            "name": "inventory.json",
+            "sha256": "e797b5e5e35de0801a20ac841f370795288789570e9294dbdd02c93d9ab7f20f"
+          },
+          {
+            "name": "result.json",
+            "sha256": "dace0c58feecd57379bf89e9d0803c8c3835e72ee7743ce374756c37f3c02b2f"
+          }
+        ]
+      },
+      {
+        "id": 12943686814,
+        "name": "governance-quality-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:14bfa15ea77a0b4884e871e728ca923d8953258a5879149bbe5c8dd2eaec7aee",
+        "expires_at": "2026-11-13T00:17:38Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "f0b41d0f6a22e094eec9557be0a4a7728d111eeffeae346cc6329c630deb39b4"
+          }
+        ]
+      },
+      {
+        "id": 12943363193,
+        "name": "governance-engineering-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:c702b91059e811e39cc82cb7f4f9bc282b88b5213d218e4878b22eeaef7dac01",
+        "expires_at": "2026-11-13T00:21:51Z",
+        "files": [
+          {
+            "name": "engineering-junit.xml",
+            "sha256": "b45f88bddbd28c888a1499e34990f8db7c4a9d0624d396d094e4be1bf0127e67"
+          },
+          {
+            "name": "inventory.json",
+            "sha256": "2b0734f57d103f9c17858389549fd725cce67cf1c0a6366e080b22b8e52183a2"
+          },
+          {
+            "name": "result.json",
+            "sha256": "188df407f4afcc5ea6c4ded564dbbf16b165564fe31ae64f25209383211f4493"
+          }
+        ]
+      },
+      {
+        "id": 12943278852,
+        "name": "governance-runtime-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:e1c639537711ddf793def8278cf85613f88434088d2818a533f16ae3116027d2",
+        "expires_at": "2026-11-13T00:17:14Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "0d3e5159e5132f8fb4845f208fe0797ce917dc583e098b03b31f85dee5546bfc"
+          }
+        ]
+      },
+      {
+        "id": 12943029788,
+        "name": "governance-mypy-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:19c69425121f4c742830feef10db45fa52ee00848ec314373a4302cd72ad1b4d",
+        "expires_at": "2026-11-13T00:17:11Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "4b65b6cd954315276361f50f82e408a3bb51d3f827ce27987c6a8520651574e5"
+          }
+        ]
+      },
+      {
+        "id": 12942859854,
+        "name": "security-b8ac60e0e2626ed83c81749d8dd7d2998d5810ab",
+        "digest": "sha256:807ea00eeabadbbfa2264d89270a491ec5e6961018ed4465deb061aac56bd3b1",
+        "expires_at": "2026-11-13T00:21:32Z",
+        "files": [
+          {
+            "name": "result.json",
+            "sha256": "c3e7d996e21e907376b07e98145cf2014b640615c73e9325a08d0c274f3d8f1b"
+          },
+          {
+            "name": "security-junit.xml",
+            "sha256": "527bd80b2e22c9f72c8630dcf1796c24dbd4ba61e4b2c00a0aa039fb5fc902b0"
+          },
+          {
+            "name": "sbom.cdx.json",
+            "sha256": "db3c01199fe4bd7e043e0a4e6ba11a67f7a51a2056e7d45d803cb7b94e64a645"
+          }
+        ]
+      }
+    ],
+    "staging_state": "FAIL",
+    "integration_eligible": false
+  },
+  "staging_failure": {
+    "category": "GRACEFUL_STOP_FAILED",
+    "checks": {
+      "backup": {
+        "created_at": "2026-10-30T00:25:18.859583+00:00",
+        "duration_seconds": 0.037744,
+        "method": "SQLITE_ONLINE_BACKUP_API",
+        "schema_head": "0027_contextual_onboarding_v2",
+        "sha256": "8d2d7ba43daa2563373e02e4e1aba484e4a3c8feeea0879c7f6916db538e2837",
+        "state_signature": "aebb52ff8077ada21a99e62b15d38766c18ce96b6af0f4ebdb10568c6c647c94",
+        "status": "PASS"
+      },
+      "cleanup": {
+        "ports_released": true,
+        "processes_stopped": true,
+        "status": "PASS",
+        "temporary_root_removed": true
+      },
+      "health": {
+        "bind": "127.0.0.1",
+        "static": "PASS",
+        "status": "PASS"
+      },
+      "immutable_promotion": {
+        "status": "NOT_RUN"
+      },
+      "incompatible_schema": {
+        "status": "NOT_RUN"
+      },
+      "installation": {
+        "offline": true,
+        "status": "PASS"
+      },
+      "known_good_A": {
+        "commit": "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065",
+        "sha256": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
+        "status": "PASS"
+      },
+      "negative_health": {
+        "reason": "HEALTH_REJECTED",
+        "status": "EXPECTED_FAILURE_OBSERVED"
+      },
+      "negative_restore_changed_state": {
+        "reason": "RESTORE_STATE_MISMATCH",
+        "status": "EXPECTED_FAILURE_OBSERVED"
+      },
+      "negative_startup": {
+        "status": "NOT_RUN"
+      },
+      "restore": {
+        "integrity_check": "PASS",
+        "schema": "PASS",
+        "semantic_state": "PASS",
+        "status": "PASS"
+      },
+      "rollback": {
+        "status": "NOT_RUN"
+      },
+      "synthetic_restore_after_block": {
+        "status": "NOT_RUN"
+      }
+    },
+    "cause": "NOT_PROVEN; original child stderr was discarded"
+  },
+  "final_head_validation": "PENDING",
+  "host": "HOST_NOT_VERIFIED",
+  "beta": "BETA_NOT_AUTHORIZED",
+  "production": "PRODUCTION_NOT_AUTHORIZED"
 }

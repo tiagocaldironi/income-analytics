@@ -3,6 +3,7 @@
 import ast
 import hashlib
 import json
+import logging
 import os
 import sqlite3
 import tempfile
@@ -28,6 +29,15 @@ class DeliveryError(ValueError):
 def require(condition, code):
     if not condition:
         raise DeliveryError(code)
+
+
+def operation_event(event, duration=0.0):
+    require(event in {"backup_started", "backup_completed", "backup_failed",
+                      "restore_validation_failed"}, "INVALID_OPERATIONAL_EVENT")
+    logging.getLogger("income.operations").info(json.dumps({
+        "timestamp": datetime.now(UTC).isoformat(), "severity": "INFO", "event_id": event,
+        "component": "disposable_recovery", "duration_seconds": round(duration, 6),
+    }, sort_keys=True))
 
 
 class Workspace:
@@ -243,6 +253,7 @@ def backup_database(workspace, source, destination, head):
     require(not destination.exists(), "BACKUP_ALREADY_EXISTS")
     require(destination.parent.is_dir(), "BACKUP_DIRECTORY_MISSING")
     started = time.monotonic()
+    operation_event("backup_started")
     temporary = workspace.safe(destination.with_name(destination.name + ".partial"))
     require(not temporary.exists(), "PARTIAL_ALREADY_EXISTS")
 
@@ -255,6 +266,10 @@ def backup_database(workspace, source, destination, head):
                 origin.backup(backup, pages=64, progress=progress, sleep=0.05)
         signature = database_check(workspace, temporary, head)
         os.replace(temporary, destination)
+        operation_event("backup_completed", time.monotonic() - started)
+    except Exception:
+        operation_event("backup_failed", time.monotonic() - started)
+        raise
     finally:
         temporary.unlink(missing_ok=True)
     return {
@@ -299,6 +314,9 @@ def restore_database(workspace, backup_path, destination, record):
                 source.backup(target, pages=64, progress=progress, sleep=0.05)
         database_check(workspace, temporary, record["schema_head"], record["state_signature"])
         os.replace(temporary, destination)
+    except Exception:
+        operation_event("restore_validation_failed", time.monotonic() - started)
+        raise
     finally:
         temporary.unlink(missing_ok=True)
     return {"status": "PASS", "integrity_check": "PASS", "schema": "PASS", "semantic_state": "PASS"}

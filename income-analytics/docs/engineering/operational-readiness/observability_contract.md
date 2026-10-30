@@ -21,3 +21,5 @@ Minimum event IDs exist in `operational.EVENTS`; actual lifecycle/readiness/auth
 paths are wired. Backup/restore events belong to the disposable recovery wrapper. Startup failure before
 app import and abrupt termination require the future supervisor. A collector exception fails open for
 the financial request with a fixed monitoring-failed code, never its raw exception text.
+
+Disposable delivery now emits allowlisted backup start/complete/failure and restore validation failure records without exception payloads. Provider attempts expose aggregate dependency latency. Child diagnostics are retained only inside the owned temporary workspace and never uploaded; cleanup removes them. Shutdown errors distinguish timeout from nonzero exit, and successful staging records measured stop duration and exit status.

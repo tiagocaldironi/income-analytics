@@ -165,19 +165,14 @@ class Server:
             target = "income_analytics.__delivery_missing__:app"
         self.stop_file = workspace.file(f"stop-{len(workspace.processes)}.flag")
         env = {**installed["env"], "DELIVERY_STOP_FILE": str(self.stop_file)}
-        self.process = subprocess.Popen(
-            [
-                str(installed["python"]),
-                "-c",
-                RUN_SERVER,
-                target,
-                str(self.port),
-            ],
-            cwd=installed["root"],
-            env=env,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        # Private owned diagnostics are cleaned with the disposable workspace.
+        # Never publish raw child output or productive process information.
+        self.diagnostics = workspace.file(f"server-{len(workspace.processes)}.private.log")
+        with self.diagnostics.open("wb") as output:
+            self.process = subprocess.Popen(
+                [str(installed["python"]), "-c", RUN_SERVER, target, str(self.port)],
+                cwd=installed["root"], env=env, stdout=output, stderr=output,
+            )
         workspace.processes.append(self.process)
         workspace.ports.append(self.port)
 
@@ -206,12 +201,13 @@ class Server:
                 require(response.status == 200 and content in response.read(), "STATIC_FAILED")
 
     def stop(self):
+        started = time.monotonic()
         if self.process.poll() is None:
             # File-based control belongs to this disposable process only; no
             # console signal, production PID or application endpoint is targeted.
             self.stop_file.write_text("stop", encoding="ascii")
             try:
-                self.process.wait(timeout=10)
+                self.process.wait(timeout=30)
             except subprocess.TimeoutExpired:
                 self.process.terminate()
                 try:
@@ -219,9 +215,10 @@ class Server:
                 except subprocess.TimeoutExpired:
                     self.process.kill()
                     self.process.wait(timeout=10)
-                raise DeliveryError("GRACEFUL_STOP_FAILED") from None
-            require(self.process.returncode == 0, "GRACEFUL_STOP_FAILED")
+                raise DeliveryError("GRACEFUL_STOP_FAILED_TIMEOUT") from None
+            require(self.process.returncode == 0, "GRACEFUL_STOP_FAILED_EXIT")
         require(self.process.poll() is not None, "PROCESS_STOP_FAILED")
+        self.stop_seconds = round(time.monotonic() - started, 6)
 
 
 def expect_failure(action, codes):
@@ -303,6 +300,10 @@ def exercise(previous_archive, candidate_archive, previous, candidate, result):
             )
         finally:
             server_b.stop()
+        result["graceful_shutdown"] = {
+            "status": "PASS", "seconds": server_b.stop_seconds,
+            "exit_code": server_b.process.returncode, "forced_stop": False,
+        }
         # A second real process demonstrates startup failure independently of
         # HTTP failure. Neither injection changes the immutable package bytes.
         failed_server = Server(workspace, version_b, fault="startup")

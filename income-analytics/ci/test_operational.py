@@ -456,3 +456,75 @@ def test_operational_missing_or_invalid_semantic_receipt_blocks_even_successful_
                           "host_rpo_rto_certified": False}
     result = require_operational({"engineering_ci": "PASS"}, report, "success")
     assert result["engineering_ci"] == "PASS"
+
+
+def test_backup_lifecycle_events_are_allowlisted_and_payload_free(owned, caplog, monkeypatch):
+    caplog.set_level(logging.INFO, logger="income.operations")
+    path = seed(owned)
+    backup_database(owned, path, owned.file("backup.db"), "synthetic-head")
+    monkeypatch.setattr("delivery.os.replace", lambda *_: (_ for _ in ()).throw(
+        PermissionError("synthetic-sensitive-payload")))
+    with pytest.raises(PermissionError):
+        backup_database(owned, path, owned.file("failed.db"), "synthetic-head")
+    events = [json.loads(record.getMessage())["event_id"] for record in caplog.records
+              if record.name == "income.operations"]
+    assert events == ["backup_started", "backup_completed", "backup_started", "backup_failed"]
+    assert str(path) not in caplog.text and "synthetic-sensitive-payload" not in caplog.text
+
+
+def test_dependency_latency_metrics_have_no_provider_or_financial_labels():
+    collector = runtime.Signals()
+    collector.dependency(0.2)
+    collector.dependency(0.4)
+    result = collector.snapshot()
+    assert result["counts"]["dependency_checks"] == 2
+    assert result["dependency_mean_seconds"] == pytest.approx(0.3)
+
+
+@pytest.mark.parametrize("mode", ["success", "timeout", "nonzero"])
+def test_graceful_shutdown_failure_cannot_be_waived(owned, mode):
+    import subprocess
+
+    from delivery_stage import Server
+
+    class Process:
+        returncode = None
+        calls = 0
+
+        def poll(self):
+            return self.returncode
+
+        def wait(self, timeout):
+            self.calls += 1
+            if self.calls == 1:
+                assert timeout == 30
+                if mode == "timeout":
+                    raise subprocess.TimeoutExpired("synthetic-process", timeout)
+            self.returncode = 1 if mode == "nonzero" else 0
+
+        def terminate(self):
+            self.returncode = -1
+
+    server = Server.__new__(Server)
+    server.stop_file = owned.file("synthetic-stop.flag")
+    server.process = Process()
+    if mode == "success":
+        server.stop()
+        assert server.stop_seconds >= 0 and server.stop_file.read_text() == "stop"
+    else:
+        with pytest.raises(DeliveryError, match="GRACEFUL_STOP_FAILED_"):
+            server.stop()
+
+
+def test_retention_bucket_counts_respect_exact_limits_at_calendar_boundaries(owned):
+    source = seed(owned)
+    now = datetime(2026, 10, 29, 12, tzinfo=UTC)
+    records = []
+    for day in range(0, 90):
+        path = owned.file(f"daily-{day}.db")
+        record = backup_database(owned, source, path, "synthetic-head")
+        record.update(path=str(path), created_at=(now - timedelta(days=day)).isoformat())
+        records.append(record)
+    result = retention_plan(owned, records, now=now, daily=7, weekly=4, monthly=3)
+    assert result["bucket_counts"] == {"daily": 7, "weekly": 4, "monthly": 3}
+    assert len(result["keep"]) <= 14 and result["deletion_authorized"] is False

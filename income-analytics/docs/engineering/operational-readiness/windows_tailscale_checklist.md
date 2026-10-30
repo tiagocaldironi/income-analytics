@@ -14,3 +14,5 @@ Preconditions: separate authorization, maintenance window, validated backup, own
 Collect only metadata; never export connection strings or process environment. This PR must not invoke
 tailscale serve, modify DNS/firewall/certificates, install services, restart application or change launchers.
 Versioned launcher `scripts/start_income_lan.ps1` is evidence of intent, not effective host configuration.
+
+Versioned findings: the LAN helper binds Uvicorn to 0.0.0.0 and supplies no explicit proxy trust or supervisor configuration. PR8 local-mode peer/Host restrictions still apply; this does not prove a real host is safely bound. The .env.example DATABASE_URL entry is not the runtime database selector (INCOME_ANALYTICS_DATABASE), and the template is not automatically loaded. No launcher/template changed. Controlled build and staging bind 127.0.0.1 with outbound network denied. Host validation must resolve these differences explicitly.

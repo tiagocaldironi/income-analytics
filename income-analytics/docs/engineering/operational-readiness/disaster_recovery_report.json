@@ -19,5 +19,39 @@
     "production_access": false
   },
   "host_certified": false,
-  "hosted_measurement": "PENDING"
+  "hosted_measurement": "PENDING",
+  "latest_local_uncommitted_controls": {
+    "totals": {
+      "passed": 58,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "recovery": {
+      "status": "PASS",
+      "environment": "DISPOSABLE_SYNTHETIC_SQLITE_WAL",
+      "backup_seconds": 0.022451,
+      "detection_seconds": 0.00198,
+      "restore_seconds": 0.027912,
+      "validation_seconds": 0.011708,
+      "observed_recovery_seconds": 0.041601,
+      "synthetic_committed_rows": 100,
+      "synthetic_rows_lost": 0,
+      "observed_rpo": "ZERO_COMMITTED_SYNTHETIC_ROWS_AT_BACKUP_BOUNDARY",
+      "last_valid_backup_age_seconds": 0.045828,
+      "host_rpo_rto_certified": false,
+      "target_rpo_hours": 24,
+      "target_rto_hours": 2,
+      "targets": "PROPOSED_NOT_GUARANTEED",
+      "production_access": false
+    },
+    "focused_tests": {
+      "passed": 122,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "source_fingerprint_at_execution": "7e0e51b249a983a45cb3368dee1ffee53facba4942870ef38f36f9ba1440347a",
+    "meaning": "Dirty-worktree validation; hosted proof is revision-specific and separate"
+  }
 }
