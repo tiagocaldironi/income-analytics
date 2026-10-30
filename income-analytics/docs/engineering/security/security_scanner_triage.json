@@ -10849,6 +10849,31 @@
       "file": "income-analytics/.env.example",
       "line": 26,
       "commit": "9a7ee2417f15e20a761e28c34e7d845e0b1196c1"
+    },
+    {
+      "tool": "gitleaks",
+      "mode": "dir",
+      "rule": "generic-api-key",
+      "file": "income-analytics/docs/engineering/operational-readiness/operational_readiness_final.md",
+      "line": 76,
+      "commit": "",
+      "state": "FALSE_POSITIVE",
+      "content_sha256": "c9c8ec3efaf0d33dcbe4ba8e45f76589ef1dd23f2f2a61addadfc82150679dac",
+      "identity": "61fa1b8715ca5d3b9251765bc8fc11c1bfc9e725625b1f651f778ca7239e8968",
+      "reason": "Exact reviewed public documentation sentence about prohibited actions; no credential value. Bound to full current-file digest or original historical commit, file, line and rule. Any changed occurrence requires a new review.",
+      "evidence": "PR10 source review at the pinned line; actual secret negative fixture remains REJECTED; no rule/config/ignore change"
+    },
+    {
+      "tool": "gitleaks",
+      "mode": "git",
+      "rule": "generic-api-key",
+      "file": "income-analytics/docs/engineering/operational-readiness/operational_readiness_final.md",
+      "line": 76,
+      "commit": "30bb3dc0cce11f34f0e2ce0d255ec993a80c7914",
+      "state": "FALSE_POSITIVE",
+      "identity": "59d1b4b6d8af6beaa3b3b945d1bbd19568eea22759d12f770a2a19e8a1f226cf",
+      "reason": "Exact reviewed public documentation sentence about prohibited actions; no credential value. Bound to full current-file digest or original historical commit, file, line and rule. Any changed occurrence requires a new review.",
+      "evidence": "PR10 source review at the pinned line; actual secret negative fixture remains REJECTED; no rule/config/ignore change"
     }
   ]
 }
