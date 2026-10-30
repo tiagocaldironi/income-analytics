@@ -1,6 +1,7 @@
 """Add disabled-by-default BRAPI paid-income integration state."""
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision = "0008_paid_income_brapi"

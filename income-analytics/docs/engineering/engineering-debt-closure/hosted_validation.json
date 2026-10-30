@@ -1,0 +1,10 @@
+{
+  "state": "NOT_VERIFIED_YET",
+  "repository": "tiagocaldironi/income-analytics",
+  "branch": "codex/pr11-engineering-debt",
+  "pr": null,
+  "premerge": [],
+  "postmerge": [],
+  "canonical_final_receipt": "PR body and immutable same-SHA Actions artifacts; update after acquisition",
+  "production_authorized": false
+}

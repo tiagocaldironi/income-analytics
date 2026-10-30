@@ -1,6 +1,7 @@
 """Add the persisted dashboard read model."""
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision = "0010_portfolio_dashboard_snapshot"

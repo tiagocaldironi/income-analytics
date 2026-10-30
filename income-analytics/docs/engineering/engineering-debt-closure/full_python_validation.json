@@ -1,0 +1,24 @@
+{
+  "state": "FAIL_EXPECTED_HISTORICAL_BLOCKERS",
+  "baseline": {
+    "passed": 1338,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 5
+  },
+  "local_reference_reproduction": {
+    "passed": 1338,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 5
+  },
+  "candidate": "RUNNING",
+  "collection_errors": 0,
+  "new_skips": 0,
+  "new_xfails": 0,
+  "scope": "unchanged full contract plus new governance regression controls",
+  "financial_overlap": "All 24 failed/error financial cases remain in both full and financial checks",
+  "external": "5 existing explicitly external Firebase skips remain",
+  "contract_proposal": "Keep full diagnostic failed until independent financial evidence exists. Do not redefine full success or remove any test. Engineering already separately runs the hermetic scope.",
+  "financial_state": "FINANCIAL_CERTIFICATION_BLOCKED"
+}

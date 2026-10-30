@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 
 import run as legacy
+from engineering_debt import reconciled_findings, require_clean_diagnostics
 from financial_certification import evaluate as evaluate_financial_evidence
 from financial_certification import failure_causes
 from gate_policy import (
@@ -115,6 +116,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         "ci/test_security.py",
         "ci/test_financial_certification.py",
         "ci/test_operational.py",
+        "ci/test_engineering_debt.py",
         f"--ci-gate={gate}",
         "-ra",
         "--tb=short",
@@ -216,6 +218,12 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
         ):
             raise ValueError("QUALITY_LOCK_REVIEW_REQUIRED")
         actual, exits = [], {}
+        ledger = json.loads(
+            (ROOT / "docs/engineering/engineering-debt-closure/quality_ledger.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        expected_findings = reconciled_findings(expected_findings, ledger, ROOT)
         for tool in ("ruff", "mypy"):
             if importlib.metadata.version(tool) != baseline["tools"][tool]:
                 raise ValueError("QUALITY_TOOL_VERSION_REVIEW_REQUIRED")
@@ -250,6 +258,7 @@ def main() -> int:
         summary = require_operational(
             summary, reports.get("operational", {}), args.operational_status
         )
+        summary = require_clean_diagnostics(summary, reports)
         args.reports.mkdir(parents=True, exist_ok=True)
         (args.reports / "gate-summary.json").write_text(json.dumps(summary, indent=2) + "\n")
         print(json.dumps(summary, indent=2))
@@ -269,6 +278,8 @@ def main() -> int:
         "fingerprint_version": FINGERPRINT_VERSION,
         "governance_policy_sha256": governance_policy_identity(ROOT),
         "pr_head_sha": os.getenv("CI_PR_HEAD_SHA", ""),
+        "run_id": os.getenv("GITHUB_RUN_ID", "LOCAL"),
+        "run_attempt": os.getenv("GITHUB_RUN_ATTEMPT", "1"),
         "event_sha": os.getenv("GITHUB_SHA", ""),
         "worktree_dirty": bool(
             subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip()

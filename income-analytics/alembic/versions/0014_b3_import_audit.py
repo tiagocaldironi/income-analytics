@@ -1,8 +1,8 @@
 """Persist auditable B3 import batches and source-row identities."""
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 revision = "0014_b3_import_audit"
 down_revision = "0013_capital_flow_classification"
@@ -31,7 +31,13 @@ def upgrade() -> None:
     op.create_table(
         "b3_imported_records",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("batch_id", sa.String(36), sa.ForeignKey("b3_import_batches.id"), nullable=False, index=True),
+        sa.Column(
+            "batch_id",
+            sa.String(36),
+            sa.ForeignKey("b3_import_batches.id"),
+            nullable=False,
+            index=True,
+        ),
         sa.Column("source", sa.String(16), nullable=False, server_default="B3"),
         sa.Column("fingerprint", sa.String(128), nullable=False, index=True),
         sa.Column("occurrence_index", sa.Integer(), nullable=False),
@@ -53,7 +59,9 @@ def upgrade() -> None:
         sa.Column("financial_event_id", sa.String(36), sa.ForeignKey("financial_events.id")),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("applied_at", sa.DateTime(timezone=True)),
-        sa.UniqueConstraint("source", "fingerprint", "occurrence_index", name="uq_b3_imported_record_identity"),
+        sa.UniqueConstraint(
+            "source", "fingerprint", "occurrence_index", name="uq_b3_imported_record_identity"
+        ),
     )
 
 

@@ -1,0 +1,30 @@
+{
+  "state": "PARTIAL",
+  "required_context": "CI / Engineering",
+  "ruleset": 26078982,
+  "ruleset_modified": false,
+  "promoted": [
+    "ruff"
+  ],
+  "not_promoted": {
+    "mypy": "607 unresolved typed contracts; still runs and fails visibly",
+    "python": "Full contract intentionally retains the 24 financial failure/error cases and 5 external skips"
+  },
+  "failure_conditions": [
+    "missing report",
+    "nonzero exit",
+    "cancelled",
+    "skipped",
+    "missing findings",
+    "nonempty findings",
+    "different checkout",
+    "different source fingerprint",
+    "different policy",
+    "different run",
+    "different attempt",
+    "invalid exit type"
+  ],
+  "tests": "ci/test_engineering_debt.py",
+  "baseline_policy": "Original 803 historical quality identities preserved byte-for-byte; 802 observed in PR10. quality_ledger.json reconciles every original occurrence, retaining multiplicity and exact remaining locations. Reintroducing resolved debt fails.",
+  "exceptions_added": 0
+}

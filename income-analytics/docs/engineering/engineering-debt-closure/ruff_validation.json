@@ -1,0 +1,15 @@
+{
+  "state": "RUFF_PASS_LOCAL",
+  "baseline": 130,
+  "current": 0,
+  "exit_code": 0,
+  "rules": [
+    "E",
+    "F",
+    "I"
+  ],
+  "configuration": "unchanged pyproject.toml",
+  "scope": "ruff check . --no-cache --output-format=json",
+  "hosted": "NOT_VERIFIED_YET",
+  "reference_run": 41051244098
+}

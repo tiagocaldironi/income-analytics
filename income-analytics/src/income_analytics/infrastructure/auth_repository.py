@@ -7,6 +7,7 @@ from uuid import UUID, uuid4
 
 from fastapi import HTTPException
 from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.orm import Session
 
 from income_analytics.application.auth_context import Principal
 from income_analytics.infrastructure.auth_config import signup_enabled
@@ -24,7 +25,12 @@ def digest(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
 
-def audit(session, actor_id: str | None, action: str, resource_id: str | None = None):
+def audit(
+    session: Session,
+    actor_id: str | None,
+    action: str,
+    resource_id: str | None = None,
+) -> None:
     session.add(
         SecurityAuditRecord(
             id=str(uuid4()),
@@ -82,7 +88,7 @@ def resolve_identity(claims: dict, *, create: bool = False) -> Principal:
     return Principal(UUID(user_id), subject, roles)
 
 
-def store_session(cookie: str, principal: Principal, csrf: str, seconds: int):
+def store_session(cookie: str, principal: Principal, csrf: str, seconds: int) -> None:
     with SessionFactory.begin() as db:
         db.query(AuthSessionRecord).filter(AuthSessionRecord.expires_at < int(time.time())).delete()
         db.merge(
@@ -104,7 +110,7 @@ def validate_local_session(cookie: str, principal: Principal) -> str:
         return row.csrf_hash
 
 
-def delete_session(cookie: str):
+def delete_session(cookie: str) -> None:
     with SessionFactory.begin() as db:
         row = db.get(AuthSessionRecord, digest(cookie))
         if row:
@@ -112,7 +118,7 @@ def delete_session(cookie: str):
             db.delete(row)
 
 
-def rate_limit(key: str, *, limit: int, seconds: int = 60):
+def rate_limit(key: str, *, limit: int, seconds: int = 60) -> None:
     """SQLite atomic counters are shared by all workers using this database."""
     now = int(time.time())
     window = now // seconds * seconds
@@ -122,10 +128,10 @@ def rate_limit(key: str, *, limit: int, seconds: int = 60):
             SecurityRateLimitRecord.window < now - 2 * 86400
         ).delete()
         statement = insert(SecurityRateLimitRecord).values(key=hashed, window=window, count=1)
-        statement = statement.on_conflict_do_update(
+        returning = statement.on_conflict_do_update(
             index_elements=["key", "window"], set_={"count": SecurityRateLimitRecord.count + 1}
         ).returning(SecurityRateLimitRecord.count)
-        count = db.execute(statement).scalar_one()
+        count = db.execute(returning).scalar_one()
     if count > limit:
         raise HTTPException(
             429, "Muitas solicitações. Aguarde um momento.", headers={"Retry-After": str(seconds)}

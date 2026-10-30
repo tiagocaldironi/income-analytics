@@ -1,6 +1,7 @@
 """Persist capital-flow classifications for performance scopes."""
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision = "0013_capital_flow_classification"

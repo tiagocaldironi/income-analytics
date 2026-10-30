@@ -4,11 +4,17 @@ from __future__ import annotations
 
 from contextvars import ContextVar
 from time import perf_counter
-from typing import Any
+from typing import TypedDict
 
 from sqlalchemy import Engine, event
 
-RequestMetrics = dict[str, Any]
+
+class RequestMetrics(TypedDict):
+    query_count: int
+    db_time_ms: float
+    query_started: list[float]
+
+
 current_request_metrics: ContextVar[RequestMetrics | None] = ContextVar(
     "income_analytics_request_metrics", default=None
 )

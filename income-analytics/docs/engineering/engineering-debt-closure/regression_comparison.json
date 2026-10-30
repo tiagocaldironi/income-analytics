@@ -1,0 +1,126 @@
+{
+  "state": "IN_PROGRESS",
+  "baseline_sha": "cfb96a2b405b2821d7b03a6a3546dd8c9241d8c0",
+  "reference_run": 41051244098,
+  "static": {
+    "before": 802,
+    "after": 607,
+    "resolved": 195
+  },
+  "semantic_equivalence": {
+    "exceptions": [
+      "new annotations and type-only declarations",
+      "explicit persisted-onboarding invariant assertion",
+      "rate-limit local-variable rename",
+      "reviewed imports ordering"
+    ],
+    "files": [
+      {
+        "file": "income-analytics/alembic/versions/0008_paid_income_brapi.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/alembic/versions/0009_pension_real_estate_classes.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/alembic/versions/0010_portfolio_dashboard_snapshot.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/alembic/versions/0012_pension_market_data.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/alembic/versions/0013_capital_flow_classification.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/alembic/versions/0014_b3_import_audit.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/alembic/versions/0015_magic_formula_fundamentals_snapshots.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/alembic/versions/0027_contextual_onboarding_v2.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/scripts/rematerialize_magic_formula_v2.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/api/onboarding_v2.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/api/routers/dashboard.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/api/routers/portfolios.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/api/saas_security.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/auth_repository.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/irpf_xlsx_import.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/magic_formula_snapshot_repository.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/models.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/request_profiling.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/infrastructure/upload_safety.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/src/income_analytics/main.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/tests/infrastructure/test_onboarding_v2_migration.py",
+        "executable_ast_equivalent": true
+      },
+      {
+        "file": "income-analytics/tests/security/test_firebase_authorization.py",
+        "executable_ast_equivalent": true
+      }
+    ]
+  },
+  "frozen_files": "No changed manifests, hashes, fixtures, financial policy or test-group files",
+  "local_results": {
+    "quality": "PASS",
+    "operational": "PASS",
+    "node": "PASS",
+    "financial": "BLOCKED",
+    "engineering": {
+      "totals": {
+        "passed": 1365,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "state": "PASS",
+      "note": "Precommit test run; not a same-SHA hosted receipt"
+    }
+  },
+  "production_access": false
+}

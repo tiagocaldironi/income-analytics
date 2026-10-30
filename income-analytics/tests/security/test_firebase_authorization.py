@@ -397,6 +397,7 @@ def test_onboarding_metadata_is_persisted_and_isolated_without_financial_writes(
     b, rb, _ = login()
     assert ra.status_code == rb.status_code == 200
     a1, a2, b1 = wallet(a, "guide-a"), wallet(a, "guide-a2"), wallet(b, "guide-b")
+
     def path(key):
         return f"/api/portfolios/{key}/onboarding"
 
@@ -417,77 +418,131 @@ def test_onboarding_metadata_is_persisted_and_isolated_without_financial_writes(
 
 def test_contextual_onboarding_intent_is_personal_progress_is_per_wallet(saas):
     login, tokens, _ = saas
-    a,_,token=login();b,_,_=login()
-    first=wallet(a,"onboard-a");second=wallet(a,"onboard-second");foreign=wallet(b,"onboard-b")
-    path=f"/api/portfolios/{first}/onboarding-v2"
-    initial=a.get(path).json()
-    assert initial["ask_intent"] and initial["achievements"][0]["state"]=="COMPLETED"
+    a, _, token = login()
+    b, _, _ = login()
+    first = wallet(a, "onboard-a")
+    second = wallet(a, "onboard-second")
+    foreign = wallet(b, "onboard-b")
+    path = f"/api/portfolios/{first}/onboarding-v2"
+    initial = a.get(path).json()
+    assert initial["ask_intent"] and initial["achievements"][0]["state"] == "COMPLETED"
     assert not initial["facts"]["confirmed_investment"]
-    for client,w in ((a,foreign),(b,first)):
-        assert client.get(f"/api/portfolios/{w}/onboarding-v2").status_code==404
-        assert client.put(f"/api/portfolios/{w}/onboarding-v2",json={"action":"START"}).status_code==404
-    assert a.put(path,json={"action":"INTENT","intent":"EXISTING","user_id":"forged"}).status_code==422
-    assert a.put(path,json={"action":"INTENT","intent":"EXISTING"}).status_code==200
-    assert a.get(path).json()["intent"]=="EXISTING"
-    returning,session,_=login(uid=tokens[token]["sub"])
-    assert session.status_code==200 and returning.get(path).json()["intent"]=="EXISTING"
-    other=a.get(f"/api/portfolios/{second}/onboarding-v2").json()
-    assert other["intent"]=="EXISTING" and not other["ask_intent"]
-    assert other["status"]=="ACTIVE"
-    assert a.put(path,json={"action":"CONFIRM_ASSET"}).status_code==409
-    assert a.put(path,json={"action":"EXPLORE","analysis":"composition"}).status_code==409
-    assert a.put(path,json={"action":"CLASS","asset_class":"FAKE_CLASS"}).status_code==422
-    assert a.put(path,json={"action":"CLASS","asset_class":"FII"}).json()["last_step"]==4
-    assert a.put(path,json={"action":"SKIP"}).json()["status"]=="SKIPPED"
-    assert a.get(path).json()["status"]=="SKIPPED"
-    assert a.put(path,json={"action":"RESUME"}).json()["status"]=="ACTIVE"
-    assert a.put(path,json={"action":"DISMISS"}).json()["dismissed_at"] is not None
-    assert a.get(f"/api/portfolios/{second}/onboarding-v2").json()["status"]=="ACTIVE"
+    for client, w in ((a, foreign), (b, first)):
+        assert client.get(f"/api/portfolios/{w}/onboarding-v2").status_code == 404
+        assert (
+            client.put(f"/api/portfolios/{w}/onboarding-v2", json={"action": "START"}).status_code
+            == 404
+        )
+    assert (
+        a.put(
+            path, json={"action": "INTENT", "intent": "EXISTING", "user_id": "forged"}
+        ).status_code
+        == 422
+    )
+    assert a.put(path, json={"action": "INTENT", "intent": "EXISTING"}).status_code == 200
+    assert a.get(path).json()["intent"] == "EXISTING"
+    returning, session, _ = login(uid=tokens[token]["sub"])
+    assert session.status_code == 200 and returning.get(path).json()["intent"] == "EXISTING"
+    other = a.get(f"/api/portfolios/{second}/onboarding-v2").json()
+    assert other["intent"] == "EXISTING" and not other["ask_intent"]
+    assert other["status"] == "ACTIVE"
+    assert a.put(path, json={"action": "CONFIRM_ASSET"}).status_code == 409
+    assert a.put(path, json={"action": "EXPLORE", "analysis": "composition"}).status_code == 409
+    assert a.put(path, json={"action": "CLASS", "asset_class": "FAKE_CLASS"}).status_code == 422
+    assert a.put(path, json={"action": "CLASS", "asset_class": "FII"}).json()["last_step"] == 4
+    assert a.put(path, json={"action": "SKIP"}).json()["status"] == "SKIPPED"
+    assert a.get(path).json()["status"] == "SKIPPED"
+    assert a.put(path, json={"action": "RESUME"}).json()["status"] == "ACTIVE"
+    assert a.put(path, json={"action": "DISMISS"}).json()["dismissed_at"] is not None
+    assert a.get(f"/api/portfolios/{second}/onboarding-v2").json()["status"] == "ACTIVE"
 
 
 def test_contextual_onboarding_confirmed_facts_events_and_deletion(saas):
-    from sqlalchemy import select,func
-    from income_analytics.infrastructure.models import OnboardingEventV2Record,FinancialEventRecord
-    login,_,_=saas
-    client,_,_=login();wid=wallet(client,"onboard-confirmed");path=f"/api/portfolios/{wid}/onboarding-v2"
-    assert client.put(path,json={"action":"START"}).status_code==200
-    assert client.put(path,json={"action":"START"}).status_code==200
-    failed=trade(client,wid,ticker="ONBV2",quantity="-1")
-    assert failed.status_code==422
+    from sqlalchemy import func, select
+
+    from income_analytics.infrastructure.models import FinancialEventRecord, OnboardingEventV2Record
+
+    login, _, _ = saas
+    client, _, _ = login()
+    wid = wallet(client, "onboard-confirmed")
+    path = f"/api/portfolios/{wid}/onboarding-v2"
+    assert client.put(path, json={"action": "START"}).status_code == 200
+    assert client.put(path, json={"action": "START"}).status_code == 200
+    failed = trade(client, wid, ticker="ONBV2", quantity="-1")
+    assert failed.status_code == 422
     assert not client.get(path).json()["facts"]["confirmed_investment"]
-    assert trade(client,wid,ticker="ONBV2").status_code==201
-    loaded=client.get(path).json()
+    assert trade(client, wid, ticker="ONBV2").status_code == 201
+    loaded = client.get(path).json()
     assert loaded["facts"]["confirmed_investment"]
-    assert loaded["achievements"][1]["state"]=="COMPLETED"
-    assert loaded["facts"]["available_analyses"]==[]
-    assert client.put('/api/market-prices/ONBV2',headers={"X-Portfolio-Id":wid},json={"current_price":"12","effective_date":"2026-10-01"}).status_code==200
-    loaded=client.get(path).json()
+    assert loaded["achievements"][1]["state"] == "COMPLETED"
+    assert loaded["facts"]["available_analyses"] == []
+    assert (
+        client.put(
+            "/api/market-prices/ONBV2",
+            headers={"X-Portfolio-Id": wid},
+            json={"current_price": "12", "effective_date": "2026-10-01"},
+        ).status_code
+        == 200
+    )
+    loaded = client.get(path).json()
     assert loaded["facts"]["available_analyses"]
-    before=client.get('/api/portfolio',headers={"X-Portfolio-Id":wid}).json()
-    assert client.put(path,json={"action":"CONFIRM_ASSET"}).json()["last_step"]==5
+    before = client.get("/api/portfolio", headers={"X-Portfolio-Id": wid}).json()
+    assert client.put(path, json={"action": "CONFIRM_ASSET"}).json()["last_step"] == 5
     for _ in range(2):
-        result=client.put(path,json={"action":"EXPLORE","analysis":loaded["facts"]["available_analyses"][0]})
-        assert result.status_code==200 and result.json()["status"]=="COMPLETED"
-    assert client.get('/api/portfolio',headers={"X-Portfolio-Id":wid}).json()==before
+        result = client.put(
+            path, json={"action": "EXPLORE", "analysis": loaded["facts"]["available_analyses"][0]}
+        )
+        assert result.status_code == 200 and result.json()["status"] == "COMPLETED"
+    assert client.get("/api/portfolio", headers={"X-Portfolio-Id": wid}).json() == before
     with SessionFactory() as db:
-        assert db.scalar(select(func.count()).select_from(OnboardingEventV2Record).where(OnboardingEventV2Record.portfolio_id==wid,OnboardingEventV2Record.event_name=="onboarding_started"))==1
-        assert db.scalar(select(func.count()).select_from(OnboardingEventV2Record).where(OnboardingEventV2Record.portfolio_id==wid,OnboardingEventV2Record.event_name=="onboarding_completed"))==1
-        event_id=db.scalar(select(FinancialEventRecord.id).where(FinancialEventRecord.portfolio_id==wid))
-    assert client.delete(f"/api/operations/{event_id}",headers={"X-Portfolio-Id":wid}).status_code==200
-    deleted=client.get(path).json()
+        assert (
+            db.scalar(
+                select(func.count())
+                .select_from(OnboardingEventV2Record)
+                .where(
+                    OnboardingEventV2Record.portfolio_id == wid,
+                    OnboardingEventV2Record.event_name == "onboarding_started",
+                )
+            )
+            == 1
+        )
+        assert (
+            db.scalar(
+                select(func.count())
+                .select_from(OnboardingEventV2Record)
+                .where(
+                    OnboardingEventV2Record.portfolio_id == wid,
+                    OnboardingEventV2Record.event_name == "onboarding_completed",
+                )
+            )
+            == 1
+        )
+        event_id = db.scalar(
+            select(FinancialEventRecord.id).where(FinancialEventRecord.portfolio_id == wid)
+        )
+    assert (
+        client.delete(f"/api/operations/{event_id}", headers={"X-Portfolio-Id": wid}).status_code
+        == 200
+    )
+    deleted = client.get(path).json()
     assert not deleted["facts"]["has_current_investments"]
-    assert deleted["achievements"][1]["state"]=="NOT_STARTED"
+    assert deleted["achievements"][1]["state"] == "NOT_STARTED"
     assert deleted["first_asset_earned_at"] is not None
 
 
 def test_contextual_onboarding_unauthenticated_and_csrf(saas):
-    login,_,_=saas
-    client,_,_=login();wid=wallet(client,"onboard-csrf");path=f"/api/portfolios/{wid}/onboarding-v2"
-    assert TestClient(app,base_url=ORIGIN).get(path).status_code==401
-    assert client.put(path,headers={"X-CSRF-Token":"forged"},json={"action":"START"}).status_code==403
-    assert client.post('/api/auth/logout').status_code==200
-    client.headers['X-CSRF-Token']=client.get('/api/auth/csrf').json()['csrf_token']
-    assert client.put(path,json={"action":"START"}).status_code==401
+    login, _, _ = saas
+    client, _, _ = login()
+    wid = wallet(client, "onboard-csrf")
+    path = f"/api/portfolios/{wid}/onboarding-v2"
+    assert TestClient(app, base_url=ORIGIN).get(path).status_code == 401
+    assert (
+        client.put(path, headers={"X-CSRF-Token": "forged"}, json={"action": "START"}).status_code
+        == 403
+    )
+    assert client.post("/api/auth/logout").status_code == 200
+    client.headers["X-CSRF-Token"] = client.get("/api/auth/csrf").json()["csrf_token"]
+    assert client.put(path, json={"action": "START"}).status_code == 401
 
 
 def test_data_sources_exposes_only_public_catalog(saas):
@@ -497,8 +552,21 @@ def test_data_sources_exposes_only_public_catalog(saas):
     response = client.get("/api/data-sources")
     assert response.status_code == 200
     providers = response.json()["providers"]
-    assert {item["provider"] for item in providers} == {"Brapi", "B3 COTAHIST", "BCB PTAX", "CoinGecko"}
-    allowed = {"provider", "description", "status", "last_success", "next_execution", "execution_note", "group"}
+    assert {item["provider"] for item in providers} == {
+        "Brapi",
+        "B3 COTAHIST",
+        "BCB PTAX",
+        "CoinGecko",
+    }
+    allowed = {
+        "provider",
+        "description",
+        "status",
+        "last_success",
+        "next_execution",
+        "execution_note",
+        "group",
+    }
     for item in providers:
         assert set(item) == allowed
         assert item["status"] == "UNKNOWN"
@@ -511,17 +579,39 @@ def test_data_sources_exposes_only_public_catalog(saas):
 def test_executable_simulation_owned_read_only_and_validated(saas):
     from datetime import date
     from decimal import Decimal
-    from sqlalchemy import select, func
+
+    from sqlalchemy import func, select
+
     from income_analytics.infrastructure.models import FinancialEventRecord
+
     login, _, _ = saas
     a, _, _ = login()
     b, _, _ = login()
     aid, bid = wallet(a, "plan-A"), wallet(b, "plan-B")
     assert trade(a, aid, ticker="PLAN3").status_code == 201
     headers = {"X-Portfolio-Id": aid}
-    assert a.put("/api/market-prices/PLAN3", headers=headers, json={"current_price": "34.50", "effective_date": date.today().isoformat()}).status_code == 200
-    assert a.put("/api/allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": "1"}}).status_code == 200
-    assert a.put("/api/asset-allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": {"PLAN3": "1"}}}).status_code == 200
+    assert (
+        a.put(
+            "/api/market-prices/PLAN3",
+            headers=headers,
+            json={"current_price": "34.50", "effective_date": date.today().isoformat()},
+        ).status_code
+        == 200
+    )
+    assert (
+        a.put(
+            "/api/allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": "1"}}
+        ).status_code
+        == 200
+    )
+    assert (
+        a.put(
+            "/api/asset-allocation-policy",
+            headers=headers,
+            json={"targets": {"BRAZILIAN_STOCK": {"PLAN3": "1"}}},
+        ).status_code
+        == 200
+    )
     path = "/api/portfolio/simulation/executable-contribution"
     before = a.get("/api/portfolio", headers=headers).json()
     with SessionFactory() as db:
@@ -536,7 +626,9 @@ def test_executable_simulation_owned_read_only_and_validated(saas):
     assert a.post(path, headers={"X-Portfolio-Id": bid}, json={"amount": "50"}).status_code == 404
     assert a.post(path, json={"amount": "50"}).status_code == 400
     for payload in [
-        {"amount": "0"}, {"amount": "NaN"}, {"amount": "0.001"},
+        {"amount": "0"},
+        {"amount": "NaN"},
+        {"amount": "0.001"},
         {"amount": "50", "unit_price": "1"},
         {"amount": "50", "rules": {"PLAN3": {"quantity_step": ".5"}}},
         {"amount": "50", "rules": {"PLAN3": {"fixed_fee_base": "-1"}}},
@@ -553,28 +645,66 @@ def test_executable_simulation_owned_read_only_and_validated(saas):
 
 def test_scoped_quote_timestamp_survives_sqlite_roundtrip_without_breaking_routes(saas):
     from datetime import UTC, date, datetime
+
     from sqlalchemy import select
-    from income_analytics.infrastructure.models import PortfolioAssetRecord, PortfolioMarketPriceRecord
+
+    from income_analytics.infrastructure.models import (
+        PortfolioAssetRecord,
+        PortfolioMarketPriceRecord,
+    )
+
     login, _, _ = saas
     client, _, _ = login()
     wid = wallet(client, "timestamp-roundtrip")
     assert trade(client, wid, ticker="UTC3").status_code == 201
     headers = {"X-Portfolio-Id": wid}
-    assert client.put("/api/allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": "1"}}).status_code == 200
-    assert client.put("/api/asset-allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": {"UTC3": "1"}}}).status_code == 200
+    assert (
+        client.put(
+            "/api/allocation-policy", headers=headers, json={"targets": {"BRAZILIAN_STOCK": "1"}}
+        ).status_code
+        == 200
+    )
+    assert (
+        client.put(
+            "/api/asset-allocation-policy",
+            headers=headers,
+            json={"targets": {"BRAZILIAN_STOCK": {"UTC3": "1"}}},
+        ).status_code
+        == 200
+    )
     observed = datetime.combine(date.today(), datetime.min.time(), tzinfo=UTC)
     quote_id = str(uuid4())
     with SessionFactory.begin() as db:
-        asset_id = db.scalar(select(PortfolioAssetRecord.asset_id).where(PortfolioAssetRecord.portfolio_id == wid))
-        db.add(PortfolioMarketPriceRecord(id=quote_id, portfolio_id=wid, asset_id=asset_id, price="12", effective_date=date.today(), registered_at=observed, provider="coingecko", price_timestamp=observed))
+        asset_id = db.scalar(
+            select(PortfolioAssetRecord.asset_id).where(PortfolioAssetRecord.portfolio_id == wid)
+        )
+        db.add(
+            PortfolioMarketPriceRecord(
+                id=quote_id,
+                portfolio_id=wid,
+                asset_id=asset_id,
+                price="12",
+                effective_date=date.today(),
+                registered_at=observed,
+                provider="coingecko",
+                price_timestamp=observed,
+            )
+        )
     with SessionFactory() as db:
         raw = db.get(PortfolioMarketPriceRecord, quote_id)
         assert raw.price_timestamp.tzinfo is None, "SQLite strips timezone metadata"
         raw_timestamp = raw.price_timestamp
-    for path in ("/api/portfolio", "/api/portfolio/dashboard", "/api/portfolio/allocation-analysis", "/api/operations"):
+    for path in (
+        "/api/portfolio",
+        "/api/portfolio/dashboard",
+        "/api/portfolio/allocation-analysis",
+        "/api/operations",
+    ):
         response = client.get(path, headers=headers)
         assert response.status_code == 200, (path, response.text)
-    response = client.post("/api/portfolio/simulation/executable-contribution", headers=headers, json={"amount": "50"})
+    response = client.post(
+        "/api/portfolio/simulation/executable-contribution", headers=headers, json={"amount": "50"}
+    )
     assert response.status_code == 200, response.text
     order = response.json()["orders"][0]
     assert order["price_timestamp"] == observed.isoformat()
