@@ -1,6 +1,8 @@
 """Negative controls for occurrence accounting and promoted diagnostics."""
 
+from contextlib import contextmanager
 from copy import deepcopy
+from types import SimpleNamespace
 
 import pytest
 from engineering_debt import reconciled_findings, require_clean_diagnostics
@@ -32,6 +34,46 @@ def test_resolved_occurrence_cannot_be_reintroduced(tmp_path):
         compare_diagnostics([before], reconciled_findings([before], ledger, tmp_path))["status"]
         == "FAIL"
     )
+
+
+def test_duplicate_ids_cannot_obscure_distinct_original_occurrences(tmp_path):
+    before, ledger = sample()
+    other = dict(before, line=8)
+    ledger["occurrences"].append(
+        dict(id="one", before=other, after=other, status="OPEN", evidence="review")
+    )
+    with pytest.raises(ValueError, match="DEBT_LEDGER_DUPLICATE_ID"):
+        reconciled_findings([before, other], ledger, tmp_path)
+
+
+def test_ledger_cannot_read_paths_outside_checkout(tmp_path):
+    before, ledger = sample()
+    ledger["reviewed_source_sha256"] = {"../outside.py": "0" * 64}
+    with pytest.raises(ValueError, match="DEBT_LEDGER_PATH_ESCAPE"):
+        reconciled_findings([before], ledger, tmp_path)
+
+
+def test_onboarding_missing_row_fails_before_financial_facts_are_read(monkeypatch):
+    from income_analytics.api import onboarding_v2
+
+    class MissingRow:
+        def execute(self, statement):
+            pass
+
+        def get(self, model, key):
+            return None
+
+    @contextmanager
+    def begin():
+        yield MissingRow()
+
+    def forbidden_facts(*args):
+        pytest.fail("Financial facts must not be consulted after a failed onboarding invariant")
+
+    monkeypatch.setattr(onboarding_v2, "SessionFactory", SimpleNamespace(begin=begin))
+    monkeypatch.setattr(onboarding_v2, "facts", forbidden_facts)
+    with pytest.raises(AssertionError, match="Onboarding insert did not persist its journey"):
+        onboarding_v2.update("local", "wallet", "Wallet", None, SimpleNamespace(action="START"))
 
 
 @pytest.mark.parametrize("mutation", ["omit", "duplicate", "message", "evidence", "status", "hash"])

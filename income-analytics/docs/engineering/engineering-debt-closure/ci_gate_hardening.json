@@ -7,7 +7,7 @@
     "ruff"
   ],
   "not_promoted": {
-    "mypy": "607 unresolved typed contracts; still runs and fails visibly",
+    "mypy": "499 remaining occurrences, including 39 in three byte-frozen source modules; diagnosis remains visible and failed",
     "python": "Full contract intentionally retains the 24 financial failure/error cases and 5 external skips"
   },
   "failure_conditions": [
@@ -26,5 +26,6 @@
   ],
   "tests": "ci/test_engineering_debt.py",
   "baseline_policy": "Original 803 historical quality identities preserved byte-for-byte; 802 observed in PR10. quality_ledger.json reconciles every original occurrence, retaining multiplicity and exact remaining locations. Reintroducing resolved debt fails.",
-  "exceptions_added": 0
+  "exceptions_added": 0,
+  "negative_controls": "27 direct new cases plus 3 automatically expanded source/policy identity cases; all included in Engineering"
 }

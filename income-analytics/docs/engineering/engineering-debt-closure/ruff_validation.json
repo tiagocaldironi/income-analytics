@@ -10,6 +10,11 @@
   ],
   "configuration": "unchanged pyproject.toml",
   "scope": "ruff check . --no-cache --output-format=json",
-  "hosted": "NOT_VERIFIED_YET",
+  "hosted": {
+    "run_id": 41057954702,
+    "checkout_sha": "f7fcfc2ddd6c5f57d58d7aab72f0f0626f1e4522",
+    "state": "PASS",
+    "findings": 0
+  },
   "reference_run": 41051244098
 }

@@ -8,6 +8,10 @@
     "src/income_analytics/api/routers/dashboard.py": "dff22784ef6a6c217b9d7ea122af9bbc765100ffe043201de2adacd2ff6b1146",
     "src/income_analytics/api/routers/portfolios.py": "6d223ac548b0c5185dd3b5da9f4ca751c3408c987820ef8231a4e320655e82b7",
     "src/income_analytics/api/saas_security.py": "4708c099ded0532302745898f09b48aebe077d76f85dde5f7d84ff1fc60e632a",
+    "src/income_analytics/application/executable_contribution.py": "1257c78181f46d120bf054b1a6fec4081cdfb551f2bf01b91ba5fee1a71999ba",
+    "src/income_analytics/application/global_contribution_allocator.py": "bb49a550ff06619f965017ec45a1e6237a2a68526645af85bca389259f2ea58f",
+    "src/income_analytics/application/magic_formula_formal_qa.py": "84f264f68a857762c53bb3ecbd2c7a1b1cf9d93b716524a1c68036cb8aac1300",
+    "src/income_analytics/application/wealth_explanation.py": "63ab640d71ecb53e047cd61d1e5220fa12b1ee1651d1df5f659392eeef46d719",
     "src/income_analytics/infrastructure/auth_repository.py": "fc4bacdb9c9311961261ed9b2586f20edde20b3af65c3fda2b3aa5ebb18cb99f",
     "src/income_analytics/infrastructure/irpf_xlsx_import.py": "b31d3cc8317c6a5e364bab98d1ec0f30ebe8b0f841dd3901b7d7916352868857",
     "src/income_analytics/infrastructure/magic_formula_snapshot_repository.py": "ccd45fc19e7bc57a88c13077853cc1d556038b3c1f8e798e9e8dbf3cc88c7990",
@@ -2988,16 +2992,9 @@
         "code": "type-arg",
         "message": "Missing type arguments for generic type \"dict\""
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 19,
-        "column": null,
-        "code": "type-arg",
-        "message": "Missing type arguments for generic type \"dict\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0187",
@@ -3009,16 +3006,9 @@
         "code": "type-arg",
         "message": "Missing type arguments for generic type \"dict\""
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 20,
-        "column": null,
-        "code": "type-arg",
-        "message": "Missing type arguments for generic type \"dict\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0188",
@@ -3030,16 +3020,9 @@
         "code": "type-arg",
         "message": "Missing type arguments for generic type \"tuple\""
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 23,
-        "column": null,
-        "code": "type-arg",
-        "message": "Missing type arguments for generic type \"tuple\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0189",
@@ -3051,16 +3034,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 26,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0190",
@@ -3072,16 +3048,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"_allocate\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 53,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"_allocate\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0191",
@@ -3093,16 +3062,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 67,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0192",
@@ -3114,16 +3076,9 @@
         "code": "var-annotated",
         "message": "Need type annotation for \"trace\" (hint: \"trace: list[<type>] = ...\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 93,
-        "column": null,
-        "code": "var-annotated",
-        "message": "Need type annotation for \"trace\" (hint: \"trace: list[<type>] = ...\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0193",
@@ -3135,16 +3090,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 97,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0194",
@@ -3156,16 +3104,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 112,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0195",
@@ -3177,16 +3118,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 117,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0196",
@@ -3198,16 +3132,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"signature\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 118,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"signature\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0197",
@@ -3219,16 +3146,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 120,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0198",
@@ -3240,16 +3160,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"objective\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 147,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"objective\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0199",
@@ -3261,16 +3174,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 150,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0200",
@@ -3282,16 +3188,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 180,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0201",
@@ -3303,16 +3202,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"proposals\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 183,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"proposals\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0202",
@@ -3324,16 +3216,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"transition\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 188,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"transition\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0203",
@@ -3345,16 +3230,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"objective\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 194,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"objective\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0204",
@@ -3366,16 +3244,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"expand\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 200,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"expand\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0205",
@@ -3390,7 +3261,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 202,
+        "line": 265,
         "column": null,
         "code": "var-annotated",
         "message": "Need type annotation for \"best_by_ticker\" (hint: \"best_by_ticker: dict[<type>, <type>] = ...\")"
@@ -3408,16 +3279,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"rank\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 209,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"rank\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0207",
@@ -3429,16 +3293,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"expand\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 234,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"expand\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0208",
@@ -3450,16 +3307,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"signature\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/global_contribution_allocator.py",
-        "line": 235,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"signature\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0209",
@@ -7506,7 +7356,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 23,
+        "line": 24,
         "column": null,
         "code": "type-arg",
         "message": "Missing type arguments for generic type \"dict\""
@@ -7524,16 +7374,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 40,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0403",
@@ -7545,16 +7388,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 60,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0404",
@@ -7566,16 +7402,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 65,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0405",
@@ -7587,16 +7416,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 71,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0406",
@@ -7608,16 +7430,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 72,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0407",
@@ -7629,16 +7444,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 75,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0408",
@@ -7650,16 +7458,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"present\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 80,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"present\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0409",
@@ -7671,16 +7472,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"present\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 86,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"present\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0410",
@@ -7692,16 +7486,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 110,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0411",
@@ -7713,16 +7500,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 111,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0412",
@@ -7734,16 +7514,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 112,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0413",
@@ -7755,16 +7528,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"present\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 117,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"present\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0414",
@@ -7776,16 +7542,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 122,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0415",
@@ -7797,16 +7556,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 124,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0416",
@@ -7818,16 +7570,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 125,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0417",
@@ -7839,16 +7584,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 126,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0418",
@@ -7860,16 +7598,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 129,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0419",
@@ -7881,16 +7612,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"present\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 138,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"present\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0420",
@@ -7902,16 +7626,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 175,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0421",
@@ -7926,7 +7643,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 176,
+        "line": 177,
         "column": null,
         "code": "var-annotated",
         "message": "Need type annotation for \"refs\" (hint: \"refs: list[<type>] = ...\")"
@@ -7944,16 +7661,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"present\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 183,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"present\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0423",
@@ -7965,16 +7675,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 197,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0424",
@@ -7986,16 +7689,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 204,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0425",
@@ -8007,16 +7703,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 205,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0426",
@@ -8028,16 +7717,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 209,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0427",
@@ -8049,16 +7731,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 210,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0428",
@@ -8070,16 +7745,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 234,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0429",
@@ -8091,16 +7759,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 238,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0430",
@@ -8112,16 +7773,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"present\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 246,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"present\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0431",
@@ -8133,16 +7787,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 258,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0432",
@@ -8154,16 +7801,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 265,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0433",
@@ -8175,16 +7815,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 275,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0434",
@@ -8196,16 +7829,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 279,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0435",
@@ -8217,16 +7843,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 280,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0436",
@@ -8238,16 +7857,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 286,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0437",
@@ -8259,16 +7871,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 287,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0438",
@@ -8280,16 +7885,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 288,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0439",
@@ -8301,16 +7899,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 295,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0440",
@@ -8322,16 +7913,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 298,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0441",
@@ -8343,16 +7927,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 303,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0442",
@@ -8364,16 +7941,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 304,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0443",
@@ -8385,16 +7955,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 307,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0444",
@@ -8406,16 +7969,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"number\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 308,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"number\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0445",
@@ -8427,16 +7983,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 320,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0446",
@@ -8448,16 +7997,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 322,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0447",
@@ -8469,16 +8011,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 325,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0448",
@@ -8490,16 +8025,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 349,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0449",
@@ -8511,16 +8039,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"equal\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 350,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"equal\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0450",
@@ -8532,16 +8053,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 356,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0451",
@@ -8553,16 +8067,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"check\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/magic_formula_formal_qa.py",
-        "line": 387,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"check\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0452",
@@ -9921,7 +9428,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 28,
+        "line": 66,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
@@ -9942,7 +9449,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 32,
+        "line": 119,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
@@ -9963,7 +9470,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 36,
+        "line": 126,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
@@ -9981,16 +9488,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 66,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0520",
@@ -10002,16 +9502,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 69,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0521",
@@ -10023,16 +9516,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 76,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0522",
@@ -10044,16 +9530,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"ceil_units\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 77,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"ceil_units\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0523",
@@ -10065,16 +9544,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 81,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0524",
@@ -10086,16 +9558,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"floor_units\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 84,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"floor_units\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0525",
@@ -10107,16 +9572,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 89,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0526",
@@ -10131,7 +9589,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 93,
+        "line": 123,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"_build_executable_plan\" in typed context"
@@ -10149,16 +9607,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 96,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0528",
@@ -10173,7 +9624,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 115,
+        "line": 145,
         "column": null,
         "code": "var-annotated",
         "message": "Need type annotation for \"class_values\" (hint: \"class_values: dict[<type>, <type>] = ...\")"
@@ -10194,7 +9645,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 257,
+        "line": 287,
         "column": null,
         "code": "operator",
         "message": "No overload variant of \"__sub__\" of \"date\" matches argument type \"None\""
@@ -10215,7 +9666,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 285,
+        "line": 315,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"common_increment\" in typed context"
@@ -10236,7 +9687,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 285,
+        "line": 315,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"price\""
@@ -10257,7 +9708,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 297,
+        "line": 327,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"price\""
@@ -10278,7 +9729,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 298,
+        "line": 328,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"effective_date\""
@@ -10299,7 +9750,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 299,
+        "line": 329,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"provider\""
@@ -10320,7 +9771,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 300,
+        "line": 330,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"price_timestamp\""
@@ -10341,7 +9792,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 301,
+        "line": 331,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"price_timestamp\""
@@ -10359,16 +9810,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"allocate_quantities\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 331,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"allocate_quantities\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0538",
@@ -10380,16 +9824,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"cost\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 342,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"cost\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0539",
@@ -10401,16 +9838,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"cost\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 370,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"cost\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0540",
@@ -10422,16 +9852,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"cost\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 371,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"cost\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0541",
@@ -10443,16 +9866,9 @@
         "code": "attr-defined",
         "message": "\"Decimal\" has no attribute \"__iter__\"; maybe \"__int__\"? (not iterable)"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 428,
-        "column": null,
-        "code": "attr-defined",
-        "message": "\"Decimal\" has no attribute \"__iter__\"; maybe \"__int__\"? (not iterable)"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0542",
@@ -10590,16 +10006,9 @@
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"__iter__\"; maybe \"__dir__\" or \"__str__\"? (not iterable)"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 82,
-        "column": null,
-        "code": "attr-defined",
-        "message": "\"object\" has no attribute \"__iter__\"; maybe \"__dir__\" or \"__str__\"? (not iterable)"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0549",
@@ -10611,16 +10020,9 @@
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"__iter__\"; maybe \"__dir__\" or \"__str__\"? (not iterable)"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 84,
-        "column": null,
-        "code": "attr-defined",
-        "message": "\"object\" has no attribute \"__iter__\"; maybe \"__dir__\" or \"__str__\"? (not iterable)"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0550",
@@ -10632,16 +10034,9 @@
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"__iter__\"; maybe \"__dir__\" or \"__str__\"? (not iterable)"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 88,
-        "column": null,
-        "code": "attr-defined",
-        "message": "\"object\" has no attribute \"__iter__\"; maybe \"__dir__\" or \"__str__\"? (not iterable)"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0551",
@@ -10653,16 +10048,9 @@
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"__iter__\"; maybe \"__dir__\" or \"__str__\"? (not iterable)"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 93,
-        "column": null,
-        "code": "attr-defined",
-        "message": "\"object\" has no attribute \"__iter__\"; maybe \"__dir__\" or \"__str__\"? (not iterable)"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0552",
@@ -10674,16 +10062,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"_flow_children\" of \"WealthExplanationService\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 122,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"_flow_children\" of \"WealthExplanationService\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0553",
@@ -10695,16 +10076,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"_children\" of \"WealthExplanationService\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 131,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"_children\" of \"WealthExplanationService\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0554",
@@ -10716,16 +10090,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"_children\" of \"WealthExplanationService\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 139,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"_children\" of \"WealthExplanationService\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0555",
@@ -10737,16 +10104,9 @@
         "code": "no-untyped-call",
         "message": "Call to untyped function \"_children\" of \"WealthExplanationService\" in typed context"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 145,
-        "column": null,
-        "code": "no-untyped-call",
-        "message": "Call to untyped function \"_children\" of \"WealthExplanationService\" in typed context"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0556",
@@ -10758,16 +10118,9 @@
         "code": "type-var",
         "message": "Value of type variable \"_AddableT1\" of \"sum\" cannot be \"object\""
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 150,
-        "column": null,
-        "code": "type-var",
-        "message": "Value of type variable \"_AddableT1\" of \"sum\" cannot be \"object\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0557",
@@ -10779,16 +10132,9 @@
         "code": "operator",
         "message": "Unsupported operand types for + (\"Decimal\" and \"object\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 150,
-        "column": null,
-        "code": "operator",
-        "message": "Unsupported operand types for + (\"Decimal\" and \"object\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0558",
@@ -10800,16 +10146,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 290,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0559",
@@ -10821,16 +10160,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 305,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0560",
@@ -10842,16 +10174,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 320,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a return type annotation"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0561",
@@ -10863,16 +10188,9 @@
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation for one or more parameters"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 320,
-        "column": null,
-        "code": "no-untyped-def",
-        "message": "Function is missing a type annotation for one or more parameters"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0562",
@@ -10884,16 +10202,9 @@
         "code": "operator",
         "message": "Unsupported operand types for + (\"Decimal\" and \"str\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 404,
-        "column": null,
-        "code": "operator",
-        "message": "Unsupported operand types for + (\"Decimal\" and \"str\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0563",
@@ -10905,16 +10216,9 @@
         "code": "operator",
         "message": "Unsupported operand types for + (\"Decimal\" and \"None\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 404,
-        "column": null,
-        "code": "operator",
-        "message": "Unsupported operand types for + (\"Decimal\" and \"None\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0564",
@@ -10926,16 +10230,9 @@
         "code": "operator",
         "message": "Unsupported operand types for < (\"int\" and \"None\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 413,
-        "column": null,
-        "code": "operator",
-        "message": "Unsupported operand types for < (\"int\" and \"None\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0565",
@@ -10947,16 +10244,9 @@
         "code": "operator",
         "message": "Unsupported operand types for > (\"str\" and \"int\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 413,
-        "column": null,
-        "code": "operator",
-        "message": "Unsupported operand types for > (\"str\" and \"int\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0566",
@@ -10968,16 +10258,9 @@
         "code": "arg-type",
         "message": "Argument \"key\" to \"sorted\" has incompatible type \"Callable[[dict[str, bool | str | Decimal | None]], bool | str | Decimal | None]\"; expected \"Callable[[dict[str, bool | str | Decimal | None]], SupportsDunderLT[Any] | SupportsDunderGT[Any]]\""
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 414,
-        "column": null,
-        "code": "arg-type",
-        "message": "Argument \"key\" to \"sorted\" has incompatible type \"Callable[[dict[str, bool | str | Decimal | None]], bool | str | Decimal | None]\"; expected \"Callable[[dict[str, bool | str | Decimal | None]], SupportsDunderLT[Any] | SupportsDunderGT[Any]]\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0567",
@@ -10989,16 +10272,9 @@
         "code": "return-value",
         "message": "Incompatible return value type (got \"bool | str | Decimal | None\", expected \"SupportsDunderLT[Any] | SupportsDunderGT[Any]\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 414,
-        "column": null,
-        "code": "return-value",
-        "message": "Incompatible return value type (got \"bool | str | Decimal | None\", expected \"SupportsDunderLT[Any] | SupportsDunderGT[Any]\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0568",
@@ -11010,16 +10286,9 @@
         "code": "operator",
         "message": "Unsupported operand types for > (\"int\" and \"None\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 418,
-        "column": null,
-        "code": "operator",
-        "message": "Unsupported operand types for > (\"int\" and \"None\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0569",
@@ -11031,16 +10300,9 @@
         "code": "operator",
         "message": "Unsupported operand types for < (\"str\" and \"int\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 418,
-        "column": null,
-        "code": "operator",
-        "message": "Unsupported operand types for < (\"str\" and \"int\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0570",
@@ -11052,16 +10314,9 @@
         "code": "arg-type",
         "message": "Argument \"key\" to \"sorted\" has incompatible type \"Callable[[dict[str, bool | str | Decimal | None]], bool | str | Decimal | None]\"; expected \"Callable[[dict[str, bool | str | Decimal | None]], SupportsDunderLT[Any] | SupportsDunderGT[Any]]\""
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 419,
-        "column": null,
-        "code": "arg-type",
-        "message": "Argument \"key\" to \"sorted\" has incompatible type \"Callable[[dict[str, bool | str | Decimal | None]], bool | str | Decimal | None]\"; expected \"Callable[[dict[str, bool | str | Decimal | None]], SupportsDunderLT[Any] | SupportsDunderGT[Any]]\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0571",
@@ -11073,16 +10328,9 @@
         "code": "return-value",
         "message": "Incompatible return value type (got \"bool | str | Decimal | None\", expected \"SupportsDunderLT[Any] | SupportsDunderGT[Any]\")"
       },
-      "after": {
-        "tool": "mypy",
-        "file": "src/income_analytics/application/wealth_explanation.py",
-        "line": 419,
-        "column": null,
-        "code": "return-value",
-        "message": "Incompatible return value type (got \"bool | str | Decimal | None\", expected \"SupportsDunderLT[Any] | SupportsDunderGT[Any]\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
     },
     {
       "id": "historical-0572",

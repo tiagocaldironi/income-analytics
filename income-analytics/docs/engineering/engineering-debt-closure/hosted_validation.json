@@ -1,9 +1,34 @@
 {
-  "state": "NOT_VERIFIED_YET",
+  "state": "INITIAL_RUN_FAILED_SECURITY_CHECKSUM_FALSE_POSITIVE",
   "repository": "tiagocaldironi/income-analytics",
   "branch": "codex/pr11-engineering-debt",
-  "pr": null,
-  "premerge": [],
+  "pr": 56,
+  "premerge": [
+    {
+      "run_id": 41057954702,
+      "attempt": 1,
+      "head_sha": "cbee1ba4455e2c73ccde78de3dd645a2eb2f37c5",
+      "checkout_sha": "f7fcfc2ddd6c5f57d58d7aab72f0f0626f1e4522",
+      "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/41057954702",
+      "ruff": "PASS",
+      "mypy_occurrences": 607,
+      "engineering": {
+        "passed": 1365,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "full_python": {
+        "passed": 1365,
+        "failed": 15,
+        "errors": 9,
+        "skipped": 5
+      },
+      "security": "FAIL: exact source checksum misidentified as generic-api-key",
+      "staging": "SKIPPED_DUE_TO_FAILED_SECURITY",
+      "eligible": false
+    }
+  ],
   "postmerge": [],
   "canonical_final_receipt": "PR body and immutable same-SHA Actions artifacts; update after acquisition",
   "production_authorized": false
