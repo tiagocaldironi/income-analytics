@@ -351,3 +351,50 @@ def test_stock_loan_credit_and_debit_are_non_economic() -> None:
         None,
         "STOCK_LOAN",
     )
+
+
+@pytest.mark.parametrize("priced", [False, True])
+def test_settlement_overlapping_stock_loan_requires_review_even_with_reference_price(priced):
+    header = [
+        "Entrada/Saída",
+        "Data",
+        "Movimentação",
+        "Produto",
+        "Instituição",
+        "Quantidade",
+        "Preço unitário",
+        "Valor",
+    ]
+    rows = [
+        [
+            "Débito",
+            "15/12/2025",
+            "Transferência - Liquidação",
+            "TEST3 - Teste",
+            "XP",
+            "45",
+            "49.68" if priced else "-",
+            "2235.6" if priced else "-",
+        ],
+        ["Crédito", "15/12/2025", "Empréstimo", "TEST3 - Teste", "XP", "45", "-", "-"],
+        [
+            "Crédito",
+            "15/12/2025",
+            "Transferência - Liquidação",
+            "TEST3 - Teste",
+            "XP",
+            "2",
+            "10",
+            "20",
+        ],
+        ["Débito", "15/12/2025", "Venda", "TEST3 - Teste", "XP", "45", "49.68", "2235.6"],
+    ]
+    settlement, loan, other_quantity, explicit_sale = B3MovementReportParser().parse(
+        _workbook("Movimentação", header, rows)
+    )
+    assert settlement.status is B3RowStatus.REVIEW_REQUIRED
+    assert settlement.detail == "SETTLEMENT_WITH_STOCK_LOAN_REQUIRES_RECONCILIATION"
+    assert settlement.quantity == Decimal("45")
+    assert loan.status is B3RowStatus.UNSUPPORTED
+    assert other_quantity.status is B3RowStatus.NEW
+    assert explicit_sale.status is B3RowStatus.NEW
