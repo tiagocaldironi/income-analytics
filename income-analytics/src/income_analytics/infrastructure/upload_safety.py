@@ -4,7 +4,7 @@ from io import BytesIO
 from zipfile import BadZipFile, ZipFile
 
 
-def validate_workbook(payload: bytes):
+def validate_workbook(payload: bytes) -> None:
     if len(payload) > 6 * 1024 * 1024:
         raise ValueError("Planilha excede o limite de 6 MB.")
     try:

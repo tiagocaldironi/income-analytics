@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Callable
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
@@ -122,7 +123,7 @@ def _column_index(reference: str) -> int:
     return result - 1
 
 
-def _column_for(header: dict[int, str], predicate: object) -> int | None:
+def _column_for(header: dict[int, str], predicate: Callable[[str], bool]) -> int | None:
     return next((column for column, value in header.items() if predicate(_normalized(value))), None)
 
 

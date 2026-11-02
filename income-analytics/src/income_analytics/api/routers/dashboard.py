@@ -603,8 +603,12 @@ def project_executable_contribution(simulation: ExecutableContributionInput) -> 
     """Price existing strategy targets without writing events or executing orders."""
     try:
         plan = build_executable_plan(
-            session, amount=simulation.amount,
-            rules={ticker: rule.model_dump(exclude_none=True) for ticker, rule in simulation.rules.items()},
+            session,
+            amount=simulation.amount,
+            rules={
+                ticker: rule.model_dump(exclude_none=True)
+                for ticker, rule in simulation.rules.items()
+            },
         )
         return jsonable_encoder(plan, custom_encoder={Decimal: str})
     except ValueError as error:

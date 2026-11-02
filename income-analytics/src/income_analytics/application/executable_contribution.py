@@ -7,9 +7,13 @@ from dataclasses import asdict, dataclass
 from datetime import date
 from decimal import ROUND_CEILING, ROUND_DOWN, Decimal, localcontext
 from math import lcm
+from typing import TypedDict
 
 from income_analytics.application.base_currency_valuation import MAX_FX_STALE_AGE_DAYS
-from income_analytics.application.global_contribution_allocator import allocate_quantities
+from income_analytics.application.global_contribution_allocator import (
+    AllocationDiagnostics,
+    allocate_quantities,
+)
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.projectors.contribution_target_allocator import (
     ContributionTargetAllocator,
@@ -25,11 +29,37 @@ FOREIGN_CLASSES = {"INTERNATIONAL", "INTERNATIONAL_ETF", "US_REIT"}
 SUPPORTED = B3_CLASSES | FOREIGN_CLASSES | {"CRYPTO", "FIXED_INCOME"}
 
 
-def floor_units(value, step):
+class ExecutableOrder(TypedDict):
+    ticker: str
+    label: str
+    asset_class: str
+    market: str
+    unit_price: Decimal
+    currency: str
+    price_date: date
+    price_timestamp: str | None
+    price_source: str
+    price_age_days: int
+    quantity: Decimal
+    quantity_step: Decimal
+    native_amount: Decimal
+    estimated_principal: Decimal
+    estimated_total: Decimal
+    estimated_costs: Decimal
+    costs_known: bool
+    fx_rate: Decimal
+    fx_date: date | None
+    weight_before: Decimal | None
+    weight_after: Decimal | None
+    target_weight: Decimal
+    reason: str
+
+
+def floor_units(value: Decimal, step: Decimal) -> Decimal:
     return (value / step).to_integral_value(rounding=ROUND_DOWN) * step
 
 
-def ceil_units(value, step):
+def ceil_units(value: Decimal, step: Decimal) -> Decimal:
     return (value / step).to_integral_value(rounding=ROUND_CEILING) * step
 
 
@@ -63,22 +93,22 @@ class Instrument:
     costs_known: bool = False
 
     @property
-    def unit_base(self):
+    def unit_base(self) -> Decimal:
         return self.price * self.fx
 
-    def cost(self, quantity):
+    def cost(self, quantity: Decimal) -> Decimal:
         if not quantity:
             return ZERO
         return (quantity * self.unit_base * (1 + self.fee_rate) + self.fixed_fee).quantize(
             CENT, rounding=ROUND_CEILING
         )
 
-    def minimum(self):
+    def minimum(self) -> Decimal:
         return ceil_units(
             max(self.step, self.minimum_quantity, self.minimum_amount / self.price), self.step
         )
 
-    def affordable(self, available):
+    def affordable(self, available: Decimal) -> Decimal:
         if available <= self.fixed_fee:
             return ZERO
         return floor_units(
@@ -327,7 +357,7 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
             "residual_amount": ZERO,
             "total_estimated": ZERO,
         }
-    diagnostics = {"initial_unavailable_reference": unavailable}
+    diagnostics: AllocationDiagnostics = {"initial_unavailable_reference": unavailable}
     quantities, residual, iterations = allocate_quantities(
         candidates,
         class_values,
@@ -341,7 +371,7 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
     principal = sum((quantities[item.ticker] * item.unit_base for item in candidates), ZERO)
     total = sum((item.cost(quantities[item.ticker]) for item in candidates), ZERO)
     wealth = sum(class_values.values(), ZERO)
-    orders = []
+    orders: list[ExecutableOrder] = []
     for item in candidates:
         quantity = quantities[item.ticker]
         if not quantity:

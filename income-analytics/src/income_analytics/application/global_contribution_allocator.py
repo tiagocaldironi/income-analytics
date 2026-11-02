@@ -4,39 +4,97 @@ Only planning state changes. Quotes, ledger, policy and certified projectors are
 never written. The primary objective is the official global class TV distance.
 """
 
+from __future__ import annotations
+
+from collections.abc import Sequence
 from dataclasses import dataclass
 from decimal import ROUND_CEILING, ROUND_DOWN, Decimal, localcontext
+from typing import TYPE_CHECKING, NotRequired, TypedDict
 
 from income_analytics.domain.projectors.contribution_target_allocator import (
     ContributionTargetAllocator,
 )
 
+if TYPE_CHECKING:
+    from income_analytics.application.executable_contribution import Instrument
+
 ZERO = Decimal(0)
+type Objective = tuple[Decimal, Decimal, Decimal, Decimal]
+type Signature = tuple[tuple[str, Decimal], ...]
+
+
+class Purchase(TypedDict):
+    ticker: str
+    quantity: Decimal
+
+
+class AllocationIteration(TypedDict):
+    class_distance_before: Decimal
+    class_distance_after: Decimal
+    asset_distance_before: Decimal
+    asset_distance_after: Decimal
+    purchases: list[Purchase]
+    spent_after: Decimal
+    remaining_after: Decimal
+
+
+class InitialCandidate(TypedDict):
+    ticker: str
+    asset_class: str
+    minimum_cost: Decimal
+    best_quantity: Decimal
+    class_distance_after: Decimal | None
+    reason: str
+
+
+class DiscardedCandidate(TypedDict):
+    ticker: str
+    asset_class: str
+    minimum_additional_quantity: Decimal
+    minimum_additional_cost: Decimal
+    reason: str
+
+
+class AllocationDiagnostics(TypedDict):
+    initial_unavailable_reference: NotRequired[Decimal]
+    objective: NotRequired[str]
+    initial_class_distance: NotRequired[Decimal]
+    final_class_distance: NotRequired[Decimal]
+    initial_asset_distance: NotRequired[Decimal]
+    final_asset_distance: NotRequired[Decimal]
+    evaluated_candidates: NotRequired[int]
+    lookahead_depth: NotRequired[int]
+    beam_width: NotRequired[int]
+    search_limited: NotRequired[bool]
+    stop_reason: NotRequired[str]
+    iterations: NotRequired[list[AllocationIteration]]
+    discarded_candidates: NotRequired[list[DiscardedCandidate]]
+    initial_candidates: NotRequired[list[InitialCandidate]]
 
 
 @dataclass
 class _State:
-    quantities: dict
-    values: dict
+    quantities: dict[str, Decimal]
+    values: dict[str, Decimal]
     principal: Decimal
     spent: Decimal
-    objective: tuple
+    objective: Objective
 
 
 def allocate_quantities(
-    instruments,
-    class_values,
-    class_targets,
-    budget,
-    unavailable=ZERO,
+    instruments: Sequence[Instrument],
+    class_values: dict[str, Decimal],
+    class_targets: dict[str, Decimal],
+    budget: Decimal,
+    unavailable: Decimal = ZERO,
     *,
-    strategy_assets=None,
-    diagnostics=None,
-    lookahead_depth=3,
-    beam_width=12,
-    max_evaluations=20000,
-    max_iterations=None,
-):
+    strategy_assets: dict[str, dict[str, Decimal]] | None = None,
+    diagnostics: AllocationDiagnostics | None = None,
+    lookahead_depth: int = 3,
+    beam_width: int = 12,
+    max_evaluations: int = 20000,
+    max_iterations: int | None = None,
+) -> tuple[dict[str, Decimal], Decimal, int]:
     """Re-evaluate ALL classes after every accepted candidate or bounded purchase bundle.
 
     Lexical objective: class TV, configured-asset TV, negative invested principal,
@@ -65,18 +123,18 @@ def allocate_quantities(
 
 
 def _allocate(
-    instruments,
-    class_values,
-    class_targets,
-    budget,
+    instruments: Sequence[Instrument],
+    class_values: dict[str, Decimal],
+    class_targets: dict[str, Decimal],
+    budget: Decimal,
     *,
-    strategy_assets,
-    diagnostics,
-    lookahead_depth,
-    beam_width,
-    max_evaluations,
-    max_iterations,
-):
+    strategy_assets: dict[str, dict[str, Decimal]] | None,
+    diagnostics: AllocationDiagnostics | None,
+    lookahead_depth: int,
+    beam_width: int,
+    max_evaluations: int,
+    max_iterations: int | None,
+) -> tuple[dict[str, Decimal], Decimal, int]:
     ordered = sorted(instruments, key=lambda item: item.ticker)
     by_ticker = {item.ticker: item for item in ordered}
     keys = sorted(set(class_values) | set(class_targets))
@@ -87,20 +145,25 @@ def _allocate(
         if strategy_assets is not None
         else {item.ticker: {"current": item.current, "target": item.target} for item in ordered}
     )
-    assets = sorted(assets.items())
+    asset_items = sorted(assets.items())
     evaluated = 0
     limited = False
-    trace = []
-    initial_candidates = []
+    trace: list[AllocationIteration] = []
+    initial_candidates: list[InitialCandidate] = []
     limit = max_iterations if max_iterations is not None else min(256, max(32, 4 * len(ordered)))
 
-    def objective(class_state, quantities, principal, spent):
+    def objective(
+        class_state: dict[str, Decimal],
+        quantities: dict[str, Decimal],
+        principal: Decimal,
+        spent: Decimal,
+    ) -> Objective:
         total = sum(class_state.values(), ZERO)
         distance = ContributionTargetAllocator.distance(class_state, targets)
         if distance is None:
             distance = sum(targets.values(), ZERO) / 2
         asset_distance = ZERO
-        for ticker, asset in assets:
+        for ticker, asset in asset_items:
             item = by_ticker.get(ticker)
             value = asset["current"] + (
                 quantities.get(ticker, ZERO) * item.unit_base if item else ZERO
@@ -109,15 +172,15 @@ def _allocate(
             asset_distance += abs(weight - asset["target"]) / 2
         return distance, asset_distance, -principal, spent - principal
 
-    def signature(state):
+    def signature(state: _State) -> Signature:
         return tuple(
             (ticker, quantity) for ticker, quantity in sorted(state.quantities.items()) if quantity
         )
 
-    def rank(state):
+    def rank(state: _State) -> tuple[Objective, Signature]:
         return state.objective, signature(state)
 
-    def transition(state, item, quantity):
+    def transition(state: _State, item: Instrument, quantity: Decimal) -> _State | None:
         nonlocal evaluated, limited
         if evaluated >= max_evaluations:
             limited = True
@@ -147,7 +210,7 @@ def _allocate(
             objective(projected, quantities, principal, spent),
         )
 
-    def proposals(state, item):
+    def proposals(state: _State, item: Instrument) -> Sequence[Decimal]:
         previous = state.quantities[item.ticker]
         minimum = item.step if previous else item.minimum()
         maximum = item.affordable(budget - state.spent + item.cost(previous)) - previous
@@ -177,7 +240,7 @@ def _allocate(
                     quantities.add(quantity)
         return sorted(quantities)
 
-    def expand(state):
+    def expand(state: _State) -> list[_State]:
         results = []
         # Minimum proposals for every instrument precede optional quantity batches.
         pending = [(item, proposals(state, item)) for item in ordered]
@@ -209,18 +272,22 @@ def _allocate(
                 if ticker not in best_by_ticker or rank(candidate) < rank(best_by_ticker[ticker]):
                     best_by_ticker[ticker] = candidate
             for item in ordered:
-                candidate = best_by_ticker.get(item.ticker)
+                initial_candidate = best_by_ticker.get(item.ticker)
                 initial_candidates.append(
                     {
                         "ticker": item.ticker,
                         "asset_class": item.asset_class,
                         "minimum_cost": item.cost(item.minimum()),
-                        "best_quantity": candidate.quantities[item.ticker] if candidate else ZERO,
-                        "class_distance_after": candidate.objective[0] if candidate else None,
+                        "best_quantity": initial_candidate.quantities[item.ticker]
+                        if initial_candidate
+                        else ZERO,
+                        "class_distance_after": initial_candidate.objective[0]
+                        if initial_candidate
+                        else None,
                         "reason": "ELIGIBLE_GLOBAL_IMPROVEMENT"
-                        if candidate and candidate.objective < state.objective
+                        if initial_candidate and initial_candidate.objective < state.objective
                         else "GLOBAL_STRATEGY_LIMIT"
-                        if candidate
+                        if initial_candidate
                         else "MINIMUM_EXCEEDS_BALANCE",
                     }
                 )
@@ -265,7 +332,7 @@ def _allocate(
         limited = state.spent < budget
 
     remaining = budget - state.spent
-    discarded = []
+    discarded: list[DiscardedCandidate] = []
     for item in ordered:
         previous = state.quantities[item.ticker]
         minimum = item.step if previous else item.minimum()

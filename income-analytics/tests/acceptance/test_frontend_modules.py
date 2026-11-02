@@ -130,7 +130,10 @@ def test_holdings_offer_a_lazy_accessible_asset_transactions_modal() -> None:
     assert "data-asset-transactions" in portfolio
     assert "openAssetTransactions" in portfolio
     assert "assetTransactions(dialog.dataset.assetId" in portfolio
-    assert "Nenhum lançamento encontrado para este ativo." in portfolio
+    assert "Nenhum rendimento registrado para este ativo." in portfolio
+    assert "Nenhuma movimentação registrada para este ativo." in portfolio
+    assert 'role="tablist" aria-label="Tipos de lançamentos"' in portfolio
+    assert "data-confirm-asset-delete" in portfolio
     assert "Não foi possível carregar os lançamentos." in portfolio
     assert "assetTransactionsTrigger?.focus()" in portfolio
     assert "asset-transactions-dialog" in styles
@@ -185,7 +188,8 @@ def test_holdings_experience_uses_one_aggregate_projection_and_strategy_context(
     assert '"capital-gain": capitalGain' in portfolio
     assert "afterLayout" in portfolio
     assert "ResizeObserver" in portfolio
-    assert "equityChart.resize()" in portfolio
+    assert "responsiveDateAxis(equityChart, target)" in portfolio
+    assert "chart.resize()" in portfolio
     assert "Pontos de atenção" in dashboard
 
 

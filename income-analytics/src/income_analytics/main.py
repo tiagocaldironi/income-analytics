@@ -1,14 +1,16 @@
 import logging
 import os
+import re
 from pathlib import Path
 from threading import Thread
 from time import perf_counter
 from uuid import UUID
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
+from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 from starlette.types import Scope
 
@@ -28,7 +30,7 @@ from income_analytics.api.routers.dashboard import (
 from income_analytics.api.routers.health import router as health_router
 from income_analytics.api.routers.income_starter import router as income_starter_router
 from income_analytics.api.routers.portfolios import router as portfolios_router
-from income_analytics.api.saas_security import authorize_request
+from income_analytics.api.saas_security import authorize_request, local_mode_rejection
 from income_analytics.application.portfolio_context import (
     current_portfolio_id,
     reset_active_portfolio_id,
@@ -40,6 +42,7 @@ from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.infrastructure.auth_config import saas_enabled, validate_configuration
 from income_analytics.infrastructure.database import engine, initialize_database
 from income_analytics.infrastructure.request_profiling import (
+    RequestMetrics,
     current_request_metrics,
     install_sql_timing,
 )
@@ -61,10 +64,14 @@ if os.environ.get("INCOME_ANALYTICS_PERF_LOG", "").strip().lower() in {"1", "tru
 
 
 @app.middleware("http")
-async def portfolio_request_context(request, call_next):
+async def portfolio_request_context(
+    request: Request, call_next: RequestResponseEndpoint,
+) -> Response:
+    if rejection := local_mode_rejection(request):
+        return rejection
     if saas_enabled():
 
-        async def scoped(portfolio_id):
+        async def scoped(portfolio_id: UUID) -> Response:
             return await serve_portfolio(request, call_next, portfolio_id)
 
         return await authorize_request(request, call_next, portfolio_handler=scoped)
@@ -81,7 +88,9 @@ async def portfolio_request_context(request, call_next):
     return await serve_portfolio(request, call_next, portfolio_id)
 
 
-async def serve_portfolio(request, call_next, portfolio_id):
+async def serve_portfolio(
+    request: Request, call_next: RequestResponseEndpoint, portfolio_id: UUID,
+) -> Response:
     portfolio = SqlitePortfolioRepository().get(portfolio_id)
     if portfolio is None:
         return JSONResponse({"detail": "Carteira não encontrada."}, status_code=404)
@@ -90,8 +99,14 @@ async def serve_portfolio(request, call_next, portfolio_id):
     portfolio_token = set_active_portfolio_id(portfolio_id)
     session_token = None
     try:
+        history_only = request.method == "GET" and (
+            request.url.path in {"/api/operations", "/api/operations/history"}
+            or re.fullmatch(r"/api/portfolio/assets/[^/]+/transactions", request.url.path)
+            is not None
+        )
         financial_session = await run_in_threadpool(
-            PortfolioSession, portfolio_id=portfolio_id, persistent=True
+            PortfolioSession, portfolio_id=portfolio_id, persistent=True,
+            history_only=history_only,
         )
         session_token = set_request_session(financial_session)
         return await call_next(request)
@@ -102,7 +117,7 @@ async def serve_portfolio(request, call_next, portfolio_id):
 
 
 @app.middleware("http")
-async def security_headers(request, call_next):
+async def security_headers(request: Request, call_next: RequestResponseEndpoint) -> Response:
     response = await call_next(request)
     if saas_enabled():
         response.headers["Cache-Control"] = "no-store, private"
@@ -130,7 +145,7 @@ async def security_headers(request, call_next):
 
 
 @app.middleware("http")
-async def profile_request(request, call_next):
+async def profile_request(request: Request, call_next: RequestResponseEndpoint) -> Response:
     enabled = os.environ.get("INCOME_ANALYTICS_PERF_LOG", "").strip().lower() in {
         "1",
         "true",
@@ -138,7 +153,7 @@ async def profile_request(request, call_next):
     }
     if not enabled:
         return await call_next(request)
-    metrics = {"query_count": 0, "db_time_ms": 0.0, "query_started": []}
+    metrics: RequestMetrics = {"query_count": 0, "db_time_ms": 0.0, "query_started": []}
     token = current_request_metrics.set(metrics)
     started = perf_counter()
     try:
@@ -235,3 +250,12 @@ def dashboard() -> FileResponse:
 @app.get("/conta", include_in_schema=False)
 def account_page() -> FileResponse:
     return FileResponse(static_directory / "account.html", headers={"Cache-Control": "no-store"})
+
+
+def install_operational_controls() -> None:
+    from income_analytics.infrastructure.operational import OperationalMiddleware
+
+    app.add_middleware(OperationalMiddleware)
+
+
+install_operational_controls()

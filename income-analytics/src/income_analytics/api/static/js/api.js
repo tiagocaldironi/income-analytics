@@ -3,7 +3,14 @@ import { refreshCsrf } from "./auth-client.js";
 
 async function request(path, options = {}) {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 15000);
+  const mutation = options.method && options.method !== "GET";
+  // Writes rebuild the dashboard; quote refresh also waits for external providers.
+  const timeoutMs = path === "/market-prices/refresh" ? 180000 : mutation ? 120000 : 30000;
+  let timedOut = false;
+  let timeout;
+  const abortFromCaller = () => controller.abort(options.signal.reason);
+  if (options.signal?.aborted) abortFromCaller();
+  else options.signal?.addEventListener("abort", abortFromCaller, { once: true });
   const requestPortfolioId = window.localStorage.getItem("income.activePortfolioId");
   try {
     const headers = new Headers(options.headers || {});
@@ -12,14 +19,21 @@ async function request(path, options = {}) {
     if (window.sessionStorage?.getItem("income.userId") && options.method && options.method !== "GET") {
       headers.set("X-CSRF-Token", await refreshCsrf());
     }
+    if (requestPortfolioId !== window.localStorage.getItem("income.activePortfolioId")) {
+      throw new DOMException("A carteira ativa mudou durante a solicitação.", "AbortError");
+    }
+    timeout = window.setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
     const response = await fetch(`/api${path}`, {
       cache: "no-store",
       ...options,
       headers,
-      signal: options.signal || controller.signal,
+      signal: controller.signal,
     });
     const parseStarted = performance.now();
-    const body = await response.json().catch(() => ({}));
+    const body = await response.json().catch(error => {
+      if (controller.signal.aborted) throw error;
+      return {};
+    });
     performance.measure("income:json-parse", {
       start: parseStarted,
       end: performance.now(),
@@ -42,8 +56,16 @@ async function request(path, options = {}) {
       throw new Error(detail || "Não foi possível concluir a operação.");
     }
     return body;
+  } catch (error) {
+    if (timedOut) {
+      throw new Error(mutation
+        ? "O servidor demorou para responder. A solicitação pode ter sido concluída. Consulte o histórico antes de repetir."
+        : "O servidor demorou para responder. Atualize a tela e tente novamente.");
+    }
+    throw error;
   } finally {
     window.clearTimeout(timeout);
+    options.signal?.removeEventListener("abort", abortFromCaller);
   }
 }
 

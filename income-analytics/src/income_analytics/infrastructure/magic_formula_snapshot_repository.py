@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from datetime import UTC, date, datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import text
+from sqlalchemy.orm import Session, sessionmaker
 
 from income_analytics.application.magic_formula_validation import CompanyNormalizationValidation
 from income_analytics.infrastructure.database import SessionFactory, initialize_database
@@ -17,7 +19,12 @@ from income_analytics.infrastructure.models import (
 
 
 class SqliteMagicFormulaSnapshotRepository:
-    def __init__(self, *, session_factory=None, initialize=None):
+    def __init__(
+        self,
+        *,
+        session_factory: sessionmaker[Session] | None = None,
+        initialize: Callable[[], None] | None = None,
+    ) -> None:
         self._session_factory = session_factory
         self._initialize = initialize
 

@@ -125,6 +125,7 @@ class PortfolioSession:
     portfolio_id: UUID
     account_id: UUID = field(default_factory=uuid4)
     persistent: bool = False
+    history_only: bool = False
     _assets: dict[str, Asset] = field(default_factory=dict, init=False)
     _events: list[FinancialEvent] = field(default_factory=list, init=False)
     _market_prices: list[MarketPrice] = field(default_factory=list, init=False)
@@ -159,7 +160,19 @@ class PortfolioSession:
                 str(asset.ticker): asset
                 for asset in SqliteAssetRepository(self.portfolio_id).list()
             }
-            self._events = list(SqliteFinancialEventRepository(self.portfolio_id).list())
+            events = SqliteFinancialEventRepository(self.portfolio_id)
+            self._events = list(
+                events.list(assets={str(asset.id): asset for asset in self._assets.values()})
+                if self.history_only else events.list()
+            )
+            if self.history_only:
+                # History formatting needs fixed-income labels, but no strategy,
+                # prices, benchmarks, pension/property valuations or recurrence rules.
+                self._fixed_income_details = {
+                    details.asset_id: details
+                    for details in SqliteFixedIncomeDetailsRepository(self.portfolio_id).list()
+                }
+                return
             market_prices = SqliteMarketPriceRepository()
             self._market_prices = list(market_prices.list())
             self._market_prices_by_asset = market_prices.list_by_asset()

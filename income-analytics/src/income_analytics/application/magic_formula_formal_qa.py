@@ -7,6 +7,7 @@ Derived identities are checked using only the independent golden inputs.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable, Iterable, Mapping
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
@@ -22,7 +23,7 @@ from income_analytics.application.magic_formula_contract import (
 def evaluate_formal_qa(
     fixture: dict, snapshot: dict, *, readback_matches: bool
 ) -> tuple[DimensionDecision, ...]:
-    decisions = []
+    decisions: list[DimensionDecision] = []
     contract_errors = golden_contract_errors(fixture)
     try:
         metrics = json.loads(snapshot["metrics_json"])
@@ -37,7 +38,7 @@ def evaluate_formal_qa(
             )
         )
 
-    def check(dimension, operation):
+    def check(dimension: str, operation: Callable[[], Iterable[str]]) -> None:
         if contract_errors:
             decisions.append(
                 DimensionDecision(dimension, ValidationStatus.REVIEW_REQUIRED, contract_errors)
@@ -57,22 +58,22 @@ def evaluate_formal_qa(
                 DimensionDecision(dimension, ValidationStatus.FAIL, (f"EVIDENCE_MISMATCH:{exc}",))
             )
 
-    def present(record, *keys):
+    def present(record: Mapping[str, object], *keys: str) -> None:
         for key in keys:
             if record.get(key) is None or record[key] == "":
                 raise ValueError(key)
 
-    def number(value):
+    def number(value: object) -> Decimal:
         result = Decimal(str(value))
         if not result.is_finite():
             raise ValueError("NONFINITE_AMOUNT")
         return result
 
-    def equal(a, b, label):
+    def equal(a: object, b: object, label: str) -> None:
         if not number(a) == number(b):
             raise AssertionError(label)
 
-    def accounting():
+    def accounting() -> list[str]:
         references = []
         required = FINANCIAL_METRICS[:7]
         for metric in required:
@@ -126,7 +127,7 @@ def evaluate_formal_qa(
             equal(metrics[metric], expected[metric], metric)
         return references
 
-    def securities():
+    def securities() -> list[str]:
         evidence = fixture["security"]
         capital = fixture["capital"]["securities"]
         if not len(evidence) == len(capital) > 0:
@@ -172,7 +173,7 @@ def evaluate_formal_qa(
             refs.append(s["fca_source_reference"])
         return refs
 
-    def capital():
+    def capital() -> list[str]:
         refs = []
         caps = fixture["capital"]["securities"]
         if not len(caps) == len(components) > 0:
@@ -235,7 +236,7 @@ def evaluate_formal_qa(
             refs.extend((c["issued_source_reference"], c["treasury_source_reference"]))
         return refs
 
-    def market():
+    def market() -> list[str]:
         refs = []
         prices = fixture["prices"]
         if not len(prices) == len(components) > 0:
@@ -276,7 +277,7 @@ def evaluate_formal_qa(
             refs.append(p["record_reference"])
         return refs
 
-    def market_cap():
+    def market_cap() -> tuple[str, ...]:
         prices = {p["ticker"]: number(p["price"]) for p in fixture["prices"]}
         for c in fixture["capital"]["securities"]:
             matches = [x for x in components if x["security_id"] == c["security_id"]]
@@ -304,7 +305,7 @@ def evaluate_formal_qa(
         equal(metrics["market_cap"], expected["market_cap"], "SNAPSHOT_MARKET_CAP")
         return ("SUM(normalized_quantity * official_close)",)
 
-    def derived():
+    def derived() -> tuple[str, ...]:
         e = {k: number(v) for k, v in expected.items()}
         identities = {
             "financial_debt_total": e["financial_debt_short_term"] + e["financial_debt_long_term"],
@@ -322,7 +323,7 @@ def evaluate_formal_qa(
                 equal(metrics[key], e[key], key)
         return tuple(identities)
 
-    def accounting_lineage():
+    def accounting_lineage() -> list[str]:
         refs = []
         for metric, group in fixture["accounting"].items():
             for c in group["components"]:
@@ -353,7 +354,7 @@ def evaluate_formal_qa(
                 refs.append(c["source_reference"])
         return refs
 
-    def readback():
+    def readback() -> tuple[str, ...]:
         if not readback_matches:
             raise AssertionError("SNAPSHOT_CHANGED_BETWEEN_SESSIONS")
         if not "validation_status" not in metrics:

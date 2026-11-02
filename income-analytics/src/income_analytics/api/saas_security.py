@@ -3,13 +3,15 @@
 import copy
 import os
 import secrets
+from collections.abc import Awaitable, Callable, Iterable, Iterator
 from uuid import UUID
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from fastapi.routing import APIRoute
 from starlette.concurrency import run_in_threadpool
-from starlette.responses import JSONResponse, RedirectResponse
-from starlette.routing import Match, compile_path
+from starlette.middleware.base import RequestResponseEndpoint
+from starlette.responses import JSONResponse, RedirectResponse, Response
+from starlette.routing import BaseRoute, Match, compile_path
 
 from income_analytics.application.auth_context import principal_context
 from income_analytics.infrastructure.auth_config import cookie_name, origin
@@ -64,7 +66,7 @@ UNAVAILABLE_HANDLERS = {
 }
 
 
-def api_routes(routes, prefix=""):
+def api_routes(routes: Iterable[BaseRoute], prefix: str = "") -> Iterator[APIRoute]:
     """Flatten eager and lazy FastAPI includes, retaining effective URL prefixes.
 
     Unknown route types remain denied. The original router is never mutated.
@@ -85,7 +87,7 @@ def api_routes(routes, prefix=""):
             yield candidate
 
 
-def check_csrf(request, expected_hash: str | None = None):
+def check_csrf(request: Request, expected_hash: str | None = None) -> None:
     if request.headers.get("origin") != origin():
         raise HTTPException(403, "Origem da solicitação não permitida.")
     cookie = request.cookies.get(cookie_name("csrf"), "")
@@ -96,7 +98,7 @@ def check_csrf(request, expected_hash: str | None = None):
         raise HTTPException(403, "Atualize a sessão e tente novamente.")
 
 
-async def bounded_body(request):
+async def bounded_body(request: Request) -> None:
     # Enforced on the stream too: Content-Length is not trusted.
     maximum = 8 * 1024 * 1024 if "imports/" in request.url.path else 128 * 1024
     body = bytearray()
@@ -107,7 +109,12 @@ async def bounded_body(request):
     request._body = bytes(body)
 
 
-async def authorize_request(request, call_next, *, portfolio_handler):
+async def authorize_request(
+    request: Request,
+    call_next: RequestResponseEndpoint,
+    *,
+    portfolio_handler: Callable[[UUID], Awaitable[Response]],
+) -> Response:
     context_token = None
     try:
         # Trust neither arbitrary Host nor forwarded headers from untrusted peers.
@@ -185,20 +192,22 @@ async def authorize_request(request, call_next, *, portfolio_handler):
                 ("BCB PTAX", "Referência oficial de câmbio do Banco Central."),
                 ("CoinGecko", "Referências de preço para criptoativos suportados."),
             )
-            return JSONResponse({
-                "providers": [
-                    {
-                        "provider": name,
-                        "description": description,
-                        "status": "UNKNOWN",
-                        "last_success": None,
-                        "next_execution": None,
-                        "execution_note": "Consulta sob demanda",
-                        "group": "Dados de mercado",
-                    }
-                    for name, description in catalog
-                ]
-            })
+            return JSONResponse(
+                {
+                    "providers": [
+                        {
+                            "provider": name,
+                            "description": description,
+                            "status": "UNKNOWN",
+                            "last_success": None,
+                            "next_execution": None,
+                            "execution_note": "Consulta sob demanda",
+                            "group": "Dados de mercado",
+                        }
+                        for name, description in catalog
+                    ]
+                }
+            )
         if route.name == "list_market_price_refresh_runs":
             # Legacy run records are global and may contain private diagnostics.
             return JSONResponse({"runs": []})
@@ -237,3 +246,26 @@ async def authorize_request(request, call_next, *, portfolio_handler):
     finally:
         if context_token is not None:
             principal_context.reset(context_token)
+
+
+def local_mode_rejection(request: Request) -> JSONResponse | None:
+    from income_analytics.infrastructure.auth_config import saas_enabled
+
+    if saas_enabled():
+        return None
+    peer = request.client.host if request.client else ""
+    allowed = {"127.0.0.1", "::1"}
+    hosts = {"localhost", "127.0.0.1", "::1"}
+    if os.getenv("INCOME_ANALYTICS_TESTING") == "1":
+        allowed.add("testclient")
+        hosts.add("testserver")
+    invalid_origin = (
+        request.method not in {"GET", "HEAD", "OPTIONS"}
+        and request.headers.get("origin") is not None
+        and request.headers["origin"] != str(request.base_url).rstrip("/")
+    )
+    if peer not in allowed or request.url.hostname not in hosts or invalid_origin:
+        return JSONResponse(
+            {"detail": "Modo local disponível apenas em loopback."}, status_code=403
+        )
+    return None

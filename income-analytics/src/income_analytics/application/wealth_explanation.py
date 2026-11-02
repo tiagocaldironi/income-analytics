@@ -7,6 +7,7 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
+from typing import NotRequired, TypedDict
 
 from income_analytics.application.base_currency_valuation import BaseCurrencyValuation
 from income_analytics.domain.entities.financial_event import FinancialEvent
@@ -19,6 +20,50 @@ INCOME_EVENTS = {
     FinancialEventType.INTEREST_ON_EQUITY,
     FinancialEventType.FII_INCOME,
 }
+
+
+class ContributorRow(TypedDict):
+    ticker: str
+    name: str
+    asset_class: str
+    currency_code: str
+    opening_value: Decimal
+    closing_value: Decimal | None
+    valuation_available: bool
+    flows: Decimal
+    paid_income: Decimal
+    valuation_change: Decimal
+    contribution: Decimal
+
+
+class ContributionChild(TypedDict):
+    asset_class: str
+    ticker: str
+    label: str
+    signed_amount: Decimal
+    source_count: int
+    valuation_available: NotRequired[bool]
+    event_type: NotRequired[str]
+
+
+class ContributionComponent(TypedDict):
+    component_type: str
+    label: str
+    signed_amount: Decimal
+    direction: str
+    children: list[ContributionChild]
+    source_count: int
+
+
+class ClassContribution(TypedDict):
+    asset_class: str
+    contribution: Decimal
+
+
+class Contributors(TypedDict):
+    rows: list[ContributorRow]
+    classes: list[ClassContribution]
+    top: dict[str, list[ContributorRow]]
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -265,8 +310,8 @@ class WealthExplanationService:
         component_type: str,
         label: str,
         signed_amount: Decimal,
-        children: list[dict[str, object]] | None = None,
-    ) -> dict[str, object]:
+        children: list[ContributionChild] | None = None,
+    ) -> ContributionComponent:
         return {
             "component_type": component_type,
             "label": label,
@@ -287,7 +332,10 @@ class WealthExplanationService:
         return max(Decimal("0"), Decimal("100") - abs(unexplained) / abs(change) * Decimal("100"))
 
     @staticmethod
-    def _children(rows, predicate):
+    def _children(
+        rows: Iterable[ContributorRow],
+        predicate: Callable[[ContributorRow], bool],
+    ) -> list[ContributionChild]:
         return [
             {
                 "asset_class": row["asset_class"],
@@ -302,7 +350,7 @@ class WealthExplanationService:
         ]
 
     @staticmethod
-    def _flow_children(rows):
+    def _flow_children(rows: Iterable[ContributorRow]) -> list[ContributionChild]:
         return [
             {
                 "asset_class": row["asset_class"],
@@ -317,7 +365,11 @@ class WealthExplanationService:
         ]
 
     @staticmethod
-    def _income_children(events, base_currency: str, amounts: dict[int, Decimal]):
+    def _income_children(
+        events: Iterable[FinancialEvent],
+        base_currency: str,
+        amounts: dict[int, Decimal],
+    ) -> list[ContributionChild]:
         return [
             {
                 "asset_class": event.asset.asset_class.value,
@@ -353,7 +405,7 @@ class WealthExplanationService:
         closing: BaseCurrencyValuation,
         events: Iterable[FinancialEvent],
         event_amounts: dict[int, Decimal],
-    ) -> dict[str, object]:
+    ) -> Contributors:
         opening_values = {item.ticker: item.market_value_base for item in opening.positions}
         closing_values = {item.ticker: item.market_value_base for item in closing.positions}
         assets = {
@@ -373,7 +425,7 @@ class WealthExplanationService:
                 sells[ticker] += event_amounts.get(id(event), Decimal("0"))
             elif event.event_type in INCOME_EVENTS:
                 income[ticker] += event_amounts.get(id(event), Decimal("0"))
-        rows = []
+        rows: list[ContributorRow] = []
         for ticker, asset in assets.items():
             start = opening_values.get(ticker) or Decimal("0")
             end_value = closing_values.get(ticker)

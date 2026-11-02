@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "roots": {
+    "firebase": "13.1.0",
+    "echarts": "6.1.0"
+  },
+  "scope": "Firebase browser app/auth and ECharts declared runtime dependency closure. Optional React Native peer is not loaded by the browser ESM application. Registry metadata is evidence, not a real authentication integration test.",
+  "components": [
+    {
+      "ecosystem": "npm",
+      "name": "@firebase/app",
+      "version": "0.16.4",
+      "metadata_url": "https://registry.npmjs.org/%40firebase%2Fapp/0.16.4",
+      "dependencies": {
+        "idb": "7.1.1",
+        "tslib": "^2.1.0",
+        "@firebase/util": "1.15.3",
+        "@firebase/logger": "0.5.2",
+        "@firebase/component": "0.7.5"
+      },
+      "integrity": "sha512-eW9MgxKQFNif18lOGor/dqVm4tb5lySwxkid1nbU6ymS6hSVh7r/MREf9zmnGhHQ6ZGC4KJye6PCT+C//9R+hQ==",
+      "peer_dependencies": {},
+      "peer_metadata": {}
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@firebase/auth",
+      "version": "1.13.8",
+      "metadata_url": "https://registry.npmjs.org/%40firebase%2Fauth/1.13.8",
+      "dependencies": {
+        "tslib": "^2.1.0",
+        "@firebase/util": "1.15.3",
+        "@firebase/logger": "0.5.2",
+        "@firebase/component": "0.7.5"
+      },
+      "integrity": "sha512-JPW7S7Hwp5qhn8VwEEHWfI1P2kqCqpKbJVTWlKT5UWl1NNbVjrYOGKTZHCVqUeVhLs7BjMWWkCnkoa8tzUjSjQ==",
+      "peer_dependencies": {
+        "@firebase/app": "0.x",
+        "@react-native-async-storage/async-storage": "^2.2.0 || ^3.0.0"
+      },
+      "peer_metadata": {
+        "@react-native-async-storage/async-storage": {
+          "optional": true
+        }
+      }
+    },
+    {
+      "ecosystem": "npm",
+      "name": "zrender",
+      "version": "6.1.0",
+      "metadata_url": "https://registry.npmjs.org/zrender/6.1.0",
+      "dependencies": {
+        "tslib": "2.3.0"
+      },
+      "integrity": "sha512-oEGMDB6pOP2S6OwRR4PdVv610zrjnA3Bh+JnSG12fYJlBKjtNAoEb5fSUoCOOINlH96I2fU38/A2UpRKs67xYQ==",
+      "peer_dependencies": {},
+      "peer_metadata": {}
+    },
+    {
+      "ecosystem": "npm",
+      "name": "tslib",
+      "version": "2.3.0",
+      "metadata_url": "https://registry.npmjs.org/tslib/2.3.0",
+      "dependencies": {},
+      "integrity": "sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==",
+      "peer_dependencies": {},
+      "peer_metadata": {}
+    },
+    {
+      "ecosystem": "npm",
+      "name": "idb",
+      "version": "7.1.1",
+      "metadata_url": "https://registry.npmjs.org/idb/7.1.1",
+      "dependencies": {},
+      "integrity": "sha512-gchesWBzyvGHRO9W8tzUWFDycow5gwjvFKfyV9FF32Y7F50yZMp7mP+T2mJIWFx49zicqyC4uefHM17o6xKIVQ==",
+      "peer_dependencies": {},
+      "peer_metadata": {}
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@firebase/util",
+      "version": "1.15.3",
+      "metadata_url": "https://registry.npmjs.org/%40firebase%2Futil/1.15.3",
+      "dependencies": {
+        "tslib": "^2.1.0"
+      },
+      "integrity": "sha512-c/z/gaIlaaLZEuGbE6sLUuJ61tskg1JghvhcNQzW948ASBinbVBBRnZTC4b4yt4LaEtJQkYlyzqLHcutFwEIvA==",
+      "peer_dependencies": {},
+      "peer_metadata": {}
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@firebase/logger",
+      "version": "0.5.2",
+      "metadata_url": "https://registry.npmjs.org/%40firebase%2Flogger/0.5.2",
+      "dependencies": {
+        "tslib": "^2.1.0"
+      },
+      "integrity": "sha512-J2VO4NFTc0xQFrxV1B/lm5balicm9cwuX2acR9Yn41fN8KgUeQFo+VJV222IqW2FPSXKDu9uo5WdQFWf9TPbYg==",
+      "peer_dependencies": {},
+      "peer_metadata": {}
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@firebase/component",
+      "version": "0.7.5",
+      "metadata_url": "https://registry.npmjs.org/%40firebase%2Fcomponent/0.7.5",
+      "dependencies": {
+        "tslib": "^2.1.0",
+        "@firebase/util": "1.15.3"
+      },
+      "integrity": "sha512-vuFDcL91Q+2ZuBJkyOh86T4q0B4ffNTDjc/A38tybO56odQABxRTFLTIowCWqAKeIcgo37GowWMVgFF73gD8Qw==",
+      "peer_dependencies": {},
+      "peer_metadata": {}
+    }
+  ],
+  "unresolved_ranges": [
+    {
+      "parent": "@firebase/app@0.16.4",
+      "name": "tslib",
+      "declared_range": "^2.1.0",
+      "runtime_version": "NOT_VERIFIED",
+      "scan": "OSV_PACKAGE_WIDE"
+    },
+    {
+      "parent": "@firebase/auth@1.13.8",
+      "name": "tslib",
+      "declared_range": "^2.1.0",
+      "runtime_version": "NOT_VERIFIED",
+      "scan": "OSV_PACKAGE_WIDE"
+    },
+    {
+      "parent": "@firebase/util@1.15.3",
+      "name": "tslib",
+      "declared_range": "^2.1.0",
+      "runtime_version": "NOT_VERIFIED",
+      "scan": "OSV_PACKAGE_WIDE"
+    },
+    {
+      "parent": "@firebase/logger@0.5.2",
+      "name": "tslib",
+      "declared_range": "^2.1.0",
+      "runtime_version": "NOT_VERIFIED",
+      "scan": "OSV_PACKAGE_WIDE"
+    },
+    {
+      "parent": "@firebase/component@0.7.5",
+      "name": "tslib",
+      "declared_range": "^2.1.0",
+      "runtime_version": "NOT_VERIFIED",
+      "scan": "OSV_PACKAGE_WIDE"
+    }
+  ],
+  "external_assets": [
+    {
+      "url": "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js",
+      "sha256": "5f9f6e699f201010941ff6e116b7dbfc5794ab7b4524875d1a734acdd2994d06",
+      "scope": "Observed CDN ESM bytes; runtime browser SRI not enforced"
+    },
+    {
+      "url": "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js",
+      "sha256": "72decbdf62edb7d86249db701206bf08a6ef694ac1a96105b9aac7c3cecb0d0d",
+      "scope": "Observed CDN ESM bytes; runtime browser SRI not enforced"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "baseline_sha256": "4bff522ba5cf8f203dbb7851a88f3745df4a6f75f4478c88fdd933740bed152a",
+  "quality_configuration_sha256": "c931b996f37acc74300e2d24b8fb9397d2e9a3dea721bd8ac1cb7b8e504db859",
+  "lock_sha256": "9e21c4d7114ed15da0ec141ed01a2d2e4abb4b68afa05cec68c008701ebc0f63",
+  "relocated": [
+    {
+      "code": "no-untyped-def",
+      "before": 68,
+      "after": 70,
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "code": "no-untyped-call",
+      "before": 69,
+      "after": 71,
+      "message": "Call to untyped function \"serve_portfolio\" in typed context"
+    },
+    {
+      "code": "no-untyped-call",
+      "before": 71,
+      "after": 73,
+      "message": "Call to untyped function \"authorize_request\" in typed context"
+    },
+    {
+      "code": "no-untyped-call",
+      "before": 82,
+      "after": 84,
+      "message": "Call to untyped function \"serve_portfolio\" in typed context"
+    },
+    {
+      "code": "no-untyped-def",
+      "before": 85,
+      "after": 87,
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "code": "no-untyped-def",
+      "before": 112,
+      "after": 114,
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "code": "no-untyped-def",
+      "before": 140,
+      "after": 142,
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "code": "operator",
+      "before": 172,
+      "after": 174,
+      "message": "Unsupported operand types for - (\"float\" and \"object\")"
+    }
+  ],
+  "reason": "Original quality baseline remains byte-identical. Reviewed setuptools/wheel security fixes change only packaging configuration and lock. Two inserted guard lines move existing main.py diagnostics; no diagnostic/tool/rule/message waived."
+}

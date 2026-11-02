@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from income_analytics.application.market_data import MarketDataUnavailable, MarketPriceObservation
+from income_analytics.infrastructure.operational_provider import fetch_json
 
 
 class BrapiMarketDataProvider:
@@ -33,8 +34,11 @@ class BrapiMarketDataProvider:
                 f"{self.base_url}?{urlencode({'symbols': ','.join(symbols)})}",
                 headers=headers,
             )
-            with urlopen(request, timeout=self._timeout_seconds) as response:
-                payload = json.loads(response.read().decode("utf-8"))
+            def transport(_timeout: float) -> tuple[int, bytes]:
+                with urlopen(request, timeout=self._timeout_seconds) as response:
+                    return 200, response.read()
+
+            payload = fetch_json(transport, attempts=1)
         except (IndexError, KeyError, OSError, TypeError, URLError, ValueError) as error:
             raise MarketDataUnavailable("BRAPI batch quotes unavailable.") from error
         observations: dict[str, MarketPriceObservation] = {}

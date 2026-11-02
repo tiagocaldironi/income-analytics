@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-10-28T20:26:09.263555+00:00",
+  "repository": "tiagocaldironi/income-analytics",
+  "pr": 48,
+  "pr_url": "https://github.com/tiagocaldironi/income-analytics/pull/48",
+  "run_id": 40760146814,
+  "run_url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40760146814",
+  "pr_head_sha": "a2f6d64bb55210bb7514c2f172efa37116eeec6e",
+  "executed_checkout_sha": "2a6513494b3f228b4ce46c716920b6ee1de24af7",
+  "financial_baseline_sha": "ca627ac72f110d0f4d62faaa9c51a08eaed54965",
+  "source_fingerprint": "1648121a859a166d0b03ece09654d323e7cf56efcc3608ff06665bf389d79d9e",
+  "destination": "%USERPROFILE%/.codex/evidence/income-analytics/pr51e/40760146814",
+  "storage": "Local user-managed persistent directory; no external service; not a backup or immutable archive",
+  "access": "Inherited user-profile ACL: owner, SYSTEM, Administrators; CodexSandboxUsers read/execute. No Everyone/BUILTIN Users grant observed.",
+  "scope": "Only sanitized artifacts, API metadata and this manifest; no raw logs, credentials, SQLite, snapshots or B3 payloads",
+  "artifacts": [
+    {
+      "id": 12848610633,
+      "name": "gate-summary-2a6513494b3f228b4ce46c716920b6ee1de24af7",
+      "digest": "sha256:2299e6986b47c96e9d00f2faf0d7ef1e88cc54813a9955944d0c8d117b24e72a",
+      "expires_at": "2026-11-11T20:12:21Z",
+      "size_in_bytes": 552,
+      "archive_sha256_verified": true,
+      "files": [
+        {
+          "path": "gate-summary.json",
+          "sha256": "5604dc7b039fceb5f01d1c2f4328bb0c8b4db2c8707770a30a261686ae0b4a44",
+          "bytes": 693,
+          "identical_to_pr51e_download": true
+        }
+      ]
+    },
+    {
+      "id": 12848450659,
+      "name": "governance-quality-2a6513494b3f228b4ce46c716920b6ee1de24af7",
+      "digest": "sha256:b8979d339e756417d9fc2d4be06913d23288b01e8735aa5c4bc860ee4dff132d",
+      "expires_at": "2026-11-11T20:07:28Z",
+      "size_in_bytes": 643,
+      "archive_sha256_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "26b9687b28c4f6a200c57c61e3b493cb22089f2ef9b40512ab294305e390da9f",
+          "bytes": 852,
+          "identical_to_pr51e_download": true
+        }
+      ]
+    },
+    {
+      "id": 12848081719,
+      "name": "governance-ruff-2a6513494b3f228b4ce46c716920b6ee1de24af7",
+      "digest": "sha256:15c67e36565835e954941f9512190a8220091b0cc649a11840dd93524b1da3b7",
+      "expires_at": "2026-11-11T20:07:04Z",
+      "size_in_bytes": 1770,
+      "archive_sha256_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "b84492078691b3f7dc11b931e845340fba9a411766cfd92645d976f0556e1391",
+          "bytes": 28739,
+          "identical_to_pr51e_download": true
+        }
+      ]
+    },
+    {
+      "id": 12847852781,
+      "name": "governance-financial-2a6513494b3f228b4ce46c716920b6ee1de24af7",
+      "digest": "sha256:482a3a2ca3ea36b1b12afcde8322cb179ed46b7676d7de4af2714f52276d0acd",
+      "expires_at": "2026-11-11T20:08:43Z",
+      "size_in_bytes": 57386,
+      "archive_sha256_verified": true,
+      "files": [
+        {
+          "path": "inventory.json",
+          "sha256": "2541ff181d7d5bf1fc3a7406bdb5da3fd70bd0a662ce9761d790caf4528dc982",
+          "bytes": 683075,
+          "identical_to_pr51e_download": true
+        },
+        {
+          "path": "financial-junit.xml",
+          "sha256": "b770b19e40ca10fee2dc507a2eb3838e3e16d5ef697e95d900577a1a2e692ede",
+          "bytes": 15060,
+          "identical_to_pr51e_download": true
+        },
+        {
+          "path": "result.json",
+          "sha256": "33ba61decfee33b80c9a7753417d1acefaa4a8ce6ecee17b1544d2c3934a24c8",
+          "bytes": 132213,
+          "identical_to_pr51e_download": true
+        }
+      ]
+    },
+    {
+      "id": 12847488672,
+      "name": "governance-python-2a6513494b3f228b4ce46c716920b6ee1de24af7",
+      "digest": "sha256:b8d77a70e608fec8cdd8eb1b439d7f0d1ee71f6dca3428562263711e64e5db99",
+      "expires_at": "2026-11-11T20:11:15Z",
+      "size_in_bytes": 109967,
+      "archive_sha256_verified": true,
+      "files": [
+        {
+          "path": "coverage.xml",
+          "sha256": "0e44c60caf323afd27423c65ee55c0af43a2c055b05fb5c364e133b265e0602c",
+          "bytes": 554826,
+          "identical_to_pr51e_download": true
+        },
+        {
+          "path": "python-junit.xml",
+          "sha256": "e295f65f2789ca449996e86699608be19887e38a1165c8e1ffaa91ad658291d5",
+          "bytes": 147714,
+          "identical_to_pr51e_download": true
+        },
+        {
+          "path": "inventory.json",
+          "sha256": "92a426c0ed0d0d329ca1c5a148411b47c97d0955b289a7068e2a4ae052e700c1",
+          "bytes": 655808,
+          "identical_to_pr51e_download": true
+        },
+        {
+          "path": "result.json",
+          "sha256": "62e6d4fd9268bfc6a2d1018befa7447b2dd180b3bdb93f5525c0ba5514072c46",
+          "bytes": 196373,
+          "identical_to_pr51e_download": true
+        }
+      ]
+    },
+    {
+      "id": 12847287980,
+      "name": "governance-mypy-2a6513494b3f228b4ce46c716920b6ee1de24af7",
+      "digest": "sha256:72d361240908dd128c41d4e08ed39366d251ff6836b31e6133cc37e9c0194824",
+      "expires_at": "2026-11-11T20:06:51Z",
+      "size_in_bytes": 9050,
+      "archive_sha256_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "b326a2e5dc012c9c5d85fa01278c7616a211dcafeb0bb736308dca4fd9413fff",
+          "bytes": 182707,
+          "identical_to_pr51e_download": true
+        }
+      ]
+    },
+    {
+      "id": 12847033234,
+      "name": "governance-runtime-2a6513494b3f228b4ce46c716920b6ee1de24af7",
+      "digest": "sha256:34daeddbaf8c5af76c3b6464e78994b1c151016512582cb7fafff9bafd51139d",
+      "expires_at": "2026-11-11T20:06:59Z",
+      "size_in_bytes": 443,
+      "archive_sha256_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "1833316c1d158db6baa7493832c41c72bcb630d134c9492c92aa2142cc7706af",
+          "bytes": 511,
+          "identical_to_pr51e_download": true
+        }
+      ]
+    },
+    {
+      "id": 12846938925,
+      "name": "governance-engineering-2a6513494b3f228b4ce46c716920b6ee1de24af7",
+      "digest": "sha256:de7ee2cf51de31d1498db72c08d74541d1c27245ccd6d354f6c3824153908253",
+      "expires_at": "2026-11-11T20:11:17Z",
+      "size_in_bytes": 77096,
+      "archive_sha256_verified": true,
+      "files": [
+        {
+          "path": "engineering-junit.xml",
+          "sha256": "d606fa23f440768a7cfe3d5401a1ea464e5594acce3428039e2b69b86e30edff",
+          "bytes": 141533,
+          "identical_to_pr51e_download": true
+        },
+        {
+          "path": "inventory.json",
+          "sha256": "6c94f1dcf414c78c721f9ffb89892db004bd1fcab26de2894a99918dad710ce7",
+          "bytes": 656615,
+          "identical_to_pr51e_download": true
+        },
+        {
+          "path": "result.json",
+          "sha256": "e0f4cad23cf9784e674e7493a256f523b4d80d683aa3f6d1ac1951966b5cf663",
+          "bytes": 194426,
+          "identical_to_pr51e_download": true
+        }
+      ]
+    },
+    {
+      "id": 12846903366,
+      "name": "governance-node-2a6513494b3f228b4ce46c716920b6ee1de24af7",
+      "digest": "sha256:d243dfa2b238c746c7705c52669ca0e138b9a437620355061089b90f3c77b9e0",
+      "expires_at": "2026-11-11T20:06:50Z",
+      "size_in_bytes": 796,
+      "archive_sha256_verified": true,
+      "files": [
+        {
+          "path": "result.json",
+          "sha256": "59ca8daa843353f69dab4cd725efba1936fbdef20e5b8d6723c4cc3dfb693f50",
+          "bytes": 2996,
+          "identical_to_pr51e_download": true
+        }
+      ]
+    }
+  ]
+}

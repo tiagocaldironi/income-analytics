@@ -8,7 +8,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from functools import lru_cache
 from typing import cast
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session
@@ -82,6 +82,7 @@ from income_analytics.infrastructure.models import (
     ProviderHealthRecord,
     RealEstateDetailsRecord,
     RecurringRuleRecord,
+    SecurityAuditRecord,
 )
 from income_analytics.infrastructure.models import (
     B3ImportedRecord as B3ImportedRecordRow,
@@ -621,7 +622,23 @@ class SqliteAssetRepository:
                 .filter(PortfolioAssetRecord.portfolio_id == self.portfolio_id)
                 .all()
             )
-            return tuple(self._scoped_asset(session, record) for record in records)
+            # Fetch portfolio overrides in one query instead of one per asset.
+            metadata = {}
+            if saas_enabled():
+                metadata = {
+                    row.asset_id: json.loads(row.payload)
+                    for row in session.query(PortfolioAssetMetadataRecord)
+                    .filter_by(portfolio_id=self.portfolio_id).all()
+                }
+            assets = []
+            for record in records:
+                asset = self._to_domain(record)
+                values = metadata.get(record.id)
+                if values:
+                    asset.name = values["name"]
+                    asset.asset_class = AssetClass(values["asset_class"])
+                assets.append(asset)
+            return tuple(assets)
 
     @staticmethod
     def list_all() -> tuple[Asset, ...]:
@@ -1080,6 +1097,34 @@ class SqliteFinancialEventRepository:
     def delete(self, event_id: str) -> bool:
         initialize_database()
         with SessionFactory.begin() as session:
+            target = session.query(FinancialEventRecord).filter_by(
+                id=event_id, portfolio_id=self.portfolio_id
+            ).first()
+            if target is None:
+                return False
+            # Keep source fingerprints/statuses as tombstones so an intentional
+            # deletion cannot be silently recreated by a later import/sync.
+            for model in (B3ImportedRecordRow, ImportedPaidIncomeRecord):
+                references = session.query(model).filter_by(
+                    financial_event_id=event_id, portfolio_id=self.portfolio_id
+                ).all()
+                for reference in references:
+                    previous = reference.detail
+                    reference.financial_event_id = None
+                    reference.detail = (
+                        f"USER_DELETED_OPERATION:{event_id}"
+                        + (f"; {previous}" if previous else "")
+                    )
+            principal = current_principal()
+            session.add(SecurityAuditRecord(
+                id=str(uuid4()),
+                actor_id=str(principal.user_id) if principal else None,
+                action="USER_DELETED_OPERATION",
+                evidence_ref=event_id,
+                resource_id=self.portfolio_id,
+                created_at=int(datetime.now(UTC).timestamp()),
+            ))
+            session.flush()
             deleted = (
                 session.query(FinancialEventRecord)
                 .filter_by(id=event_id, portfolio_id=self.portfolio_id)
@@ -1090,15 +1135,21 @@ class SqliteFinancialEventRepository:
             _cached_financial_events.cache_clear()
         return deleted
 
-    def list(self) -> tuple[FinancialEvent, ...]:
+    def list(self, *, assets: dict[str, Asset] | None = None) -> tuple[FinancialEvent, ...]:
+        if assets is not None:
+            return self._list_uncached(assets=assets)
         if saas_enabled():
             return self._list_uncached()
         return _cached_financial_events(database_url(), self.portfolio_id)
 
-    def _list_uncached(self) -> tuple[FinancialEvent, ...]:
-        assets = {
-            str(asset.id): asset for asset in SqliteAssetRepository(UUID(self.portfolio_id)).list()
-        }
+    def _list_uncached(
+        self, *, assets: dict[str, Asset] | None = None
+    ) -> tuple[FinancialEvent, ...]:
+        if assets is None:
+            assets = {
+                str(asset.id): asset
+                for asset in SqliteAssetRepository(UUID(self.portfolio_id)).list()
+            }
         with SessionFactory() as session:
             rows = (
                 session.query(FinancialEventRecord)
@@ -1270,6 +1321,14 @@ class SqliteMarketPriceRepository:
         return dict(_cached_market_prices_by_asset(database_url()))
 
 
+def _refresh_run_json_value(value: object) -> str:
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return str(value)
+    raise TypeError(f"Unsupported refresh history value: {type(value).__name__}")
+
+
 class SqliteMarketPriceRefreshRunRepository:
     def __init__(self, portfolio_id: UUID) -> None:
         self.portfolio_id = str(portfolio_id)
@@ -1284,7 +1343,9 @@ class SqliteMarketPriceRefreshRunRepository:
                     started_at=cast(datetime, run["started_at"]),
                     finished_at=cast(datetime, run["finished_at"]),
                     status=str(run["status"]),
-                    outcomes_json=json.dumps(run["providers"], ensure_ascii=False),
+                    outcomes_json=json.dumps(
+                        run["providers"], ensure_ascii=False, default=_refresh_run_json_value
+                    ),
                 )
             )
 

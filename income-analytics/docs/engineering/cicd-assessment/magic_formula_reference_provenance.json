@@ -1,0 +1,879 @@
+{
+  "schema_version": "PR51C_REFERENCE_PROVENANCE_V1",
+  "assessed_on": "2026-10-28",
+  "base_sha": "1bbd2d42686ab0c893790772a05a7845cfbc0295",
+  "financial_baseline_sha": "ca627ac72f110d0f4d62faaa9c51a08eaed54965",
+  "candidate_branch": "codex/pr51c-magic-formula-references",
+  "candidate_uncommitted": true,
+  "states": {
+    "VERIFIED": "Origin/content integrity anchored independently; ci_approved additionally requires permission and complete dependencies.",
+    "RECOVERABLE": "Origin/candidate identified; independent recovery not complete.",
+    "BLOCKED": "Evidence unavailable/insufficient or redistribution unresolved.",
+    "REJECTED": "Incompatible with historical authenticity."
+  },
+  "digest_format": "sha256(json.dumps(document, sort_keys=True, ensure_ascii=False, default=str).encode(utf8)); original default separators, not compact JSON",
+  "source_manifest_order": [
+    "dfp_cia_aberta_2023.zip",
+    "dfp_cia_aberta_2024.zip",
+    "dfp_cia_aberta_2025.zip",
+    "itr_cia_aberta_2025.zip",
+    "fca_cia_aberta_2024.zip",
+    "fca_cia_aberta_2025.zip"
+  ],
+  "source_manifest_computed": "4083204323f096ee573bd79b00b37f59ca2ae4cd0d01e4dc9692ab568338baa1",
+  "git_search": {
+    "exact_inputs_in_any_local_reachable_git_history": false,
+    "tags_checked": [
+      "income-simulation-v2-2026-10-25",
+      "income-v2-2026-10-24",
+      "income-v2-2026-10-24-consolidated",
+      "v0.1.0",
+      "v0.2.0",
+      "v0.3.0",
+      "v0.4.0"
+    ],
+    "github_releases": 0,
+    "github_artifacts": "Only 18 sanitized offline CI artifacts found; no historical payload reference pack."
+  },
+  "ci_policy": {
+    "approved_reference_ids": [
+      "cvm-dfp-2025-index"
+    ],
+    "automatic_downloads": false,
+    "real_database_access": false,
+    "unapproved_references": "fail explicitly, never skip/xfail or synthesize a replacement"
+  },
+  "references": [
+    {
+      "id": "ranking-v12.2",
+      "path": "docs/appendices/magic_formula_v12_2/ranking_snapshot.json",
+      "state": "VERIFIED",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "08d8776ee27af53c54c36efd9768fbc40e190f6f0ea0e0c18ec549199ff7cad0",
+      "schema": {
+        "format": "JSON UTF-8",
+        "top_level_fields": [
+          "accounting_cutoff",
+          "blocked",
+          "blocked_companies",
+          "build_date",
+          "conservative_coverage",
+          "conservative_denominator",
+          "created_at",
+          "data_snapshot_digest",
+          "data_snapshot_id",
+          "eligible_complete_companies",
+          "financial_information_cutoff",
+          "liquidity_fail_companies",
+          "liquidity_fails",
+          "methodological_coverage",
+          "methodological_denominator",
+          "metric_non_rankable",
+          "point_in_time_blocked_companies",
+          "policy_hash",
+          "policy_id",
+          "price_reference_date",
+          "provenance",
+          "rankable_companies",
+          "ranking_as_of_date",
+          "ranking_hash",
+          "ranking_reference_date",
+          "ranking_snapshot_id",
+          "ranking_style",
+          "results",
+          "review_companies",
+          "reviews",
+          "snapshot_content_hash",
+          "source_manifest_hash",
+          "supersedes_snapshot_id",
+          "tie_policy"
+        ],
+        "result_fields": [
+          "aviation_flag",
+          "combined_score",
+          "commerce_category",
+          "company_id",
+          "company_name",
+          "cvm_code",
+          "data_quality_status",
+          "earnings_yield",
+          "earnings_yield_rank",
+          "ebit",
+          "enterprise_value",
+          "filing_date",
+          "financial_information_cutoff",
+          "financial_reference_date",
+          "global_rank",
+          "invested_capital",
+          "point_in_time_lineage",
+          "price",
+          "price_reference_date",
+          "price_stale_calendar_days",
+          "provenance_status",
+          "ranking_as_of_date",
+          "ranking_reference_date",
+          "return_on_capital",
+          "return_on_capital_rank",
+          "selected_financial_document",
+          "selected_isin",
+          "selected_security"
+        ],
+        "provenance_fields": [
+          "accounting",
+          "company_id",
+          "filing_date",
+          "market",
+          "point_in_time",
+          "selected_isin",
+          "selected_security_source",
+          "source_snapshot_digest",
+          "source_snapshot_id",
+          "ticker"
+        ]
+      },
+      "reference_date": "2025-12-30",
+      "build_date": "2026-10-16",
+      "created_at": "2026-10-16T11:26:06.928076+00:00",
+      "snapshot_id": "mf-f1ee50809c83979ba221d84e",
+      "ranking_hash": "f1ee50809c83979ba221d84ebb48150b9470331240940f89a8cb745f2a4ee8f3",
+      "content_hash": "18a8631490f3a340575df3234acc26065a467b701c9a999cd3eaed859bb82db7",
+      "source_manifest_hash": "4083204323f096ee573bd79b00b37f59ca2ae4cd0d01e4dc9692ab568338baa1",
+      "data_snapshot_id": "ed8a9235-ee14-4a97-93fd-0dbcd87113fb",
+      "data_snapshot_digest": "0e46baad7108a01b972459b1736ec28a67a2c932fcac10344432569b24a586d9",
+      "policy_hash": "96d5d54ab1b1320ddc14f1a3c9cd6764b1bf8d68f1e6d79ffd0faa6d1b72cbac",
+      "ranked": 165,
+      "generator": "scripts/build_magic_formula_v12_2.py::main",
+      "independent_evidence": [
+        "docs/MAGIC_FORMULA_POINT_IN_TIME_RANKING_AND_RELEASE_V12_2.md:24",
+        "docs/MAGIC_FORMULA_COMPANY_DETAIL_AND_SECTOR_UX_V1.md:19-20"
+      ],
+      "integrity": "Verified by standalone stdlib digest, without recomputing ranking; full snapshot content and ordered results match preexisting Git anchors.",
+      "license": {
+        "state": "BLOCKED",
+        "reason": "Mixed CVM/B3 derived content: no B3 redistribution authorization located. Metadata authenticity does not approve CI distribution."
+      },
+      "consumers": [
+        "tests/api/test_magic_formula_product_api.py"
+      ],
+      "dependencies": [
+        "universe-ed8a",
+        "cvm-dfp-2023",
+        "cvm-dfp-2024",
+        "cvm-dfp-2025",
+        "cvm-itr-2025",
+        "cvm-fca-2024",
+        "cvm-fca-2025",
+        "cotahist-2025",
+        "historical-shares-evidence"
+      ],
+      "remediation": "Resolve distribution permission and include exact audited original bytes, never recompute a replacement golden."
+    },
+    {
+      "id": "universe-v8",
+      "path": "docs/appendices/magic_formula_policy_review_resolution_v8/methodological_universe_v8.csv",
+      "state": "RECOVERABLE",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "8c1f1ff25653229e2feec30e5c45462f69612a15e9bfaeca5114fec5ce57e485",
+      "schema": {
+        "format": "CSV UTF-8(-BOM), comma-separated",
+        "columns": [
+          "cvm_code",
+          "company",
+          "sector",
+          "structural_status",
+          "security_status_v8",
+          "selected_ticker_v8",
+          "selected_isin_v8",
+          "traded_days_ratio_30d_v8",
+          "liquidity_status_v8",
+          "data_status_v6",
+          "methodological_status_v8",
+          "review_reason",
+          "commerce_category",
+          "commerce_classification_uncertain",
+          "aviation_related",
+          "utility_related",
+          "financial_related"
+        ],
+        "rows": 307,
+        "status_counts": {
+          "LIQUIDITY_FAIL": 45,
+          "ELIGIBLE_COMPLETE": 180,
+          "ELIGIBLE_DATA_BLOCKED": 63,
+          "BUYABLE_SECURITY_REVIEW": 19
+        }
+      },
+      "reference_date": "2025-12-30",
+      "snapshot_id": "ed8a9235-ee14-4a97-93fd-0dbcd87113fb",
+      "data_snapshot_digest": "0e46baad7108a01b972459b1736ec28a67a2c932fcac10344432569b24a586d9",
+      "generator": "scripts/audit_magic_formula_policy_review_resolution_v8.py",
+      "independent_evidence": [
+        "docs/MAGIC_FORMULA_POLICY_REVIEW_RESOLUTION_V8.md"
+      ],
+      "integrity": "307 rows and historical aggregate statuses match documentation, but no independent preexisting byte/per-row digest located. Current SHA is observation only, not historical authentication.",
+      "license": {
+        "state": "BLOCKED",
+        "reason": "Contains B3-derived identity/liquidity classifications; distribution permission not demonstrated."
+      },
+      "consumers": [
+        "tests/application/test_magic_formula_methodology_policy_v1.py"
+      ],
+      "dependencies": [
+        "v6-v7-v9-lineage",
+        "cotahist-2022-2024",
+        "cotahist-2025",
+        "universe-ed8a"
+      ],
+      "remediation": "Recover independently anchored original CSV/per-issuer evidence; aggregate counts alone cannot authenticate all rows."
+    },
+    {
+      "id": "universe-v9.2",
+      "path": "docs/appendices/magic_formula_v9_2/methodological_universe.csv",
+      "state": "RECOVERABLE",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "e2285ba59e910a1dc17a091ac5393fdadc46d401708a981beae4b4c96499c5b1",
+      "schema": {
+        "format": "CSV UTF-8(-BOM), comma-separated",
+        "columns": [
+          "cvm_code",
+          "company",
+          "structural_status",
+          "security_status",
+          "selected_ticker",
+          "selected_isin",
+          "traded_days_ratio_30d",
+          "liquidity_status",
+          "methodological_status",
+          "rankable"
+        ],
+        "rows": 307,
+        "status_counts": {
+          "LIQUIDITY_FAIL": 45,
+          "ELIGIBLE_COMPLETE": 180,
+          "ELIGIBLE_DATA_BLOCKED": 63,
+          "BUYABLE_SECURITY_REVIEW": 19
+        }
+      },
+      "reference_date": "2025-12-30",
+      "snapshot_id": "ed8a9235-ee14-4a97-93fd-0dbcd87113fb",
+      "data_snapshot_digest": "0e46baad7108a01b972459b1736ec28a67a2c932fcac10344432569b24a586d9",
+      "generator": "scripts/audit_magic_formula_baseline_activation_v9_2.py",
+      "independent_evidence": [
+        "docs/MAGIC_FORMULA_BASELINE_RECONSTITUTION_AND_ACTIVATION_V9_2.md"
+      ],
+      "integrity": "307 rows and historical aggregate statuses match documentation, but no independent preexisting byte/per-row digest located. Current SHA is observation only, not historical authentication.",
+      "license": {
+        "state": "BLOCKED",
+        "reason": "Contains B3-derived identity/liquidity classifications; distribution permission not demonstrated."
+      },
+      "consumers": [
+        "tests/application/test_magic_formula_canonical_ranking.py"
+      ],
+      "dependencies": [
+        "v6-v7-v9-lineage",
+        "cotahist-2022-2024",
+        "cotahist-2025",
+        "universe-ed8a"
+      ],
+      "remediation": "Recover independently anchored original CSV/per-issuer evidence; aggregate counts alone cannot authenticate all rows."
+    },
+    {
+      "id": "universe-db",
+      "path": "data/magic_formula/universe_snapshots.db",
+      "state": "BLOCKED",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "c3f906e32aac085a196b7def498660e2d7e02d463ce36496c11c582dc905f744",
+      "reference_date": "2025-12-31",
+      "schema": [
+        [
+          "index",
+          "sqlite_autoindex_magic_formula_universe_snapshots_1",
+          null
+        ],
+        [
+          "table",
+          "magic_formula_universe_snapshots",
+          "CREATE TABLE magic_formula_universe_snapshots (\n                universe_snapshot_id TEXT PRIMARY KEY, reference_date TEXT NOT NULL,\n                universe_policy_version TEXT NOT NULL, created_at TEXT NOT NULL,\n                document_json TEXT NOT NULL CHECK(json_valid(document_json)),\n                document_digest TEXT NOT NULL\n            )"
+        ],
+        [
+          "trigger",
+          "universe_no_delete",
+          "CREATE TRIGGER universe_no_delete\n                    BEFORE DELETE ON magic_formula_universe_snapshots\n                    BEGIN SELECT RAISE(ABORT,'IMMUTABLE_UNIVERSE_SNAPSHOT'); END"
+        ],
+        [
+          "trigger",
+          "universe_no_update",
+          "CREATE TRIGGER universe_no_update\n                    BEFORE UPDATE ON magic_formula_universe_snapshots\n                    BEGIN SELECT RAISE(ABORT,'IMMUTABLE_UNIVERSE_SNAPSHOT'); END"
+        ]
+      ],
+      "snapshots": [
+        {
+          "rowid": 1,
+          "snapshot_id": "22db1605-56e5-48ed-985b-4b611dba3a5d",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-09-17T09:37:30.405956+00:00",
+          "document_digest": "d1bd6f95bf0db1fdbeebc8c830f3527e3a5a17c6575b208ea4d23a34feb892fe",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        },
+        {
+          "rowid": 2,
+          "snapshot_id": "f63e9ed8-8103-4f2b-970b-925fd1c2e0e7",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-09-17T21:27:31.931499+00:00",
+          "document_digest": "6d8d3161d75617db30baadd9efe32623e5aa1feb2ac91cde9567e41ce05fd9b9",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        },
+        {
+          "rowid": 3,
+          "snapshot_id": "c9fa8807-bbc6-4d43-a7a1-9cabd5a88209",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-09-18T10:51:36.877789+00:00",
+          "document_digest": "2988021250643d05d500f3afe4c6508a08a94a91d22d25ab441e0b03ddd8787c",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        },
+        {
+          "rowid": 4,
+          "snapshot_id": "6d418683-6c09-4cfd-a67b-a4cc54718ddd",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-09-20T19:11:05.617561+00:00",
+          "document_digest": "289ec7ce1c6f40078ffee2da680864344ca9f1b43552aa7ac1e7d11c9e921cc9",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        },
+        {
+          "rowid": 5,
+          "snapshot_id": "b3aa341e-7074-4d53-93f3-b3b88d247c19",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-09-23T10:26:14.240944+00:00",
+          "document_digest": "1924bd817463d2bf0fd3f9cd26b9ee2c0266d2ca185ed76d6481ff99d7d88fa2",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        },
+        {
+          "rowid": 6,
+          "snapshot_id": "9dd05e5a-d4a0-402c-809e-fd7f4cbc4f64",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-10-12T18:40:11.188115+00:00",
+          "document_digest": "dcf2a1181b42ef641fa9783ff0da6324566020a079aa0b60049ba405de99261e",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        },
+        {
+          "rowid": 7,
+          "snapshot_id": "c458573e-bf4f-4d58-a1be-bcef9df4f430",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-10-12T18:40:11.188115+00:00",
+          "document_digest": "de107fca92f0001143cef0395d8e24713332c92f74cf9c26a1f0e57ff396da86",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        },
+        {
+          "rowid": 8,
+          "snapshot_id": "ed8a9235-ee14-4a97-93fd-0dbcd87113fb",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-10-12T19:12:56.069873+00:00",
+          "document_digest": "0e46baad7108a01b972459b1736ec28a67a2c932fcac10344432569b24a586d9",
+          "self_digest_valid": true,
+          "state": "VERIFIED",
+          "independent_anchor": "docs/MAGIC_FORMULA_METHODOLOGY_POLICY_ACTIVATION_V9.md:12"
+        }
+      ],
+      "generator": "scripts/discover_magic_formula_universe.py and subsequent recovery publications",
+      "independent_evidence": [
+        "docs/MAGIC_FORMULA_PRICE_BLOCKERS_BATCH_RECOVERY_V3.md",
+        "docs/MAGIC_FORMULA_PRICE_RECOVERY_PHASE_01.md"
+      ],
+      "integrity": "Source contains exactly one snapshot table, eight rows. All eight self-digests valid. Only ed8a content digest independently anchored in Git; predecessor and tied-row digests not independently anchored. Source opened immutable/readonly; bytes unchanged.",
+      "license": {
+        "state": "BLOCKED",
+        "reason": "B3-derived data. Complete historical/ordering pack cannot yet be approved."
+      },
+      "consumers": [
+        "tests/application/test_magic_formula_preview.py",
+        "tests/application/test_magic_formula_price_availability_audit.py",
+        "tests/application/test_magic_formula_historical_price_sources_v5.py",
+        "tests/api/test_magic_formula_product_api.py",
+        "tests/application/test_magic_formula_canonical_ranking.py"
+      ],
+      "dependencies": [
+        "universe-ed8a",
+        "universe-6d418",
+        "universe-tied-rows",
+        "cvm-dfp-2025",
+        "cvm-fca-2025",
+        "cotahist-2025"
+      ],
+      "remediation": "Export authenticated document JSON + original rowid/timestamps only after provenance and permission review; rebuild separate temporary SQLite, never ship/use original DB in tests."
+    },
+    {
+      "id": "universe-ed8a",
+      "path": null,
+      "state": "VERIFIED",
+      "ci_approved": false,
+      "local_candidate_found": false,
+      "sha256": null,
+      "document_digest": "0e46baad7108a01b972459b1736ec28a67a2c932fcac10344432569b24a586d9",
+      "snapshot_id": "ed8a9235-ee14-4a97-93fd-0dbcd87113fb",
+      "reference_date": "2025-12-31",
+      "schema": "CANDIDATE_PUBLISHABLE_UNIVERSE document",
+      "generator": "price blockers batch recovery V3",
+      "independent_evidence": [
+        "docs/MAGIC_FORMULA_METHODOLOGY_POLICY_ACTIVATION_V9.md:12",
+        "scripts/audit_magic_formula_baseline_activation_v9_2.py:378-379"
+      ],
+      "integrity": "Standalone recomputation matches original document_digest and historical Git anchor.",
+      "license": {
+        "state": "BLOCKED",
+        "reason": "Includes B3 prices/identity; no redistribution authorization evidenced."
+      },
+      "consumers": [
+        "PY-API",
+        "PY-V9",
+        "PY-DB"
+      ],
+      "dependencies": [
+        "cvm-dfp-2025",
+        "cvm-fca-2025",
+        "cotahist-2025"
+      ],
+      "remediation": "Permission review before exporting original historical document."
+    },
+    {
+      "id": "universe-6d418",
+      "path": null,
+      "state": "BLOCKED",
+      "ci_approved": false,
+      "local_candidate_found": false,
+      "sha256": null,
+      "schema": "Historical universe rows",
+      "snapshot_ids": [
+        "6d418683-6c09-4cfd-a67b-a4cc54718ddd"
+      ],
+      "observed_rows": [
+        {
+          "rowid": 4,
+          "snapshot_id": "6d418683-6c09-4cfd-a67b-a4cc54718ddd",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-09-20T19:11:05.617561+00:00",
+          "document_digest": "289ec7ce1c6f40078ffee2da680864344ca9f1b43552aa7ac1e7d11c9e921cc9",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        }
+      ],
+      "reference_date": "2025-12-31",
+      "integrity": "Existing rows self-consistent, but no independent full-content digest/rowid-order anchor recovered. Never manufacture rows with these IDs.",
+      "license": {
+        "state": "BLOCKED",
+        "reason": "B3 redistribution permission pending."
+      },
+      "generator": "Historical discovery/recovery; see universe-db",
+      "independent_evidence": [
+        "docs/MAGIC_FORMULA_PRICE_RECOVERY_PHASE_01.md"
+      ],
+      "consumers": [
+        "tests/application/test_magic_formula_preview.py"
+      ],
+      "dependencies": [
+        "universe-db"
+      ],
+      "remediation": "Recover original export/digest anchored independently of current local DB."
+    },
+    {
+      "id": "universe-tied-rows",
+      "path": null,
+      "state": "BLOCKED",
+      "ci_approved": false,
+      "local_candidate_found": false,
+      "sha256": null,
+      "schema": "Historical universe rows",
+      "snapshot_ids": [
+        "9dd05e5a-d4a0-402c-809e-fd7f4cbc4f64",
+        "c458573e-bf4f-4d58-a1be-bcef9df4f430"
+      ],
+      "observed_rows": [
+        {
+          "rowid": 6,
+          "snapshot_id": "9dd05e5a-d4a0-402c-809e-fd7f4cbc4f64",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-10-12T18:40:11.188115+00:00",
+          "document_digest": "dcf2a1181b42ef641fa9783ff0da6324566020a079aa0b60049ba405de99261e",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        },
+        {
+          "rowid": 7,
+          "snapshot_id": "c458573e-bf4f-4d58-a1be-bcef9df4f430",
+          "reference_date": "2025-12-31",
+          "created_at": "2026-10-12T18:40:11.188115+00:00",
+          "document_digest": "de107fca92f0001143cef0395d8e24713332c92f74cf9c26a1f0e57ff396da86",
+          "self_digest_valid": true,
+          "state": "RECOVERABLE",
+          "independent_anchor": null
+        }
+      ],
+      "reference_date": "2025-12-31",
+      "integrity": "Existing rows self-consistent, but no independent full-content digest/rowid-order anchor recovered. Never manufacture rows with these IDs.",
+      "license": {
+        "state": "BLOCKED",
+        "reason": "B3 redistribution permission pending."
+      },
+      "generator": "Historical discovery/recovery; see universe-db",
+      "independent_evidence": [
+        "tests/application/test_magic_formula_price_availability_audit.py::test_snapshot_ordering_audit_resolves_duplicate_timestamp_with_rowid"
+      ],
+      "consumers": [
+        "tests/application/test_magic_formula_price_availability_audit.py"
+      ],
+      "dependencies": [
+        "universe-db"
+      ],
+      "remediation": "Recover original export/digest anchored independently of current local DB."
+    },
+    {
+      "id": "cvm-dfp-2023",
+      "path": "data/cvm/dfp_cia_aberta_2023.zip",
+      "state": "VERIFIED",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "9b301ce4bb1b6b351435a683784deec9d38c3f90ab6f2cb01729c12a9abf5bde",
+      "reference_date": "2023",
+      "schema": "Official CVM annual ZIP; original bytes retained locally",
+      "generator": "CVM SEP / Suporte a Sistemas CVM",
+      "official_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2023.zip",
+      "license": {
+        "state": "VERIFIED",
+        "identifier": "ODbL-1.0",
+        "dataset_url": "https://dados.cvm.gov.br/dataset/cia_aberta-doc-dfp",
+        "checked_on": "2026-10-28",
+        "attribution": "Comissão de Valores Mobiliários — SEP / Suporte a Sistemas CVM"
+      },
+      "independent_evidence": [
+        "V12.2 source_manifest_hash inside Git-anchored snapshot_content_hash"
+      ],
+      "integrity": "Six archive hashes, in generator order, plus frozen universe digest reproduce source_manifest_hash 4083204323f096ee573bd79b00b37f59ca2ae4cd0d01e4dc9692ab568338baa1",
+      "consumers": [
+        "Replay scripts/build_magic_formula_v12_2.py"
+      ],
+      "dependencies": [],
+      "remediation": "No automatic download; use content-addressed archived originals with attribution if full replay is separately approved. Raw FCA attachments may include contact data; minimize before distribution."
+    },
+    {
+      "id": "cvm-dfp-2024",
+      "path": "data/cvm/dfp_cia_aberta_2024.zip",
+      "state": "VERIFIED",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "f52caa45b6fc202334d7b87bb9bb24830280f5ff6a29b8b8557894b26fed1be8",
+      "reference_date": "2024",
+      "schema": "Official CVM annual ZIP; original bytes retained locally",
+      "generator": "CVM SEP / Suporte a Sistemas CVM",
+      "official_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2024.zip",
+      "license": {
+        "state": "VERIFIED",
+        "identifier": "ODbL-1.0",
+        "dataset_url": "https://dados.cvm.gov.br/dataset/cia_aberta-doc-dfp",
+        "checked_on": "2026-10-28",
+        "attribution": "Comissão de Valores Mobiliários — SEP / Suporte a Sistemas CVM"
+      },
+      "independent_evidence": [
+        "V12.2 source_manifest_hash inside Git-anchored snapshot_content_hash"
+      ],
+      "integrity": "Six archive hashes, in generator order, plus frozen universe digest reproduce source_manifest_hash 4083204323f096ee573bd79b00b37f59ca2ae4cd0d01e4dc9692ab568338baa1",
+      "consumers": [
+        "Replay scripts/build_magic_formula_v12_2.py"
+      ],
+      "dependencies": [],
+      "remediation": "No automatic download; use content-addressed archived originals with attribution if full replay is separately approved. Raw FCA attachments may include contact data; minimize before distribution."
+    },
+    {
+      "id": "cvm-dfp-2025",
+      "path": "data/cvm/dfp_cia_aberta_2025.zip",
+      "state": "VERIFIED",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "de8b7be1cdae032a402ab33916015c74fdc30f0bc64be3f38a4b5dd1d43f6d79",
+      "reference_date": "2025",
+      "schema": "Official CVM annual ZIP; original bytes retained locally",
+      "generator": "CVM SEP / Suporte a Sistemas CVM",
+      "official_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2025.zip",
+      "license": {
+        "state": "VERIFIED",
+        "identifier": "ODbL-1.0",
+        "dataset_url": "https://dados.cvm.gov.br/dataset/cia_aberta-doc-dfp",
+        "checked_on": "2026-10-28",
+        "attribution": "Comissão de Valores Mobiliários — SEP / Suporte a Sistemas CVM"
+      },
+      "independent_evidence": [
+        "tests/fixtures/cvm/phase2_v1/manifest.json"
+      ],
+      "integrity": "Six archive hashes, in generator order, plus frozen universe digest reproduce source_manifest_hash 4083204323f096ee573bd79b00b37f59ca2ae4cd0d01e4dc9692ab568338baa1",
+      "consumers": [
+        "Replay scripts/build_magic_formula_v12_2.py",
+        "application/magic_formula_canonical_ranking.py::_dfp_filing_dates"
+      ],
+      "dependencies": [],
+      "remediation": "No automatic download; use content-addressed archived originals with attribution if full replay is separately approved. Raw FCA attachments may include contact data; minimize before distribution."
+    },
+    {
+      "id": "cvm-itr-2025",
+      "path": "data/cvm/itr_cia_aberta_2025.zip",
+      "state": "VERIFIED",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "33818c4d8b755961010d7353accad4dfe2659b2b2e035493d8a838e88289a491",
+      "reference_date": "2025",
+      "schema": "Official CVM annual ZIP; original bytes retained locally",
+      "generator": "CVM SEP / Suporte a Sistemas CVM",
+      "official_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_2025.zip",
+      "license": {
+        "state": "VERIFIED",
+        "identifier": "ODbL-1.0",
+        "dataset_url": "https://dados.cvm.gov.br/dataset/cia_aberta-doc-itr",
+        "checked_on": "2026-10-28",
+        "attribution": "Comissão de Valores Mobiliários — SEP / Suporte a Sistemas CVM"
+      },
+      "independent_evidence": [
+        "V12.2 source_manifest_hash inside Git-anchored snapshot_content_hash"
+      ],
+      "integrity": "Six archive hashes, in generator order, plus frozen universe digest reproduce source_manifest_hash 4083204323f096ee573bd79b00b37f59ca2ae4cd0d01e4dc9692ab568338baa1",
+      "consumers": [
+        "Replay scripts/build_magic_formula_v12_2.py"
+      ],
+      "dependencies": [],
+      "remediation": "No automatic download; use content-addressed archived originals with attribution if full replay is separately approved. Raw FCA attachments may include contact data; minimize before distribution."
+    },
+    {
+      "id": "cvm-fca-2024",
+      "path": "data/cvm/fca_cia_aberta_2024.zip",
+      "state": "VERIFIED",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "55ad239eee3a922e25a599f72eb835e0e0a0ae50de0b50c738997143302f5e49",
+      "reference_date": "2024",
+      "schema": "Official CVM annual ZIP; original bytes retained locally",
+      "generator": "CVM SEP / Suporte a Sistemas CVM",
+      "official_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_2024.zip",
+      "license": {
+        "state": "VERIFIED",
+        "identifier": "ODbL-1.0",
+        "dataset_url": "https://dados.cvm.gov.br/dataset/cia_aberta-doc-fca",
+        "checked_on": "2026-10-28",
+        "attribution": "Comissão de Valores Mobiliários — SEP / Suporte a Sistemas CVM"
+      },
+      "independent_evidence": [
+        "V12.2 source_manifest_hash inside Git-anchored snapshot_content_hash"
+      ],
+      "integrity": "Six archive hashes, in generator order, plus frozen universe digest reproduce source_manifest_hash 4083204323f096ee573bd79b00b37f59ca2ae4cd0d01e4dc9692ab568338baa1",
+      "consumers": [
+        "Replay scripts/build_magic_formula_v12_2.py"
+      ],
+      "dependencies": [],
+      "remediation": "No automatic download; use content-addressed archived originals with attribution if full replay is separately approved. Raw FCA attachments may include contact data; minimize before distribution."
+    },
+    {
+      "id": "cvm-fca-2025",
+      "path": "data/cvm/fca_cia_aberta_2025.zip",
+      "state": "VERIFIED",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "dbbbda515a98d402ff0b0fb2808d15f3d81b029e0c61de8b95655323604d1192",
+      "reference_date": "2025",
+      "schema": "Official CVM annual ZIP; original bytes retained locally",
+      "generator": "CVM SEP / Suporte a Sistemas CVM",
+      "official_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_2025.zip",
+      "license": {
+        "state": "VERIFIED",
+        "identifier": "ODbL-1.0",
+        "dataset_url": "https://dados.cvm.gov.br/dataset/cia_aberta-doc-fca",
+        "checked_on": "2026-10-28",
+        "attribution": "Comissão de Valores Mobiliários — SEP / Suporte a Sistemas CVM"
+      },
+      "independent_evidence": [
+        "V12.2 source_manifest_hash inside Git-anchored snapshot_content_hash"
+      ],
+      "integrity": "Six archive hashes, in generator order, plus frozen universe digest reproduce source_manifest_hash 4083204323f096ee573bd79b00b37f59ca2ae4cd0d01e4dc9692ab568338baa1",
+      "consumers": [
+        "Replay scripts/build_magic_formula_v12_2.py"
+      ],
+      "dependencies": [],
+      "remediation": "No automatic download; use content-addressed archived originals with attribution if full replay is separately approved. Raw FCA attachments may include contact data; minimize before distribution."
+    },
+    {
+      "id": "cvm-dfp-2025-index",
+      "path": null,
+      "state": "VERIFIED",
+      "ci_approved": true,
+      "local_candidate_found": false,
+      "sha256": "a99e5d1db1c0f62bf1090452a41ed7df8bd3b20ecd2df699ccd16c8fc963cc94",
+      "schema": "Latin-1 semicolon CSV; 157823 bytes; original index member, no row/column changes",
+      "reference_date": "2025; DT_REFER and DT_RECEB preserved individually",
+      "generator": "CVM original member; lossless gzip(mtime=0) packaging in PR5.1C",
+      "fixture": {
+        "path": "tests/fixtures/cvm/receipt_index_2025_v1/dfp_cia_aberta_2025.csv.gz",
+        "sha256": "420c5dffb1a9504a74dd2f98632acb5f47df764415cce17d10d9e2384bf1592f",
+        "compression": "gzip",
+        "bytes": 23358
+      },
+      "independent_evidence": [
+        "Parent ZIP matches tests/fixtures/cvm/phase2_v1/manifest.json original archive_sha256",
+        "Exact member extraction; parent hash independently anchored before PR5.1C"
+      ],
+      "license": {
+        "state": "VERIFIED",
+        "identifier": "ODbL-1.0",
+        "attribution": "Comissão de Valores Mobiliários",
+        "dataset_url": "https://dados.cvm.gov.br/dataset/cia_aberta-doc-dfp",
+        "notice": "tests/fixtures/cvm/receipt_index_2025_v1/README.md"
+      },
+      "consumers": [
+        "tests/infrastructure/test_magic_formula_ci_reference_bundle.py",
+        "ci/magic_formula_references.py"
+      ],
+      "dependencies": [
+        "cvm-dfp-2025"
+      ],
+      "remediation": "Approved for index-date tests only. Derivative temporary ZIP must never claim original full DFP hash or accounting evidence."
+    },
+    {
+      "id": "cotahist-2025",
+      "path": "data/cotahist/COTAHIST_A2025.ZIP",
+      "state": "BLOCKED",
+      "ci_approved": false,
+      "local_candidate_found": true,
+      "sha256": "6cc0ad851c8f605ca30418acac48be81f1767f6ed05b4f563772d06ae448047d",
+      "schema": "B3 COTAHIST fixed-width ZIP",
+      "reference_date": "2025-12-30",
+      "generator": "B3",
+      "independent_evidence": [
+        "tests/fixtures/cvm/price_identity_v1/manifest.json source_archive.sha256"
+      ],
+      "integrity": "Official B3 annual prices; no redistribution permission established.",
+      "license": {
+        "state": "BLOCKED",
+        "terms_url": "https://www.b3.com.br/pt_br/termos-de-uso-e-protecao-de-dados/termos-de-uso/"
+      },
+      "consumers": [
+        "Full methodological/publication replay"
+      ],
+      "dependencies": [],
+      "remediation": "Review permission and independent hashes; no automatic download, generation or public upload."
+    },
+    {
+      "id": "cotahist-2022-2024",
+      "path": null,
+      "state": "BLOCKED",
+      "ci_approved": false,
+      "local_candidate_found": false,
+      "sha256": null,
+      "schema": "B3 COTAHIST fixed-width ZIP",
+      "reference_date": "2025-12-30",
+      "generator": "B3",
+      "independent_evidence": [],
+      "integrity": "Needed by V8 S4/L3 evidence; hashes exist only in local audit manifest not independently anchored in full.",
+      "license": {
+        "state": "BLOCKED",
+        "terms_url": "https://www.b3.com.br/pt_br/termos-de-uso-e-protecao-de-dados/termos-de-uso/"
+      },
+      "consumers": [
+        "Full methodological/publication replay"
+      ],
+      "dependencies": [],
+      "remediation": "Review permission and independent hashes; no automatic download, generation or public upload."
+    },
+    {
+      "id": "historical-shares-evidence",
+      "path": null,
+      "state": "BLOCKED",
+      "ci_approved": false,
+      "local_candidate_found": false,
+      "sha256": null,
+      "schema": "Historical per-issuer evidence",
+      "reference_date": "V6 → V12.2 historical versions",
+      "generator": "Historical generation scripts",
+      "independent_evidence": [],
+      "integrity": "V12.2 shares_evidence_dfp2024 and shares_point_in_time_v1 need document-level acquisition/identity/digest inventory.",
+      "license": {
+        "state": "BLOCKED",
+        "terms_url": "https://www.b3.com.br/pt_br/termos-de-uso-e-protecao-de-dados/termos-de-uso/"
+      },
+      "consumers": [
+        "Full methodological/publication replay"
+      ],
+      "dependencies": [],
+      "remediation": "Review permission and independent hashes; no automatic download, generation or public upload."
+    },
+    {
+      "id": "v6-v7-v9-lineage",
+      "path": null,
+      "state": "BLOCKED",
+      "ci_approved": false,
+      "local_candidate_found": false,
+      "sha256": null,
+      "schema": "Historical per-issuer evidence",
+      "reference_date": "V6 → V12.2 historical versions",
+      "generator": "Historical generation scripts",
+      "independent_evidence": [],
+      "integrity": "V6/V7 candidate selections/taxonomy/blocker files and V9 source CSVs not versioned; no independent complete checksums recovered.",
+      "license": {
+        "state": "BLOCKED",
+        "terms_url": "https://www.b3.com.br/pt_br/termos-de-uso-e-protecao-de-dados/termos-de-uso/"
+      },
+      "consumers": [
+        "Full methodological/publication replay"
+      ],
+      "dependencies": [],
+      "remediation": "Review permission and independent hashes; no automatic download, generation or public upload."
+    },
+    {
+      "id": "synthetic-historical-replacement",
+      "path": null,
+      "state": "REJECTED",
+      "ci_approved": false,
+      "local_candidate_found": false,
+      "sha256": null,
+      "schema": null,
+      "reference_date": null,
+      "generator": null,
+      "independent_evidence": [],
+      "integrity": "Synthetic rows or freshly calculated rankings cannot authenticate historical IDs, ranks or golden expectations.",
+      "license": {
+        "state": "NOT_APPLICABLE"
+      },
+      "consumers": [],
+      "dependencies": [],
+      "remediation": "Synthetic data only in distinctly named unit contracts; never replace these historical references."
+    }
+  ],
+  "worktree_preparation": {
+    "local_develop_sha": "11c110b",
+    "origin_develop_and_pr_base_sha": "ca627ac72f110d0f4d62faaa9c51a08eaed54965",
+    "pr48_head_sha": "1bbd2d42686ab0c893790772a05a7845cfbc0295",
+    "pr48_state": "open draft, not merged; connector inspected 2026-10-28",
+    "pr51b_branch_head_sha": "1bbd2d42686ab0c893790772a05a7845cfbc0295",
+    "pr51b_unique_commits": 0,
+    "pr51b_uncommitted_files_copied_explicitly": [
+      "src/income_analytics/infrastructure/cvm_fundamentals_data.py",
+      "tests/frontend/holdings_v2.mjs",
+      "tests/infrastructure/test_cvm_statement_parser.py",
+      "docs/engineering/cicd-assessment/pr51b_validation.md"
+    ],
+    "other_worktrees_mutated": false,
+    "production_worktree_accessed": false
+  }
+}

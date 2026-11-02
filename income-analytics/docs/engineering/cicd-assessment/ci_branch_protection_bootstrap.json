@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "state": "PROPOSAL_ONLY_NOT_APPLIED",
+  "risk": "INDEPENDENT_REVIEW_NOT_AVAILABLE",
+  "maintainer": "tiagocaldironi",
+  "target_branch": "develop",
+  "level": 1,
+  "proposed_branch_protection_payload": {
+    "required_status_checks": {
+      "strict": true,
+      "checks": [{"context": "CI / Engineering", "app_id": 15368}]
+    },
+    "enforce_admins": true,
+    "required_pull_request_reviews": {
+      "dismiss_stale_reviews": false,
+      "require_code_owner_reviews": false,
+      "required_approving_review_count": 0,
+      "require_last_push_approval": false
+    },
+    "restrictions": null,
+    "required_conversation_resolution": true,
+    "allow_force_pushes": false,
+    "allow_deletions": false
+  },
+  "activation_preconditions": [
+    "Authorize publication of reviewed commits and validate hosted Engineering",
+    "Explicitly authorize administrative activation after reviewing effects",
+    "Verify PR-only enforcement with zero reviews and no owner/last-push approval",
+    "Confirm the sole maintainer can satisfy the legitimate PR path",
+    "Record a scoped administrative recovery procedure"
+  ],
+  "merge_queue": "DISABLED_NO_MERGE_GROUP_SUPPORT",
+  "auto_merge": "NOT_AUTHORIZED",
+  "future_level": {
+    "required_approving_review_count": 1,
+    "require_code_owner_reviews": true,
+    "dismiss_stale_reviews": true,
+    "require_last_push_approval": true,
+    "precondition": "Verify an independent write collaborator and critical-path ownership before separate authorization"
+  }
+}

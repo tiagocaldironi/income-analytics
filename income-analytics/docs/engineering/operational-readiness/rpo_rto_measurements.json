@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "environment": "DISPOSABLE_WINDOWS_SYNTHETIC_SQLITE_WAL",
+  "premerge_run": 41045768631,
+  "hosted_database_recovery": {
+    "status": "PASS",
+    "environment": "DISPOSABLE_SYNTHETIC_SQLITE_WAL",
+    "backup_seconds": 0.023513,
+    "detection_seconds": 0.00069,
+    "restore_seconds": 0.026312,
+    "validation_seconds": 0.00337,
+    "observed_recovery_seconds": 0.030372,
+    "synthetic_committed_rows": 100,
+    "synthetic_rows_lost": 0,
+    "observed_rpo": "ZERO_COMMITTED_SYNTHETIC_ROWS_AT_BACKUP_BOUNDARY",
+    "last_valid_backup_age_seconds": 0.040037,
+    "host_rpo_rto_certified": false,
+    "target_rpo_hours": 24,
+    "target_rto_hours": 2,
+    "targets": "PROPOSED_NOT_GUARANTEED",
+    "production_access": false
+  },
+  "hosted_application_stop": {
+    "exit_code": 0,
+    "forced_stop": false,
+    "seconds": 0.383035,
+    "status": "PASS"
+  },
+  "local_database_recovery": {
+    "status": "PASS",
+    "environment": "DISPOSABLE_SYNTHETIC_SQLITE_WAL",
+    "backup_seconds": 0.021667,
+    "detection_seconds": 0.001823,
+    "restore_seconds": 0.025923,
+    "validation_seconds": 0.012263,
+    "observed_recovery_seconds": 0.040009,
+    "synthetic_committed_rows": 100,
+    "synthetic_rows_lost": 0,
+    "observed_rpo": "ZERO_COMMITTED_SYNTHETIC_ROWS_AT_BACKUP_BOUNDARY",
+    "last_valid_backup_age_seconds": 0.043692,
+    "host_rpo_rto_certified": false,
+    "target_rpo_hours": 24,
+    "target_rto_hours": 2,
+    "targets": "PROPOSED_NOT_GUARANTEED",
+    "production_access": false
+  },
+  "application_recovery_boundary": "Final source additionally records rollback decision to app health/static/semantic validation",
+  "proposed_rpo_hours": 24,
+  "proposed_rto_hours": 2,
+  "targets_are_guarantees": false,
+  "host_rpo_rto_certified": false,
+  "limitations": [
+    "Synthetic 100-row database; no personal financial data",
+    "No real schedule or off-host encrypted backup activated",
+    "Database-only duration excludes app startup; app rollback duration is a separate metric",
+    "Final source/postmerge metrics live in the final receipt; no premerge reuse as postmerge"
+  ],
+  "final_receipt_locator": {
+    "pull_request": "https://github.com/tiagocaldironi/income-analytics/pull/55",
+    "authoritative_final_receipt": "PR body after verified protected integration and postmerge runs",
+    "reason": "Do not claim postmerge validation from a premerge checkout or create recursive receipt commits"
+  }
+}

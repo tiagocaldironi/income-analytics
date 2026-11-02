@@ -1,5 +1,7 @@
 # Roadmap
 
+CI integrado e protegido em `develop` (Python 3.14 / Node 24): veja o [encerramento e as evidências de enforcement](docs/engineering/cicd-assessment/ci_final_closure.md) e os [comandos de execução offline](docs/engineering/ci-offline/README.md). Engineering é o gate obrigatório; certificação financeira/release continuam bloqueados e CD não está implementado.
+
 ## Executar em modo local/LAN
 
 No PowerShell, a partir da raiz do projeto:

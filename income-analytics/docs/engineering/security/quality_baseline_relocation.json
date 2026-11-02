@@ -1,0 +1,53 @@
+{
+  "reason": "Two guard lines inserted in existing middleware. Same diagnostics, no severity/message/tool waivers. Historical finding list retained; configuration and lock attestations updated for reviewed build-tool CVE fixes.",
+  "relocated": [
+    {
+      "code": "no-untyped-def",
+      "before": 68,
+      "after": 70,
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "code": "no-untyped-call",
+      "before": 69,
+      "after": 71,
+      "message": "Call to untyped function \"serve_portfolio\" in typed context"
+    },
+    {
+      "code": "no-untyped-call",
+      "before": 71,
+      "after": 73,
+      "message": "Call to untyped function \"authorize_request\" in typed context"
+    },
+    {
+      "code": "no-untyped-call",
+      "before": 82,
+      "after": 84,
+      "message": "Call to untyped function \"serve_portfolio\" in typed context"
+    },
+    {
+      "code": "no-untyped-def",
+      "before": 85,
+      "after": 87,
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "code": "no-untyped-def",
+      "before": 112,
+      "after": 114,
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "code": "no-untyped-def",
+      "before": 140,
+      "after": 142,
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "code": "operator",
+      "before": 172,
+      "after": 174,
+      "message": "Unsupported operand types for - (\"float\" and \"object\")"
+    }
+  ]
+}

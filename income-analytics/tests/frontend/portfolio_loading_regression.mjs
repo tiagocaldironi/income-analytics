@@ -92,3 +92,17 @@ pending[1]({...dashboard,portfolio:{...dashboard.portfolio,capital_applied_statu
 pending[0]({...dashboard,portfolio:{...dashboard.portfolio,capital_applied_status:'AVAILABLE',capital_applied:111}});await older;
 assert.equal(nodes.get('#net-invested').textContent,'R$ 222');
 console.log('Rapid wallet refresh: delayed older response cannot overwrite the current wallet.');
+
+
+// Refreshing the same wallet after deletion keeps the modal; a wallet switch never does.
+context.portfolioApi.dashboard=async()=>dashboard;
+let closed=0;
+const modal={open:true,close(){closed++;this.open=false;}};
+nodes.set('#asset-transactions-modal',modal);
+await context.loadPortfolio('',{preserveTransactions:true});
+assert.equal(closed,0);
+context.localStorage={getItem:()=> 'different-wallet'};
+modal.open=true;
+await context.loadPortfolio('',{preserveTransactions:true});
+assert.equal(closed,1);
+console.log('History modal survives same-wallet refresh and closes on portfolio changes.');

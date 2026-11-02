@@ -237,24 +237,43 @@ def update_portfolio_onboarding(portfolio_id: UUID, body: PortfolioOnboardingUpd
 
 class ContextualOnboardingUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    action: Literal["START","INTENT","DEFER_INTENT","CLASS","CONFIRM_ASSET","EXPLORE","SKIP","DISMISS","RESUME","STEP"]
-    intent: Literal["STARTING","EXISTING","ORGANIZE"] | None = None
+    action: Literal[
+        "START",
+        "INTENT",
+        "DEFER_INTENT",
+        "CLASS",
+        "CONFIRM_ASSET",
+        "EXPLORE",
+        "SKIP",
+        "DISMISS",
+        "RESUME",
+        "STEP",
+    ]
+    intent: Literal["STARTING", "EXISTING", "ORGANIZE"] | None = None
     asset_class: str | None = None
-    analysis: Literal["composition","evolution"] | None = None
+    analysis: Literal["composition", "evolution"] | None = None
     step: int | None = None
 
 
 @router.get("/{portfolio_id}/onboarding-v2")
 def get_contextual_onboarding(portfolio_id: UUID):
     from income_analytics.api.onboarding_v2 import read
-    viewer,wallet = _onboarding_key(portfolio_id)
+
+    viewer, wallet = _onboarding_key(portfolio_id)
     portfolio = SqlitePortfolioRepository().get(portfolio_id)
-    return read(viewer,wallet,portfolio.name)
+    return read(viewer, wallet, portfolio.name)
 
 
 @router.put("/{portfolio_id}/onboarding-v2")
-def update_contextual_onboarding(portfolio_id: UUID,body: ContextualOnboardingUpdate):
+def update_contextual_onboarding(portfolio_id: UUID, body: ContextualOnboardingUpdate):
     from income_analytics.api.onboarding_v2 import update
-    viewer,wallet = _onboarding_key(portfolio_id)
+
+    viewer, wallet = _onboarding_key(portfolio_id)
     portfolio = SqlitePortfolioRepository().get(portfolio_id)
-    return update(viewer,wallet,portfolio.name,str(current_principal().user_id) if saas_enabled() else None,body)
+    return update(
+        viewer,
+        wallet,
+        portfolio.name,
+        str(current_principal().user_id) if saas_enabled() else None,
+        body,
+    )

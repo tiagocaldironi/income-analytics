@@ -1,0 +1,562 @@
+{
+  "state": "CI_IMPLEMENTED_AND_PROTECTED",
+  "recorded_at_utc": "2026-10-28T22:06:55.559984+00:00",
+  "ci_merge_pr": 48,
+  "ci_merge_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a",
+  "validated_develop_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a",
+  "post_merge_run": {
+    "run_id": 40775898058,
+    "event": "push",
+    "head_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a",
+    "status": "completed",
+    "conclusion": "failure",
+    "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058",
+    "checks": {
+      "engineering": {
+        "equivalent": true,
+        "comparisons": {
+          "status": true,
+          "exit_code": true,
+          "totals": true,
+          "cases": true,
+          "source_fingerprint": true,
+          "fingerprint_version": true,
+          "governance_policy_sha256": true,
+          "schema": true,
+          "python": true,
+          "clean": true,
+          "event_sha": true,
+          "event_identity": true,
+          "inventory": true
+        },
+        "totals": {
+          "passed": 1069,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "checkout_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a"
+      },
+      "financial": {
+        "equivalent": true,
+        "comparisons": {
+          "status": true,
+          "exit_code": true,
+          "totals": true,
+          "cases": true,
+          "blockers": true,
+          "source_fingerprint": true,
+          "fingerprint_version": true,
+          "governance_policy_sha256": true,
+          "schema": true,
+          "python": true,
+          "clean": true,
+          "event_sha": true,
+          "event_identity": true,
+          "inventory": true
+        },
+        "totals": {
+          "passed": 73,
+          "failed": 15,
+          "errors": 9,
+          "skipped": 0
+        },
+        "checkout_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a"
+      },
+      "mypy": {
+        "equivalent": true,
+        "comparisons": {
+          "status": true,
+          "exit_code": true,
+          "findings": true,
+          "source_fingerprint": true,
+          "fingerprint_version": true,
+          "governance_policy_sha256": true,
+          "schema": true,
+          "python": true,
+          "clean": true,
+          "event_sha": true,
+          "event_identity": true
+        },
+        "totals": null,
+        "checkout_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a"
+      },
+      "node": {
+        "equivalent": true,
+        "comparisons": {
+          "status": true,
+          "exit_code": true,
+          "suites": true,
+          "source_fingerprint": true,
+          "fingerprint_version": true,
+          "governance_policy_sha256": true,
+          "schema": true,
+          "python": true,
+          "clean": true,
+          "event_sha": true,
+          "event_identity": true
+        },
+        "totals": null,
+        "checkout_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a"
+      },
+      "python": {
+        "equivalent": true,
+        "comparisons": {
+          "status": true,
+          "exit_code": true,
+          "totals": true,
+          "cases": true,
+          "source_fingerprint": true,
+          "fingerprint_version": true,
+          "governance_policy_sha256": true,
+          "schema": true,
+          "python": true,
+          "clean": true,
+          "event_sha": true,
+          "event_identity": true,
+          "inventory": true
+        },
+        "totals": {
+          "passed": 1069,
+          "failed": 15,
+          "errors": 9,
+          "skipped": 5
+        },
+        "checkout_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a"
+      },
+      "quality": {
+        "equivalent": true,
+        "comparisons": {
+          "status": true,
+          "exit_code": true,
+          "current_debt": true,
+          "baseline_debt": true,
+          "added": true,
+          "removed": true,
+          "baseline_sha256": true,
+          "raw_tool_exit_codes": true,
+          "source_fingerprint": true,
+          "fingerprint_version": true,
+          "governance_policy_sha256": true,
+          "schema": true,
+          "python": true,
+          "clean": true,
+          "event_sha": true,
+          "event_identity": true
+        },
+        "totals": null,
+        "checkout_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a"
+      },
+      "ruff": {
+        "equivalent": true,
+        "comparisons": {
+          "status": true,
+          "exit_code": true,
+          "findings": true,
+          "source_fingerprint": true,
+          "fingerprint_version": true,
+          "governance_policy_sha256": true,
+          "schema": true,
+          "python": true,
+          "clean": true,
+          "event_sha": true,
+          "event_identity": true
+        },
+        "totals": null,
+        "checkout_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a"
+      },
+      "runtime": {
+        "equivalent": true,
+        "comparisons": {
+          "status": true,
+          "exit_code": true,
+          "source_fingerprint": true,
+          "fingerprint_version": true,
+          "governance_policy_sha256": true,
+          "schema": true,
+          "python": true,
+          "clean": true,
+          "event_sha": true,
+          "event_identity": true
+        },
+        "totals": null,
+        "checkout_sha": "e6a30902f9186af27e7b288305c0bd6918ee526a"
+      }
+    },
+    "gate_summary": {
+      "engineering_ci": "PASS",
+      "engineering_missing_reports": [],
+      "consistent_identity": true,
+      "financial_certification": "BLOCKED",
+      "financial_reasons": [
+        "CERT_48_REQUIRES_INDEPENDENT_RECONCILIATION",
+        "IDENTITY_FROZEN_BYTES_UNRESOLVED",
+        "22_HISTORICAL_REFERENCES_UNAPPROVED"
+      ],
+      "release_readiness": "BLOCKED",
+      "release_reasons": [
+        "Reproducible release artifact/homologation/backup/rollback evidence not implemented",
+        "Financial certification requires independent closure"
+      ],
+      "deployment_authorization": "NOT_IMPLEMENTED",
+      "deployment_authorized": false,
+      "external_integrations": "NOT_RUN_OFFLINE; see full-suite external cases"
+    },
+    "artifacts": [
+      {
+        "name": "gate-summary-e6a30902f9186af27e7b288305c0bd6918ee526a",
+        "id": 12855651805,
+        "digest": "sha256:a316b3251ada12c2c763ab3a3623b99f01bbfc09adf4690f8a2918ee79e42ffa",
+        "expires_at": "2026-11-11T22:05:42Z",
+        "files": [
+          {
+            "path": "gate-summary.json",
+            "sha256": "5604dc7b039fceb5f01d1c2f4328bb0c8b4db2c8707770a30a261686ae0b4a44"
+          }
+        ]
+      },
+      {
+        "name": "governance-ruff-e6a30902f9186af27e7b288305c0bd6918ee526a",
+        "id": 12855370673,
+        "digest": "sha256:a7667538951bd7077efcfa7fd45881fcfa8489ae7a34d11b16eecc9e808b8d6d",
+        "expires_at": "2026-11-11T21:56:59Z",
+        "files": [
+          {
+            "path": "result.json",
+            "sha256": "ee6c2f810f0a24744945c9918d5b805b519041aa32c387108bc14cd1d973e809"
+          }
+        ]
+      },
+      {
+        "name": "governance-runtime-e6a30902f9186af27e7b288305c0bd6918ee526a",
+        "id": 12855205884,
+        "digest": "sha256:7ddd550f398788a165232a71293af83dd7f12f3a6ec7d8ac9eb539bebd69735e",
+        "expires_at": "2026-11-11T21:57:07Z",
+        "files": [
+          {
+            "path": "result.json",
+            "sha256": "2bbb52b0e70463fc6e7e401be3aba7cf414158895da47ebe36666c035c628e4d"
+          }
+        ]
+      },
+      {
+        "name": "governance-financial-e6a30902f9186af27e7b288305c0bd6918ee526a",
+        "id": 12854727110,
+        "digest": "sha256:51fd1f10be8f7440a5e2ad7ccf14bf2badb4b5f2011026df90faf5825ba36af5",
+        "expires_at": "2026-11-11T21:58:18Z",
+        "files": [
+          {
+            "path": "financial-junit.xml",
+            "sha256": "b770b19e40ca10fee2dc507a2eb3838e3e16d5ef697e95d900577a1a2e692ede"
+          },
+          {
+            "path": "inventory.json",
+            "sha256": "034caf10a4018008b6eb8ab65f73ac5a51f827f9ce52170d256dc035da8a6d83"
+          },
+          {
+            "path": "result.json",
+            "sha256": "61a560e3b176b154545bb2cbbb8e4448497b437b7541af15bceff3990801dbfb"
+          }
+        ]
+      },
+      {
+        "name": "governance-quality-e6a30902f9186af27e7b288305c0bd6918ee526a",
+        "id": 12854577439,
+        "digest": "sha256:b9fa035a37e0d63746a04b69911d2a9b60fd9fc341dc7ac5a26d90b3f480119b",
+        "expires_at": "2026-11-11T21:57:09Z",
+        "files": [
+          {
+            "path": "result.json",
+            "sha256": "be93662f1edc228a044a486ab5e4ffcc4b21c1fe78c1f1653c63dbd047f91a27"
+          }
+        ]
+      },
+      {
+        "name": "governance-engineering-e6a30902f9186af27e7b288305c0bd6918ee526a",
+        "id": 12854333443,
+        "digest": "sha256:9b7e80816a187ad141cf2936dcbf5348ef9b48d7f0ed888f18b9aeb876fdc199",
+        "expires_at": "2026-11-11T22:03:55Z",
+        "files": [
+          {
+            "path": "engineering-junit.xml",
+            "sha256": "ea4e7083b0cc914b9a058c14b01a68d80ed9e0b771ead84008b2c5cd08b90629"
+          },
+          {
+            "path": "inventory.json",
+            "sha256": "e88f02bc096540a1629c7a8e7de57a0adb447483da3cac72e0d4a2bafe4c007d"
+          },
+          {
+            "path": "result.json",
+            "sha256": "28d5e771bf8c9489dcbf4cb7ed1cd5581f08310bf6b17fd3ac6a5c7184c1cd3e"
+          }
+        ]
+      },
+      {
+        "name": "governance-node-e6a30902f9186af27e7b288305c0bd6918ee526a",
+        "id": 12854092980,
+        "digest": "sha256:90980a18ece426e9cf27400ec3822cc688c242e19e79eac934ccb08933df1fa4",
+        "expires_at": "2026-11-11T21:56:40Z",
+        "files": [
+          {
+            "path": "result.json",
+            "sha256": "05f92e2716b9c77142d7beab93c875bf351e6b45927e29bca2d5958302d3c192"
+          }
+        ]
+      },
+      {
+        "name": "governance-python-e6a30902f9186af27e7b288305c0bd6918ee526a",
+        "id": 12853593986,
+        "digest": "sha256:cea9c024c8b28383afe67991d5e634279322848d9f792956d12a069ee8f7420d",
+        "expires_at": "2026-11-11T21:59:50Z",
+        "files": [
+          {
+            "path": "inventory.json",
+            "sha256": "45ca37ab65030dfc7371340f7bea58516023bbfc31251f6d3a0e2bce13664d2d"
+          },
+          {
+            "path": "python-junit.xml",
+            "sha256": "9498dcb0f1475dc0c009b7a5d16253b4f6e3653fd82e43e300e30c4b6061dea9"
+          },
+          {
+            "path": "coverage.xml",
+            "sha256": "8186fc11a80e34a9cab7141683696478cc6a61dbba014de798eab86b5fe58d8a"
+          },
+          {
+            "path": "result.json",
+            "sha256": "58e208729a4bcd0e7d0b6fb24c008b289957b57be3033cc8ca6c9b10f07f71b4"
+          }
+        ]
+      },
+      {
+        "name": "governance-mypy-e6a30902f9186af27e7b288305c0bd6918ee526a",
+        "id": 12853593724,
+        "digest": "sha256:18b3dcf2d84f2e4405574cb35344409ecafc886ee569c128837f28fbc24d102c",
+        "expires_at": "2026-11-11T21:57:17Z",
+        "files": [
+          {
+            "path": "result.json",
+            "sha256": "4c86875f84323efa004b2f01fdca155a83f637488dc93708bb938e3bbafeb16e"
+          }
+        ]
+      }
+    ],
+    "jobs": [
+      {
+        "name": "CI / Frontend",
+        "conclusion": "success",
+        "status": "completed",
+        "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058/job/123124978952"
+      },
+      {
+        "name": "CI / Python engineering",
+        "conclusion": "success",
+        "status": "completed",
+        "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058/job/123124979269"
+      },
+      {
+        "name": "CI / Full Python diagnostic",
+        "conclusion": "failure",
+        "status": "completed",
+        "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058/job/123124979276"
+      },
+      {
+        "name": "CI / Quality non-regression",
+        "conclusion": "success",
+        "status": "completed",
+        "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058/job/123124979358"
+      },
+      {
+        "name": "CI / Financial certification",
+        "conclusion": "failure",
+        "status": "completed",
+        "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058/job/123124979375"
+      },
+      {
+        "name": "CI / Ruff diagnostics",
+        "conclusion": "failure",
+        "status": "completed",
+        "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058/job/123124979383"
+      },
+      {
+        "name": "CI / mypy diagnostics",
+        "conclusion": "failure",
+        "status": "completed",
+        "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058/job/123124979443"
+      },
+      {
+        "name": "CI / Runtime installation",
+        "conclusion": "success",
+        "status": "completed",
+        "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058/job/123124979509"
+      },
+      {
+        "name": "CI / Engineering",
+        "conclusion": "success",
+        "status": "completed",
+        "url": "https://github.com/tiagocaldironi/income-analytics/actions/runs/40775898058/job/123128855440"
+      }
+    ]
+  },
+  "ruleset_id": 26078982,
+  "ruleset": {
+    "id": 26078982,
+    "name": "Income CI - protected develop",
+    "target": "branch",
+    "source_type": "Repository",
+    "source": "tiagocaldironi/income-analytics",
+    "enforcement": "active",
+    "conditions": {
+      "ref_name": {
+        "exclude": [],
+        "include": [
+          "refs/heads/develop"
+        ]
+      }
+    },
+    "rules": [
+      {
+        "type": "deletion"
+      },
+      {
+        "type": "non_fast_forward"
+      },
+      {
+        "type": "pull_request",
+        "parameters": {
+          "required_approving_review_count": 0,
+          "dismiss_stale_reviews_on_push": false,
+          "required_reviewers": [],
+          "require_code_owner_review": false,
+          "require_last_push_approval": false,
+          "required_review_thread_resolution": true,
+          "require_extra_approval_for_unattributed_changes": true,
+          "allowed_merge_methods": [
+            "merge"
+          ]
+        }
+      },
+      {
+        "type": "required_status_checks",
+        "parameters": {
+          "strict_required_status_checks_policy": true,
+          "do_not_enforce_on_create": false,
+          "required_status_checks": [
+            {
+              "context": "CI / Engineering",
+              "integration_id": 15368
+            }
+          ]
+        }
+      }
+    ],
+    "node_id": "RRS_lACqUmVwb3NpdG9yec5NifJjzgGN7wY",
+    "created_at": "2026-10-28T18:46:02.601-03:00",
+    "updated_at": "2026-10-28T18:54:53.968-03:00",
+    "bypass_actors": [],
+    "current_user_can_bypass": "never",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/tiagocaldironi/income-analytics/rulesets/26078982"
+      },
+      "html": {
+        "href": "https://github.com/tiagocaldironi/income-analytics/rules/26078982"
+      }
+    }
+  },
+  "effective_develop_rules": [
+    {
+      "type": "deletion",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "tiagocaldironi/income-analytics",
+      "ruleset_id": 26078982
+    },
+    {
+      "type": "non_fast_forward",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "tiagocaldironi/income-analytics",
+      "ruleset_id": 26078982
+    },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": false,
+        "required_reviewers": [],
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": true,
+        "require_extra_approval_for_unattributed_changes": true,
+        "allowed_merge_methods": [
+          "merge"
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "tiagocaldironi/income-analytics",
+      "ruleset_id": 26078982
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": false,
+        "required_status_checks": [
+          {
+            "context": "CI / Engineering",
+            "integration_id": 15368
+          }
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "tiagocaldironi/income-analytics",
+      "ruleset_id": 26078982
+    }
+  ],
+  "independent_review": "INDEPENDENT_REVIEW_NOT_AVAILABLE",
+  "enforcement": {
+    "direct_push": {
+      "result": "REJECTED_GH013",
+      "target": "isolated control branch under same ruleset",
+      "source_sha_had_engineering_pass": true,
+      "message": "Changes must be made through a pull request.",
+      "target_unchanged": true
+    },
+    "failed_engineering_merge": {
+      "result": "REJECTED_HTTP405",
+      "pr": 49,
+      "target": "isolated control branch under same ruleset",
+      "message": "Required status check \"CI / Engineering\" is failing.",
+      "probe_ci": {
+        "run_id": 40774775041,
+        "totals": {
+          "passed": 1069,
+          "failed": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "failed_cases": [
+          {
+            "class": "tests.test_ci_enforcement_probe",
+            "name": "test_controlled_ci_enforcement_failure",
+            "status": "failed"
+          }
+        ],
+        "checkout_sha": "c215491b952c0a3b4873b6a15af561f6492e6ba0",
+        "pr_head_sha": "e4257a38590337cd7ed0346f60abccdcbf1426ea",
+        "fingerprint": "bee387afa3938a56a5c6d86939e38062136ddfdc09ac83a0ed84acc7cb266825",
+        "policy": "73db10df451889f01ab20a25a17090f0e88e0fed7aeb26551630ca83fda95e48"
+      },
+      "probe_closed_unmerged": true
+    },
+    "force_push": "Blocked by active non_fast_forward rule; no destructive attempt",
+    "deletion": "Blocked by active deletion rule; no destructive attempt",
+    "legitimate_merge": "PR48 merged under active ruleset, with zero reviews and without bypass",
+    "temporary_remote_refs": "Removed after tests; develop protection remained active"
+  },
+  "production_preservation": {
+    "head": "ca627ac72f110d0f4d62faaa9c51a08eaed54965",
+    "tracked_files_verified": 897,
+    "head_status_and_hashes_unchanged": true,
+    "no_deploy_or_productive_migration_executed": true
+  },
+  "documentation_scope": "This document records the operational CI merge and its push run. Its own publication is a subsequent documentation-only PR requiring Engineering and a new push run; no self-referential SHA assertion."
+}

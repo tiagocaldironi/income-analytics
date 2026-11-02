@@ -1,0 +1,13 @@
+category,criterion,state,evidence_or_dependency
+security,local auth/authorization/isolation,READY,"Verified premerge engineering scope, run 41045768631; host/cloud excluded"
+security,secrets/scanners/artifact identity,READY,"Verified premerge engineering scope, run 41045768631; host/cloud excluded"
+security,real cloud configuration,NOT_VERIFIED,authorized Firebase IAM/domain review
+reliability,synthetic backup/restore/rollback/monitoring,READY,"Verified premerge engineering scope, run 41045768631; host/cloud excluded"
+reliability,real backup encryption/off-host/schedule,NOT_READY,not provisioned; operator approval and host drill
+reliability,host availability and recovery,NOT_VERIFIED,Windows/Tailscale/supervisor checklist
+financial,certification/provenance/accuracy,NOT_READY,"CERT_48, frozen identity and 22 historical cases"
+financial,real import/performance reconciliation,NOT_VERIFIED,independent approved data and functional evidence
+product,signup/onboarding/B3/portfolio/patrimony/strategy/simulation,NOT_VERIFIED,real user acceptance outside this PR
+product,offline frontend regression,READY,"Verified premerge engineering scope, run 41045768631; host/cloud excluded"
+privacy,policy/retention/export/deletion/communication/incidents,NOT_READY,privacy owner approval and complete contracts
+authorization,beta with real users,NOT_READY,explicit authorization absent; financial release blocked
