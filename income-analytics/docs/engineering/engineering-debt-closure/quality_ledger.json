@@ -5,7 +5,7 @@
   "historical_baseline_occurrences": 803,
   "reviewed_source_sha256": {
     "src/income_analytics/api/onboarding_v2.py": "a5ba7efcac28924eb5b68e4a8bd3409183bb979a59abfd896d546a80704dd5df",
-    "src/income_analytics/api/routers/dashboard.py": "2499f9532658e98627b8a4becdb461dd7e0644c6db6811454bd45eaf225ab288",
+    "src/income_analytics/api/routers/dashboard.py": "a65287a25aabf211c9f3fcfe905b6e7e25c871e9d68b4d87ee67fe0fa52cabaa",
     "src/income_analytics/api/routers/portfolios.py": "6d223ac548b0c5185dd3b5da9f4ca751c3408c987820ef8231a4e320655e82b7",
     "src/income_analytics/api/saas_security.py": "4708c099ded0532302745898f09b48aebe077d76f85dde5f7d84ff1fc60e632a",
     "src/income_analytics/application/executable_contribution.py": "53f563ccfcd2c25df0e005c641813162d5d2c3247be9e688bbc4343e6981030c",
@@ -13449,7 +13449,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2054,
+        "line": 2070,
         "column": null,
         "code": "arg-type",
         "message": "Argument 1 to \"setdefault\" of \"MutableMapping\" has incompatible type \"object\"; expected \"str\""
@@ -13470,7 +13470,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2316,
+        "line": 2332,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
@@ -13491,7 +13491,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2321,
+        "line": 2337,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
@@ -13512,7 +13512,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2339,
+        "line": 2355,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
@@ -13533,7 +13533,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2350,
+        "line": 2366,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
@@ -13554,7 +13554,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2361,
+        "line": 2377,
         "column": null,
         "code": "no-any-return",
         "message": "Returning Any from function declared to return \"dict[str, object]\""
@@ -13575,7 +13575,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2638,
+        "line": 2654,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"id\""
@@ -13596,7 +13596,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2639,
+        "line": 2655,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"status\""
@@ -13617,7 +13617,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2640,
+        "line": 2656,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"file_name\""
@@ -13638,7 +13638,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2641,
+        "line": 2657,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"report_type\""
@@ -13659,7 +13659,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2643,
+        "line": 2659,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"total_rows\""
@@ -13680,7 +13680,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2644,
+        "line": 2660,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"new_rows\""
@@ -13701,7 +13701,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2645,
+        "line": 2661,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"duplicate_rows\""
@@ -13722,7 +13722,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2646,
+        "line": 2662,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"review_rows\""
@@ -13743,7 +13743,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2647,
+        "line": 2663,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"unsupported_rows\""
@@ -13764,7 +13764,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2648,
+        "line": 2664,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"invalid_rows\""
@@ -13785,7 +13785,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2652,
+        "line": 2668,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"source_row\""
@@ -13806,7 +13806,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2653,
+        "line": 2669,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"status\""
@@ -13827,7 +13827,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2654,
+        "line": 2670,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"detail\""
@@ -13848,7 +13848,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2655,
+        "line": 2671,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"event_date\""
@@ -13869,7 +13869,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2656,
+        "line": 2672,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"event_type\""
@@ -13890,7 +13890,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2657,
+        "line": 2673,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"income_type\""
@@ -13911,7 +13911,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2658,
+        "line": 2674,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"source_symbol\""
@@ -13932,7 +13932,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2659,
+        "line": 2675,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"normalized_symbol\""
@@ -13953,7 +13953,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2660,
+        "line": 2676,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"institution\""
@@ -13974,7 +13974,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2661,
+        "line": 2677,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"market\""
@@ -13995,7 +13995,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2662,
+        "line": 2678,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"quantity\""
@@ -14016,7 +14016,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2663,
+        "line": 2679,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"unit_price\""
@@ -14037,7 +14037,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2664,
+        "line": 2680,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"total_value\""
@@ -14058,7 +14058,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2665,
+        "line": 2681,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"quantity_status\""
@@ -14079,7 +14079,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2666,
+        "line": 2682,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"financial_status\""
@@ -14100,7 +14100,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2667,
+        "line": 2683,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"occurrence_index\""
@@ -14121,7 +14121,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2682,
+        "line": 2698,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"normalized_symbol\""
@@ -14142,7 +14142,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2683,
+        "line": 2699,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"normalized_symbol\""
@@ -14163,7 +14163,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2718,
+        "line": 2734,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"income_type\""
@@ -14184,7 +14184,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2812,
+        "line": 2828,
         "column": null,
         "code": "assignment",
         "message": "Incompatible types in assignment (expression has type \"object\", variable has type \"B3ImportBatch | None\")"
@@ -14205,7 +14205,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2813,
+        "line": 2829,
         "column": null,
         "code": "arg-type",
         "message": "Argument 1 to \"create_batch\" of \"SqliteB3ImportRepository\" has incompatible type \"None\"; expected \"B3ImportBatch\""
@@ -14226,7 +14226,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2815,
+        "line": 2831,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"status\""
@@ -14247,7 +14247,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2816,
+        "line": 2832,
         "column": null,
         "code": "arg-type",
         "message": "Argument 1 to \"save_record\" of \"SqliteB3ImportRepository\" has incompatible type \"object\"; expected \"B3ImportedRecord\""
@@ -14268,7 +14268,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2908,
+        "line": 2924,
         "column": null,
         "code": "dict-item",
         "message": "Dict entry 2 has incompatible type \"str\": \"str | None\"; expected \"str\": \"str\""
@@ -14289,7 +14289,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2913,
+        "line": 2929,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"add\""
@@ -14310,7 +14310,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2930,
+        "line": 2946,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"save_record_in_session\""
@@ -14331,7 +14331,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 3195,
+        "line": 3211,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
@@ -14352,7 +14352,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 3925,
+        "line": 3941,
         "column": null,
         "code": "var-annotated",
         "message": "Need type annotation for \"valuation_by_date\" (hint: \"valuation_by_date: dict[<type>, <type>] = ...\")"
@@ -14373,7 +14373,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 3932,
+        "line": 3948,
         "column": null,
         "code": "no-any-return",
         "message": "Returning Any from function declared to return \"PortfolioProjection\""
@@ -14394,7 +14394,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 3934,
+        "line": 3950,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
@@ -14415,7 +14415,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4071,
+        "line": 4087,
         "column": null,
         "code": "arg-type",
         "message": "Argument \"performance_at\" to \"build_performance_comparison\" has incompatible type \"Callable[[date, date], object]\"; expected \"Callable[[date, date], PerformanceProjection]\""
@@ -14436,7 +14436,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4574,
+        "line": 4590,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"as_of\""
@@ -14457,7 +14457,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4575,
+        "line": 4591,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"base_currency\""
@@ -14478,7 +14478,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4576,
+        "line": 4592,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"invested_wealth\""
@@ -14499,7 +14499,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4577,
+        "line": 4593,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"strategy_distance\""
@@ -14520,7 +14520,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4578,
+        "line": 4594,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"valuation_status\""
@@ -14541,7 +14541,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4579,
+        "line": 4595,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"issues\""
@@ -14562,7 +14562,7 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4588,
+        "line": 4604,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"class_allocations\""

@@ -34,7 +34,7 @@ Usar o ambiente reproduzível e o isolamento já definidos em `ci/run.py::isolat
 |---|---|
 | Suíte offline completa, incluindo testes CI | 1.416 passaram; 15 falhas, 9 erros, 5 skips, todos preexistentes; 28 novos casos passaram |
 | Comparação individual com baseline b642709 | Nenhum caso existente mudou de resultado |
-| Rodada final após precedência de taxonomia e renovação do snapshot | 166 passaram, 0 falhas, 0 erros; 5 skips externos explícitos |
+| Rodada final após precedência de taxonomia e renovação do snapshot | 167 passaram, 0 falhas, 0 erros; 5 skips externos explícitos |
 | Frontend final, após revisão de ordenação de contratos com múltiplos lotes | 33 suítes passaram |
 | Ruff completo | PASS pela política existente: 23 ocorrências históricas exatas de estilo em migrações imutáveis; nenhuma ocorrência nova |
 | mypy completo | 486 diagnósticos contra 499 na baseline; zero novos; não é um gate limpo |
@@ -42,7 +42,7 @@ Usar o ambiente reproduzível e o isolamento já definidos em `ci/run.py::isolat
 | Certificação financeira | BLOCKED: 104 passaram, 15 falharam, 9 erros; inclui execução e falha de `test_shares_unit_020_frozen_engine` |
 | Integridade | 41/41 arquivos imutáveis idênticos; checkouts principal e PR12 preservados |
 
-O checkpoint completo precede dois testes adicionais e os pequenos ajustes finais de precedência de classificação/snapshot. A rodada final focada valida essas alterações. Não se somam execuções sobrepostas para fabricar um total de aprovação. Os relatórios hospedados do SHA do PR devem ser consultados separadamente.
+O checkpoint completo precede três testes adicionais e os pequenos ajustes finais de precedência de classificação/snapshot. A rodada final focada valida essas alterações. Não se somam execuções sobrepostas para fabricar um total de aprovação. Os relatórios hospedados do SHA do PR devem ser consultados separadamente.
 
 Comandos principais, a partir do diretório da aplicação:
 
@@ -79,7 +79,7 @@ Capturas do aplicativo real em servidor loopback com banco descartável **exclus
 | Separar Tesouro e bancária | Atendido visualmente; a classe financeira permanece estável |
 | Nomes legíveis e fallback | Atendido para famílias reconhecidas; identificação desconhecida explícita e sem inferir código/principal |
 | Ordenação decrescente e busca | Atendido em todos os grupos; empates por nome, inválidos no fim; escolha explícita preservada; saldos em moeda-base |
-| Patrimônio/pesos/metas | Invariantes sintéticas reconciliadas e histórico preservado; metas e TWR continuam consolidados, sem duplicação nos subgrupos |
+| Patrimônio/pesos/metas | Invariantes sintéticas reconciliadas e histórico preservado; metas e TWR continuam consolidados, sem duplicação quando há múltiplos subgrupos; carteiras exclusivamente bancárias mantêm os indicadores originais |
 | Compras/vendas/edição/importação/simulação fracionárias | Atendido para títulos tradicionais já representados em unidades de título e identificados/resolvidos |
 | Quantidade mínima/precisão e restrições de outros ativos | Incremento de 0,01 título validado; regras B3 inteiras na simulação e controles; frações internacionais/cripto preservadas pelos testes existentes |
 | Contratos legados | Pendente de conciliação independente: não converter unidades de contrato em títulos automaticamente |

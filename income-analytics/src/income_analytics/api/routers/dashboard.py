@@ -1727,6 +1727,22 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
             ]
             if not rows:
                 continue
+            visual_types = {
+                row.get("display_group", "FIXED_INCOME")
+                for row in financial_group["assets"]
+                if not row.get("target_only")
+            }
+            if len(visual_types) == 1:
+                display_groups.append(
+                    {
+                        **financial_group,
+                        "asset_class": visual_class,
+                        "financial_asset_class": "FIXED_INCOME",
+                        "label": label,
+                        "assets": rows,
+                    }
+                )
+                continue
             values = [row["market_value_base"] for row in rows]
             costs = [
                 row["average_price"] * row["quantity"]

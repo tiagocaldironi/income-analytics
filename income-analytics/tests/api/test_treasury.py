@@ -190,3 +190,30 @@ def test_read_model_version_refreshes_legacy_snapshot_without_changing_history(
     dashboard.ensure_portfolio_dashboard_snapshot_current()
     assert len(calls) == 1
     assert not session.history()
+
+
+def test_bank_only_group_keeps_the_existing_financial_indicators(session):
+    session.register_fixed_income_asset(
+        ticker="FI-BANK-ONLY",
+        name="CDB Exemplo",
+        instrument_type=FixedIncomeInstrumentType.CDB,
+        indexer_type=FixedIncomeIndexerType.PREFIXED,
+        contracted_rate=D("0"),
+        application_date=date(2026, 1, 1),
+        principal_amount=D("1000"),
+    )
+    holdings = dashboard._build_portfolio_holdings(as_of=date(2026, 1, 1))
+    visual = holdings["display_groups"][0]
+    financial = holdings["classes"][0]
+    assert visual["label"] == "Renda Fixa Bancária"
+    for field in [
+        "performance_coverage",
+        "target_weight",
+        "deviation",
+        "market_value",
+        "total_cost",
+        "weight",
+        "total_result",
+    ]:
+        assert visual[field] == financial[field]
+    assert visual["performance_coverage"] is not None

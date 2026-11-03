@@ -35,12 +35,12 @@
   },
   "final_focused": {
     "totals": {
-      "passed": 166,
+      "passed": 167,
       "failed": 0,
       "errors": 0,
       "skipped": 5
     },
-    "scope": "Treasury, API, import, executable allocation, revision persistence, security, history boundary and quality ledger tests"
+    "scope": "Treasury, API, import, executable allocation, revision persistence, security, history boundary and quality ledger tests; bank-only indicators preserved"
   },
   "frontend": {
     "status": "PASS",
@@ -108,5 +108,5 @@
   "merge_performed": false,
   "deploy_performed": false,
   "issue_closure": "NOT_CLAIMED",
-  "hosted_validation": "PENDING"
+  "hosted_validation": "PENDING_FOR_FINAL_SHA"
 }
