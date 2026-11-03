@@ -1,0 +1,9 @@
+{
+  "targeted_tests": 312,
+  "command": "PYTHONPATH=<checkout>/src;<checkout>/ci python -m pytest ci/test_engineering_debt.py ci/test_governance.py ci/test_delivery.py ci/test_financial_certification.py ci/test_security.py -q -o addopts=",
+  "status": "PASS",
+  "immutable_files_verified": 41,
+  "new_policy_active": false,
+  "hosted_new_candidate": "PENDING",
+  "full_suite": "RUNNING"
+}

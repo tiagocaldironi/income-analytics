@@ -1,0 +1,162 @@
+{
+  "scope": "LOCAL_DISPOSABLE_PROTOCOL_VALIDATION_NOT_A_RELEASE",
+  "production_access": false,
+  "checks": {
+    "cleanup": {
+      "status": "PASS",
+      "processes_stopped": true,
+      "ports_released": true,
+      "temporary_root_removed": true
+    },
+    "known_good_A": {
+      "status": "PASS",
+      "commit": "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065",
+      "sha256": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2"
+    },
+    "backup": {
+      "status": "PASS",
+      "method": "SQLITE_ONLINE_BACKUP_API",
+      "sha256": "4fee6b575d419500efab1d1c722d0ba4ab4fee8e7dde3feb1bc3d00b91fefb90",
+      "state_signature": "56cb5ff036d8955aa0425f95a954b65fd45fe43caa241471736d8efe8dd96aed",
+      "schema_head": "0027_contextual_onboarding_v2",
+      "created_at": "2026-11-03T15:05:04.067929+00:00",
+      "duration_seconds": 0.032769
+    },
+    "negative_restore_changed_state": {
+      "status": "EXPECTED_FAILURE_OBSERVED",
+      "reason": "RESTORE_STATE_MISMATCH"
+    },
+    "restore": {
+      "status": "PASS",
+      "integrity_check": "PASS",
+      "schema": "PASS",
+      "semantic_state": "PASS"
+    },
+    "installation": {
+      "status": "PASS",
+      "offline": true
+    },
+    "health": {
+      "status": "PASS",
+      "bind": "127.0.0.1",
+      "static": "PASS"
+    },
+    "negative_health": {
+      "status": "EXPECTED_FAILURE_OBSERVED",
+      "reason": "HEALTH_REJECTED"
+    },
+    "graceful_shutdown": {
+      "status": "PASS",
+      "seconds": 0.585466,
+      "exit_code": 0,
+      "forced_stop": false
+    },
+    "negative_startup": {
+      "status": "EXPECTED_FAILURE_OBSERVED",
+      "reason": "STARTUP_FAILED"
+    },
+    "rollback_events": [
+      "A_HEALTHY",
+      "BACKUP_VERIFIED",
+      "B_SELECTED_AND_HEALTHY",
+      "B_HEALTH_FAILURE_OBSERVED",
+      "B_STARTUP_FAILURE_OBSERVED",
+      "A_RESELECTED",
+      "A_DIGEST_VERIFIED",
+      "A_RESTARTED_HEALTHY"
+    ],
+    "rollback_restore": {
+      "status": "PASS",
+      "integrity_check": "PASS",
+      "schema": "PASS",
+      "semantic_state": "PASS",
+      "mode": "DISPOSABLE_STAGING_CHECKPOINT_ONLY",
+      "changed_tables": [
+        "portfolio_dashboard_snapshot"
+      ],
+      "post_backup_persistent_facts": "UNCHANGED",
+      "production_access": false
+    },
+    "rollback": {
+      "status": "PASS",
+      "application_digest": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
+      "schema_compatibility": "EXACT_MIGRATION_IDENTITY",
+      "state_signature": "56cb5ff036d8955aa0425f95a954b65fd45fe43caa241471736d8efe8dd96aed",
+      "downgrade": "NOT_RUN",
+      "data_recovery_mode": "DISPOSABLE_STAGING_CHECKPOINT_ONLY",
+      "recovery_seconds": 5.520651,
+      "measurement_boundary": "ROLLBACK_DECISION_TO_APP_HEALTH_STATIC_AND_SEMANTIC_VALIDATION",
+      "host_rpo_rto_certified": false
+    },
+    "incompatible_schema": {
+      "status": "BLOCKED",
+      "reason": "SCHEMA_INCOMPATIBLE",
+      "safe_block_verified": true,
+      "downgrade": "NOT_RUN",
+      "required_action": "SEPARATE_VALIDATED_RESTORE_PLAN"
+    },
+    "synthetic_restore_after_block": {
+      "status": "PASS",
+      "integrity_check": "PASS",
+      "schema": "PASS",
+      "semantic_state": "PASS"
+    },
+    "immutable_promotion": {
+      "status": "PASS",
+      "candidate_sha256": "2bcb80858fa7f611a4ca1c2e0f2206ca608dfb04add1a7ff9db585a3fd69a36d",
+      "staging_sha256": "2bcb80858fa7f611a4ca1c2e0f2206ca608dfb04add1a7ff9db585a3fd69a36d",
+      "rebuild": "NOT_RUN"
+    }
+  },
+  "status": "PASS",
+  "previous_version": {
+    "repository": "tiagocaldironi/income-analytics",
+    "source_commit": "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065",
+    "build_run_id": 40856571402,
+    "build_run_attempt": 1,
+    "artifact_id": 12890060783,
+    "artifact_digest": "sha256:bc67e06ee29949c642a259c6fce074c2d32af91e0e1452900e0dc47d8f7fd7ee",
+    "package_sha256": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
+    "build_policy_identity": "1594f72e60abd1b2cd93653897e1babcbf73f062538f933b5decf2a834840898",
+    "governance_policy_identity": "98cc8047e6edc173ded67e7ab68496bf0dd3d2317c480879f43b0590ec503fce",
+    "source_fingerprint": "6eca8283da6dd622d2c5b7f605834a3a451100b80072696536ef0c2a482fdff1",
+    "environment_target": "DISPOSABLE_WINDOWS_STAGING",
+    "mode": "delivery",
+    "promotion_status": "CANDIDATE_CREATED",
+    "promotion_blockers": [],
+    "financial_release": "BLOCKED",
+    "production_status": "PRODUCTION_NOT_AUTHORIZED",
+    "validation_evidence_references": [
+      "https://github.com/tiagocaldironi/income-analytics/actions/runs/40856571402",
+      "https://github.com/tiagocaldironi/income-analytics/actions/runs/40856571402/artifacts/12890060783"
+    ],
+    "security_baseline": "LEGACY_PINNED_ROLLBACK_ONLY",
+    "manifest_sha256": "008b349f9a2f17332292fdf0cad2fd690a5d00ef21a37e8f7e0124ce367cee04"
+  },
+  "candidate": {
+    "repository": "tiagocaldironi/income-analytics",
+    "source_commit": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+    "build_run_id": 41612817516,
+    "build_run_attempt": 1,
+    "artifact_id": 13220640268,
+    "artifact_digest": "sha256:a77cc192fc4d8e2ac098f58171ba5a4aa888c76b22b1f72b45379595b4ffbb8d",
+    "package_sha256": "2bcb80858fa7f611a4ca1c2e0f2206ca608dfb04add1a7ff9db585a3fd69a36d",
+    "build_policy_identity": "dbb336ede9aae74325b6144baf7125cb5833e114ef94000108187bf8033201c1",
+    "governance_policy_identity": "e4799b53e75f90f335e066b0a02a3d7ae0066d7c3f6f0ecafaf6dcb6fd924e5a",
+    "source_fingerprint": "e539547b5ac6e4f758f85636c4308248d1ca93485c393d3ee71c1a769fed78b7",
+    "environment_target": "DISPOSABLE_WINDOWS_STAGING",
+    "mode": "premerge",
+    "promotion_status": "PROMOTION_BLOCKED",
+    "promotion_blockers": [
+      "PR_UNMERGED_PREMERGE_TEST_ONLY"
+    ],
+    "financial_release": "BLOCKED",
+    "production_status": "PRODUCTION_NOT_AUTHORIZED",
+    "validation_evidence_references": [
+      "https://github.com/tiagocaldironi/income-analytics/actions/runs/41612817516",
+      "https://github.com/tiagocaldironi/income-analytics/actions/runs/41612817516/artifacts/13220640268"
+    ],
+    "security_baseline": "PASS",
+    "manifest_sha256": "99bb27a3814e837437e6fd40579f7276eca6286a00778e7d0f1af1a6c21dcc30"
+  }
+}

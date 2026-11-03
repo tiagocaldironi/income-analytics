@@ -108,6 +108,29 @@ def engineering_reports():
     return reports
 
 
+@pytest.mark.parametrize("check", ["runtime", "engineering", "node", "quality", "build"])
+@pytest.mark.parametrize("invalid_exit", [False, 0.0, "0", None])
+def test_malformed_exit_code_cannot_approve_engineering(check, invalid_exit):
+    reports = engineering_reports()
+    reports[check]["exit_code"] = invalid_exit
+    assert summarize_reports(reports)["engineering_ci"] == "FAIL"
+
+
+@pytest.mark.parametrize("invalid_exit", [False, 0.0, "0", None])
+def test_malformed_exit_code_cannot_approve_financial_certification(invalid_exit):
+    reports = engineering_reports()
+    reports["financial"] = {
+        **reports["engineering"],
+        "status": "PASS",
+        "blockers": [],
+        "exit_code": invalid_exit,
+    }
+    result = summarize_reports(reports)
+    assert result["financial_certification"] == "BLOCKED"
+    assert result["release_readiness"] == "BLOCKED"
+    assert result["deployment_authorized"] is False
+
+
 def test_engineering_pass_never_authorizes_financial_release_or_deploy():
     reports = engineering_reports()
     reports["financial"] = {

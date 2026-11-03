@@ -232,6 +232,56 @@ def expect_failure(action, codes):
     raise DeliveryError("EXPECTED_FAILURE_NOT_OBSERVED")
 
 
+def restore_staging_checkpoint(workspace, backup, database, record):
+    """Recover this disposable exercise, without discarding post-backup facts.
+
+    A candidate startup can replace the derived dashboard snapshot. App-only
+    rollback cannot reproduce its prior bytes. Only that cache may differ here;
+    any other changed table requires a separate recovery plan. This capability
+    cannot address a database outside the fresh staging workspace.
+    """
+    backup, database = workspace.safe(backup), workspace.safe(database)
+    require(all(p.poll() is not None for p in workspace.processes), "RESTORE_REQUIRES_STOPPED_APP")
+    require(sha(backup.read_bytes()) == record["sha256"], "BACKUP_DIGEST_MISMATCH")
+    database_check(workspace, backup, record["schema_head"], record["state_signature"])
+
+    def tables(path):
+        with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)) as connection:
+            result = {}
+            for name, sql in connection.execute(
+                "SELECT name,sql FROM sqlite_master WHERE type='table' "
+                "AND name NOT LIKE 'sqlite_%' ORDER BY name"
+            ).fetchall():
+                quoted = '"' + name.replace('"', '""') + '"'
+                rows = connection.execute("SELECT * FROM " + quoted).fetchall()
+                # repr remains local and is never included in a report or log.
+                result[name] = (sql, sorted(repr(row) for row in rows))
+            return result
+
+    before, current = tables(backup), tables(database)
+    changed = {
+        name for name in before.keys() | current.keys() if before.get(name) != current.get(name)
+    }
+    require(changed <= {"portfolio_dashboard_snapshot"}, "ROLLBACK_HAS_NEW_PERSISTENT_STATE")
+    if "portfolio_dashboard_snapshot" in changed:
+        require(
+            "portfolio_dashboard_snapshot" in before
+            and "portfolio_dashboard_snapshot" in current
+            and before["portfolio_dashboard_snapshot"][0]
+            == current["portfolio_dashboard_snapshot"][0],
+            "ROLLBACK_CACHE_SCHEMA_CHANGED",
+        )
+    restored = restore_database(workspace, backup, database, record)
+    database_check(workspace, database, record["schema_head"], record["state_signature"])
+    return {
+        **restored,
+        "mode": "DISPOSABLE_STAGING_CHECKPOINT_ONLY",
+        "changed_tables": sorted(changed),
+        "post_backup_persistent_facts": "UNCHANGED",
+        "production_access": False,
+    }
+
+
 def exercise(previous_archive, candidate_archive, previous, candidate, result):
     workspace = Workspace()
     result["cleanup"] = {"status": "NOT_RUN"}
@@ -322,6 +372,9 @@ def exercise(previous_archive, candidate_archive, previous, candidate, result):
         ]
         recovery_started = time.monotonic()
         rollback_compatibility(workspace, database, version_a["contract"], version_b["contract"])
+        result["rollback_restore"] = restore_staging_checkpoint(
+            workspace, backup, database, record
+        )
         select_version(workspace, "A", previous)
         verify(a, previous["source_commit"], previous["package_sha256"])
         recovered = Server(workspace, version_a)
@@ -340,6 +393,7 @@ def exercise(previous_archive, candidate_archive, previous, candidate, result):
             "schema_compatibility": "EXACT_MIGRATION_IDENTITY",
             "state_signature": record["state_signature"],
             "downgrade": "NOT_RUN",
+            "data_recovery_mode": "DISPOSABLE_STAGING_CHECKPOINT_ONLY",
             "recovery_seconds": recovery_seconds,
             "measurement_boundary": (
                 "ROLLBACK_DECISION_TO_APP_HEALTH_STATIC_AND_SEMANTIC_VALIDATION"

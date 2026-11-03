@@ -13,7 +13,9 @@ from engineering_debt import (
     require_clean_diagnostics,
     ruff_exception_findings,
 )
-from gate_policy import compare_diagnostics
+from gate_policy import compare_diagnostics, diagnostic_key
+from release_inventory import inventory
+from release_regressions import assess, content_digest
 
 
 def sample():
@@ -302,3 +304,149 @@ def test_raw_ruff_error_or_inconsistent_success_cannot_be_waived(tmp_path, code)
     approved = ruff_exception_findings(tmp_path, legacy_policy(tmp_path))
     with pytest.raises(ValueError, match="RUFF_RAW_RESULT_INCONSISTENT"):
         classify_ruff(code, approved, approved)
+
+
+# Issue 65 is evaluated in proposal mode; it cannot promote a release.
+
+
+def release_sample():
+    finding = dict(tool="mypy", file="src/a.py", line=4, column=None, code="type-arg", message="M")
+    baseline = dict(
+        findings=[finding],
+        cases=[dict(**{"class": "test.a"}, name="test_ok", status="passed")],
+        tool_versions={"mypy": "2.3.1"},
+        configuration_sha256="config",
+        scope=["src", "tests"],
+    )
+    review = dict(
+        risk="low",
+        financial_impact="NONCRITICAL_REVIEWED",
+        security_impact="NONCRITICAL_REVIEWED",
+        issue="#64",
+        owner="reviewer",
+        evidence="https://github.com/example/review",
+        review_until="2026-12-01",
+    )
+    policy = dict(
+        accepted_baseline_sha256=content_digest(baseline),
+        approval_url="https://github.com/example/approval",
+        approver="reviewer",
+        review_until="2026-12-01",
+        occurrences={diagnostic_key(finding): review},
+    )
+    candidate = deepcopy(baseline)
+    candidate["critical_gates"] = dict(Financial="PASS", Security="PASS", Release="PASS")
+    return baseline, candidate, policy
+
+
+def test_release_proposal_never_authorizes_deployment():
+    baseline, candidate, policy = release_sample()
+    result = assess(baseline, candidate, policy, today="2026-11-03")
+    assert set(result["gates"].values()) == {"PASS"}
+    assert result["deployment_authorized"] is False
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "new",
+        "duplicate",
+        "line",
+        "message",
+        "code",
+        "missing_test",
+        "skip",
+        "failed",
+        "new_failed_test",
+        "tools",
+        "config",
+        "scope",
+        "approval",
+        "expired",
+        "baseline",
+        "risk",
+        "owner",
+        "issue",
+        "financial",
+        "security",
+        "evidence",
+        "duplicate_test",
+        "missing_review",
+        "expired_occurrence",
+    ],
+)
+def test_release_proposal_blocks_unreviewed_changes(mutation):
+    baseline, candidate, policy = release_sample()
+    finding = candidate["findings"][0]
+    review = policy["occurrences"][diagnostic_key(finding)]
+    if mutation == "new":
+        candidate["findings"].append(dict(finding, file="src/new.py"))
+    elif mutation == "duplicate":
+        candidate["findings"].append(deepcopy(finding))
+    elif mutation in {"line", "message", "code"}:
+        finding[mutation] = 8 if mutation == "line" else "changed"
+    elif mutation == "missing_test":
+        candidate["cases"] = []
+    elif mutation in {"skip", "failed"}:
+        candidate["cases"][0]["status"] = "skipped" if mutation == "skip" else "failed"
+    elif mutation == "new_failed_test":
+        candidate["cases"].append(dict(**{"class": "test.new"}, name="new", status="failed"))
+    elif mutation == "duplicate_test":
+        candidate["cases"].append(deepcopy(candidate["cases"][0]))
+    elif mutation in {"tools", "config", "scope"}:
+        candidate[
+            {"tools": "tool_versions", "config": "configuration_sha256", "scope": "scope"}[mutation]
+        ] = "changed"
+    elif mutation == "approval":
+        policy.pop("approval_url")
+    elif mutation == "expired":
+        policy["review_until"] = "2026-11-02"
+    elif mutation == "baseline":
+        baseline["scope"] = ["changed"]
+    elif mutation in {"risk", "owner", "issue", "evidence"}:
+        review[mutation] = "high" if mutation == "risk" else ""
+    elif mutation in {"financial", "security"}:
+        review[mutation + "_impact"] = "UNKNOWN"
+    elif mutation == "missing_review":
+        policy["occurrences"] = {}
+    elif mutation == "expired_occurrence":
+        review["review_until"] = "2026-11-02"
+    assert (
+        assess(baseline, candidate, policy, today="2026-11-03")["gates"]["Engineering"] == "BLOCKED"
+    )
+
+
+@pytest.mark.parametrize("gate", ["Financial", "Security", "Release"])
+@pytest.mark.parametrize("status", ["BLOCKED", "NOT_APPLICABLE", None])
+def test_historical_acceptance_cannot_waive_critical_gates(gate, status):
+    baseline, candidate, policy = release_sample()
+    candidate["critical_gates"][gate] = status
+    assert assess(baseline, candidate, policy, today="2026-11-03")["gates"][gate] == "BLOCKED"
+
+
+def test_existing_failed_test_requires_individual_acceptance():
+    baseline, candidate, policy = release_sample()
+    baseline["cases"][0]["status"] = candidate["cases"][0]["status"] = "failed"
+    policy["accepted_baseline_sha256"] = content_digest(baseline)
+    assert (
+        assess(baseline, candidate, policy, today="2026-11-03")["gates"]["Engineering"] == "BLOCKED"
+    )
+
+
+def test_historical_mapping_does_not_silently_accept_changed_code_or_duplicates(monkeypatch):
+    import release_inventory
+
+    sources = {"old": b"def f():\n    return missing\n",
+               "new": b"# inserted\ndef f():\n    return missing\n"}
+    monkeypatch.setattr(release_inventory, "git_bytes", lambda sha, file: sources[sha])
+    finding = dict(tool="mypy", file="src/a.py", line=2, column=None,
+                   code="name-defined", message="missing")
+    before = dict(checkout_sha="old", findings=[finding])
+    after = dict(checkout_sha="new", findings=[dict(finding, line=3)])
+    rows = inventory(before, after)
+    assert rows[0]["historical_finding"] == finding
+    assert rows[0]["acceptance"] == "PENDING"
+    after["findings"].append(dict(finding, line=3))
+    assert inventory(before, after)[1]["origin"] == "UNPROVEN_BLOCK"
+    sources["new"] = b"# inserted\ndef f():\n    return different\n"
+    assert inventory(before, after)[0]["origin"] == "UNPROVEN_BLOCK"
