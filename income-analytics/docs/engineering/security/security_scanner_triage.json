@@ -21774,6 +21774,31 @@
       "identity": "9bb75be05799e5581d9b9f5b1485a2ca75514c1b3acaab9df64f3d2fd8d3d4c4",
       "reason": "Exact reviewed public source SHA-256 at quality_ledger.json:15, not a credential. Ledger bytes changed following #61 source and occurrence reconciliation; source digest independently recomputed.",
       "evidence": "auth_repository.py bytes match reviewed_source_sha256; pinned Gitleaks negative fixture REJECTED in hosted run 41611306087. Exact full-file identity only; all scanning rules retained."
+    },
+    {
+      "tool": "gitleaks",
+      "mode": "dir",
+      "rule": "generic-api-key",
+      "file": "income-analytics/docs/engineering/scoped-financial-certification/immutable_reference_inventory.json",
+      "line": 12,
+      "commit": "",
+      "state": "FALSE_POSITIVE",
+      "content_sha256": "d6f99bca05a7d3f6ad4d3e67ce46db5c6876da71dfc7c15d15c5b1b0f7c83853",
+      "identity": "197358740fcb22d9780a8e416b7586a1cbb820784e86a44d540dcfd7bec243b4",
+      "reason": "Exact public SHA-256 of immutable migration 0008_paid_income_brapi.py; recomputed against develop b642709 and current bytes. Not a credential. Current occurrence bound to full inventory digest; historical occurrence bound to commit/file/line/rule. No file or rule exemption.",
+      "evidence": "Issue #77; docs/engineering/security/issue77_security_baseline.md; original failed artifact 13272900909; Git blob b642709:income-analytics/alembic/versions/0008_paid_income_brapi.py"
+    },
+    {
+      "tool": "gitleaks",
+      "mode": "git",
+      "rule": "generic-api-key",
+      "file": "income-analytics/docs/engineering/scoped-financial-certification/immutable_reference_inventory.json",
+      "line": 12,
+      "commit": "42325f4d8e37ff1491f1bb26eb8e10fad891a979",
+      "state": "FALSE_POSITIVE",
+      "identity": "6d77fca7bafcb08e50acb7ae323d0842e1eb6734905cfa269e7ceb0ccf731519",
+      "reason": "Exact public SHA-256 of immutable migration 0008_paid_income_brapi.py; recomputed against develop b642709 and current bytes. Not a credential. Current occurrence bound to full inventory digest; historical occurrence bound to commit/file/line/rule. No file or rule exemption.",
+      "evidence": "Issue #77; docs/engineering/security/issue77_security_baseline.md; original failed artifact 13272900909; Git blob b642709:income-analytics/alembic/versions/0008_paid_income_brapi.py"
     }
   ]
 }
