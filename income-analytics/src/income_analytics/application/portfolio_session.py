@@ -22,6 +22,12 @@ from income_analytics.application.market_data import (
     MarketDataUnavailable,
     MarketPriceObservation,
 )
+from income_analytics.application.treasury import (
+    is_treasury,
+    tradable_title,
+    validate_title_history,
+)
+from income_analytics.application.treasury import validate_trade as validate_treasury_trade
 from income_analytics.domain.allocation_policy import AllocationPolicy
 from income_analytics.domain.asset_allocation_policy import AssetAllocationPolicy
 from income_analytics.domain.benchmark_rate import BenchmarkRate
@@ -214,6 +220,7 @@ class PortfolioSession:
         ticker: str,
         name: str | None = None,
         asset_class: AssetClass = AssetClass.OTHER,
+        asset_type: AssetType | None = None,
         country: str = "BR",
         currency_code: str = "BRL",
         sector: str | None = None,
@@ -227,6 +234,23 @@ class PortfolioSession:
         """Register a trade only when it can be applied to the current portfolio."""
         normalized_ticker = ticker.strip().upper()
         asset = self._assets.get(normalized_ticker)
+        title_trade = (
+            asset_type is AssetType.TREASURY
+            or (
+                asset is not None
+                and is_treasury(asset)
+                and asset.id not in self._fixed_income_details
+            )
+            or (
+                asset is None
+                and asset_class is AssetClass.FIXED_INCOME
+                and tradable_title(name or "")
+            )
+        )
+        if title_trade:
+            if not tradable_title(asset.name if asset else name or ""):
+                raise ValueError("Título sem regras operacionais suportadas.")
+            validate_treasury_trade(quantity, unit_price)
         if asset is None:
             asset = (
                 SqliteAssetRepository(self.portfolio_id).get_by_ticker(normalized_ticker)
@@ -239,6 +263,7 @@ class PortfolioSession:
                     normalized_ticker,
                     name=name or normalized_ticker,
                     asset_class=asset_class,
+                    asset_type=asset_type,
                     country=country,
                     currency_code=currency_code,
                     sector=sector,
@@ -268,6 +293,8 @@ class PortfolioSession:
         )
 
         candidate_events = [*self._events, event]
+        if is_treasury(asset) and asset.id not in self._fixed_income_details:
+            validate_title_history(candidate_events, asset.id)
         projection = PortfolioProjector.project(
             candidate_events,
             market_prices=self._market_prices_for_projection(as_of=effective_date),
@@ -276,6 +303,68 @@ class PortfolioSession:
         self._events.append(event)
         if self.persistent:
             SqliteFinancialEventRepository(self.portfolio_id).save(event)
+        return projection
+
+    def amend_treasury_trade(
+        self,
+        *,
+        event_id: UUID,
+        quantity: Decimal,
+        unit_price: Decimal,
+        effective_date: date,
+        expected_revision: int,
+        gross_amount: Decimal | None = None,
+    ) -> PortfolioProjection:
+        """Keep identity/provenance and retain prior facts in an audited revision."""
+        original = next((event for event in self._events if event.id == event_id), None)
+        if original is None or original.asset is None:
+            raise ValueError("Lançamento não encontrado nesta carteira.")
+        asset = original.asset
+        if (
+            not is_treasury(asset)
+            or not tradable_title(asset.name)
+            or asset.id in self._fixed_income_details
+            or original.event_type not in {FinancialEventType.BUY, FinancialEventType.SELL}
+        ):
+            raise ValueError(
+                "Edição disponível somente para compras e vendas em títulos de Tesouro."
+            )
+        validate_treasury_trade(quantity, unit_price, gross_amount)
+        revisions = original.metadata.get("treasury_revisions", [])
+        if not isinstance(revisions, list) or len(revisions) != expected_revision:
+            raise ValueError("O lançamento foi alterado; recarregue antes de editar.")
+        replacement = replace(
+            original,
+            quantity=Quantity(quantity),
+            unit_price=Money(unit_price),
+            effective_date=effective_date,
+            metadata={
+                **original.metadata,
+                "treasury_revisions": [
+                    *revisions,
+                    {
+                        "quantity": str(original.quantity.value) if original.quantity else None,
+                        "unit_price": str(original.unit_price.amount)
+                        if original.unit_price
+                        else None,
+                        "effective_date": original.effective_date.isoformat(),
+                        "amended_at": datetime.now(UTC).isoformat(),
+                    },
+                ],
+            },
+        )
+        events = [replacement if event.id == event_id else event for event in self._events]
+        validate_title_history(events, asset.id)
+        projection = PortfolioProjector.project(
+            events,
+            market_prices=self._market_prices_for_projection(as_of=None),
+            market_data_available=bool(self._market_prices or self._fixed_income_details),
+        )
+        if self.persistent:
+            from income_analytics.infrastructure.treasury_revisions import save_revision
+
+            save_revision(replacement, self.portfolio_id, expected_revision)
+        self._events = events
         return projection
 
     def project(self, *, as_of: date | None = None) -> PortfolioProjection:

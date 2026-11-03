@@ -5,10 +5,10 @@
   "historical_baseline_occurrences": 803,
   "reviewed_source_sha256": {
     "src/income_analytics/api/onboarding_v2.py": "a5ba7efcac28924eb5b68e4a8bd3409183bb979a59abfd896d546a80704dd5df",
-    "src/income_analytics/api/routers/dashboard.py": "dff22784ef6a6c217b9d7ea122af9bbc765100ffe043201de2adacd2ff6b1146",
+    "src/income_analytics/api/routers/dashboard.py": "2499f9532658e98627b8a4becdb461dd7e0644c6db6811454bd45eaf225ab288",
     "src/income_analytics/api/routers/portfolios.py": "6d223ac548b0c5185dd3b5da9f4ca751c3408c987820ef8231a4e320655e82b7",
     "src/income_analytics/api/saas_security.py": "4708c099ded0532302745898f09b48aebe077d76f85dde5f7d84ff1fc60e632a",
-    "src/income_analytics/application/executable_contribution.py": "1257c78181f46d120bf054b1a6fec4081cdfb551f2bf01b91ba5fee1a71999ba",
+    "src/income_analytics/application/executable_contribution.py": "53f563ccfcd2c25df0e005c641813162d5d2c3247be9e688bbc4343e6981030c",
     "src/income_analytics/application/global_contribution_allocator.py": "bb49a550ff06619f965017ec45a1e6237a2a68526645af85bca389259f2ea58f",
     "src/income_analytics/application/magic_formula_formal_qa.py": "84f264f68a857762c53bb3ecbd2c7a1b1cf9d93b716524a1c68036cb8aac1300",
     "src/income_analytics/application/wealth_explanation.py": "63ab640d71ecb53e047cd61d1e5220fa12b1ee1651d1df5f659392eeef46d719",
@@ -18,7 +18,11 @@
     "src/income_analytics/infrastructure/models.py": "d0537113c4e1ef36bc3598193932fe8f16911bb1ac1af424c1b7ed6b4fd7e7bc",
     "src/income_analytics/infrastructure/request_profiling.py": "757bf2e4ea9443f9b3404b8b8024c6a4f03b7d52dcf097155c5e02d49870a275",
     "src/income_analytics/infrastructure/upload_safety.py": "996c4f8e35d35ad37eb0bc7675b25869a8ed8c7e556eba7b17cf0412c13ad76f",
-    "src/income_analytics/main.py": "87beadcab9ae279c31d1e9981f0f1a89ca6ff036b0223ae50895675cdb5e502c"
+    "src/income_analytics/main.py": "87beadcab9ae279c31d1e9981f0f1a89ca6ff036b0223ae50895675cdb5e502c",
+    "src/income_analytics/application/holdings_display.py": "31afe9e7a41d114394f8738616c8aadc21f000cd2dc940b4215bab9d086ab1b1",
+    "src/income_analytics/application/treasury.py": "40b16f2f674522d8d3359f786906d27dae76f94d1de145b6addcf8d98fe001a4",
+    "src/income_analytics/application/portfolio_session.py": "7ccd1ef8c0a9bc6a48c977d5c1e90a394415e4c19eb31d59535307ec814cb97e",
+    "src/income_analytics/infrastructure/treasury_revisions.py": "d960a27d7aebd27ee130fc526195761da35f5a9a8eba0b66758f6a7c19c38b46"
   },
   "occurrences": [
     {
@@ -9589,13 +9593,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 66,
+        "line": 68,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0517",
@@ -9610,13 +9614,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 119,
+        "line": 122,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0518",
@@ -9631,13 +9635,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 126,
+        "line": 129,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0519",
@@ -9750,13 +9754,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 123,
+        "line": 126,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"_build_executable_plan\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0527",
@@ -9785,13 +9789,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 145,
+        "line": 148,
         "column": null,
         "code": "var-annotated",
         "message": "Need type annotation for \"class_values\" (hint: \"class_values: dict[<type>, <type>] = ...\")"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0529",
@@ -9806,13 +9810,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 287,
+        "line": 315,
         "column": null,
         "code": "operator",
         "message": "No overload variant of \"__sub__\" of \"date\" matches argument type \"None\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0530",
@@ -9827,13 +9831,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 315,
+        "line": 343,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"common_increment\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0531",
@@ -9848,13 +9852,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 315,
+        "line": 343,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"price\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0532",
@@ -9869,13 +9873,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 327,
+        "line": 356,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"price\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0533",
@@ -9890,13 +9894,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 328,
+        "line": 357,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"effective_date\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0534",
@@ -9911,13 +9915,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 329,
+        "line": 358,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"provider\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0535",
@@ -9932,13 +9936,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 330,
+        "line": 359,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"price_timestamp\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0536",
@@ -9953,13 +9957,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/executable_contribution.py",
-        "line": 331,
+        "line": 360,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"Any | None\" has no attribute \"price_timestamp\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0537",
@@ -12249,13 +12253,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/portfolio_session.py",
-        "line": 869,
+        "line": 958,
         "column": null,
         "code": "assignment",
         "message": "Incompatible types in assignment (expression has type \"MarketPrice\", variable has type \"Money\")"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0671",
@@ -12270,13 +12274,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/portfolio_session.py",
-        "line": 877,
+        "line": 966,
         "column": null,
         "code": "arg-type",
         "message": "Argument 1 to \"append\" of \"list\" has incompatible type \"Money\"; expected \"MarketPrice\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0672",
@@ -12291,13 +12295,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/portfolio_session.py",
-        "line": 878,
+        "line": 967,
         "column": null,
         "code": "arg-type",
         "message": "Argument 1 to \"_remember_market_price\" of \"PortfolioSession\" has incompatible type \"Money\"; expected \"MarketPrice\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0673",
@@ -12312,13 +12316,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/portfolio_session.py",
-        "line": 945,
+        "line": 1034,
         "column": null,
         "code": "return-value",
         "message": "Incompatible return value type (got \"tuple[object, tuple[str, ...], tuple[str, ...]]\", expected \"tuple[int, tuple[str, ...], tuple[str, ...]]\")"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0674",
@@ -12333,13 +12337,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/application/portfolio_session.py",
-        "line": 945,
+        "line": 1034,
         "column": null,
         "code": "arg-type",
         "message": "Argument 1 to \"tuple\" has incompatible type \"object\"; expected \"Iterable[str]\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0675",
@@ -12844,13 +12848,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 145,
+        "line": 154,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0702",
@@ -12865,13 +12869,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 155,
+        "line": 164,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a type annotation"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0703",
@@ -12886,13 +12890,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 158,
+        "line": 167,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0704",
@@ -12907,13 +12911,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 176,
+        "line": 185,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"_PortfolioRepositoryProxy\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0705",
@@ -12928,13 +12932,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 179,
+        "line": 188,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"_PortfolioRepositoryProxy\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0706",
@@ -12949,13 +12953,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 246,
+        "line": 255,
         "column": null,
         "code": "misc",
         "message": "Generator has incompatible item type \"tuple[str, str, str]\"; expected \"tuple[str, str, None]\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0707",
@@ -12970,13 +12974,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 605,
+        "line": 628,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"build_executable_plan\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0708",
@@ -12991,13 +12995,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 613,
+        "line": 636,
         "column": null,
         "code": "no-any-return",
         "message": "Returning Any from function declared to return \"dict[str, object]\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0709",
@@ -13012,13 +13016,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 1306,
+        "line": 1329,
         "column": null,
         "code": "no-any-return",
         "message": "Returning Any from function declared to return \"dict[str, object]\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0710",
@@ -13033,13 +13037,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 1313,
+        "line": 1336,
         "column": null,
         "code": "no-any-return",
         "message": "Returning Any from function declared to return \"dict[str, object]\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0711",
@@ -13054,13 +13058,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 1375,
+        "line": 1398,
         "column": null,
         "code": "no-any-return",
         "message": "Returning Any from function declared to return \"dict[str, object] | None\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0712",
@@ -13075,13 +13079,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 1382,
+        "line": 1405,
         "column": null,
         "code": "assignment",
         "message": "Incompatible default for parameter \"request\" (default has type \"None\", parameter has type \"Request[State]\")"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0713",
@@ -13096,13 +13100,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 1406,
+        "line": 1429,
         "column": null,
         "code": "assignment",
         "message": "Incompatible default for parameter \"request\" (default has type \"None\", parameter has type \"Request[State]\")"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0714",
@@ -13117,13 +13121,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 1487,
+        "line": 1514,
         "column": null,
         "code": "arg-type",
         "message": "Argument \"label\" to \"AssetCompositionInput\" has incompatible type \"str | None\"; expected \"str\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0715",
@@ -13138,13 +13142,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 1503,
+        "line": 1530,
         "column": null,
         "code": "arg-type",
         "message": "Argument \"label\" to \"AssetCompositionInput\" has incompatible type \"str | None\"; expected \"str\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0716",
@@ -13156,16 +13160,17 @@
         "code": "union-attr",
         "message": "Item \"int\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"__iter__\" (not iterable)"
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1635,
         "column": null,
         "code": "union-attr",
         "message": "Item \"int\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"__iter__\" (not iterable)"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0717",
@@ -13177,16 +13182,17 @@
         "code": "union-attr",
         "message": "Item \"Decimal\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"__iter__\" (not iterable)"
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1635,
         "column": null,
         "code": "union-attr",
         "message": "Item \"Decimal\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"__iter__\" (not iterable)"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0718",
@@ -13198,16 +13204,17 @@
         "code": "union-attr",
         "message": "Item \"None\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"__iter__\" (not iterable)"
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1635,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"__iter__\" (not iterable)"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0719",
@@ -13219,16 +13226,17 @@
         "code": "index",
         "message": "Invalid index type \"str | Decimal | Any | None\" for \"dict[str, AssetCompositionItem]\"; expected type \"str\""
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1636,
         "column": null,
         "code": "index",
         "message": "Invalid index type \"str | Decimal | Any | None\" for \"dict[str, AssetCompositionItem]\"; expected type \"str\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0720",
@@ -13240,16 +13248,17 @@
         "code": "index",
         "message": "Invalid index type \"str\" for \"str\"; expected type \"SupportsIndex | slice[SupportsIndex | None, SupportsIndex | None, SupportsIndex | None]\""
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1636,
         "column": null,
         "code": "index",
         "message": "Invalid index type \"str\" for \"str\"; expected type \"SupportsIndex | slice[SupportsIndex | None, SupportsIndex | None, SupportsIndex | None]\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0721",
@@ -13261,16 +13270,17 @@
         "code": "union-attr",
         "message": "Item \"str\" of \"dict[str, str | Decimal | Any | None] | str | Any\" has no attribute \"update\""
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1637,
         "column": null,
         "code": "union-attr",
         "message": "Item \"str\" of \"dict[str, str | Decimal | Any | None] | str | Any\" has no attribute \"update\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0722",
@@ -13282,16 +13292,17 @@
         "code": "union-attr",
         "message": "Item \"dict[str, object]\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1649,
         "column": null,
         "code": "union-attr",
         "message": "Item \"dict[str, object]\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0723",
@@ -13303,16 +13314,17 @@
         "code": "union-attr",
         "message": "Item \"int\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1649,
         "column": null,
         "code": "union-attr",
         "message": "Item \"int\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0724",
@@ -13324,16 +13336,17 @@
         "code": "union-attr",
         "message": "Item \"str\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1649,
         "column": null,
         "code": "union-attr",
         "message": "Item \"str\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0725",
@@ -13345,16 +13358,17 @@
         "code": "union-attr",
         "message": "Item \"Decimal\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1649,
         "column": null,
         "code": "union-attr",
         "message": "Item \"Decimal\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0726",
@@ -13366,16 +13380,17 @@
         "code": "union-attr",
         "message": "Item \"None\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1649,
         "column": null,
         "code": "union-attr",
         "message": "Item \"None\" of \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None\" has no attribute \"extend\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0727",
@@ -13387,16 +13402,17 @@
         "code": "arg-type",
         "message": "Argument \"key\" to \"sort\" of \"list\" has incompatible type \"Callable[[dict[str, list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None]], list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal]\"; expected \"Callable[[dict[str, list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None]], SupportsDunderLT[Any] | SupportsDunderGT[Any]]\""
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1675,
         "column": null,
         "code": "arg-type",
         "message": "Argument \"key\" to \"sort\" of \"list\" has incompatible type \"Callable[[dict[str, list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None]], list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal]\"; expected \"Callable[[dict[str, list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal | None]], SupportsDunderLT[Any] | SupportsDunderGT[Any]]\""
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0728",
@@ -13408,16 +13424,17 @@
         "code": "return-value",
         "message": "Incompatible return value type (got \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal\", expected \"SupportsDunderLT[Any] | SupportsDunderGT[Any]\")"
       },
-      "after": {
+      "after": null,
+      "status": "RESOLVED",
+      "evidence": "Issue #61: explicit HoldingGroup/HoldingRow TypedDict contracts eliminate heterogeneous dictionary inference; complete mypy scope retained. Original finding preserved in before.",
+      "issue61_baseline": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
         "line": 1675,
         "column": null,
         "code": "return-value",
         "message": "Incompatible return value type (got \"list[dict[str, str | Decimal | Any | None]] | dict[str, object] | int | str | Any | Decimal\", expected \"SupportsDunderLT[Any] | SupportsDunderGT[Any]\")"
-      },
-      "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      }
     },
     {
       "id": "historical-0729",
@@ -13432,13 +13449,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 1944,
+        "line": 2054,
         "column": null,
         "code": "arg-type",
         "message": "Argument 1 to \"setdefault\" of \"MutableMapping\" has incompatible type \"object\"; expected \"str\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0730",
@@ -13453,13 +13470,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2206,
+        "line": 2316,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0731",
@@ -13474,13 +13491,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2211,
+        "line": 2321,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0732",
@@ -13495,13 +13512,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2229,
+        "line": 2339,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0733",
@@ -13516,13 +13533,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2240,
+        "line": 2350,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0734",
@@ -13537,13 +13554,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2251,
+        "line": 2361,
         "column": null,
         "code": "no-any-return",
         "message": "Returning Any from function declared to return \"dict[str, object]\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0735",
@@ -13558,13 +13575,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2456,
+        "line": 2638,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"id\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0736",
@@ -13579,13 +13596,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2457,
+        "line": 2639,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"status\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0737",
@@ -13600,13 +13617,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2458,
+        "line": 2640,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"file_name\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0738",
@@ -13621,13 +13638,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2459,
+        "line": 2641,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"report_type\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0739",
@@ -13642,13 +13659,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2461,
+        "line": 2643,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"total_rows\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0740",
@@ -13663,13 +13680,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2462,
+        "line": 2644,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"new_rows\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0741",
@@ -13684,13 +13701,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2463,
+        "line": 2645,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"duplicate_rows\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0742",
@@ -13705,13 +13722,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2464,
+        "line": 2646,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"review_rows\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0743",
@@ -13726,13 +13743,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2465,
+        "line": 2647,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"unsupported_rows\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0744",
@@ -13747,13 +13764,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2466,
+        "line": 2648,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"invalid_rows\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0745",
@@ -13768,13 +13785,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2470,
+        "line": 2652,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"source_row\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0746",
@@ -13789,13 +13806,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2471,
+        "line": 2653,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"status\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0747",
@@ -13810,13 +13827,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2472,
+        "line": 2654,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"detail\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0748",
@@ -13831,13 +13848,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2473,
+        "line": 2655,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"event_date\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0749",
@@ -13852,13 +13869,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2474,
+        "line": 2656,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"event_type\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0750",
@@ -13873,13 +13890,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2475,
+        "line": 2657,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"income_type\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0751",
@@ -13894,13 +13911,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2476,
+        "line": 2658,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"source_symbol\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0752",
@@ -13915,13 +13932,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2477,
+        "line": 2659,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"normalized_symbol\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0753",
@@ -13936,13 +13953,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2478,
+        "line": 2660,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"institution\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0754",
@@ -13957,13 +13974,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2479,
+        "line": 2661,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"market\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0755",
@@ -13978,13 +13995,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2480,
+        "line": 2662,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"quantity\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0756",
@@ -13999,13 +14016,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2481,
+        "line": 2663,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"unit_price\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0757",
@@ -14020,13 +14037,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2482,
+        "line": 2664,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"total_value\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0758",
@@ -14041,13 +14058,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2483,
+        "line": 2665,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"quantity_status\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0759",
@@ -14062,13 +14079,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2484,
+        "line": 2666,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"financial_status\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0760",
@@ -14083,13 +14100,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2485,
+        "line": 2667,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"occurrence_index\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0761",
@@ -14104,13 +14121,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2500,
+        "line": 2682,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"normalized_symbol\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0762",
@@ -14125,13 +14142,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2501,
+        "line": 2683,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"normalized_symbol\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0763",
@@ -14146,13 +14163,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2536,
+        "line": 2718,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"income_type\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0764",
@@ -14167,13 +14184,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2630,
+        "line": 2812,
         "column": null,
         "code": "assignment",
         "message": "Incompatible types in assignment (expression has type \"object\", variable has type \"B3ImportBatch | None\")"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0765",
@@ -14188,13 +14205,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2631,
+        "line": 2813,
         "column": null,
         "code": "arg-type",
         "message": "Argument 1 to \"create_batch\" of \"SqliteB3ImportRepository\" has incompatible type \"None\"; expected \"B3ImportBatch\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0766",
@@ -14209,13 +14226,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2633,
+        "line": 2815,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"status\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0767",
@@ -14230,13 +14247,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2634,
+        "line": 2816,
         "column": null,
         "code": "arg-type",
         "message": "Argument 1 to \"save_record\" of \"SqliteB3ImportRepository\" has incompatible type \"object\"; expected \"B3ImportedRecord\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0768",
@@ -14251,13 +14268,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2686,
+        "line": 2908,
         "column": null,
         "code": "dict-item",
         "message": "Dict entry 2 has incompatible type \"str\": \"str | None\"; expected \"str\": \"str\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0769",
@@ -14272,13 +14289,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2691,
+        "line": 2913,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"add\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0770",
@@ -14293,13 +14310,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2708,
+        "line": 2930,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"save_record_in_session\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0771",
@@ -14314,13 +14331,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 2973,
+        "line": 3195,
         "column": null,
         "code": "no-untyped-call",
         "message": "Call to untyped function \"get\" in typed context"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0772",
@@ -14335,13 +14352,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 3703,
+        "line": 3925,
         "column": null,
         "code": "var-annotated",
         "message": "Need type annotation for \"valuation_by_date\" (hint: \"valuation_by_date: dict[<type>, <type>] = ...\")"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0773",
@@ -14356,13 +14373,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 3710,
+        "line": 3932,
         "column": null,
         "code": "no-any-return",
         "message": "Returning Any from function declared to return \"PortfolioProjection\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0774",
@@ -14377,13 +14394,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 3712,
+        "line": 3934,
         "column": null,
         "code": "no-untyped-def",
         "message": "Function is missing a return type annotation"
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0775",
@@ -14398,13 +14415,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 3849,
+        "line": 4071,
         "column": null,
         "code": "arg-type",
         "message": "Argument \"performance_at\" to \"build_performance_comparison\" has incompatible type \"Callable[[date, date], object]\"; expected \"Callable[[date, date], PerformanceProjection]\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0776",
@@ -14419,13 +14436,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4352,
+        "line": 4574,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"as_of\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0777",
@@ -14440,13 +14457,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4353,
+        "line": 4575,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"base_currency\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0778",
@@ -14461,13 +14478,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4354,
+        "line": 4576,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"invested_wealth\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0779",
@@ -14482,13 +14499,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4355,
+        "line": 4577,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"strategy_distance\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0780",
@@ -14503,13 +14520,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4356,
+        "line": 4578,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"valuation_status\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0781",
@@ -14524,13 +14541,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4357,
+        "line": 4579,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"issues\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0782",
@@ -14545,13 +14562,13 @@
       "after": {
         "tool": "mypy",
         "file": "src/income_analytics/api/routers/dashboard.py",
-        "line": 4366,
+        "line": 4588,
         "column": null,
         "code": "attr-defined",
         "message": "\"object\" has no attribute \"class_allocations\""
       },
       "status": "OPEN",
-      "evidence": "Exact tool/code/message and multiplicity retained; reviewed location mapping to candidate source"
+      "evidence": "Issue #61: exact tool/code/message retained; reviewed source-line relocation. Full-scope mypy: 486 findings, no added diagnostics."
     },
     {
       "id": "historical-0783",

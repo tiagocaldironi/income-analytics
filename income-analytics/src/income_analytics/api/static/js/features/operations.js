@@ -10,6 +10,13 @@ function setOperationFields(type) {
   const jcp = type === "INTEREST_ON_EQUITY";
   const income = dividend || jcp;
   const assetClass = document.querySelector("#trade-asset-class")?.value;
+  const treasury = assetClass === "TREASURY";
+  const titleInput = document.querySelector("#treasury-title");
+  if (titleInput) { titleInput.closest("label").hidden = !treasury; titleInput.disabled = !treasury; titleInput.required = treasury; }
+  const quantityInput = document.querySelector("#quantity");
+  if (quantityInput) { quantityInput.step = treasury ? "0.01" : ["BRAZILIAN_STOCK", "BRAZILIAN_ETF", "FII"].includes(assetClass) ? "1" : "any"; quantityInput.min = treasury ? "0.01" : ["BRAZILIAN_STOCK", "BRAZILIAN_ETF", "FII"].includes(assetClass) ? "1" : "0.000001"; }
+  const priceInput = document.querySelector("#unit_price");
+  if (priceInput) { priceInput.step = treasury ? "0.000001" : "0.01"; priceInput.min = treasury ? "0.000001" : "0.01"; }
   const fixedIncome = type === "BUY" && assetClass === "FIXED_INCOME";
   const fixedIncomeSale = type === "SELL" && assetClass === "FIXED_INCOME";
   const pension = type === "BUY" && assetClass === "PENSION";
@@ -21,7 +28,7 @@ function setOperationFields(type) {
   if (assetClassLabel) assetClassLabel.textContent = type === "SELL" ? "Classe do ativo" : "Classe do ativo (no primeiro lançamento)";
   const tickerLabel = document.querySelector('label[for="ticker"]');
   if (tickerLabel) tickerLabel.textContent = fixedIncomeSale ? "Ativo da carteira" : "Ativo";
-  document.querySelector("#ticker").maxLength = fixedIncomeSale ? 64 : 12;
+  document.querySelector("#ticker").maxLength = fixedIncomeSale ? 64 : treasury ? 20 : 12;
   const capitalFlow = document.querySelector("#capital-flow-details");
   if (capitalFlow) capitalFlow.hidden = (type !== "BUY" && !external) || wealth;
   ["#country", "#currency-code", "#sector"].forEach(selector => {
@@ -335,6 +342,8 @@ function arrangeOperationForm() {
     if (parent?.id) wrapper.id = parent.id;
     if (label) wrapper.append(label);
     wrapper.append(input);
+    const treasuryField = parent?.querySelector('label[for="treasury-title"]');
+    if (treasuryField) wrapper.append(treasuryField);
     if (parent) parent.replaceWith(wrapper);
     destination.append(wrapper);
   };
@@ -373,10 +382,25 @@ function arrangeOperationForm() {
 export function openOperationModal(options = {}) {
   const dialog = document.querySelector("#operation-modal");
   if (!dialog) return;
-  const { eventType = "BUY", assetClass, ticker, name, country, currencyCode, sector } = options || {};
+  const { eventType = "BUY", assetClass, ticker, name, country, currencyCode, sector, eventId, revision, quantity, unitPrice, effectiveDate } = options || {};
   const type = document.querySelector("#event_type");
   const classSelect = document.querySelector("#trade-asset-class");
   const symbol = document.querySelector("#ticker");
+  dialog.dataset.treasuryEventId = eventId || "";
+  dialog.dataset.treasuryRevision = String(revision || 0);
+  if (type) type.disabled = Boolean(eventId);
+  dialog.querySelectorAll("[data-quick-operation]").forEach(button => { button.disabled=Boolean(eventId); });
+  const submit = document.querySelector("#trade-form")?.querySelector("button[type=submit]");
+  if (submit) submit.textContent = eventId ? "Salvar alteração" : "Registrar operação";
+  if (classSelect) classSelect.disabled = Boolean(eventId);
+  if (symbol) symbol.readOnly = Boolean(eventId);
+  const titleInput = document.querySelector("#treasury-title"); if (titleInput) titleInput.readOnly=Boolean(eventId);
+  if (eventId) {
+    document.querySelector("#quantity").value=quantity;
+    document.querySelector("#unit_price").value=unitPrice;
+    document.querySelector("#effective-date").value=effectiveDate;
+  }
+  const heading = dialog.querySelector("h2"); if (heading) heading.textContent = eventId ? "Editar lançamento de Tesouro" : "Nova operação";
   if (assetClass && classSelect && Array.from(classSelect.options).some(option => option.value === assetClass)) {
     classSelect.value = assetClass;
   }
@@ -384,6 +408,7 @@ export function openOperationModal(options = {}) {
   if (symbol && ticker) {
     symbol.value = ticker;
     symbol.dataset.assetName = name || "";
+    const titleInput = document.querySelector("#treasury-title"); if (titleInput) titleInput.value = name || "";
   }
   if (country) document.querySelector("#country").value = country;
   if (currencyCode) document.querySelector("#currency-code").value = currencyCode;
@@ -540,7 +565,7 @@ function bindOperationSearch() {
     } catch { list.replaceChildren(); }
   };
   ticker.loadFixedIncomeSaleOptions = loadFixedIncomeSaleOptions;
-  ticker.addEventListener("input", () => {
+  ticker.addEventListener("input", async () => {
     ticker.dataset.assetName = "";
     clearTimeout(timer);
     const query = ticker.value.trim();
@@ -549,6 +574,15 @@ function bindOperationSearch() {
       const candidate = candidatesBySymbol.get(query.toUpperCase());
       ticker.dataset.assetName = candidate?.name || "";
       updateOperationSummary();
+      return;
+    }
+    if (document.querySelector("#trade-asset-class").value === "TREASURY") {
+      const holdings = await portfolioApi.holdings().catch(() => null);
+      if (document.querySelector("#trade-asset-class").value !== "TREASURY" || ticker.value.trim() !== query) return;
+      candidatesBySymbol = new Map((holdings?.classes || []).flatMap(group => group.assets || []).filter(asset => asset.treasury_trade_supported).map(asset => [asset.ticker.toUpperCase(), asset]));
+      list.innerHTML = [...candidatesBySymbol.values()].map(asset => `<option value="${escapeAttribute(asset.ticker)}">${escapeAttribute(asset.display_name || asset.name)}</option>`).join("");
+      const asset = candidatesBySymbol.get(query.toUpperCase());
+      if (asset) { ticker.dataset.assetName=asset.name; document.querySelector("#treasury-title").value=asset.name; }
       return;
     }
     if (query.length < 2) { list.replaceChildren(); return; }
@@ -575,7 +609,10 @@ function bindOperationSearch() {
       return;
     }
     if (!candidate) return;
-    ticker.value = candidate.symbol;
+    if (document.querySelector("#trade-asset-class").value === "TREASURY") {
+      document.querySelector("#treasury-title").value = candidate.name || "";
+    }
+    ticker.value = candidate.symbol || candidate.ticker;
     ticker.dataset.assetName = candidate.name || "";
     const classSelect = document.querySelector("#trade-asset-class");
     if (candidate.suggested_asset_class && Array.from(classSelect.options).some(option => option.value === candidate.suggested_asset_class)) {
@@ -697,6 +734,8 @@ export function bindOperations() {
     }
   });
   const typeInput = document.querySelector("#event_type");
+  document.querySelector("#trade-asset-class")?.insertAdjacentHTML("beforeend", '<option value="TREASURY">Tesouro Direto</option>');
+  document.querySelector("#ticker")?.insertAdjacentHTML("afterend", '<label hidden for="treasury-title">Nome do título<input id="treasury-title" placeholder="Tesouro Selic 2031" maxlength="200" disabled><small>Quantidade em múltiplos de 0,01 título. Sem conversão automática de contratos antigos.</small></label>');
   document.querySelector("#trade-asset-class")?.insertAdjacentHTML(
     "beforeend",
     '<option value="PENSION">Previdência</option><option value="REAL_ESTATE">Imóveis</option>',
@@ -716,7 +755,7 @@ export function bindOperations() {
   };
   document.querySelector("#capital-flow-type")?.addEventListener("change", updateCapitalFlowFields);
   updateCapitalFlowFields();
-  document.querySelector("#external-flow-details")?.insertAdjacentHTML("afterend", '<div id="fixed-income-details" hidden><label>Nome do investimento<input id="wealth-name" required></label><label>Instrumento<select id="fi-instrument"><option>CDB</option><option>LCI</option><option>LCA</option><option>TESOURO_DIRETO</option><option value="SAVINGS_ACCOUNT">Poupança</option></select></label><label>Indexador<select id="fi-indexer" required><option value="" selected disabled>Selecione o indexador</option><option value="PREFIXED">Prefixado</option><option value="CDI_PERCENT">% do CDI</option><option value="CDI_PLUS">% do CDI + spread</option><option value="IPCA_PLUS">IPCA + spread</option><option value="SAVINGS_RULE" hidden>Regra da poupança</option></select></label><label>Principal<input id="fi-principal" type="number" min="0.01" step="0.01" required></label><label>Taxa anual (%)<input id="fi-rate" type="number" step="0.01"></label><label>% do CDI<input id="fi-percentage" type="number" min="0.01" step="0.01"></label><label>Spread anual (%)<input id="fi-spread" type="number" step="0.01"></label></div><div id="pension-details" hidden><label>Identificador<input id="wealth-ticker" maxlength="32" required></label><label>Nome<input id="wealth-name" required></label><label>Instituição<input id="pension-institution" required></label><label>Plano<input id="pension-name" required></label><label>Saldo informado<input id="pension-balance" type="number" min="0" step="0.01" required></label><label>Tipo<select id="pension-type"><option>PGBL</option><option>VGBL</option></select></label><label>Regime<select id="pension-tax"><option>PROGRESSIVO</option><option>REGRESSIVO</option></select></label></div><div id="real-estate-details" hidden><label>Tipo<input id="property-type" value="APARTAMENTO" required></label><label>CEP<input id="property-cep" required></label><label>Valor atual<input id="property-value" type="text" inputmode="decimal" data-money required></label></div>');
+  document.querySelector("#external-flow-details")?.insertAdjacentHTML("afterend", '<div id="fixed-income-details" hidden><label>Nome do investimento<input id="wealth-name" required></label><label>Instrumento<select id="fi-instrument"><option>CDB</option><option>LCI</option><option>LCA</option><option value="SAVINGS_ACCOUNT">Poupança</option></select></label><label>Indexador<select id="fi-indexer" required><option value="" selected disabled>Selecione o indexador</option><option value="PREFIXED">Prefixado</option><option value="CDI_PERCENT">% do CDI</option><option value="CDI_PLUS">% do CDI + spread</option><option value="IPCA_PLUS">IPCA + spread</option><option value="SAVINGS_RULE" hidden>Regra da poupança</option></select></label><label>Principal<input id="fi-principal" type="number" min="0.01" step="0.01" required></label><label>Taxa anual (%)<input id="fi-rate" type="number" step="0.01"></label><label>% do CDI<input id="fi-percentage" type="number" min="0.01" step="0.01"></label><label>Spread anual (%)<input id="fi-spread" type="number" step="0.01"></label></div><div id="pension-details" hidden><label>Identificador<input id="wealth-ticker" maxlength="32" required></label><label>Nome<input id="wealth-name" required></label><label>Instituição<input id="pension-institution" required></label><label>Plano<input id="pension-name" required></label><label>Saldo informado<input id="pension-balance" type="number" min="0" step="0.01" required></label><label>Tipo<select id="pension-type"><option>PGBL</option><option>VGBL</option></select></label><label>Regime<select id="pension-tax"><option>PROGRESSIVO</option><option>REGRESSIVO</option></select></label></div><div id="real-estate-details" hidden><label>Tipo<input id="property-type" value="APARTAMENTO" required></label><label>CEP<input id="property-cep" required></label><label>Valor atual<input id="property-value" type="text" inputmode="decimal" data-money required></label></div>');
   const fixedIncomeDetails = document.querySelector("#fixed-income-details");
   document.querySelector("#fi-instrument")?.insertAdjacentHTML(
     "afterbegin",
@@ -864,6 +903,16 @@ export function bindOperations() {
             amount: saleValue.value,
             effective_date: document.querySelector("#effective-date").value,
           });
+        } else if (assetClass === "TREASURY") {
+          const treasuryPayload = {
+            event_type: type, ticker: tickerInput.value.trim(), name: document.querySelector("#treasury-title").value.trim(),
+            quantity: decimalForApi(quantityInput.value), unit_price: decimalForApi(priceInput.value),
+            effective_date: document.querySelector("#effective-date").value,
+          };
+          const dialog = document.querySelector("#operation-modal");
+          if (dialog.dataset.treasuryEventId) {
+            await portfolioApi.amendTreasuryTrade(dialog.dataset.treasuryEventId, {...treasuryPayload, expected_revision: Number(dialog.dataset.treasuryRevision)});
+          } else await portfolioApi.createTreasuryTrade(treasuryPayload);
         } else if (fixedIncome) {
           await portfolioApi.createFixedIncome(wealthPayload("FIXED_INCOME"));
         } else if (pension) {
@@ -919,7 +968,7 @@ export function bindOperations() {
         }
       });
       window.dispatchEvent(new CustomEvent("income:operation-confirmed",{detail:{portfolioId:operationPortfolioId}}));
-      setMessage(message, "Operação registrada com sucesso.");
+      setMessage(message, document.querySelector("#operation-modal")?.dataset.treasuryEventId ? "Lançamento atualizado com sucesso." : "Operação registrada com sucesso.");
       document.querySelector("#operation-modal")?.close();
       form.reset();
       document.querySelector("#event_type").value = "BUY";

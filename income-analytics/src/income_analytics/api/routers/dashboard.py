@@ -32,6 +32,7 @@ from income_analytics.application.fx_data import FxRateUnavailable
 from income_analytics.application.historical_portfolio_reconstruction import (
     HistoricalPortfolioReconstructionService,
 )
+from income_analytics.application.holdings_display import HoldingGroup
 from income_analytics.application.income_starter import catalog as income_starter_catalog
 from income_analytics.application.investment_tools import TOOLS, ranking_contract
 from income_analytics.application.magic_formula_canonical_ranking import (
@@ -59,6 +60,13 @@ from income_analytics.application.portfolio_context import (
 )
 from income_analytics.application.portfolio_session import PortfolioSession
 from income_analytics.application.provider_health import ProviderHealthRegistry
+from income_analytics.application.treasury import (
+    is_treasury,
+    tradable_title,
+    validate_title_history,
+)
+from income_analytics.application.treasury import presentation as treasury_presentation
+from income_analytics.application.treasury import validate_trade as validate_treasury_trade
 from income_analytics.application.wealth_explanation import WealthExplanationService
 from income_analytics.domain.allocation_policy import AllocationPolicy
 from income_analytics.domain.asset_allocation_policy import AssetAllocationPolicy
@@ -87,6 +95,7 @@ from income_analytics.domain.read_models.portfolio_projection import PortfolioPr
 from income_analytics.domain.read_models.position_projection import PositionProjection
 from income_analytics.domain.recurring_rule import RecurrenceFrequency, RecurringRule
 from income_analytics.domain.value_objects.money import Money
+from income_analytics.domain.value_objects.quantity import Quantity
 from income_analytics.infrastructure.auth_config import saas_enabled
 from income_analytics.infrastructure.b3_benchmark_data import (
     B3BenchmarkDataProvider,
@@ -177,7 +186,7 @@ dashboard_snapshot_repository = _PortfolioRepositoryProxy(
     SqlitePortfolioDashboardSnapshotRepository
 )
 market_price_refresh_runs = _PortfolioRepositoryProxy(SqliteMarketPriceRefreshRunRepository)
-PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 4
+PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 5
 
 
 def _effective_analysis_end_date(start_date: date, end_date: date) -> date:
@@ -404,6 +413,20 @@ class TradeInput(BaseModel):
     capital_flow_type: CapitalFlowType = CapitalFlowType.INTERNAL_TRANSFER
     source_asset_class: AssetClass | None = None
     destination_asset_class: AssetClass | None = None
+
+
+class TreasuryTradeInput(BaseModel):
+    event_type: Literal["BUY", "SELL"]
+    ticker: str = Field(min_length=1, max_length=20)
+    name: str = Field(min_length=1, max_length=200)
+    quantity: Decimal = Field(gt=0, max_digits=24, decimal_places=2)
+    unit_price: Decimal = Field(gt=0, max_digits=24, decimal_places=6)
+    gross_amount: Decimal | None = Field(default=None, gt=0, max_digits=24, decimal_places=2)
+    effective_date: date
+
+
+class TreasuryAmendInput(TreasuryTradeInput):
+    expected_revision: int = Field(ge=0)
 
 
 class FixedIncomeSaleInput(BaseModel):
@@ -1424,6 +1447,10 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
     portfolio = session.projection(as_of=as_of)
     valuation = session.base_currency_valuation(as_of=as_of)
     base_values = {item.ticker: item.market_value_base for item in valuation.positions}
+    treasury_views = {
+        asset.id: treasury_presentation(asset, session._fixed_income_details.get(asset.id))
+        for asset in session._assets.values()
+    }
     fx_rates = {item.ticker: item.fx_rate for item in valuation.positions}
     latest_quotes = {}
     for quote in sorted(
@@ -1456,7 +1483,7 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
         AssetClass.CRYPTO: "Cripto",
         AssetClass.OTHER: "Outros",
     }
-    groups = []
+    groups: list[HoldingGroup] = []
     for asset_class, positions in by_class.items():
         strategy = analysis_by_class.get(asset_class)
         values = [base_values.get(str(position.asset.ticker)) for position in positions]
@@ -1511,7 +1538,7 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
             )
         )
         composition_by_id = {item.asset_id: item for item in composition.items}
-        group = {
+        group: HoldingGroup = {
             "asset_class": asset_class.value,
             "label": labels[asset_class],
             "asset_count": len(positions),
@@ -1549,6 +1576,16 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
                     "asset_id": str(position.asset.id),
                     "ticker": str(position.asset.ticker),
                     "name": position.asset.name,
+                    "display_group": treasury_views[position.asset.id].get(
+                        "display_group", asset_class.value
+                    ),
+                    "display_name": treasury_views[position.asset.id].get(
+                        "display_name", position.asset.name
+                    ),
+                    "quantity_unit": treasury_views[position.asset.id].get("quantity_unit", "UNIT"),
+                    "treasury_trade_supported": treasury_views[position.asset.id].get(
+                        "treasury_trade_supported", False
+                    ),
                     "country": position.asset.country,
                     "sector": position.asset.sector,
                     "currency_code": position.asset.currency.code,
@@ -1672,6 +1709,74 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
         group["valuation_quality"] = composition.valuation_quality
         group["valuation_unavailable_reason"] = composition.unavailable_reason
         groups.append(group)
+    display_groups: list[HoldingGroup] = []
+    for financial_group in groups:
+        if financial_group["asset_class"] != "FIXED_INCOME":
+            display_groups.append(financial_group)
+            continue
+        for visual_class, label in (
+            ("TREASURY", "Tesouro Direto"),
+            ("FIXED_INCOME", "Renda Fixa Bancária"),
+            ("OTHER_FIXED_INCOME", "Outros de Renda Fixa"),
+        ):
+            rows = [
+                row
+                for row in financial_group["assets"]
+                if not row.get("target_only")
+                and row.get("display_group", "FIXED_INCOME") == visual_class
+            ]
+            if not rows:
+                continue
+            values = [row["market_value_base"] for row in rows]
+            costs = [
+                row["average_price"] * row["quantity"]
+                for row in rows
+                if row["currency_code"] == valuation.base_currency
+            ]
+            weights = [row["portfolio_weight"] for row in rows]
+            display_groups.append(
+                {
+                    **financial_group,
+                    "asset_class": visual_class,
+                    "financial_asset_class": "FIXED_INCOME",
+                    "label": label,
+                    "assets": rows,
+                    "asset_count": len(rows),
+                    "market_value": sum(
+                        (value for value in values if value is not None), Decimal("0")
+                    )
+                    if all(value is not None for value in values)
+                    else None,
+                    "total_cost": sum(costs, Decimal("0")) if len(costs) == len(rows) else None,
+                    "weight": sum(
+                        (weight for weight in weights if weight is not None), Decimal("0")
+                    )
+                    if all(weight is not None for weight in weights)
+                    else None,
+                    "total_result": sum(
+                        (
+                            row["total_result"] * fx_rates[row["ticker"]]
+                            for row in rows
+                            if row["total_result"] is not None
+                            and fx_rates.get(row["ticker"]) is not None
+                        ),
+                        Decimal("0"),
+                    )
+                    if all(
+                        row["total_result"] is not None and fx_rates.get(row["ticker"]) is not None
+                        for row in rows
+                    )
+                    else None,
+                    "composition_distance": None,
+                    "target_weight": None,
+                    "deviation": None,
+                    "performance_coverage": None,
+                    "shared_strategy_note": (
+                        "Metas e TWR permanecem consolidados na classe Renda Fixa; "
+                        "estes são subgrupos visuais."
+                    ),
+                }
+            )
     groups.sort(key=lambda item: item["market_value"] or Decimal("0"), reverse=True)
     return {
         "base_currency": valuation.base_currency,
@@ -1683,6 +1788,7 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
         "valuation_complete": valuation.complete,
         "portfolio_drift": portfolio_drift,
         "classes": groups,
+        "display_groups": display_groups,
     }
 
 
@@ -1752,6 +1858,10 @@ def _serialize_asset_transaction(event: FinancialEvent) -> dict[str, object]:
         "asset_id": str(asset.id),
         "event_type": event.event_type.value,
         "operation": _operation_label(event.event_type),
+        "treasury_editable": is_treasury(asset)
+        and asset.id not in session._fixed_income_details
+        and event.event_type in {FinancialEventType.BUY, FinancialEventType.SELL},
+        "treasury_revision": len(event.metadata.get("treasury_revisions", [])),
         "effective_date": event.effective_date,
         "quantity": event.quantity.value if event.quantity else None,
         "unit_price": event.unit_price.amount if event.unit_price else None,
@@ -2303,6 +2413,78 @@ def create_trade(trade: TradeInput) -> dict[str, object]:
     return serialize_portfolio(projection)
 
 
+@router.post("/treasury/trades", status_code=status.HTTP_201_CREATED)
+def create_treasury_trade(trade: TreasuryTradeInput) -> dict[str, object]:
+    """Record title units without converting existing contract-unit positions."""
+    try:
+        validate_treasury_trade(trade.quantity, trade.unit_price, trade.gross_amount)
+        asset = session._assets.get(trade.ticker.strip().upper())
+        if asset is not None:
+            details = session._fixed_income_details.get(asset.id)
+            if not is_treasury(asset, details) or details is not None:
+                raise ValueError(
+                    (
+                        "Identificador incompatível ou contrato legado: "
+                        "concilie as unidades antes de negociar títulos."
+                    )
+                )
+            name = asset.name
+        else:
+            if trade.event_type == "SELL":
+                raise ValueError("Selecione um título existente para vender.")
+            name = trade.name
+        if not tradable_title(name):
+            raise ValueError(
+                (
+                    "Título não suportado: informe Tesouro Selic, IPCA+ ou Prefixado "
+                    "e o ano de vencimento."
+                )
+            )
+        projection = session.register_trade(
+            event_type=FinancialEventType(trade.event_type),
+            ticker=trade.ticker,
+            name=name,
+            asset_class=AssetClass.FIXED_INCOME,
+            asset_type=AssetType.TREASURY,
+            quantity=trade.quantity,
+            unit_price=trade.unit_price,
+            effective_date=trade.effective_date,
+            capital_flow_type=CapitalFlowType.INTERNAL_TRANSFER,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    rebuild_portfolio_dashboard_snapshot()
+    return serialize_portfolio(projection)
+
+
+@router.put("/treasury/trades/{event_id}")
+def amend_treasury_trade(event_id: UUID, trade: TreasuryAmendInput) -> dict[str, object]:
+    original = next((event for event in session.history() if event.id == event_id), None)
+    if original is None:
+        raise HTTPException(status_code=404, detail="Lançamento não encontrado nesta carteira.")
+    if (
+        original.asset is None
+        or str(original.asset.ticker) != trade.ticker.strip().upper()
+        or original.event_type.value != trade.event_type
+    ):
+        raise HTTPException(
+            status_code=422, detail="A edição preserva o ativo e o tipo da operação."
+        )
+    try:
+        projection = session.amend_treasury_trade(
+            event_id=event_id,
+            quantity=trade.quantity,
+            unit_price=trade.unit_price,
+            effective_date=trade.effective_date,
+            expected_revision=trade.expected_revision,
+            gross_amount=trade.gross_amount,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    rebuild_portfolio_dashboard_snapshot()
+    return serialize_portfolio(projection)
+
+
 @router.post("/fixed-income/sales", status_code=status.HTTP_201_CREATED)
 def create_fixed_income_sale(sale: FixedIncomeSaleInput) -> dict[str, object]:
     """Sell an existing fixed-income position for its total cash proceeds."""
@@ -2642,6 +2824,8 @@ def apply_b3_import(batch_id: UUID) -> dict[str, object]:
             repository.list_records(batch_id),
             key=lambda row: (row.event_date or date.min, row.source_row),
         )
+        treasury_events = list(session.history())
+        assets_by_id = {asset.id: asset for asset in session._assets.values()}
         for record in records:
             if record.status is not B3ImportedRecordStatus.NEW:
                 continue
@@ -2655,6 +2839,44 @@ def apply_b3_import(batch_id: UUID) -> dict[str, object]:
                 raise ValueError("Registro B3 novo sem ativo ou data resolvidos.")
             if record.event_type:
                 event_type = FinancialEventType(record.event_type)
+                imported_asset = assets_by_id.get(record.asset_id)
+                if imported_asset is not None and is_treasury(
+                    imported_asset, session._fixed_income_details.get(imported_asset.id)
+                ):
+                    if imported_asset.id in session._fixed_income_details:
+                        raise ValueError(
+                            (
+                                "Tesouro em contrato legado: "
+                                "concilie unidades antes de importar títulos."
+                            )
+                        )
+                    if (
+                        record.quantity is None
+                        or record.unit_price is None
+                        or record.total_value is None
+                    ):
+                        raise ValueError(
+                            (
+                                "Importação de Tesouro exige quantidade, preço unitário "
+                                "e valor bruto verificáveis."
+                            )
+                        )
+                    if not tradable_title(imported_asset.name):
+                        raise ValueError(
+                            "Título sem regras operacionais suportadas; revise a importação."
+                        )
+                    validate_treasury_trade(record.quantity, record.unit_price, record.total_value)
+                    treasury_event = FinancialEvent(
+                        account_id=session.account_id,
+                        asset=imported_asset,
+                        event_type=event_type,
+                        occurred_at=datetime.now(UTC),
+                        effective_date=record.event_date,
+                        quantity=Quantity(record.quantity),
+                        unit_price=Money(record.unit_price),
+                    )
+                    treasury_events.append(treasury_event)
+                    validate_title_history(treasury_events, imported_asset.id)
                 quantity = str(record.quantity) if record.quantity is not None else None
                 unit_price = str(record.unit_price) if record.unit_price is not None else None
                 amount = None
