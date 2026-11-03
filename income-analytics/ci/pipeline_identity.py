@@ -7,6 +7,13 @@ from pathlib import Path
 
 FINGERPRINT_VERSION = 2
 POLICY_FILES = (
+    "income-analytics/ci/scoped_financial.py",
+    "income-analytics/ci/scoped_financial_trace.py",
+    "income-analytics/ci/scoped-financial-policy.json",
+    "income-analytics/ci/test_scoped_financial.py",
+    "income-analytics/docs/engineering/scoped-financial-certification/immutable_reference_inventory.json",
+    "income-analytics/docs/engineering/scoped-financial-certification/scope_and_applicability.md",
+    "income-analytics/docs/engineering/scoped-financial-certification/independent_review_request.md",
     "income-analytics/ci/typing-baseline-acceptance.json",
     "income-analytics/docs/engineering/release-policy-65/baseline_proposal.json",
     "income-analytics/docs/engineering/release-policy-65/candidate_mypy.json",

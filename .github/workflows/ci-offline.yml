@@ -81,6 +81,7 @@ jobs:
             income-analytics/ci-reports/${{ matrix.check }}/*-junit.xml
             income-analytics/ci-reports/${{ matrix.check }}/coverage.xml
             income-analytics/ci-reports/${{ matrix.check }}/inventory.json
+            income-analytics/ci-reports/${{ matrix.check }}/scoped-financial.json
           if-no-files-found: error
           retention-days: 14
           include-hidden-files: false

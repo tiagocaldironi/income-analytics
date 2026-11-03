@@ -1,0 +1,237 @@
+{
+  "schema": 1,
+  "activation": "REVIEW_ONLY",
+  "historical_baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+  "test_targets": [
+    "tests/unit",
+    "tests/acceptance",
+    "tests/api/test_treasury.py",
+    "tests/api/test_b3_import_contract.py",
+    "tests/api/test_asset_transactions.py",
+    "tests/api/test_portfolio_return_concepts.py",
+    "tests/api/test_local_multiportfolio_v2.py",
+    "tests/application/test_treasury.py",
+    "tests/application/test_executable_contribution.py",
+    "tests/application/test_global_contribution_allocator.py",
+    "tests/application/test_fixed_income_valuation.py",
+    "tests/application/test_fixed_income_assets.py",
+    "tests/application/test_capital_applied.py",
+    "tests/application/test_b3_import_dedup.py",
+    "tests/application/test_historical_portfolio_reconstruction.py",
+    "tests/application/test_performance_financial_integrity.py",
+    "tests/infrastructure/test_treasury_revisions.py",
+    "tests/infrastructure/test_sqlite_b3_import_repository.py",
+    "tests/infrastructure/test_saas_portfolio_owner.py",
+    "tests/infrastructure/test_portfolio_scope.py",
+    "tests/infrastructure/test_b3_report_parser.py",
+    "tests/application/test_scoped_treasury_certification.py"
+  ],
+  "required_executed_modules": [
+    "income_analytics.application.treasury",
+    "income_analytics.application.portfolio_session",
+    "income_analytics.application.executable_contribution",
+    "income_analytics.application.global_contribution_allocator",
+    "income_analytics.application.fixed_income_valuation",
+    "income_analytics.application.base_currency_valuation",
+    "income_analytics.application.b3_import",
+    "income_analytics.infrastructure.b3_report_parser",
+    "income_analytics.infrastructure.treasury_revisions",
+    "income_analytics.infrastructure.sqlite_repositories",
+    "income_analytics.domain.projectors.portfolio_projector",
+    "income_analytics.domain.projectors.performance_projector",
+    "income_analytics.domain.projectors.contribution_target_allocator",
+    "income_analytics.domain.projectors.hypothetical_portfolio_projector",
+    "income_analytics.api.routers.dashboard"
+  ],
+  "cert48_modules": [
+    "income_analytics.application.magic_formula_stocks",
+    "income_analytics.application.magic_formula_ranking_validation",
+    "income_analytics.application.magic_formula_contract"
+  ],
+  "immutable_inventory": "docs/engineering/scoped-financial-certification/immutable_reference_inventory.json",
+  "historical_out_of_scope_proposal": {
+    "tests/api/test_magic_formula_product_api.py::test_magic_formula_api_reads_persisted_snapshot_and_searches_ticker": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "errors",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/api/test_magic_formula_product_api.py::test_sector_metadata_covers_the_165_ranked_companies_without_changing_hash": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "errors",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/api/test_magic_formula_product_api.py::test_tools_catalog_marks_available_magic_formula_as_partial": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "errors",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/api/test_magic_formula_product_api.py::test_magic_formula_company_detail_returns_source_provenance": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "errors",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/api/test_magic_formula_product_api.py::test_detail_does_not_build_a_company_outside_the_requested_snapshot": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "errors",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/api/test_magic_formula_product_api.py::test_csna3_has_no_detail_when_it_is_blocked_from_the_published_ranking": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "errors",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/api/test_magic_formula_product_api.py::test_runtime_http_endpoint_returns_the_published_point_in_time_contract": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "errors",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_canonical_ranking.py::test_builds_a_deterministic_ranking_with_temporal_provenance": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_canonical_ranking.py::test_screening_search_and_pagination_preserve_global_rank": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_canonical_ranking.py::test_snapshot_repository_is_append_only_and_idempotent": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_historical_price_sources_v5.py::test_production_snapshot_readback_is_independent_and_idempotent": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_DATABASE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_27_v8_baseline_statuses_sum_to_307": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_28_methodological_coverage_denominator_is_complete_plus_blocked": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_methodology_policy_v1.py::test_v1_29_conservative_coverage_includes_reviews": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_FILE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_preview.py::test_preview_001_only_complete_data_universe_is_counted": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "errors",
+      "cause": "MISSING_HISTORICAL_DATABASE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_preview.py::test_preview_002_uses_the_validated_ranking_engine": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_DATABASE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_preview.py::test_preview_003_production_gate_stays_blocked": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "errors",
+      "cause": "MISSING_HISTORICAL_DATABASE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_preview.py::test_preview_current_snapshot_counts_are_derived_from_eligible_issuers": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_DATABASE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_price_availability_audit.py::test_dry_run_does_not_persist_universe_snapshot": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_DATABASE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_price_availability_audit.py::test_ranking_stays_blocked_in_saved_snapshot": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_DATABASE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_price_availability_audit.py::test_snapshot_ordering_audit_resolves_duplicate_timestamp_with_rowid": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_DATABASE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_magic_formula_price_availability_audit.py::test_csna3_and_v3_recoveries_survive_current_snapshot": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "MISSING_HISTORICAL_DATABASE",
+      "issue": 58,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/application/test_historical_shares_units.py::test_shares_unit_020_frozen_engine": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "FROZEN_IDENTITY_MISMATCH",
+      "issue": 57,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    },
+    "tests/infrastructure/test_historical_identity_fixture.py::test_versioned_official_identity_and_price_recovery": {
+      "baseline_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+      "baseline_status": "failed",
+      "cause": "FROZEN_IDENTITY_MISMATCH",
+      "issue": 57,
+      "reason": "Magic Formula ranking/reference identity, not Treasury quantities, portfolio valuation or allocation; independent scope approval pending."
+    }
+  },
+  "required_executed_functions": [
+    "income_analytics.api.routers.dashboard:_build_portfolio_holdings",
+    "income_analytics.api.routers.dashboard:create_treasury_trade",
+    "income_analytics.api.routers.dashboard:amend_treasury_trade",
+    "income_analytics.api.routers.dashboard:apply_b3_import",
+    "income_analytics.api.routers.dashboard:rebuild_portfolio_dashboard_snapshot",
+    "income_analytics.application.portfolio_session:PortfolioSession.register_trade",
+    "income_analytics.application.portfolio_session:PortfolioSession.amend_treasury_trade",
+    "income_analytics.application.portfolio_session:PortfolioSession.project",
+    "income_analytics.application.portfolio_session:PortfolioSession.performance",
+    "income_analytics.application.executable_contribution:build_executable_plan",
+    "income_analytics.application.global_contribution_allocator:allocate_quantities",
+    "income_analytics.application.treasury:validate_trade",
+    "income_analytics.application.treasury:validate_title_history"
+  ]
+}

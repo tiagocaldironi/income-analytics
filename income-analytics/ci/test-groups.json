@@ -44,7 +44,8 @@
     "tests/infrastructure/test_treasury_revisions.py",
     "tests/application/test_executable_contribution.py",
     "tests/application/test_global_contribution_allocator.py",
-    "tests/api/test_b3_import_contract.py"
+    "tests/api/test_b3_import_contract.py",
+    "tests/application/test_scoped_treasury_certification.py"
   ],
   "selection_policy": "Exact historical node IDs + explicit extra certification modules; other non-external tests stay in engineering. No selection by failure status."
 }

@@ -34,6 +34,7 @@ from operational import require_operational
 from operational import run as run_operational
 from pipeline_identity import FINGERPRINT_VERSION, execution_fingerprint, governance_policy_identity
 from release_regressions import accepted_typing
+from scoped_financial import certify as certify_release_scope
 
 CHECKS = (
     "runtime",
@@ -133,6 +134,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         "ci/test_financial_certification.py",
         "ci/test_operational.py",
         "ci/test_engineering_debt.py",
+        "ci/test_scoped_financial.py",
         f"--ci-gate={gate}",
         "-ra",
         "--tb=short",
@@ -172,6 +174,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         details["failure_causes"] = failure_causes(raw)
         evidence = evaluate_financial_evidence(ROOT, details)
         details.update(evidence)
+        details["scoped_release_assessment"] = certify_release_scope(details, output)
         approved = evidence["financial_state"] == "FINANCIAL_PASS" and result.returncode == 0
         details["status"] = (
             "PASS"
