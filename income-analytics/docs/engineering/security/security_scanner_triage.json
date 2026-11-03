@@ -21646,6 +21646,13 @@
       "content_sha256": "3f13bed0c5c7bec59dc76bf4b27e9d4d757d586b1ba71748c48e98632197d80a",
       "state": "FALSE_POSITIVE",
       "reason": "Exact payload-free JUnit case identity for test_origin_rejects_userinfo_and_paths; embeds existing deliberately invalid user:pass URL on reserved income.test from tests/security/test_baseline_hardening.py:34. No actual credential or remote validation. Any changed report bytes require renewed review."
+    },
+    {
+      "type": "CREDENTIAL_URL",
+      "content_sha256": "512e68f41b243777389c252b9661e23f213089b515e89be27c143a36d73868f1",
+      "state": "FALSE_POSITIVE",
+      "reason": "Exact existing synthetic user:pass URL on reserved income.test in test_origin_rejects_userinfo_and_paths, unchanged from 42325f4. File only appends Issue77 controls; reviewed full bytes. Covers current and historical same blob, not credentials of this type generally.",
+      "evidence": "Issue77, failed run 41730400112; prefix bytes identical to 42325f4; six tests appended; no credential validation or scanner exclusion."
     }
   ],
   "gitleaks_decisions": [

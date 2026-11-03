@@ -54,3 +54,19 @@ não reabre CERT_48, não altera cálculos, fixtures ou política financeira. Os
 testes do escopo continuam executados pela CI existente. Resultados hospedados do
 novo commit, links de evidência e encerramento são registrados na Issue77 e PR69,
 sem commit circular do próprio SHA. Não houve merge ou deploy.
+
+## Renovação da identidade do arquivo de testes
+
+O primeiro replay `41730400112` comprovou Gitleaks PASS, 150 testes de segurança
+PASS, SAST/dependências PASS e escopo financeiro inalterado (394 PASS). O scanner
+interno rejeitou o novo hash integral de `test_baseline_hardening.py`, que já
+continha uma URL de teste deliberadamente inválida em domínio reservado. A adição
+dos seis testes mudou o digest; a triagem existente corretamente não se estendeu
+a esses bytes. O prefixo original do arquivo foi comparado byte a byte com
+`42325f4` e permaneceu idêntico. Somente casos novos foram acrescentados.
+
+Renovada uma decisão por digest integral
+`512e68f41b243777389c252b9661e23f213089b515e89be27c143a36d73868f1`,
+cobrindo as duas referências aos mesmos bytes (atual e blob histórico). Não é
+vulnerabilidade independente nem autorização por prefixo/tipo de credencial.
+O comportamento de rejeitar qualquer conteúdo não revisado foi preservado.
