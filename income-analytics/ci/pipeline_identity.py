@@ -7,6 +7,13 @@ from pathlib import Path
 
 FINGERPRINT_VERSION = 2
 POLICY_FILES = (
+    "income-analytics/ci/typing-baseline-acceptance.json",
+    "income-analytics/docs/engineering/release-policy-65/baseline_proposal.json",
+    "income-analytics/docs/engineering/release-policy-65/candidate_mypy.json",
+    "income-analytics/docs/engineering/release-policy-65/candidate_python.json",
+    "income-analytics/docs/engineering/release-policy-65/occurrence_risk_proposals.json",
+    "income-analytics/docs/engineering/release-policy-65/policy_proposal.md",
+    "income-analytics/docs/engineering/release-policy-65/policy_approval.json",
     "income-analytics/ci/release_regressions.py",
     "income-analytics/ci/release_inventory.py",
     "income-analytics/ci/engineering_debt.py",

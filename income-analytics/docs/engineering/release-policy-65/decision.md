@@ -136,3 +136,15 @@ Review packet: `baseline_proposal.json` and `occurrence_risk_proposals.json`.
 The baseline content digest is `bfb56031699c3b79908657442703c086cc6f18fceea8f9c7d30abee1c177b74e`.
 Proposed owner/deadline and all 486 low/medium classifications require explicit
 acceptance. Financial failures and CERT_48 are not typing-baseline exceptions.
+
+## Subsequent typing-only human acceptance
+
+After reviewing commit `c687acf`, the owner explicitly accepted the exact 486-item
+typing baseline and proposed owner/review date. See
+`ci/typing-baseline-acceptance.json` and `accepted_typing_integration.md`. The
+existing quality job now conjoins its legacy check with the accepted-typing
+comparison. All raw jobs and financial/security rules remain intact. This later
+acceptance supersedes only the typing-acceptance status in earlier checkpoint
+reports; it does not waive the 24 historical test failures/errors, CERT_48 or
+financial certification, and does not authorize production. Updated hosted
+validation is required after the integration commit.

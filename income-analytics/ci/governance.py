@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 
 import run as legacy
@@ -32,6 +33,7 @@ from gate_policy import (
 from operational import require_operational
 from operational import run as run_operational
 from pipeline_identity import FINGERPRINT_VERSION, execution_fingerprint, governance_policy_identity
+from release_regressions import accepted_typing
 
 CHECKS = (
     "runtime",
@@ -250,10 +252,23 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
             actual.extend(findings)
             exits[tool] = code
         comparison = compare_diagnostics(actual, expected_findings)
+        typing = accepted_typing(
+            ROOT,
+            [row for row in actual if row["tool"] == "mypy"],
+            exits["mypy"],
+            versions={"mypy": importlib.metadata.version("mypy"), "python": sys.version.split()[0]},
+            today=datetime.now(UTC).date(),
+        )
+        comparison["accepted_typing_nonregression"] = typing
+        if typing["status"] != "PASS":
+            comparison["status"] = "FAIL"
         comparison["raw_tool_exit_codes"] = exits
         comparison["baseline_sha256"] = hashlib.sha256(BASELINE.read_bytes()).hexdigest()
         comparison["diagnostics_clean"] = not actual
-        comparison["meaning"] = "Non-regression only; does not approve existing Ruff/mypy debt"
+        comparison["meaning"] = (
+            "Legacy comparison AND exact human-accepted typing inventory; "
+            "raw diagnostics remain visible; no financial/test waiver or release authorization"
+        )
         return int(comparison["status"] != "PASS"), comparison
     code, details = legacy.run_check(check, env, sandbox, output)
     return code, {**details, "status": "PASS" if code == 0 else "FAIL"}
@@ -317,6 +332,19 @@ def main() -> int:
     except Exception as error:
         code = 2
         report.update(status="FAIL", runner_error=type(error).__name__)
+        if str(error) in {
+            "TYPING_ACCEPTANCE_INVALID",
+            "TYPING_ACCEPTANCE_EXPIRED",
+            "TYPING_BASELINE_MANIFEST_CHANGED",
+            "TYPING_BASELINE_REFERENCE_SCOPE_CHANGED",
+            "TYPING_BASELINE_REFERENCE_CHANGED",
+            "TYPING_BASELINE_CONTENT_CHANGED",
+            "TYPING_BASELINE_TOOL_CHANGED",
+            "TYPING_BASELINE_CONFIGURATION_CHANGED",
+            "TYPING_OCCURRENCE_REVIEW_INVALID",
+            "TYPING_RAW_RESULT_INVALID",
+        }:
+            report["runner_code"] = str(error)
         if args.check == "operational":
             report.update(
                 operational_state="OPERATIONAL_NOT_VERIFIED",
