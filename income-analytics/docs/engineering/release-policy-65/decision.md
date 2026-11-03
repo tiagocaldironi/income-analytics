@@ -58,7 +58,8 @@ the complete original state signature; no table is excluded from that check.
 
 `local_recovery.json` records the real published A/B artifact exercise passing
 locally, including startup, backup, restore, rollback, negative controls and
-cleanup. This is not evidence of hosted approval of the new correction. The
+cleanup. Hosted run 41710100034 subsequently passed the new correction on head
+`13fbe01` / tested merge `aef32f78`; see `hosted_validation.json`. The
 production rollback procedure is not implemented or certified by this change.
 
 The report aggregator also now rejects Boolean/float exit codes that Python would
@@ -93,7 +94,9 @@ pertinent certification. No financial policy is changed here.
   reference data is distinct from an unproven B3 permission failure.
 - #59 / #64: all 486 occurrence records, including each frozen occurrence's
   file, line, symbol, source text/hash, exact historical counterpart and issue.
-  UNKNOWN risks require individual review. The 39 frozen occurrences have a separate
+  The original generated inventory retains its initial UNKNOWN classifications.
+  `occurrence_risk_proposals.json` now adds individual cause/risk review proposals
+  for all 486 IDs: 397 low and 89 medium; all acceptance states remain PENDING. The 39 frozen occurrences have a separate
   per-ID technical review in `frozen_occurrence_reviews.json`, linked to #66 (10),
   #67 (28), #68 (1); low risk is proposed, not accepted. Proposed owner/deadline are not
   assignments or approvals. No generic allowance for the 39 frozen findings.
@@ -108,8 +111,9 @@ pertinent certification. No financial policy is changed here.
 
 1. Review this isolated PR and hosted results; fix any new failures.
 2. Finish risk classification of occurrences relevant to the candidate and build
-   narrowly scoped accepted-debt records for the rest. Split genuinely distinct
-   causes into child issues after technical review, without duplicating #57–#64.
+   narrowly scoped accepted-debt records for the rest. The per-ID backlog is split into #66–#68 and #70–#75, with complete coverage
+   and no duplicate reexport cause. Proposed classifications still require explicit
+   acceptance and do not establish an independent financial certification.
 3. Obtain explicit approval of the policy version and exact accepted baseline
    digest. Approval of an idea is not acceptance of unknown financial/security risk.
 4. Obtain independent financial certification/scope decision. Keep the failing
@@ -118,3 +122,17 @@ pertinent certification. No financial policy is changed here.
    all raw suites, full mypy scope and separate Financial/Security/Release results.
 6. Validate the final combined commit in hosted CI, smoke/health and rollback.
    Only then issue a new GO/NO-GO. No automatic merge/deploy.
+
+## Completed hosted checkpoint
+
+Run 41710100034, head `13fbe01`, tested merge `aef32f78`: Engineering, Security
+(144 tests), build, frontend, operational readiness and disposable staging rollback
+PASS. Full Python: 1488/15/9/5, financial: 104/15/9/0, mypy: 486. Exact
+case/occurrence comparison found zero new failures or diagnostics; all 69 tests
+added after PR62 passed. Raw jobs remain failed where appropriate. This does not
+change the NO-GO for production or approve any historical debt.
+
+Review packet: `baseline_proposal.json` and `occurrence_risk_proposals.json`.
+The baseline content digest is `bfb56031699c3b79908657442703c086cc6f18fceea8f9c7d30abee1c177b74e`.
+Proposed owner/deadline and all 486 low/medium classifications require explicit
+acceptance. Financial failures and CERT_48 are not typing-baseline exceptions.
