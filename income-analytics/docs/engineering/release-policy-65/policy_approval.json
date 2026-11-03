@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "policy_version": "v1",
+  "policy_document": "docs/engineering/release-policy-65/policy_proposal.md",
+  "policy_sha256": "9bb470469ea9f52b86d6763b8728c062a03f8be8e35ca6999f7764cf2e018566",
+  "approval_source": "Explicit human reply in this Codex conversation, 2026-11-03",
+  "approval_text": "Aprovo a política v1; revisar os riscos antes de ativá-la",
+  "policy_principles_approved": true,
+  "baseline_accepted": false,
+  "financial_exception_approved": false,
+  "activation_authorized": false,
+  "recorded_at_utc": "2026-11-03T20:10:11.136452+00:00",
+  "condition": "Review occurrence risks and obtain exact baseline acceptance before activation; financial and security gates remain independent."
+}

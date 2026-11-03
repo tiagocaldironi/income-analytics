@@ -1,0 +1,255 @@
+[
+  {
+    "file": "income-analytics/src/income_analytics/api/routers/dashboard.py",
+    "changed_functions": [
+      "_build_portfolio_holdings",
+      "_serialize_asset_transaction",
+      "create_treasury_trade",
+      "amend_treasury_trade",
+      "apply_b3_import",
+      "operation"
+    ],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Treasury HTTP/import/read-model integration",
+    "pertinent_tests": [
+      "tests/api/test_treasury.py",
+      "tests/api/test_b3_import_contract.py",
+      "ci/test_delivery.py"
+    ],
+    "gates": [
+      "Engineering",
+      "Financial",
+      "Security",
+      "Release"
+    ],
+    "assessment": "Owner isolation, JSON shape, transaction commands, v5 cache rebuild/rollback",
+    "source_sha256": "a65287a25aabf211c9f3fcfe905b6e7e25c871e9d68b4d87ee67fe0fa52cabaa",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/api/static/css/app.css",
+    "changed_functions": [],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Treasury grouping, labels, balance order and transaction forms",
+    "pertinent_tests": [
+      "tests/frontend/treasury_holdings.mjs",
+      "tests/frontend/treasury_operations.mjs"
+    ],
+    "gates": [
+      "Engineering",
+      "Security"
+    ],
+    "assessment": "UI; transaction forms also require API financial validation",
+    "source_sha256": "2888d095fe1d104d7b64547168e9761df6c8ad5371d1d3096ede550034c55459",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/api/static/index.html",
+    "changed_functions": [],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Treasury grouping, labels, balance order and transaction forms",
+    "pertinent_tests": [
+      "tests/frontend/treasury_holdings.mjs",
+      "tests/frontend/treasury_operations.mjs"
+    ],
+    "gates": [
+      "Engineering",
+      "Security"
+    ],
+    "assessment": "UI; transaction forms also require API financial validation",
+    "source_sha256": "d7844be60233b436eb9ecf96d40ec1e59d2ada08d779e3f5f4f255905571b2e9",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/api/static/js/api.js",
+    "changed_functions": [],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Treasury grouping, labels, balance order and transaction forms",
+    "pertinent_tests": [
+      "tests/frontend/treasury_holdings.mjs",
+      "tests/frontend/treasury_operations.mjs"
+    ],
+    "gates": [
+      "Engineering",
+      "Security"
+    ],
+    "assessment": "UI; transaction forms also require API financial validation",
+    "source_sha256": "fee2fa15be84d69f40eb28ac911a47c03b1ed23c0bd5b204aa41f86c048ac048",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/api/static/js/features/operations.js",
+    "changed_functions": [],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Treasury grouping, labels, balance order and transaction forms",
+    "pertinent_tests": [
+      "tests/frontend/treasury_holdings.mjs",
+      "tests/frontend/treasury_operations.mjs"
+    ],
+    "gates": [
+      "Engineering",
+      "Security"
+    ],
+    "assessment": "UI; transaction forms also require API financial validation",
+    "source_sha256": "f921307537da575772fa640ded1b5b7d10411a5281e4e825f88277382c34180e",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/api/static/js/features/portfolio.js",
+    "changed_functions": [],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Treasury grouping, labels, balance order and transaction forms",
+    "pertinent_tests": [
+      "tests/frontend/treasury_holdings.mjs",
+      "tests/frontend/treasury_operations.mjs"
+    ],
+    "gates": [
+      "Engineering",
+      "Security"
+    ],
+    "assessment": "UI; transaction forms also require API financial validation",
+    "source_sha256": "9c3387bbc16b65a4c8dd739651a94f35f05300e8c3dc751c77451e73ccd71958",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/api/static/js/features/simulation-executable.js",
+    "changed_functions": [],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Treasury grouping, labels, balance order and transaction forms",
+    "pertinent_tests": [
+      "tests/frontend/treasury_holdings.mjs",
+      "tests/frontend/treasury_operations.mjs"
+    ],
+    "gates": [
+      "Engineering",
+      "Security"
+    ],
+    "assessment": "UI; transaction forms also require API financial validation",
+    "source_sha256": "e65cd63f2b7b4a4d9f093b868c74a8047c54b7bb9b74130a1c0244bd64cd8a94",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/application/executable_contribution.py",
+    "changed_functions": [
+      "_build_executable_plan"
+    ],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Executable fractional Treasury allocation",
+    "pertinent_tests": [
+      "tests/application/test_executable_contribution.py",
+      "tests/application/test_global_contribution_allocator.py"
+    ],
+    "gates": [
+      "Engineering",
+      "Financial"
+    ],
+    "assessment": "Lot precision, affordability, residual budget; no operation registration",
+    "source_sha256": "53f563ccfcd2c25df0e005c641813162d5d2c3247be9e688bbc4343e6981030c",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/application/holdings_display.py",
+    "changed_functions": [],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Derived display groups retaining financial class",
+    "pertinent_tests": [
+      "tests/application/test_treasury.py",
+      "tests/api/test_treasury.py"
+    ],
+    "gates": [
+      "Engineering",
+      "Financial"
+    ],
+    "assessment": "Consolidation and preservation of original classes/totals",
+    "source_sha256": "31afe9e7a41d114394f8738616c8aadc21f000cd2dc940b4215bab9d086ab1b1",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/application/portfolio_session.py",
+    "changed_functions": [
+      "register_trade",
+      "amend_treasury_trade"
+    ],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Treasury operations, units, sales and historical coverage",
+    "pertinent_tests": [
+      "tests/application/test_treasury.py",
+      "tests/api/test_treasury.py"
+    ],
+    "gates": [
+      "Engineering",
+      "Financial"
+    ],
+    "assessment": "Decimal 0.01 traditional Treasury rules, oversell protection; legacy unit contract retained",
+    "source_sha256": "7ccd1ef8c0a9bc6a48c977d5c1e90a394415e4c19eb31d59535307ec814cb97e",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/application/treasury.py",
+    "changed_functions": [
+      "validate_title_history",
+      "title_name",
+      "tradable_title",
+      "is_treasury",
+      "presentation",
+      "validate_trade"
+    ],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Treasury operations, units, sales and historical coverage",
+    "pertinent_tests": [
+      "tests/application/test_treasury.py",
+      "tests/api/test_treasury.py"
+    ],
+    "gates": [
+      "Engineering",
+      "Financial"
+    ],
+    "assessment": "Decimal 0.01 traditional Treasury rules, oversell protection; legacy unit contract retained",
+    "source_sha256": "40b16f2f674522d8d3359f786906d27dae76f94d1de145b6addcf8d98fe001a4",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  },
+  {
+    "file": "income-analytics/src/income_analytics/infrastructure/treasury_revisions.py",
+    "changed_functions": [
+      "save_revision"
+    ],
+    "function_detection": "AST source segment comparison; names within this module, not a full call graph",
+    "feature": "Owner-scoped optimistic transaction amendments",
+    "pertinent_tests": [
+      "tests/infrastructure/test_treasury_revisions.py",
+      "tests/api/test_treasury.py"
+    ],
+    "gates": [
+      "Engineering",
+      "Financial",
+      "Security"
+    ],
+    "assessment": "Persistence/history preservation and concurrent revision rejection",
+    "source_sha256": "d960a27d7aebd27ee130fc526195761da35f5a9a8eba0b66758f6a7c19c38b46",
+    "financial_scope_approval": "PENDING",
+    "baseline": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+    "candidate": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2"
+  }
+]

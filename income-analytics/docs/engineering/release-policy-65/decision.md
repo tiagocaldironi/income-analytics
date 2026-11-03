@@ -1,6 +1,8 @@
 # Issue 65 — controlled release proposal
 
-Status: **NO-GO pending specific evidence and approval**, 2026-11-03.
+Status: **NO-GO pending risk acceptance and financial evidence**, 2026-11-03.
+Policy v1 principles explicitly approved by the user in this conversation;
+see `policy_approval.json`. Exact baseline acceptance and activation are NOT approved.
 This is not a requirement to eliminate all historical debt. No merge, production
 deployment, baseline acceptance or financial exemption is authorized by this report.
 
@@ -91,7 +93,9 @@ pertinent certification. No financial policy is changed here.
   reference data is distinct from an unproven B3 permission failure.
 - #59 / #64: all 486 occurrence records, including each frozen occurrence's
   file, line, symbol, source text/hash, exact historical counterpart and issue.
-  UNKNOWN risks require individual review. Proposed owner/deadline are not
+  UNKNOWN risks require individual review. The 39 frozen occurrences have a separate
+  per-ID technical review in `frozen_occurrence_reviews.json`, linked to #66 (10),
+  #67 (28), #68 (1); low risk is proposed, not accepted. Proposed owner/deadline are not
   assignments or approvals. No generic allowance for the 39 frozen findings.
 - #60: ruleset 26078982 currently requires CI / Engineering, up-to-date PRs,
   resolved discussions and no force push/deletion. The classic branch-protection
