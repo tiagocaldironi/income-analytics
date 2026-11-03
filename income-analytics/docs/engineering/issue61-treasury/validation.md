@@ -95,3 +95,13 @@ Nenhuma regra congelada, fixture financeira, manifesto ou hash foi alterado. A i
 Após revisão e aprovação dos gates aplicáveis, a ativação deverá renovar o snapshot por carteira com o mecanismo existente. Em SaaS, o startup global é deliberadamente desabilitado: usar o rebuild explícito autorizado no contexto de cada carteira, sem executar um job global sobre outros proprietários. Este PR não chama esse endpoint em produção.
 
 Como não há migração destrutiva, o retorno à versão anterior pode manter o mesmo schema. Entretanto, novas operações fracionárias e o histórico de revisões devem ser preservados: não remover lançamentos nem restaurar um banco antigo sobre dados novos. Validar leitura e reconciliação em homologação e seguir o runbook existente de rollback/backup. A integração com o PR12 exige revisão de conflitos posterior, sem sobrescrever aquele trabalho.
+
+## Solicitação de promoção e triagem hospedada — 2026-11-03
+
+O usuário autorizou seguir para produção. A autorização não equivale à aprovação dos gates: o nível C em `docs/engineering/cicd-assessment/delivery_final_closure.md` permanece bloqueado independentemente dos níveis A/B, e `ci/delivery.py` / `ci/delivery_pipeline.py` não implementam alvo produtivo. CERT_48 e referências históricas continuam pendentes. Não houve merge ou deploy.
+
+O acompanhamento de RendA+/Educa+ foi separado na [issue #63](https://github.com/tiagocaldironi/income-analytics/issues/63).
+
+A execução hospedada 41611306087 aprovou instalação, build, frontend, prontidão operacional, Ruff e não regressão de qualidade. Financeiro, diagnóstico Python e mypy reprovaram; engenharia Python ainda estava executando no momento desta triagem. Segurança reprovou por três identidades Bandit B101 cujo contexto mudou e um falso positivo Gitleaks no checksum público do inventário de qualidade.
+
+Os três nós Assert foram comparados por AST contra develop@b642709 e são idênticos; mantém-se o risco LOW previamente aceito, sem ampliar regras ou suprimir varreduras. O checksum de auth_repository.py e os bytes integrais do inventário foram recalculados. A triagem registra somente essas quatro identidades exatas. Os 23 testes de ci/test_security.py passaram, assim como o replay de todos os findings SAST/Gitleaks hospedados contra a política revisada. Isso não substitui uma nova execução integral hospedada. A primeira tentativa local de coletar esses testes sem PYTHONPATH=ci;src falhou por importação; a execução corrigida passou integralmente.
