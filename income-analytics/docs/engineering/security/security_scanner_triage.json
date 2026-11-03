@@ -18922,6 +18922,18 @@
       "content_sha256": "e6b5f106ec9d4fdba0005ddd5092905d67b995502deadd9508528253c730525d",
       "state": "FALSE_POSITIVE",
       "reason": "Exact reviewed synthetic negative fixture (bare key marker without key body, or dummy user:pass URL on income.test). Any changed bytes require review. LF/CRLF exact variants independently recorded."
+    },
+    {
+      "type": "CREDENTIAL_URL",
+      "content_sha256": "e7dcc860a2de454b1818f7a53238bfe1e091f968ce10788da6387f697b08d93a",
+      "state": "FALSE_POSITIVE",
+      "reason": "Exact payload-free JUnit case identity for test_origin_rejects_userinfo_and_paths; embeds existing deliberately invalid user:pass URL on reserved income.test from tests/security/test_baseline_hardening.py:34. No actual credential or remote validation. Any changed report bytes require renewed review."
+    },
+    {
+      "type": "CREDENTIAL_URL",
+      "content_sha256": "3f13bed0c5c7bec59dc76bf4b27e9d4d757d586b1ba71748c48e98632197d80a",
+      "state": "FALSE_POSITIVE",
+      "reason": "Exact payload-free JUnit case identity for test_origin_rejects_userinfo_and_paths; embeds existing deliberately invalid user:pass URL on reserved income.test from tests/security/test_baseline_hardening.py:34. No actual credential or remote validation. Any changed report bytes require renewed review."
     }
   ],
   "gitleaks_decisions": [
