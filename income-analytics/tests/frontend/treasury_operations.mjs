@@ -25,12 +25,16 @@ for (const operation of ["BUY", "SELL"]) {
   assert.equal(node("#treasury-title").disabled, false);
   assert.equal(node("#treasury-title").parent.hidden, false);
   assert.equal(node("#trade-details").hidden, false);
+  assert.equal(node("#asset-details").hidden, true);
+  assert.equal(node("#ticker").required, false);
   assert.equal(node("#fixed-income-sale-details").hidden, true);
 }
 for (const kind of ["BRAZILIAN_STOCK", "BRAZILIAN_ETF", "FII"]) {
   node("#trade-asset-class").value=kind;
   context.setOperationFields("BUY");
   assert.equal(node("#quantity").step, "1");
+  assert.equal(node("#asset-details").hidden, false);
+  assert.equal(node("#ticker").required, true);
   assert.equal(node("#quantity").min, "1");
   assert.equal(node("#treasury-title").disabled, true);
 }

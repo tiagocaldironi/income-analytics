@@ -567,7 +567,7 @@ tbody tr:hover { background: #17283a80; }
 .operation-form-grid input, .operation-form-grid select, .operation-more-content input, .operation-more-content select { margin-top: 5px; }
 .operation-form-grid { align-content: start; }
 .operation-form-grid #asset-details { grid-column: 1 / -1; }
-.operation-form-grid:has(.operation-treasury-title:not([hidden])) #asset-details { grid-column: auto; }
+.operation-form-grid .operation-treasury-title { grid-column: 1 / -1; }
 .operation-treasury-title small { display: block; margin-top: 6px; font-size: .75rem; font-weight: 400; line-height: 1.4; }
 .operation-modal .operation-field input, .operation-modal .operation-field select, .operation-treasury-title input { width: 100%; }
 .operation-more-options { margin-top: 14px; border-top: 1px solid var(--ia-border); color: var(--ia-text-secondary); }

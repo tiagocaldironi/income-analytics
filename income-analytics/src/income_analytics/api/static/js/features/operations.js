@@ -22,12 +22,13 @@ function setOperationFields(type) {
   const pension = type === "BUY" && assetClass === "PENSION";
   const realEstate = type === "BUY" && assetClass === "REAL_ESTATE";
   const wealth = fixedIncome || pension || realEstate;
-  document.querySelector("#asset-details").hidden = external || wealth;
+  document.querySelector("#asset-details").hidden = external || wealth || treasury;
   document.querySelector("#asset-class-details").hidden = external;
   const assetClassLabel = document.querySelector('label[for="trade-asset-class"]');
   if (assetClassLabel) assetClassLabel.textContent = type === "SELL" ? "Classe do ativo" : "Classe do ativo (no primeiro lançamento)";
   const tickerLabel = document.querySelector('label[for="ticker"]');
-  if (tickerLabel) tickerLabel.textContent = fixedIncomeSale ? "Ativo da carteira" : treasury ? "Código do título" : "Ativo";
+  if (tickerLabel) tickerLabel.textContent = fixedIncomeSale ? "Ativo da carteira" : "Ativo";
+  document.querySelector("#ticker").disabled = treasury;
   document.querySelector("#ticker").maxLength = fixedIncomeSale ? 64 : treasury ? 20 : 12;
   const capitalFlow = document.querySelector("#capital-flow-details");
   if (capitalFlow) capitalFlow.hidden = (type !== "BUY" && !external) || wealth;
@@ -95,7 +96,7 @@ function setOperationFields(type) {
       }
     });
   }
-  document.querySelector("#ticker").required = (!external && !wealth) || fixedIncomeSale;
+  document.querySelector("#ticker").required = !treasury && ((!external && !wealth) || fixedIncomeSale);
   document.querySelector("#quantity").required = !external && !income && !wealth && !fixedIncomeSale;
   document.querySelector("#unit_price").required = !external && !income && !wealth && !fixedIncomeSale;
   document.querySelector("#fixed-income-sale-value").required = fixedIncomeSale;
@@ -542,6 +543,31 @@ function updateOperationSummary() {
     : "Resumo calculado com os dados informados. Custos por operação não fazem parte do modelo atual.";
 }
 
+function bindTreasuryTitleSearch() {
+  const title = document.querySelector("#treasury-title");
+  if (!title || title.dataset.searchBound) return;
+  title.dataset.searchBound = "true";
+  const list = document.createElement("datalist");
+  list.id = "treasury-title-options";
+  document.body.append(list);
+  title.setAttribute("list", list.id);
+  title.addEventListener("focus", async () => {
+    const portfolioId = localStorage.getItem("income.activePortfolioId");
+    list.replaceChildren();
+    try {
+      const snapshot = await portfolioApi.dashboard();
+      if (portfolioId !== localStorage.getItem("income.activePortfolioId") || snapshot.status !== "VALID") return;
+      const names = new Set((snapshot.holdings?.classes || []).flatMap(group => group.assets || [])
+        .filter(asset => asset.treasury_trade_supported).map(asset => asset.display_name || asset.name));
+      for (const name of names) {
+        const option = document.createElement("option");
+        option.value = name;
+        list.append(option);
+      }
+    } catch { list.replaceChildren(); }
+  });
+}
+
 function bindOperationSearch() {
   const ticker = document.querySelector("#ticker");
   if (!ticker || ticker.dataset.searchBound) return;
@@ -822,6 +848,7 @@ export function bindOperations() {
     if (currency) document.querySelector("#currency-code").value = currency;
   });
   arrangeOperationForm();
+  bindTreasuryTitleSearch();
   bindOperationModal();
   bindOperationSearch();
   typeInput?.addEventListener("change", event => {
@@ -909,12 +936,13 @@ export function bindOperations() {
             effective_date: document.querySelector("#effective-date").value,
           });
         } else if (assetClass === "TREASURY") {
+          const dialog = document.querySelector("#operation-modal");
           const treasuryPayload = {
-            event_type: type, ticker: tickerInput.value.trim(), name: document.querySelector("#treasury-title").value.trim(),
+            event_type: type, name: document.querySelector("#treasury-title").value.trim(),
+            ...(dialog.dataset.treasuryEventId ? { ticker: tickerInput.value.trim() } : {}),
             quantity: decimalForApi(quantityInput.value), unit_price: decimalForApi(priceInput.value),
             effective_date: document.querySelector("#effective-date").value,
           };
-          const dialog = document.querySelector("#operation-modal");
           if (dialog.dataset.treasuryEventId) {
             await portfolioApi.amendTreasuryTrade(dialog.dataset.treasuryEventId, {...treasuryPayload, expected_revision: Number(dialog.dataset.treasuryRevision)});
           } else await portfolioApi.createTreasuryTrade(treasuryPayload);
