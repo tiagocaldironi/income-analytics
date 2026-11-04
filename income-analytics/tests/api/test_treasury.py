@@ -217,3 +217,64 @@ def test_bank_only_group_keeps_the_existing_financial_indicators(session):
     ]:
         assert visual[field] == financial[field]
     assert visual["performance_coverage"] is not None
+
+
+def test_title_name_resolves_existing_identity_after_full_sale(session):
+    dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload()))
+    original = session._assets["TD-SELIC-2031"].id
+    dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload(
+        ticker=None, name="LFT 2031", event_type="SELL",
+    )))
+    assert session.project().positions[0].quantity.value == D("0")
+    dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload(ticker=None)))
+    assert len(session._assets) == 1
+    assert session._assets["TD-SELIC-2031"].id == original
+    assert len(session.history()) == 3
+
+
+def test_new_title_gets_internal_identity_and_reuses_it(session):
+    body = payload()
+    body.pop("ticker")
+    assert post(body) == 201
+    ticker = next(iter(session._assets))
+    assert len(ticker) <= 20
+    dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**body))
+    assert list(session._assets) == [ticker]
+    assert session.project().positions[0].quantity.value == D("0.10")
+
+
+def test_name_only_sale_does_not_create_missing_asset(session):
+    before = session.history()
+    with pytest.raises(HTTPException) as error:
+        dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload(
+            ticker=None, event_type="SELL",
+        )))
+    assert error.value.status_code == 422
+    assert session.history() == before
+    assert not session._assets
+
+
+def test_ambiguous_title_name_cannot_choose_an_identity(session):
+    dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload()))
+    dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload(ticker="ANOTHER-TD")))
+    before = session.history()
+    with pytest.raises(HTTPException) as error:
+        dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload(ticker=None)))
+    assert error.value.status_code == 422
+    assert session.history() == before
+    assert len(session._assets) == 2
+
+
+def test_name_only_trade_cannot_replace_legacy_contract(session):
+    session.register_fixed_income_asset(
+        ticker="FI-TD", name="Tesouro Selic 2031",
+        instrument_type=FixedIncomeInstrumentType.TESOURO_DIRETO,
+        indexer_type=FixedIncomeIndexerType.SELIC,
+        application_date=date(2026, 1, 1), principal_amount=D("1000"),
+    )
+    before = session.history()
+    with pytest.raises(HTTPException) as error:
+        dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload(ticker=None)))
+    assert error.value.status_code == 422
+    assert session.history() == before
+    assert list(session._assets) == ["FI-TD"]

@@ -67,6 +67,9 @@ from income_analytics.application.treasury import (
     validate_title_history,
 )
 from income_analytics.application.treasury import presentation as treasury_presentation
+from income_analytics.application.treasury import (
+    title_name as treasury_title_name,
+)
 from income_analytics.application.treasury import validate_trade as validate_treasury_trade
 from income_analytics.application.wealth_explanation import WealthExplanationService
 from income_analytics.domain.allocation_policy import AllocationPolicy
@@ -419,7 +422,7 @@ class TradeInput(BaseModel):
 
 class TreasuryTradeInput(BaseModel):
     event_type: Literal["BUY", "SELL"]
-    ticker: str = Field(min_length=1, max_length=20)
+    ticker: str | None = Field(default=None, min_length=1, max_length=20)
     name: str = Field(min_length=1, max_length=200)
     quantity: Decimal = Field(gt=0, max_digits=24, decimal_places=2)
     unit_price: Decimal = Field(gt=0, max_digits=24, decimal_places=6)
@@ -428,6 +431,7 @@ class TreasuryTradeInput(BaseModel):
 
 
 class TreasuryAmendInput(TreasuryTradeInput):
+    ticker: str = Field(min_length=1, max_length=20)
     expected_revision: int = Field(ge=0)
 
 
@@ -2505,7 +2509,31 @@ def create_treasury_trade(trade: TreasuryTradeInput) -> dict[str, object]:
     """Record title units without converting existing contract-unit positions."""
     try:
         validate_treasury_trade(trade.quantity, trade.unit_price, trade.gross_amount)
-        asset = session._assets.get(trade.ticker.strip().upper())
+        ticker = trade.ticker.strip().upper() if trade.ticker else None
+        if ticker is None:
+            title = treasury_title_name(trade.name)
+            if title is None or not tradable_title(trade.name):
+                raise ValueError(
+                    "Selecione um título tradicional de Tesouro pelo nome e vencimento."
+                )
+            matches = [
+                asset for asset in session._assets.values()
+                if is_treasury(asset, session._fixed_income_details.get(asset.id))
+                and treasury_title_name(asset.name) == title
+            ]
+            if len(matches) > 1:
+                raise ValueError(
+                    "Há mais de um registro desse título. Abra a operação pela posição desejada."
+                )
+            if matches:
+                ticker = str(matches[0].ticker)
+            elif trade.event_type == "SELL":
+                raise ValueError("Selecione um título existente para vender.")
+            else:
+                ticker = "TD" + uuid4().hex[:18].upper()
+                if ticker in session._assets:
+                    raise ValueError("Não foi possível identificar o título. Tente novamente.")
+        asset = session._assets.get(ticker)
         if asset is not None:
             details = session._fixed_income_details.get(asset.id)
             if not is_treasury(asset, details) or details is not None:
@@ -2529,7 +2557,7 @@ def create_treasury_trade(trade: TreasuryTradeInput) -> dict[str, object]:
             )
         projection = session.register_trade(
             event_type=FinancialEventType(trade.event_type),
-            ticker=trade.ticker,
+            ticker=ticker,
             name=name,
             asset_class=AssetClass.FIXED_INCOME,
             asset_type=AssetType.TREASURY,
