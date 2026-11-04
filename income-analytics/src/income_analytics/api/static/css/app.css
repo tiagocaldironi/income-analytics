@@ -553,17 +553,23 @@ tbody tr:hover { background: #17283a80; }
 .operation-modal [hidden] { display: none !important; }
 .operation-modal > .dialog-heading { margin: 0; padding: 20px 24px; border-bottom: 1px solid var(--ia-border); }
 .operation-modal > .dialog-heading h2 { margin: 0; }
+.operation-modal > .dialog-heading .dialog-close { flex: 0 0 44px; align-self: flex-start; display: grid; width: 44px; height: 44px; min-height: 44px; margin: 0; padding: 0; place-items: center; }
 .operation-modal .operation-form, .operation-modal .recurrence-form { display: flex; min-height: 0; flex: 1; flex-direction: column; overflow: hidden; }
 .operation-form-scroll { min-height: 0; flex: 1; padding: 18px 24px; overflow: auto; }
 .operation-type-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
 .operation-type-switch button { margin: 0; border: 1px solid var(--ia-border); background: #101d2d; color: var(--ia-text-secondary); }
-.operation-type-switch button.selected { border-color: var(--ia-brand); background: #11343a; color: var(--ia-text-primary); }
+.operation-type-switch button.selected { border-color: var(--ia-brand); background: color-mix(in srgb, var(--ia-brand) 16%, var(--ia-surface)); color: var(--ia-text-primary); }
 .operation-form-grid, .operation-more-content, .recurrence-form .operation-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; align-items: start; }
 .operation-form-grid > *, .operation-more-content > *, .operation-form-grid .operation-field { min-width: 0; }
 .operation-form-grid #trade-details { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
 .operation-form-grid #dividend-details, .operation-form-grid #jcp-details, .operation-form-grid #external-flow-details { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
 .operation-form-grid label, .operation-more-content label { margin: 0; color: var(--ia-text-secondary); font-size: .82rem; }
 .operation-form-grid input, .operation-form-grid select, .operation-more-content input, .operation-more-content select { margin-top: 5px; }
+.operation-form-grid { align-content: start; }
+.operation-form-grid #asset-details { grid-column: 1 / -1; }
+.operation-form-grid:has(.operation-treasury-title:not([hidden])) #asset-details { grid-column: auto; }
+.operation-treasury-title small { display: block; margin-top: 6px; font-size: .75rem; font-weight: 400; line-height: 1.4; }
+.operation-modal .operation-field input, .operation-modal .operation-field select, .operation-treasury-title input { width: 100%; }
 .operation-more-options { margin-top: 14px; border-top: 1px solid var(--ia-border); color: var(--ia-text-secondary); }
 .operation-more-options > summary { padding: 12px 0 4px; cursor: pointer; color: var(--ia-brand); font-size: .87rem; font-weight: 700; }
 .operation-more-content { padding: 10px 0 2px; }
@@ -826,6 +832,9 @@ tbody tr:hover { background: #17283a80; }
   .operations-page-actions { justify-content: flex-start; }
   .operation-modal:not([open]) { display: none; }
   dialog.operation-modal[open] { position: fixed; inset: auto 0 0; width: 100%; max-width: none; max-height: 94dvh; height: min(94dvh, 900px); margin: 0; padding: 16px 16px max(12px, env(safe-area-inset-bottom)); overflow: hidden; border: 1px solid var(--ia-border); border-radius: 18px 18px 0 0; }
+  #operation-modal[open] { padding: 0; }
+  #operation-modal .operation-dialog-actions { gap: 8px; padding: 12px 16px max(12px, env(safe-area-inset-bottom)); }
+  #operation-modal .operation-dialog-actions button { min-width: 0; min-height: 42px; margin: 0; padding: 10px 12px; font-size: .85rem; white-space: nowrap; }
   .operation-form { min-height: 0; }
   .operation-form-scroll { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .operation-dialog-actions { position: sticky; bottom: 0; z-index: 2; padding-top: 10px; background: var(--ia-surface); }

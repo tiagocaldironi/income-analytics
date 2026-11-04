@@ -27,7 +27,7 @@ function setOperationFields(type) {
   const assetClassLabel = document.querySelector('label[for="trade-asset-class"]');
   if (assetClassLabel) assetClassLabel.textContent = type === "SELL" ? "Classe do ativo" : "Classe do ativo (no primeiro lançamento)";
   const tickerLabel = document.querySelector('label[for="ticker"]');
-  if (tickerLabel) tickerLabel.textContent = fixedIncomeSale ? "Ativo da carteira" : "Ativo";
+  if (tickerLabel) tickerLabel.textContent = fixedIncomeSale ? "Ativo da carteira" : treasury ? "Código do título" : "Ativo";
   document.querySelector("#ticker").maxLength = fixedIncomeSale ? 64 : treasury ? 20 : 12;
   const capitalFlow = document.querySelector("#capital-flow-details");
   if (capitalFlow) capitalFlow.hidden = (type !== "BUY" && !external) || wealth;
@@ -348,7 +348,6 @@ function arrangeOperationForm() {
     destination.append(wrapper);
   };
   wrapExistingField("trade-asset-class", form.querySelector("#asset-class-details"), grid);
-  wrapExistingField("ticker", form.querySelector("#asset-details"), grid);
   const dateInput = form.querySelector("#effective-date");
   if (dateInput) {
     const dateLabel = form.querySelector('label[for="effective-date"]');
@@ -357,6 +356,12 @@ function arrangeOperationForm() {
     if (dateLabel) wrapper.append(dateLabel);
     wrapper.append(dateInput);
     grid.append(wrapper);
+  }
+  wrapExistingField("ticker", form.querySelector("#asset-details"), grid);
+  const treasuryField = form.querySelector('label[for="treasury-title"]');
+  if (treasuryField) {
+    treasuryField.classList.add("operation-treasury-title");
+    grid.append(treasuryField);
   }
   const tradeDetails = form.querySelector("#trade-details");
   if (tradeDetails) {
@@ -735,7 +740,7 @@ export function bindOperations() {
   });
   const typeInput = document.querySelector("#event_type");
   document.querySelector("#trade-asset-class")?.insertAdjacentHTML("beforeend", '<option value="TREASURY">Tesouro Direto</option>');
-  document.querySelector("#ticker")?.insertAdjacentHTML("afterend", '<label hidden for="treasury-title">Nome do título<input id="treasury-title" placeholder="Tesouro Selic 2031" maxlength="200" disabled><small>Quantidade em múltiplos de 0,01 título. Sem conversão automática de contratos antigos.</small></label>');
+  document.querySelector("#ticker")?.insertAdjacentHTML("afterend", '<label hidden for="treasury-title">Nome do título<input id="treasury-title" placeholder="Ex.: Tesouro Selic 2031" maxlength="200" aria-describedby="treasury-title-help" disabled><small id="treasury-title-help">Quantidade em múltiplos de 0,01 título.</small></label>');
   document.querySelector("#trade-asset-class")?.insertAdjacentHTML(
     "beforeend",
     '<option value="PENSION">Previdência</option><option value="REAL_ESTATE">Imóveis</option>',
