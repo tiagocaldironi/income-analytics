@@ -1465,7 +1465,7 @@ def _dashboard_snapshot_for_request(request: Request | None) -> dict[str, object
 
 
 @router.get("/portfolio/dashboard")
-def get_portfolio_dashboard(request: Request = None) -> dict[str, object]:
+def get_portfolio_dashboard(request: Request) -> dict[str, object]:
     """Fast read path for Minha Carteira; never projects when a snapshot exists."""
     snapshot = _dashboard_snapshot_for_request(request)
     if snapshot is not None:

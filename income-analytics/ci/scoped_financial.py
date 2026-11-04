@@ -88,7 +88,7 @@ def assess(policy, details, trace, historical, root):
             problems.append("UNREVIEWED_FINANCIAL_RESULT:" + node)
     return {
         "schema": 1,
-        "scope": "PR69_INCLUDING_PR62",
+        "scope": policy.get("scope", "PR69_INCLUDING_PR62"),
         "technical_state": "PASS" if not problems else "BLOCKED",
         "technical_blockers": sorted(set(problems)),
         "scoped_totals": actual,

@@ -1150,9 +1150,12 @@ class SqliteFinancialEventRepository:
             # Keep source fingerprints/statuses as tombstones so an intentional
             # deletion cannot be silently recreated by a later import/sync.
             for model in (B3ImportedRecordRow, ImportedPaidIncomeRecord):
-                references = session.query(model).filter_by(
-                    financial_event_id=event_id, portfolio_id=self.portfolio_id
-                ).all()
+                references = cast(
+                    list[B3ImportedRecordRow | ImportedPaidIncomeRecord],
+                    session.query(model).filter_by(
+                        financial_event_id=event_id, portfolio_id=self.portfolio_id
+                    ).all(),
+                )
                 for reference in references:
                     previous = reference.detail
                     reference.financial_event_id = None

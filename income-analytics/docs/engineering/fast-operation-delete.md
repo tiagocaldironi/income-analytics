@@ -93,3 +93,26 @@ não são ocultadas por alteração da baseline nesta implementação.
 A fila é do processo existente, não uma nova infraestrutura. Após parada abrupta,
 a retomada depende de uma leitura autorizada do dashboard/status. A versão
 persistida impede sobrescrita obsoleta mesmo quando há trabalho concorrente.
+
+
+## Publicação autorizada — Issue #80
+
+O proprietário solicitou a criação da issue e a publicação do PR #79. A primeira
+CI hospedada (41858261593) comprovou 1.612 testes de engenharia e 394 testes do
+escopo financeiro anterior, mas bloqueou promoção por identidades SAST deslocadas
+e revisão de fontes do ledger de qualidade.
+
+O controle de relocação conserva os dois inventários originais de tipagem: somente
+uma ocorrência já aceita, em bloco de sintaxe integralmente idêntico, pode ser
+comparada na posição anterior. Base Git e fontes candidatas são fixadas por SHA-256;
+regra, mensagem, coluna e multiplicidade continuam obrigatórias. Fonte/bloco novo
+ou alterado não é dispensado. As ocorrências brutas continuam nos relatórios.
+Testes negativos cobrem alteração de código, regra, mensagem, coluna, posição,
+fonte, base do ledger e duplicidade. A análise local resultou em zero acréscimos;
+quatro diagnósticos dos caminhos tocados foram corrigidos em vez de dispensadas.
+
+A certificação restrita foi ampliada para os testes da exclusão/fila e exige
+execução observada dos novos entrypoints e da publicação por revisão. O novo
+aceite do proprietário deve ser registrado separadamente, vinculado à superfície
+deste candidato, sem reutilizar como dispensa o aceite do PR #69. A promoção
+continua exigindo CI hospedada, segurança, staging e rollback aprovados.

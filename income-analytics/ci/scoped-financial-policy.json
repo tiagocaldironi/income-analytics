@@ -24,7 +24,9 @@
     "tests/infrastructure/test_saas_portfolio_owner.py",
     "tests/infrastructure/test_portfolio_scope.py",
     "tests/infrastructure/test_b3_report_parser.py",
-    "tests/application/test_scoped_treasury_certification.py"
+    "tests/application/test_scoped_treasury_certification.py",
+    "tests/api/test_fast_operation_delete.py",
+    "tests/application/test_dashboard_refresh.py"
   ],
   "required_executed_modules": [
     "income_analytics.application.treasury",
@@ -41,7 +43,8 @@
     "income_analytics.domain.projectors.performance_projector",
     "income_analytics.domain.projectors.contribution_target_allocator",
     "income_analytics.domain.projectors.hypothetical_portfolio_projector",
-    "income_analytics.api.routers.dashboard"
+    "income_analytics.api.routers.dashboard",
+    "income_analytics.application.dashboard_refresh"
   ],
   "cert48_modules": [
     "income_analytics.application.magic_formula_stocks",
@@ -232,6 +235,11 @@
     "income_analytics.application.executable_contribution:build_executable_plan",
     "income_analytics.application.global_contribution_allocator:allocate_quantities",
     "income_analytics.application.treasury:validate_trade",
-    "income_analytics.application.treasury:validate_title_history"
-  ]
+    "income_analytics.application.treasury:validate_title_history",
+    "income_analytics.api.routers.dashboard:delete_operation",
+    "income_analytics.api.routers.dashboard:_build_dashboard_for_portfolio",
+    "income_analytics.application.dashboard_refresh:DashboardRefreshQueue._work",
+    "income_analytics.infrastructure.sqlite_repositories:SqlitePortfolioDashboardSnapshotRepository.save_if_version"
+  ],
+  "scope": "PR79_OPERATION_DELETE_AND_PR69_PR62_AFFECTED_DEPENDENCIES"
 }
