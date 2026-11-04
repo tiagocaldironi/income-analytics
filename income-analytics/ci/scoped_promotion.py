@@ -17,6 +17,9 @@ from scoped_financial import assess
 ROOT = Path(__file__).resolve().parents[1]
 APPROVAL = "ci/scoped-promotion-approval.json"
 PROTECTED = (
+    "ci/diagnostic_relocations.py",
+    "ci/diagnostic-relocations-79.json",
+    "ci/test_diagnostic_relocations.py",
     "src/",
     "alembic/",
     "tests/application/",
@@ -279,7 +282,7 @@ def evaluate(root, reports, security, staging, gate, comment, record, identity, 
         "historical_evidence": recomputed["historical_out_of_scope_proposal"],
         "historical_test_totals": reports["python"].get("totals"),
         "scoped_test_totals": scoped.get("scoped_totals"),
-        "linked_issues": [57, 58, 59, 60, 65, 76, 77],
+        "linked_issues": [57, 58, 59, 60, 65, 76, 77, 80],
         "merge_authorized": False,
         "deployment_authorized": False,
         "production_status": "PRODUCTION_NOT_AUTHORIZED",
@@ -355,7 +358,7 @@ def main():
             raise ValueError("DIRTY_OR_WRONG_CANDIDATE")
         record = json.loads((ROOT / APPROVAL).read_text(encoding="utf-8"))
         if (
-            os.environ.get("RELEASE_PR_NUMBER") != "69"
+            os.environ.get("RELEASE_PR_NUMBER") != str(record.get("pr_number", 69))
             or os.environ.get("GITHUB_REPOSITORY") != "tiagocaldironi/income-analytics"
         ):
             raise ValueError("WRONG_RELEASE_CONTEXT")

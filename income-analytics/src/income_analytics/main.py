@@ -31,6 +31,7 @@ from income_analytics.api.routers.health import router as health_router
 from income_analytics.api.routers.income_starter import router as income_starter_router
 from income_analytics.api.routers.portfolios import router as portfolios_router
 from income_analytics.api.saas_security import authorize_request, local_mode_rejection
+from income_analytics.application.dashboard_refresh import snapshot_revision
 from income_analytics.application.portfolio_context import (
     current_portfolio_id,
     reset_active_portfolio_id,
@@ -46,7 +47,10 @@ from income_analytics.infrastructure.request_profiling import (
     current_request_metrics,
     install_sql_timing,
 )
-from income_analytics.infrastructure.sqlite_repositories import SqlitePortfolioRepository
+from income_analytics.infrastructure.sqlite_repositories import (
+    SqlitePortfolioDashboardSnapshotRepository,
+    SqlitePortfolioRepository,
+)
 
 validate_configuration()
 
@@ -98,7 +102,21 @@ async def serve_portfolio(
         return JSONResponse({"detail": "Restaure a carteira antes de alterá-la."}, status_code=409)
     portfolio_token = set_active_portfolio_id(portfolio_id)
     session_token = None
+    revision_token = None
     try:
+        fast_path = (
+            request.method == "DELETE"
+            and re.fullmatch(r"/api/operations/[^/]+", request.url.path) is not None
+        ) or (
+            request.method in {"GET", "POST"}
+            and request.url.path == "/api/portfolio/dashboard/status"
+        ) or (request.method == "GET" and request.url.path == "/api/portfolio/dashboard")
+        if fast_path:
+            return await call_next(request)
+        metadata = await run_in_threadpool(
+            SqlitePortfolioDashboardSnapshotRepository(portfolio_id).state
+        )
+        revision_token = snapshot_revision.set(int(metadata["version"]))
         history_only = request.method == "GET" and (
             request.url.path in {"/api/operations", "/api/operations/history"}
             or re.fullmatch(r"/api/portfolio/assets/[^/]+/transactions", request.url.path)
@@ -111,6 +129,8 @@ async def serve_portfolio(
         session_token = set_request_session(financial_session)
         return await call_next(request)
     finally:
+        if revision_token is not None:
+            snapshot_revision.reset(revision_token)
         if session_token is not None:
             reset_request_session(session_token)
         reset_active_portfolio_id(portfolio_token)

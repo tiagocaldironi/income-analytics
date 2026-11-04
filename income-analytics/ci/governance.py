@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import run as legacy
+from diagnostic_relocations import reviewed_relocations
 from engineering_debt import (
     classify_ruff,
     reconciled_findings,
@@ -134,6 +135,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         "ci/test_financial_certification.py",
         "ci/test_operational.py",
         "ci/test_engineering_debt.py",
+        "ci/test_diagnostic_relocations.py",
         "ci/test_scoped_financial.py",
         f"--ci-gate={gate}",
         "-ra",
@@ -247,17 +249,19 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
                 encoding="utf-8"
             )
         )
-        expected_findings = reconciled_findings(expected_findings, ledger, ROOT)
         for tool in ("ruff", "mypy"):
             if importlib.metadata.version(tool) != baseline["tools"][tool]:
                 raise ValueError("QUALITY_TOOL_VERSION_REVIEW_REQUIRED")
             code, findings = quality_findings(tool, env, sandbox)
             actual.extend(findings)
             exits[tool] = code
-        comparison = compare_diagnostics(actual, expected_findings)
+        canonical, reviewed_ledger, relocation_review = reviewed_relocations(ROOT, actual, ledger)
+        expected_findings = reconciled_findings(expected_findings, reviewed_ledger, ROOT)
+        comparison = compare_diagnostics(canonical, expected_findings)
+        comparison["relocation_review"] = relocation_review
         typing = accepted_typing(
             ROOT,
-            [row for row in actual if row["tool"] == "mypy"],
+            [row for row in canonical if row["tool"] == "mypy"],
             exits["mypy"],
             versions={"mypy": importlib.metadata.version("mypy"), "python": sys.version.split()[0]},
             today=datetime.now(UTC).date(),

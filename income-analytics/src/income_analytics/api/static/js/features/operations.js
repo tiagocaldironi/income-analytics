@@ -1329,7 +1329,9 @@ function bindRenderedDeleteButtons(target) {
     if (!await confirmOperationDeletion()) return;
     await withProcessing(button, async () => {
       await portfolioApi.deleteOperation(button.dataset.operationId);
-      await Promise.all([loadOperations({ reset: true }), loadPortfolio()]);
+      // The deletion is already durable; consolidation must not lock this button.
+      void loadOperations({ reset: true });
+      void loadPortfolio();
     }, "Excluindo…");
   }));
 }

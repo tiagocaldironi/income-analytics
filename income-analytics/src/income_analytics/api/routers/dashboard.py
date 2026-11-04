@@ -11,7 +11,7 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from functools import lru_cache
 from time import sleep
-from typing import Literal
+from typing import Literal, cast
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response, status
@@ -27,6 +27,7 @@ from income_analytics.application.b3_import import (
 from income_analytics.application.benchmark_comparison import build_performance_comparison
 from income_analytics.application.benchmark_data import BenchmarkDataUnavailable
 from income_analytics.application.capital_applied import calculate_capital_applied
+from income_analytics.application.dashboard_refresh import DashboardRefreshQueue, snapshot_revision
 from income_analytics.application.executable_contribution import build_executable_plan
 from income_analytics.application.fx_data import FxRateUnavailable
 from income_analytics.application.historical_portfolio_reconstruction import (
@@ -122,6 +123,7 @@ from income_analytics.infrastructure.irpf_xlsx_import import (
 from income_analytics.infrastructure.models import FinancialEventRecord
 from income_analytics.infrastructure.sqlite_repositories import (
     SqliteB3ImportRepository,
+    SqliteFinancialEventRepository,
     SqliteImportedPaidIncomeRepository,
     SqliteMarketPriceRefreshRunRepository,
     SqlitePaidIncomeSettingsRepository,
@@ -1317,6 +1319,18 @@ def get_portfolio(as_of: date | None = None) -> dict[str, object]:
 
 def rebuild_portfolio_dashboard_snapshot() -> dict[str, object]:
     """Build once on writes, then atomically replace the dashboard read model."""
+    revision = snapshot_revision.get()
+    payload = _build_portfolio_dashboard_payload()
+    if revision is None:
+        return cast(dict[str, object], dashboard_snapshot_repository.save(payload))
+    if not dashboard_snapshot_repository.save_if_version(payload, revision):
+        # A newer deletion/write won the race; never publish the older ledger.
+        dashboard_snapshot_repository.invalidate()
+        _dashboard_refresh.request(current_portfolio_id())
+    return cast(dict[str, object], dashboard_snapshot_repository.get()) or {"status": "UPDATING"}
+
+
+def _build_portfolio_dashboard_payload() -> dict[str, object]:
     payload = {
         "read_model_version": PORTFOLIO_DASHBOARD_READ_MODEL_VERSION,
         "portfolio": serialize_portfolio(session.projection(), include_history=False),
@@ -1326,7 +1340,56 @@ def rebuild_portfolio_dashboard_snapshot() -> dict[str, object]:
         "allocation": get_portfolio_allocation(),
         "class_allocation": get_portfolio_class_allocation(),
     }
-    return dashboard_snapshot_repository.save(jsonable_encoder(payload))
+    return cast(dict[str, object], jsonable_encoder(payload))
+
+
+def _build_dashboard_for_portfolio(portfolio_id: UUID) -> dict[str, object]:
+    from income_analytics.application.portfolio_context import (
+        reset_active_portfolio_id,
+        reset_request_session,
+        set_active_portfolio_id,
+        set_request_session,
+    )
+    portfolio_token = set_active_portfolio_id(portfolio_id)
+    session_token = None
+    try:
+        fresh = PortfolioSession(portfolio_id=portfolio_id, persistent=True)
+        session_token = set_request_session(fresh)
+        return _build_portfolio_dashboard_payload()
+    finally:
+        if session_token is not None:
+            reset_request_session(session_token)
+        reset_active_portfolio_id(portfolio_token)
+
+
+_dashboard_refresh = DashboardRefreshQueue(
+    state=lambda portfolio_id: SqlitePortfolioDashboardSnapshotRepository(portfolio_id).state(),
+    build=_build_dashboard_for_portfolio,
+    save=lambda portfolio_id, payload, revision: SqlitePortfolioDashboardSnapshotRepository(
+        portfolio_id
+    ).save_if_version(payload, revision),
+    fail=lambda portfolio_id, revision: SqlitePortfolioDashboardSnapshotRepository(
+        portfolio_id
+    ).fail_if_version(revision),
+)
+
+
+@router.get("/portfolio/dashboard/status")
+def get_dashboard_refresh_status() -> dict[str, object]:
+    portfolio_id = current_portfolio_id()
+    state = SqlitePortfolioDashboardSnapshotRepository(portfolio_id).state()
+    if state["status"] == "UPDATING":
+        _dashboard_refresh.request(portfolio_id)
+    return {**state, "portfolio_id": str(portfolio_id)}
+
+
+@router.post("/portfolio/dashboard/status")
+def retry_dashboard_refresh() -> dict[str, object]:
+    portfolio_id = current_portfolio_id()
+    repository = SqlitePortfolioDashboardSnapshotRepository(portfolio_id)
+    if repository.state()["status"] == "ERROR":
+        repository.invalidate()
+    return get_dashboard_refresh_status()
 
 
 def ensure_portfolio_dashboard_snapshot_current() -> dict[str, object]:
@@ -1402,10 +1465,12 @@ def _dashboard_snapshot_for_request(request: Request | None) -> dict[str, object
 
 
 @router.get("/portfolio/dashboard")
-def get_portfolio_dashboard(request: Request = None) -> dict[str, object]:
+def get_portfolio_dashboard(request: Request) -> dict[str, object]:
     """Fast read path for Minha Carteira; never projects when a snapshot exists."""
     snapshot = _dashboard_snapshot_for_request(request)
     if snapshot is not None:
+        if snapshot.get("status") == "UPDATING":
+            _dashboard_refresh.request(current_portfolio_id())
         return snapshot
     raise HTTPException(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -2288,14 +2353,20 @@ def _operation_label(event_type: FinancialEventType) -> str:
 @router.delete(
     "/operations/{event_id}",
     status_code=status.HTTP_200_OK,
-    response_class=Response,
 )
-def delete_operation(event_id: str) -> None:
+def delete_operation(event_id: str) -> dict[str, object]:
+    portfolio_id = current_portfolio_id()
+    if not SqliteFinancialEventRepository(portfolio_id).delete(
+        event_id, invalidate_dashboard=True,
+    ):
+        raise HTTPException(status_code=404, detail="Lançamento não encontrado.")
+    # The commit (including tombstones, audit and invalidation) precedes success.
     try:
-        session.delete_event(event_id)
-        rebuild_portfolio_dashboard_snapshot()
-    except ValueError as error:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+        _dashboard_refresh.request(portfolio_id)
+    except RuntimeError:
+        logger.exception("Refresh scheduling failed; durable pending state retained")
+    return {"deleted": True, "event_id": event_id, "portfolio_id": str(portfolio_id),
+            "dashboard_refresh": "UPDATING"}
 
 
 @router.get("/portfolio/configuration")
