@@ -1,3 +1,4 @@
+import { waitForDashboard } from "../shared/dashboard-refresh.js";
 import { invalidatePortfolioGuidance, setupContextualOnboarding } from "./portfolio-guidance-v2.js";
 import { setupPortfolioView, updatePortfolioView } from "./portfolio-view-v2.js";
 import { portfolioApi } from "../api.js";
@@ -107,6 +108,7 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true, preser
   const insight = document.querySelector("#portfolio-insight");
   if (insight) { insight.hidden = true; insight.textContent = ""; }
   const containers = ["#positions", "#understand-history", "#allocation", "#class-allocation", "#portfolio-evolution", "#portfolio-performance-chart", "#monthly-income-chart"];
+  let rebuilding = false;
   containers.forEach(selector => {
     const container = document.querySelector(selector);
     if (container) container.innerHTML = selector === "#positions" ? holdingsSkeleton : loadingState;
@@ -116,6 +118,23 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true, preser
     // only when the snapshot is rebuilt after a write.
     const dashboard = await portfolioApi.dashboard();
     if (sequence !== portfolioLoadSequence) return;
+    if (dashboard.status === "UPDATING" || dashboard.status === "ERROR") {
+      rebuilding = true;
+      metricIds.forEach(id => { const node = document.querySelector(`#${id}`); if (node) node.textContent = "Atualizando…"; });
+      containers.forEach(selector => {
+        const node = document.querySelector(selector);
+        if (node) node.innerHTML = '<p role="status">Atualizando a carteira após os lançamentos confirmados…</p>';
+      });
+      if (insight) { insight.hidden = false; insight.textContent = "Atualizando totais, rentabilidade e gráficos dos lançamentos confirmados."; }
+      if (dashboard.status === "ERROR") throw new Error("A exclusão foi confirmada, mas o recálculo falhou. Tente atualizar a carteira.");
+      const result = await waitForDashboard({
+        status: () => portfolioApi.dashboardRefreshStatus(),
+        portfolioId: wallet,
+        isCurrent: () => sequence === portfolioLoadSequence && wallet === localStorage.getItem("income.activePortfolioId"),
+      });
+      if (result === "CANCELLED") return;
+      return loadPortfolio(asOf, { refreshAttention, preserveTransactions: true });
+    }
     const { portfolio, performance, history, allocation, class_allocation: classes, holdings } = dashboard;
     renderPortfolio(portfolio, holdings, performance);
     updatePortfolioView(dashboard);
@@ -136,7 +155,7 @@ export async function loadPortfolio(asOf = "", { refreshAttention = true, preser
     metricIds.forEach(id => { const node = document.querySelector(`#${id}`); if (node) node.textContent = "Indisponível"; });
     containers.forEach(selector => {
       const container = document.querySelector(selector);
-      if (container) container.innerHTML = selector === "#positions" ? '<div class="holdings-state" role="alert"><p>Não foi possível carregar seus investimentos.</p><button type="button" class="income-button secondary" data-holdings-retry>Tentar novamente</button></div>' : errorState(error.message);
+      if (container) container.innerHTML = selector === "#positions" ? `<div class="holdings-state" role="alert"><p>${rebuilding ? "A exclusão foi confirmada, mas a atualização da carteira não foi concluída." : "Não foi possível carregar seus investimentos."}</p><button type="button" class="income-button secondary" ${rebuilding ? "data-dashboard-refresh-retry" : "data-holdings-retry"}>Tentar novamente</button></div>` : errorState(error.message);
     });
   }
 }
@@ -194,6 +213,14 @@ export function bindPortfolioFilters() {
       renderHoldingsCategories();renderHoldings();document.querySelector("#holdings-search").focus();
     }
     if (event.target.closest("[data-holdings-retry]")) loadPortfolio();
+    const refreshRetry = event.target.closest("[data-dashboard-refresh-retry]");
+    if (refreshRetry && !refreshRetry.disabled) {
+      refreshRetry.disabled = true;
+      portfolioApi.retryDashboardRefresh().then(() => loadPortfolio()).catch(() => {
+        refreshRetry.disabled = false;
+        refreshRetry.textContent = "Falha ao atualizar. Tentar novamente";
+      });
+    }
     const edit = event.target.closest("[data-edit-treasury-event]");
     if (edit) {
       const dialog = document.querySelector("#asset-transactions-modal");
@@ -771,11 +798,12 @@ async function deleteAssetTransaction(dialog) {
   dismissAssetDeletion(dialog, false);
   const group = dialog.dataset.eventsGroup;
   const page = dialog._eventViews[group === "INCOME" ? "income" : "movement"].page;
-  await loadAssetTransactions(dialog, page, group);
+  pending.trigger.closest?.("tr")?.remove();
   const feedback = dialog.querySelector("[data-history-feedback]");
   feedback.textContent = "Lançamento excluído. Atualizando a carteira…";
   feedback.hidden = false;
   dialog.querySelector(`[data-events-tab="${group}"]`)?.focus();
+  await loadAssetTransactions(dialog, page, group);
   await loadPortfolio("", { preserveTransactions: true, refreshAttention: false });
   feedback.textContent = "Lançamento excluído.";
 }

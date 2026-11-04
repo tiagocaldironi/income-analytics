@@ -22,6 +22,7 @@ from income_analytics.application.b3_import import (
     B3ImportReportType,
 )
 from income_analytics.application.benchmark_data import BenchmarkNature, BenchmarkObservation
+from income_analytics.application.dashboard_refresh import DashboardState
 from income_analytics.application.fx_data import FxRateObservation
 from income_analytics.application.provider_health import ProviderHealth
 from income_analytics.domain.allocation_policy import AllocationPolicy
@@ -494,6 +495,50 @@ class SqlitePortfolioDashboardSnapshotRepository:
             }
         )
         return payload
+
+    def state(self) -> DashboardState:
+        """Read only revision metadata; do not decode a large dashboard payload."""
+        initialize_database()
+        with SessionFactory() as session:
+            row = session.query(
+                PortfolioDashboardSnapshotRecord.status, PortfolioDashboardSnapshotRecord.version
+            ).filter_by(portfolio_id=self.portfolio_id).one_or_none()
+        return {"status": row.status, "version": row.version} if row else {
+            "status": "MISSING", "version": 0,
+        }
+
+    def save_if_version(self, payload: dict[str, object], revision: int) -> bool:
+        """Publish only if no newer write has invalidated this calculation."""
+        initialize_database()
+        now = datetime.now(UTC)
+        encoded = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=str)
+        with SessionFactory.begin() as session:
+            if revision == 0:
+                result = session.execute(sqlite_insert(PortfolioDashboardSnapshotRecord).values(
+                    portfolio_id=self.portfolio_id, status="VALID", version=1,
+                    calculated_at=now, payload=encoded,
+                ).on_conflict_do_nothing(index_elements=["portfolio_id"]).returning(
+                    PortfolioDashboardSnapshotRecord.version
+                ))
+                return result.scalar_one_or_none() is not None
+            return session.query(PortfolioDashboardSnapshotRecord).filter_by(
+                portfolio_id=self.portfolio_id, version=revision,
+            ).update({"status": "VALID", "version": revision + 1,
+                      "calculated_at": now, "payload": encoded}) == 1
+
+    def invalidate(self) -> None:
+        with SessionFactory.begin() as session:
+            session.query(PortfolioDashboardSnapshotRecord).filter_by(
+                portfolio_id=self.portfolio_id
+            ).update({
+                "status": "UPDATING", "version": PortfolioDashboardSnapshotRecord.version + 1,
+            })
+
+    def fail_if_version(self, revision: int) -> bool:
+        with SessionFactory.begin() as session:
+            return session.query(PortfolioDashboardSnapshotRecord).filter_by(
+                portfolio_id=self.portfolio_id, version=revision, status="UPDATING",
+            ).update({"status": "ERROR"}) == 1
 
     def save(self, payload: dict[str, object]) -> dict[str, object]:
         """Replace the complete view in one database transaction."""
@@ -1094,7 +1139,7 @@ class SqliteFinancialEventRepository:
             )
         _cached_financial_events.cache_clear()
 
-    def delete(self, event_id: str) -> bool:
+    def delete(self, event_id: str, *, invalidate_dashboard: bool = False) -> bool:
         initialize_database()
         with SessionFactory.begin() as session:
             target = session.query(FinancialEventRecord).filter_by(
@@ -1131,6 +1176,18 @@ class SqliteFinancialEventRepository:
                 .delete()
                 == 1
             )
+            if deleted and invalidate_dashboard:
+                snapshot = session.query(PortfolioDashboardSnapshotRecord).filter_by(
+                    portfolio_id=self.portfolio_id
+                ).one_or_none()
+                if snapshot is None:
+                    session.add(PortfolioDashboardSnapshotRecord(
+                        portfolio_id=self.portfolio_id, status="UPDATING", version=1,
+                        calculated_at=datetime.now(UTC), payload="{}",
+                    ))
+                else:
+                    snapshot.status = "UPDATING"
+                    snapshot.version += 1
         if deleted:
             _cached_financial_events.cache_clear()
         return deleted

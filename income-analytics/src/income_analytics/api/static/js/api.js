@@ -123,6 +123,8 @@ export const portfolioApi = {
   },
   operations: () => request("/operations"),
   operationsHistory: params => request(`/operations/history?${new URLSearchParams(Object.entries(params).filter(([, value]) => value !== "" && value !== null && value !== undefined)).toString()}`),
+  dashboardRefreshStatus: () => request("/portfolio/dashboard/status"),
+  retryDashboardRefresh: () => request("/portfolio/dashboard/status", { method: "POST" }),
   deleteOperation: id => request(`/operations/${encodeURIComponent(id)}`, { method: "DELETE" }),
   history: (periodMonths = 12, assetClass = "") => request(`/portfolio/history?period_months=${periodMonths}${assetClass ? `&asset_class=${encodeURIComponent(assetClass)}` : ""}`),
   historyRange: (start, end) => request(`/portfolio/history?period_months=0&start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`),
