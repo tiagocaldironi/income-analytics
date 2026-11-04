@@ -241,5 +241,5 @@
     "income_analytics.application.dashboard_refresh:DashboardRefreshQueue._work",
     "income_analytics.infrastructure.sqlite_repositories:SqlitePortfolioDashboardSnapshotRepository.save_if_version"
   ],
-  "scope": "PR79_OPERATION_DELETE_AND_PR69_PR62_AFFECTED_DEPENDENCIES"
+  "scope": "PR81_TREASURY_NAME_IDENTITY_AND_PR79_PR69_PR62_AFFECTED_DEPENDENCIES"
 }
