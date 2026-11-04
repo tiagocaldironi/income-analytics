@@ -7,6 +7,10 @@ from pathlib import Path
 
 FINGERPRINT_VERSION = 2
 POLICY_FILES = (
+    "income-analytics/ci/scoped_promotion.py",
+    "income-analytics/ci/scoped-promotion-approval.json",
+    "income-analytics/tests/security/test_scoped_promotion.py",
+    "income-analytics/docs/engineering/scoped-promotion/policy.md",
     "income-analytics/ci/scoped_financial.py",
     "income-analytics/ci/scoped_financial_trace.py",
     "income-analytics/ci/scoped-financial-policy.json",
