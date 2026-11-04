@@ -1,0 +1,112 @@
+{
+  "issue": 61,
+  "baseline_commit": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+  "validation_date": "2026-11-03",
+  "immutable_files_verified": 41,
+  "concurrent_workspace_changed_files": 0,
+  "local_uncommitted_validation": true,
+  "full_checkpoint": {
+    "totals": {
+      "passed": 1416,
+      "failed": 15,
+      "errors": 9,
+      "skipped": 5
+    },
+    "existing_baseline_status_changes": {},
+    "new_cases": 28,
+    "scope": "Full offline Python and CI tests; before final taxonomy precedence guard/read-model version refresh and two additional tests. Final focused run below covers those changes."
+  },
+  "financial": {
+    "status": "BLOCKED",
+    "totals": {
+      "passed": 104,
+      "failed": 15,
+      "errors": 9,
+      "skipped": 0
+    },
+    "frozen_engine": [
+      {
+        "class": "tests.application.test_historical_shares_units",
+        "name": "test_shares_unit_020_frozen_engine",
+        "status": "failed"
+      }
+    ],
+    "production_promotion": "BLOCKED"
+  },
+  "final_focused": {
+    "totals": {
+      "passed": 167,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 5
+    },
+    "scope": "Treasury, API, import, executable allocation, revision persistence, security, history boundary and quality ledger tests; bank-only indicators preserved"
+  },
+  "frontend": {
+    "status": "PASS",
+    "suites": 33
+  },
+  "ruff": {
+    "status": "PASS",
+    "raw_tool_exit_code": 1,
+    "existing_immutable_style_findings": 23
+  },
+  "mypy": {
+    "baseline": 499,
+    "current": 486,
+    "new_diagnostics": 0,
+    "resolved": 13,
+    "still_not_clean": true
+  },
+  "quality_non_regression": "PASS",
+  "visual": {
+    "data": "SYNTHETIC_ONLY",
+    "desktop": "default viewport, approximately 1280px",
+    "mobile": {
+      "width": 390,
+      "height": 844
+    },
+    "tested": [
+      "distinct treasury table",
+      "descending balances",
+      "readable names",
+      "legacy contract unit warning",
+      "fractional quantity details",
+      "0.05 title and 1234.5678 unit-price form fields",
+      "versioned amendment prefill; canceled without save"
+    ]
+  },
+  "synthetic_reconciliation": {
+    "total_market_value": "29645.50",
+    "total_cost": "28149.00",
+    "total_result": "1496.50",
+    "financial_groups_before": [
+      {
+        "class": "FIXED_INCOME",
+        "value": "29295.50"
+      },
+      {
+        "class": "BRAZILIAN_STOCK",
+        "value": "350"
+      }
+    ],
+    "visual_groups_after": [
+      {
+        "group": "BRAZILIAN_STOCK",
+        "value": "350"
+      },
+      {
+        "group": "TREASURY",
+        "value": "27295.50"
+      },
+      {
+        "group": "FIXED_INCOME",
+        "value": "2000"
+      }
+    ]
+  },
+  "merge_performed": false,
+  "deploy_performed": false,
+  "issue_closure": "NOT_CLAIMED",
+  "hosted_validation": "PENDING_FOR_FINAL_SHA"
+}

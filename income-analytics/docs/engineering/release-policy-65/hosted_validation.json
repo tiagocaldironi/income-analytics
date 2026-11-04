@@ -1,0 +1,99 @@
+{
+  "conclusion": "failure",
+  "headSha": "13fbe019c8a8abcc092cdc23ac4d8056833b96d6",
+  "jobs": [
+    {
+      "conclusion": "success",
+      "name": "CI / Operational readiness",
+      "status": "completed"
+    },
+    {
+      "conclusion": "failure",
+      "name": "CI / Full Python diagnostic",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "name": "CI / Python engineering",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "name": "CI / Ruff diagnostics",
+      "status": "completed"
+    },
+    {
+      "conclusion": "failure",
+      "name": "CI / mypy diagnostics",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "name": "CI / Reproducible build",
+      "status": "completed"
+    },
+    {
+      "conclusion": "failure",
+      "name": "CI / Financial certification",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "name": "CI / Quality non-regression",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "name": "CI / Runtime installation",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "name": "CI / Frontend",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "name": "CI / Security baseline",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "name": "CI / Engineering",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "name": "CD / Staging validation",
+      "status": "completed"
+    }
+  ],
+  "run": 41710100034,
+  "status": "completed",
+  "tested_merge": "aef32f78c9cc37a295cfb618ffb03f54c6fb23c8",
+  "head": "13fbe019c8a8abcc092cdc23ac4d8056833b96d6",
+  "scope": "Completed executable candidate checkpoint; later documentation-only commit requires its own hosted validation.",
+  "python_totals": {
+    "passed": 1488,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 5
+  },
+  "financial_totals": {
+    "passed": 104,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 0
+  },
+  "security_tests_passed": 144,
+  "mypy": 486,
+  "new_mypy": 0,
+  "new_tests_passed_vs_pr62": 69,
+  "existing_test_status_changes": 0,
+  "decision": "NO-GO",
+  "policy_principles_approved": true,
+  "baseline_accepted": false,
+  "financial_scope_approved": false,
+  "activation_authorized": false,
+  "deployment_authorized": false
+}

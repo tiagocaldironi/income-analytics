@@ -14,6 +14,7 @@ from income_analytics.application.global_contribution_allocator import (
     AllocationDiagnostics,
     allocate_quantities,
 )
+from income_analytics.application.treasury import is_treasury, title_name, tradable_title
 from income_analytics.domain.enums.asset_class import AssetClass
 from income_analytics.domain.projectors.contribution_target_allocator import (
     ContributionTargetAllocator,
@@ -30,6 +31,7 @@ SUPPORTED = B3_CLASSES | FOREIGN_CLASSES | {"CRYPTO", "FIXED_INCOME"}
 
 
 class ExecutableOrder(TypedDict):
+    quantity_unit: str
     ticker: str
     label: str
     asset_class: str
@@ -91,6 +93,7 @@ class Instrument:
     fixed_fee: Decimal = ZERO
     fee_rate: Decimal = ZERO
     costs_known: bool = False
+    quantity_unit: str = "UNIT"
 
     @property
     def unit_base(self) -> Decimal:
@@ -190,7 +193,17 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
                 continue
             asset = eligible[ticker]
             name = asset_class.value
+            details = getattr(session, "_fixed_income_details", {}).get(getattr(asset, "id", None))
+            treasury = is_treasury(asset, details)
             rule = rules.get(ticker, {})
+            if treasury and details is None:
+                rule = {
+                    "fractional_supported": True,
+                    "quantity_precision": 2,
+                    "quantity_step": Decimal("0.01"),
+                    "minimum_quantity": Decimal("0.01"),
+                    **rule,
+                }
             fractional = rule.get("fractional_supported", False)
             precision = rule.get("quantity_precision", 8 if name == "CRYPTO" else 6)
             step = Decimal(
@@ -237,9 +250,18 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
                 raise ValueError(
                     "Confirme o suporte a frações antes de usar quantidades decimais no exterior."
                 )
+            if (
+                treasury
+                and details is None
+                and (step % Decimal("0.01") or minimum % Decimal("0.01") or precision != 2)
+            ):
+                raise ValueError(
+                    "Tesouro Direto exige incrementos de 0,01 título e precisão de duas casas."
+                )
             option = {
                 "ticker": ticker,
-                "label": asset.name,
+                "label": (title_name(asset.name) or asset.name) if treasury else asset.name,
+                "quantity_unit": "TITLE" if treasury else "UNIT",
                 "asset_class": name,
                 "currency": asset.currency.code,
                 "fractional_supported": fractional,
@@ -280,7 +302,13 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
                 reason = "UNSUPPORTED_MARKET"
             elif not getattr(asset, "active", True):
                 reason = "INACTIVE_ASSET"
-            elif name == "FIXED_INCOME" and (minimum_amount <= 0 or increment <= 0):
+            elif treasury and details is not None:
+                reason = "TREASURY_LEGACY_CONTRACT"
+            elif treasury and not tradable_title(asset.name):
+                reason = "TREASURY_UNSUPPORTED_TITLE"
+            elif (
+                name == "FIXED_INCOME" and not treasury and (minimum_amount <= 0 or increment <= 0)
+            ):
                 reason = "NEEDS_APPLICATION_TERMS"
             elif quote is None:
                 reason = "MISSING_PRICE"
@@ -316,7 +344,8 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
             candidates.append(
                 Instrument(
                     ticker=ticker,
-                    label=asset.name,
+                    label=(title_name(asset.name) or asset.name) if treasury else asset.name,
+                    quantity_unit="TITLE" if treasury else "UNIT",
                     asset_class=name,
                     market="B3"
                     if name in B3_CLASSES
@@ -395,6 +424,7 @@ def _build_executable_plan(session, *, amount, rules=None, as_of=None):
                 else (today - item.price_date).days,
                 "quantity": quantity,
                 "quantity_step": item.step,
+                "quantity_unit": item.quantity_unit,
                 "native_amount": quantity * item.price,
                 "estimated_principal": value,
                 "estimated_total": item.cost(quantity),

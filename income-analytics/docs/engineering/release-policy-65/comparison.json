@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "mode": "PROPOSAL_ONLY",
+  "baseline_accepted": false,
+  "baseline_sha": "b642709a8ea3e89ebc27e2ae3c9ccbf7d4bccde4",
+  "candidate_sha": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+  "candidate_head": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2",
+  "hosted_run": "41612817516",
+  "mypy_before": 499,
+  "mypy_after": 486,
+  "mypy_unproved": 0,
+  "frozen_diagnostics": 39,
+  "existing_test_changes": [],
+  "new_test_statuses": {
+    "passed": 31
+  },
+  "baseline_totals": {
+    "passed": 1388,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 5
+  },
+  "candidate_totals": {
+    "passed": 1419,
+    "failed": 15,
+    "errors": 9,
+    "skipped": 5
+  },
+  "baseline_test_worktree_dirty": true,
+  "warning": "Unchanged lines prove preexistence only; enclosing behavior may change."
+}

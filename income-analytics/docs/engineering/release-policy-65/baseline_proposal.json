@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "id": "B65_PR62_20261103_REVIEW_ONLY",
+  "status": "NOT_ACCEPTED",
+  "reference_head": "eaae4df0f1f370bebd20d4299fd5e536de90d6f2",
+  "reference_tested_merge": "bb2db51085ee3ca6c5d9eadbbd439dab0b31cf96",
+  "evidence_run": "41612817516",
+  "contract": {
+    "tool_versions": {
+      "mypy": "2.3.1",
+      "python": "3.14.7"
+    },
+    "configuration_sha256": "c931b996f37acc74300e2d24b8fb9397d2e9a3dea721bd8ac1cb7b8e504db859",
+    "scope": [
+      "mypy src --no-incremental",
+      "full offline tests + all existing ci test modules"
+    ]
+  },
+  "content_construction": "dict(contract, findings=candidate_mypy.findings, cases=candidate_python.cases); SHA256(json.dumps(envelope, sort_keys=True).encode())",
+  "baseline_content_sha256": "bfb56031699c3b79908657442703c086cc6f18fceea8f9c7d30abee1c177b74e",
+  "references": {
+    "candidate_mypy.json": "ae83e855a5ddbbee7380becd198821723bf9adeae3ecc6c19c0a538626e4bf77",
+    "candidate_python.json": "3f13bed0c5c7bec59dc76bf4b27e9d4d757d586b1ba71748c48e98632197d80a",
+    "occurrence_risk_proposals.json": "5d8e8b93950af482a01c827179b5c1fffa2e579e9fed0306b380905947eb57df",
+    "policy_proposal.md": "9bb470469ea9f52b86d6763b8728c062a03f8be8e35ca6999f7764cf2e018566"
+  },
+  "risk_counts": {
+    "LOW_PROPOSED": 397,
+    "MEDIUM_PROPOSED": 89
+  },
+  "proposed_owner": "tiagocaldironi",
+  "proposed_review_until": "2026-11-17",
+  "acceptance_scope": "This manifest requests review only. Typing occurrence acceptance, historical test acceptance, financial scope/certification, and activation are separate decisions.",
+  "financial_exception": false,
+  "activation_authorized": false
+}

@@ -32,6 +32,24 @@ def diagnostic(**changes):
     }
 
 
+@pytest.mark.parametrize(
+    "file",
+    [
+        "tests/api/test_treasury.py",
+        "tests/application/test_treasury.py",
+        "tests/infrastructure/test_treasury_revisions.py",
+        "tests/application/test_executable_contribution.py",
+        "tests/application/test_global_contribution_allocator.py",
+        "tests/api/test_b3_import_contract.py",
+    ],
+)
+def test_treasury_and_allocation_scopes_are_financial_and_remain_engineering(file):
+    scope = test_scope(file + "::test_scope_probe")
+    assert scope["financial"] is True
+    assert scope["engineering"] is True
+    assert scope["financial_critical"] is True
+
+
 def test_existing_debt_is_visible_and_unchanged_is_allowed():
     result = compare_diagnostics([diagnostic()], [diagnostic()])
     assert result["status"] == "PASS" and result["current_debt"] == 1
@@ -95,17 +113,52 @@ def engineering_reports():
         for name in ("runtime", "engineering", "node", "quality", "build")
     }
     reports["build"].update(
-        status="PASS", reproducibility="PASS", manifest="PASS", independent_builds=2,
+        status="PASS",
+        reproducibility="PASS",
+        manifest="PASS",
+        independent_builds=2,
         artifact_sha256="a" * 64,
         installation={
-            **{key: "PASS" for key in (
-                "status", "installation", "migrations_temporary_sqlite", "backend_import",
-                "startup_health", "static_files", "cleanup",
-            )},
-            "external_network": "DENIED", "production_access": False,
+            **{
+                key: "PASS"
+                for key in (
+                    "status",
+                    "installation",
+                    "migrations_temporary_sqlite",
+                    "backend_import",
+                    "startup_health",
+                    "static_files",
+                    "cleanup",
+                )
+            },
+            "external_network": "DENIED",
+            "production_access": False,
         },
     )
     return reports
+
+
+@pytest.mark.parametrize("check", ["runtime", "engineering", "node", "quality", "build"])
+@pytest.mark.parametrize("invalid_exit", [False, 0.0, "0", None])
+def test_malformed_exit_code_cannot_approve_engineering(check, invalid_exit):
+    reports = engineering_reports()
+    reports[check]["exit_code"] = invalid_exit
+    assert summarize_reports(reports)["engineering_ci"] == "FAIL"
+
+
+@pytest.mark.parametrize("invalid_exit", [False, 0.0, "0", None])
+def test_malformed_exit_code_cannot_approve_financial_certification(invalid_exit):
+    reports = engineering_reports()
+    reports["financial"] = {
+        **reports["engineering"],
+        "status": "PASS",
+        "blockers": [],
+        "exit_code": invalid_exit,
+    }
+    result = summarize_reports(reports)
+    assert result["financial_certification"] == "BLOCKED"
+    assert result["release_readiness"] == "BLOCKED"
+    assert result["deployment_authorized"] is False
 
 
 def test_engineering_pass_never_authorizes_financial_release_or_deploy():

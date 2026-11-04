@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "state": "OWNER_APPROVED",
+  "owner": "tiagocaldironi",
+  "approved_sha": "42325f4d8e37ff1491f1bb26eb8e10fad891a979",
+  "comment_id": 6616676753,
+  "comment_url": "https://github.com/tiagocaldironi/income-analytics/issues/76#issuecomment-6616676753",
+  "comment_body_sha256": "935b6965a2885c32831aa4a47d030bda6854201b0a72e964e57a32188f9e6f14",
+  "certified_surface_sha256": "451b850e51f624a9d50874637dec5dd8a4ee7a6da18ef3a38d3fb3fffe397623",
+  "scope": "PR69_INCLUDING_PR62_TRADITIONAL_TREASURY_AND_AFFECTED_DEPENDENCIES",
+  "binding": "UNCHANGED_CERTIFIED_SURFACE_AND_FRESH_SAME_CANDIDATE_CI_REQUIRED",
+  "merge_authorized": false,
+  "production_deploy_authorized": false
+}

@@ -81,6 +81,7 @@ jobs:
             income-analytics/ci-reports/${{ matrix.check }}/*-junit.xml
             income-analytics/ci-reports/${{ matrix.check }}/coverage.xml
             income-analytics/ci-reports/${{ matrix.check }}/inventory.json
+            income-analytics/ci-reports/${{ matrix.check }}/scoped-financial.json
           if-no-files-found: error
           retention-days: 14
           include-hidden-files: false
@@ -349,5 +350,62 @@ jobs:
           path: |
             income-analytics/ci-reports/delivery/validation.json
             income-analytics/ci-reports/delivery/candidate.json
+          if-no-files-found: error
+          retention-days: 14
+
+  release_scoped:
+    name: CI / Release scoped
+    if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.number == 69 }}
+    needs: [engineering_gate, security, staging_preview]
+    runs-on: windows-2025
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      issues: read
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: income-analytics
+    env:
+      CI_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      RELEASE_PR_NUMBER: ${{ github.event.pull_request.number }}
+      RELEASE_GITHUB_TOKEN: ${{ github.token }}
+      RELEASE_ENGINEERING_JOB: ${{ needs.engineering_gate.result }}
+      RELEASE_SECURITY_JOB: ${{ needs.security.result }}
+      RELEASE_STAGING_JOB: ${{ needs.staging_preview.result }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.7'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: governance-*-${{ github.sha }}
+          path: income-analytics/ci-reports/promotion-inputs
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: security-${{ github.sha }}
+          path: income-analytics/ci-reports/promotion-inputs/security
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: gate-summary-${{ github.sha }}
+          path: income-analytics/ci-reports/promotion-inputs/gates
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: delivery-preview-${{ github.sha }}
+          path: income-analytics/ci-reports/promotion-inputs/staging
+      - name: Evaluate scoped technical promotion without merging or deploying
+        if: always()
+        run: python ci/scoped_promotion.py --inputs ci-reports/promotion-inputs
+      - name: Publish independent release decision
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: scoped-promotion-${{ github.sha }}
+          path: income-analytics/ci-reports/promotion/promotion-report.json
           if-no-files-found: error
           retention-days: 14

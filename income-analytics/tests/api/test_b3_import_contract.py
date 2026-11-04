@@ -466,3 +466,99 @@ def test_settlement_sell_with_data_gap_stays_review_required() -> None:
             "WHERE event_type = 'SELL' AND effective_date = '2026-07-02'"
         ).fetchone()
     assert sell is None
+
+
+def test_treasury_import_keeps_fractional_titles_and_partial_sale():
+    from datetime import date
+    from decimal import Decimal
+
+    dashboard.session.register_asset(
+        ticker="TD-IMPORT-2031", name="Tesouro Selic 2031", asset_class=AssetClass.FIXED_INCOME
+    )
+    headers = [
+        "Data",
+        "Movimentação",
+        "Produto",
+        "Instituição",
+        "Quantidade",
+        "Preço Unitário",
+        "Valor da Operação",
+    ]
+    rows = [
+        [
+            "01/06/2026",
+            "Compra",
+            "TD-IMPORT-2031 - Tesouro Selic 2031",
+            "Teste",
+            "0,05",
+            "1000",
+            "50",
+        ],
+        [
+            "02/06/2026",
+            "Venda",
+            "TD-IMPORT-2031 - Tesouro Selic 2031",
+            "Teste",
+            "0,02",
+            "1100",
+            "22",
+        ],
+    ]
+    status, preview = _post_json(
+        "/imports/b3/preview",
+        {
+            "workbook_base64": _xlsx_with_rows(headers, rows, "Movimentações"),
+            "file_name": "synthetic-treasury.xlsx",
+            "report_type": "MOVEMENT",
+        },
+    )
+    assert status == 200
+    assert all(item["status"] == "NEW" for item in preview["items"])
+    status, applied = _post_json(f"/imports/b3/{preview['batch_id']}/apply", {})
+    assert status == 200
+    assert applied["applied_count"] == 2
+    position = next(
+        item
+        for item in dashboard.session.projection(as_of=date(2026, 6, 2)).positions
+        if str(item.asset.ticker) == "TD-IMPORT-2031"
+    )
+    assert position.quantity.value == Decimal("0.03")
+    assert position.average_price.amount == Decimal("1000")
+    status, repeated = _post_json(f"/imports/b3/{preview['batch_id']}/apply", {})
+    assert status == 200
+    assert repeated["applied_count"] == 0
+
+
+def test_treasury_import_rejects_inconsistent_financial_value_without_events():
+    dashboard.session.register_asset(
+        ticker="TD-BAD-2031", name="Tesouro Selic 2031", asset_class=AssetClass.FIXED_INCOME
+    )
+    rows = [
+        ["01/06/2026", "Compra", "TD-BAD-2031 - Tesouro Selic 2031", "Teste", "0,05", "1000", "51"]
+    ]
+    headers = [
+        "Data",
+        "Movimentação",
+        "Produto",
+        "Instituição",
+        "Quantidade",
+        "Preço Unitário",
+        "Valor da Operação",
+    ]
+    status, preview = _post_json(
+        "/imports/b3/preview",
+        {
+            "workbook_base64": _xlsx_with_rows(headers, rows, "Movimentações"),
+            "file_name": "synthetic-treasury-bad.xlsx",
+            "report_type": "MOVEMENT",
+        },
+    )
+    assert status == 200
+    status, result = _post_json(f"/imports/b3/{preview['batch_id']}/apply", {})
+    assert status == 422
+    assert "divergente" in result["detail"]
+    assert not any(
+        str(event.asset.ticker) == "TD-BAD-2031"
+        for event in dashboard.session.history()
+        if event.asset
+    )

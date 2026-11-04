@@ -2,8 +2,11 @@
 
 import hashlib
 import importlib.metadata
+import json
+import shutil
 from contextlib import contextmanager
 from copy import deepcopy
+from datetime import date
 from types import SimpleNamespace
 
 import pytest
@@ -13,7 +16,9 @@ from engineering_debt import (
     require_clean_diagnostics,
     ruff_exception_findings,
 )
-from gate_policy import compare_diagnostics
+from gate_policy import ROOT, compare_diagnostics, diagnostic_key
+from release_inventory import inventory
+from release_regressions import accepted_typing, assess, content_digest
 
 
 def sample():
@@ -302,3 +307,324 @@ def test_raw_ruff_error_or_inconsistent_success_cannot_be_waived(tmp_path, code)
     approved = ruff_exception_findings(tmp_path, legacy_policy(tmp_path))
     with pytest.raises(ValueError, match="RUFF_RAW_RESULT_INCONSISTENT"):
         classify_ruff(code, approved, approved)
+
+
+# Issue 65 is evaluated in proposal mode; it cannot promote a release.
+
+
+def release_sample():
+    finding = dict(tool="mypy", file="src/a.py", line=4, column=None, code="type-arg", message="M")
+    baseline = dict(
+        findings=[finding],
+        cases=[dict(**{"class": "test.a"}, name="test_ok", status="passed")],
+        tool_versions={"mypy": "2.3.1"},
+        configuration_sha256="config",
+        scope=["src", "tests"],
+    )
+    review = dict(
+        risk="low",
+        financial_impact="NONCRITICAL_REVIEWED",
+        security_impact="NONCRITICAL_REVIEWED",
+        issue="#64",
+        owner="reviewer",
+        evidence="https://github.com/example/review",
+        review_until="2026-12-01",
+    )
+    policy = dict(
+        accepted_baseline_sha256=content_digest(baseline),
+        approval_url="https://github.com/example/approval",
+        approver="reviewer",
+        review_until="2026-12-01",
+        occurrences={diagnostic_key(finding): review},
+    )
+    candidate = deepcopy(baseline)
+    candidate["critical_gates"] = dict(Financial="PASS", Security="PASS", Release="PASS")
+    return baseline, candidate, policy
+
+
+def test_release_proposal_never_authorizes_deployment():
+    baseline, candidate, policy = release_sample()
+    result = assess(baseline, candidate, policy, today="2026-11-03")
+    assert set(result["gates"].values()) == {"PASS"}
+    assert result["deployment_authorized"] is False
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "new",
+        "duplicate",
+        "line",
+        "message",
+        "code",
+        "missing_test",
+        "skip",
+        "failed",
+        "new_failed_test",
+        "tools",
+        "config",
+        "scope",
+        "approval",
+        "expired",
+        "baseline",
+        "risk",
+        "owner",
+        "issue",
+        "financial",
+        "security",
+        "evidence",
+        "duplicate_test",
+        "missing_review",
+        "expired_occurrence",
+    ],
+)
+def test_release_proposal_blocks_unreviewed_changes(mutation):
+    baseline, candidate, policy = release_sample()
+    finding = candidate["findings"][0]
+    review = policy["occurrences"][diagnostic_key(finding)]
+    if mutation == "new":
+        candidate["findings"].append(dict(finding, file="src/new.py"))
+    elif mutation == "duplicate":
+        candidate["findings"].append(deepcopy(finding))
+    elif mutation in {"line", "message", "code"}:
+        finding[mutation] = 8 if mutation == "line" else "changed"
+    elif mutation == "missing_test":
+        candidate["cases"] = []
+    elif mutation in {"skip", "failed"}:
+        candidate["cases"][0]["status"] = "skipped" if mutation == "skip" else "failed"
+    elif mutation == "new_failed_test":
+        candidate["cases"].append(dict(**{"class": "test.new"}, name="new", status="failed"))
+    elif mutation == "duplicate_test":
+        candidate["cases"].append(deepcopy(candidate["cases"][0]))
+    elif mutation in {"tools", "config", "scope"}:
+        candidate[
+            {"tools": "tool_versions", "config": "configuration_sha256", "scope": "scope"}[mutation]
+        ] = "changed"
+    elif mutation == "approval":
+        policy.pop("approval_url")
+    elif mutation == "expired":
+        policy["review_until"] = "2026-11-02"
+    elif mutation == "baseline":
+        baseline["scope"] = ["changed"]
+    elif mutation in {"risk", "owner", "issue", "evidence"}:
+        review[mutation] = "high" if mutation == "risk" else ""
+    elif mutation in {"financial", "security"}:
+        review[mutation + "_impact"] = "UNKNOWN"
+    elif mutation == "missing_review":
+        policy["occurrences"] = {}
+    elif mutation == "expired_occurrence":
+        review["review_until"] = "2026-11-02"
+    assert (
+        assess(baseline, candidate, policy, today="2026-11-03")["gates"]["Engineering"] == "BLOCKED"
+    )
+
+
+@pytest.mark.parametrize("gate", ["Financial", "Security", "Release"])
+@pytest.mark.parametrize("status", ["BLOCKED", "NOT_APPLICABLE", None])
+def test_historical_acceptance_cannot_waive_critical_gates(gate, status):
+    baseline, candidate, policy = release_sample()
+    candidate["critical_gates"][gate] = status
+    assert assess(baseline, candidate, policy, today="2026-11-03")["gates"][gate] == "BLOCKED"
+
+
+def test_existing_failed_test_requires_individual_acceptance():
+    baseline, candidate, policy = release_sample()
+    baseline["cases"][0]["status"] = candidate["cases"][0]["status"] = "failed"
+    policy["accepted_baseline_sha256"] = content_digest(baseline)
+    assert (
+        assess(baseline, candidate, policy, today="2026-11-03")["gates"]["Engineering"] == "BLOCKED"
+    )
+
+
+def test_historical_mapping_does_not_silently_accept_changed_code_or_duplicates(monkeypatch):
+    import release_inventory
+
+    sources = {
+        "old": b"def f():\n    return missing\n",
+        "new": b"# inserted\ndef f():\n    return missing\n",
+    }
+    monkeypatch.setattr(release_inventory, "git_bytes", lambda sha, file: sources[sha])
+    finding = dict(
+        tool="mypy", file="src/a.py", line=2, column=None, code="name-defined", message="missing"
+    )
+    before = dict(checkout_sha="old", findings=[finding])
+    after = dict(checkout_sha="new", findings=[dict(finding, line=3)])
+    rows = inventory(before, after)
+    assert rows[0]["historical_finding"] == finding
+    assert rows[0]["acceptance"] == "PENDING"
+    after["findings"].append(dict(finding, line=3))
+    assert inventory(before, after)[1]["origin"] == "UNPROVEN_BLOCK"
+    sources["new"] = b"# inserted\ndef f():\n    return different\n"
+    assert inventory(before, after)[0]["origin"] == "UNPROVEN_BLOCK"
+
+
+def typing_fixture(tmp_path):
+    directory = tmp_path / "docs/engineering/release-policy-65"
+    directory.mkdir(parents=True)
+    for name in (
+        "candidate_mypy.json",
+        "candidate_python.json",
+        "occurrence_risk_proposals.json",
+        "policy_proposal.md",
+        "baseline_proposal.json",
+    ):
+        shutil.copyfile(ROOT / "docs/engineering/release-policy-65" / name, directory / name)
+    (tmp_path / "ci").mkdir()
+    shutil.copyfile(
+        ROOT / "ci/typing-baseline-acceptance.json", tmp_path / "ci/typing-baseline-acceptance.json"
+    )
+    shutil.copyfile(ROOT / "pyproject.toml", tmp_path / "pyproject.toml")
+    findings = json.loads((directory / "candidate_mypy.json").read_text())["findings"]
+    return directory, findings
+
+
+def test_accepted_typing_does_not_rename_the_raw_failure_or_authorize_release(tmp_path):
+    _, findings = typing_fixture(tmp_path)
+    result = accepted_typing(
+        tmp_path,
+        findings,
+        1,
+        versions={"mypy": "2.3.1", "python": "3.14.7"},
+        today=date(2026, 11, 3),
+    )
+    assert result["status"] == "PASS"
+    assert result["raw_tool_exit_code"] == 1 and result["observed"] == 486
+    assert result["financial_waiver"] is result["historical_tests_waived"] is False
+    assert result["production_authorized"] is False
+
+
+@pytest.mark.parametrize("mutation", ["line", "message", "multiplicity", "file", "rule"])
+def test_accepted_typing_blocks_new_fingerprints_without_netting_resolutions(tmp_path, mutation):
+    _, findings = typing_fixture(tmp_path)
+    changed = deepcopy(findings[0])
+    field = {"line": "line", "message": "message", "file": "file", "rule": "code"}.get(mutation)
+    if field:
+        changed[field] = 999 if field == "line" else "new"
+    findings = findings[1:] + [changed, changed]  # resolving one cannot offset two new instances
+    result = accepted_typing(
+        tmp_path,
+        findings,
+        1,
+        versions={"mypy": "2.3.1", "python": "3.14.7"},
+        today=date(2026, 11, 3),
+    )
+    assert result["status"] == "BLOCKED" and result["added"]
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "acceptance",
+        "financial",
+        "tests",
+        "production",
+        "expiry",
+        "manifest",
+        "reference",
+        "configuration",
+        "tool",
+        "raw_bool",
+        "raw_float",
+        "raw_crash",
+        "raw_empty",
+    ],
+)
+def test_accepted_typing_rejects_unapproved_contracts(tmp_path, mutation):
+    directory, findings = typing_fixture(tmp_path)
+    path = tmp_path / "ci/typing-baseline-acceptance.json"
+    policy = json.loads(path.read_text())
+    versions = {"mypy": "2.3.1", "python": "3.14.7"}
+    today, raw = date(2026, 11, 3), 1
+    if mutation in {"acceptance", "financial", "tests", "production"}:
+        field = {
+            "acceptance": "accepted",
+            "financial": "financial_waiver",
+            "tests": "historical_tests_waived",
+            "production": "production_authorized",
+        }[mutation]
+        policy[field] = mutation != "acceptance"
+    elif mutation == "expiry":
+        today = date(2026, 11, 18)
+    elif mutation in {"manifest", "reference"}:
+        (
+            directory
+            / ("baseline_proposal.json" if mutation == "manifest" else "candidate_mypy.json")
+        ).write_text("{}")
+    elif mutation == "configuration":
+        (tmp_path / "pyproject.toml").write_text("changed")
+    elif mutation == "tool":
+        versions["mypy"] = "new"
+    elif mutation == "raw_bool":
+        raw = True
+    elif mutation == "raw_float":
+        raw = 1.0
+    elif mutation == "raw_crash":
+        raw = 2
+    elif mutation == "raw_empty":
+        findings = []
+    path.write_text(json.dumps(policy))
+    with pytest.raises(ValueError):
+        accepted_typing(tmp_path, findings, raw, versions=versions, today=today)
+
+
+def test_accepted_typing_allows_only_resolving_debt(tmp_path):
+    typing_fixture(tmp_path)
+    result = accepted_typing(
+        tmp_path, [], 0, versions={"mypy": "2.3.1", "python": "3.14.7"}, today=date(2026, 11, 17)
+    )
+    assert result["status"] == "PASS" and len(result["resolved"]) == 486
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("risk", "HIGH"),
+        ("owner_proposed", ""),
+        ("issue", ""),
+        ("evidence", ""),
+        ("source_sha256", ""),
+        ("review_until_proposed", "2030-01-01"),
+    ],
+)
+def test_rehashed_proposal_cannot_accept_high_risk_or_unreviewed_occurrences(
+    tmp_path, field, value
+):
+    directory, findings = typing_fixture(tmp_path)
+    risk_path = directory / "occurrence_risk_proposals.json"
+    reviews = json.loads(risk_path.read_text())
+    reviews[0][field] = value
+    risk_path.write_bytes(json.dumps(reviews).encode())
+    manifest_path = directory / "baseline_proposal.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["references"][risk_path.name] = hashlib.sha256(risk_path.read_bytes()).hexdigest()
+    manifest_path.write_bytes(json.dumps(manifest).encode())
+    policy_path = tmp_path / "ci/typing-baseline-acceptance.json"
+    policy = json.loads(policy_path.read_text())
+    policy["manifest_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    policy_path.write_bytes(json.dumps(policy).encode())
+    with pytest.raises(ValueError, match="TYPING_OCCURRENCE_REVIEW_INVALID"):
+        accepted_typing(
+            tmp_path,
+            findings,
+            1,
+            versions={"mypy": "2.3.1", "python": "3.14.7"},
+            today=date(2026, 11, 3),
+        )
+
+
+@pytest.mark.parametrize("legacy_status", ["PASS", "FAIL"])
+@pytest.mark.parametrize("typing_status", ["PASS", "BLOCKED"])
+def test_existing_quality_gate_conjoins_both_baselines(
+    tmp_path, monkeypatch, legacy_status, typing_status
+):
+    import governance
+
+    monkeypatch.setattr(governance, "quality_findings", lambda *args: (1, []))
+    monkeypatch.setattr(governance, "reconciled_findings", lambda *args: [])
+    monkeypatch.setattr(governance, "compare_diagnostics", lambda *args: {"status": legacy_status})
+    monkeypatch.setattr(
+        governance, "accepted_typing", lambda *args, **kw: {"status": typing_status}
+    )
+    code, details = governance.run_check("quality", {}, tmp_path, tmp_path)
+    assert (code == 0) == (legacy_status == "PASS" and typing_status == "PASS")
+    assert details["accepted_typing_nonregression"]["status"] == typing_status

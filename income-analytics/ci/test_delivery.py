@@ -27,7 +27,7 @@ from delivery import (
     verify_selection,
 )
 from delivery_pipeline import acquire, delivery_decision, envelope
-from delivery_stage import Server, environment, verify_installed
+from delivery_stage import Server, environment, restore_staging_checkpoint, verify_installed
 from test_build_artifact import built as built
 
 
@@ -112,6 +112,7 @@ def validated_staging():
             "backup",
             "restore",
             "rollback",
+            "rollback_restore",
             "synthetic_restore_after_block",
             "immutable_promotion",
             "cleanup",
@@ -149,6 +150,7 @@ def test_valid_technical_candidate_never_authorizes_production(source):
         "backup",
         "restore",
         "rollback",
+        "rollback_restore",
         "synthetic_restore_after_block",
         "immutable_promotion",
         "cleanup",
@@ -295,6 +297,67 @@ def test_online_backup_restore_exact_semantics_with_open_wal_writer(owned):
             (1, "synthetic-initial"),
             (2, "committed-in-WAL"),
         ]
+
+
+def test_staging_rollback_recovers_read_model_upgrade_without_ignoring_state(owned):
+    path = seed(owned)
+    with closing(sqlite3.connect(path)) as db:
+        db.execute("CREATE TABLE portfolio_dashboard_snapshot (version INTEGER, payload TEXT)")
+        db.execute("INSERT INTO portfolio_dashboard_snapshot VALUES (4, 'synthetic-A')")
+        db.commit()
+    backup = owned.file("rollback.db")
+    record = backup_database(owned, path, backup, "synthetic-head")
+    with closing(sqlite3.connect(path)) as db:
+        db.execute("UPDATE portfolio_dashboard_snapshot SET version=5,payload='synthetic-B'")
+        db.commit()
+    # The old app-only rollback correctly rejects changed cache bytes.
+    with pytest.raises(DeliveryError, match="RESTORE_STATE_MISMATCH"):
+        database_check(owned, path, "synthetic-head", record["state_signature"])
+    restored = restore_staging_checkpoint(owned, backup, path, record)
+    assert restored["status"] == "PASS"
+    assert restored["changed_tables"] == ["portfolio_dashboard_snapshot"]
+    assert restored["production_access"] is False
+    assert database_check(owned, path, "synthetic-head", record["state_signature"])
+    with closing(sqlite3.connect(path)) as db:
+        assert db.execute("SELECT * FROM portfolio_dashboard_snapshot").fetchall() == [
+            (4, "synthetic-A")
+        ]
+        assert db.execute("SELECT * FROM probe").fetchall() == [(1, "synthetic-initial")]
+
+
+@pytest.mark.parametrize("change", ["insert", "update", "delete", "schema"])
+def test_staging_rollback_never_discards_post_backup_persistent_changes(owned, change):
+    path = seed(owned)
+    backup = owned.file("rollback.db")
+    record = backup_database(owned, path, backup, "synthetic-head")
+    with closing(sqlite3.connect(path)) as db:
+        db.execute({
+            "insert": "INSERT INTO probe VALUES (2,'post-backup-fact')",
+            "update": "UPDATE probe SET value='post-backup-fact'",
+            "delete": "DELETE FROM probe",
+            "schema": "CREATE TABLE new_persistent_facts(id INTEGER)",
+        }[change])
+        db.commit()
+    changed_digest = sha(path.read_bytes())
+    with pytest.raises(DeliveryError, match="ROLLBACK_HAS_NEW_PERSISTENT_STATE"):
+        restore_staging_checkpoint(owned, backup, path, record)
+    assert sha(path.read_bytes()) == changed_digest
+    with pytest.raises(DeliveryError, match="RESTORE_STATE_MISMATCH"):
+        database_check(owned, path, "synthetic-head", record["state_signature"])
+
+
+def test_staging_rollback_rejects_derived_cache_schema_change(owned):
+    path = seed(owned)
+    with closing(sqlite3.connect(path)) as db:
+        db.execute("CREATE TABLE portfolio_dashboard_snapshot(version INTEGER)")
+        db.commit()
+    backup = owned.file("rollback.db")
+    record = backup_database(owned, path, backup, "synthetic-head")
+    with closing(sqlite3.connect(path)) as db:
+        db.execute("ALTER TABLE portfolio_dashboard_snapshot ADD COLUMN payload TEXT")
+        db.commit()
+    with pytest.raises(DeliveryError, match="ROLLBACK_CACHE_SCHEMA_CHANGED"):
+        restore_staging_checkpoint(owned, backup, path, record)
 
 
 @pytest.mark.parametrize(

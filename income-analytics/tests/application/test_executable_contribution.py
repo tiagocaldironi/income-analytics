@@ -305,3 +305,26 @@ def test_fixed_income_never_uses_a_derived_curve_as_purchase_quote():
     assert observed == [{"as_of": TODAY, "include_fixed_income": False}]
     assert result["orders"] == []
     assert result["blocked"][0]["reason"] == "MISSING_PRICE"
+
+
+def test_treasury_titles_use_centititles_without_bank_application_terms():
+    session = fake_session([("TD-SELIC-2031", "FIXED_INCOME", "1000", "0", 0, "BRL")])
+    session._assets["TD-SELIC-2031"].name = "Tesouro Selic 2031"
+    result = build_executable_plan(session, amount=D("55"), as_of=TODAY)
+    assert result["orders"][0]["quantity"] == D("0.05")
+    assert result["total_estimated"] == D("50")
+    assert result["residual_amount"] == D("5")
+    assert result["total_estimated"] + result["residual_amount"] == D("55")
+    assert session._assets["TD-SELIC-2031"].asset_class is AssetClass.FIXED_INCOME
+
+
+def test_treasury_cannot_override_official_quantity_increment():
+    session = fake_session([("TD-SELIC-2031", "FIXED_INCOME", "1000", "0", 0, "BRL")])
+    session._assets["TD-SELIC-2031"].name = "Tesouro Selic 2031"
+    with pytest.raises(ValueError, match="0,01"):
+        build_executable_plan(
+            session,
+            amount=D("55"),
+            as_of=TODAY,
+            rules={"TD-SELIC-2031": {"quantity_step": D("0.001")}},
+        )

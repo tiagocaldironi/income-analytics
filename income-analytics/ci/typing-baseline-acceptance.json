@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "scope": "MYPY_OCCURRENCES_ONLY",
+  "accepted": true,
+  "manifest_sha256": "973a7e0867d4df698381e5d53be1ac044b03075c11ae769e85d4fe7dd4b75e2a",
+  "baseline_content_sha256": "bfb56031699c3b79908657442703c086cc6f18fceea8f9c7d30abee1c177b74e",
+  "approval_source": "Explicit human response in this Codex conversation on 2026-11-03; exact proposal c687acf",
+  "approval_text": "Aceito o baseline de tipagem e o prazo propostos",
+  "owner": "tiagocaldironi",
+  "review_until": "2026-11-17",
+  "expiry_timezone": "UTC_INCLUSIVE_DATE",
+  "recorded_at_utc": "2026-11-03T20:26:52.270858+00:00",
+  "financial_waiver": false,
+  "historical_tests_waived": false,
+  "production_authorized": false,
+  "policy_activation": "ADDITIONAL_TYPING_CHECK_ONLY; NO_PRODUCTION_PROMOTION_CHANGE"
+}

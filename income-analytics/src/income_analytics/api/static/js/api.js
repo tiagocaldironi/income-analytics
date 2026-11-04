@@ -131,6 +131,8 @@ export const portfolioApi = {
   allocationAnalysis: asOf => request(`/portfolio/allocation-analysis${asOf ? `?as_of=${encodeURIComponent(asOf)}` : ""}`),
   intelligence: asOf => request(`/portfolio/intelligence${asOf ? `?as_of=${encodeURIComponent(asOf)}` : ""}`),
   diversification: () => request("/portfolio/diversification"),
+  amendTreasuryTrade: (eventId, payload) => request(`/treasury/trades/${encodeURIComponent(eventId)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
+  createTreasuryTrade: payload => request("/treasury/trades", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
   createTrade: payload => request("/trades", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
   createFixedIncomeSale: payload => request("/fixed-income/sales", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
   previewIrpfBrazilianStocks: workbook_base64 => request("/imports/irpf/brazilian-stocks/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workbook_base64 }) }),

@@ -1032,3 +1032,7 @@ html[data-theme="light"] .fixed-income-big-number,html[data-theme="light"] .unde
 
 .auth-pending body{visibility:hidden}
 .account-access{color:var(--ia-text-primary);padding:12px;font-size:.85rem;white-space:nowrap}
+
+.holding-strategy-note { grid-column: 1 / -1; color: var(--text-muted, #8fa3ba); font-size: .75rem; line-height: 1.5; }
+
+.treasury-edit-button { width: auto; min-height: 32px; padding: 4px 10px; margin-right: 8px; font-size: .8rem; }

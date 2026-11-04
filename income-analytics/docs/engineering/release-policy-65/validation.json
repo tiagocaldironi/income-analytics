@@ -1,0 +1,17 @@
+{
+  "targeted_tests": 312,
+  "command": "PYTHONPATH=<checkout>/src;<checkout>/ci python -m pytest ci/test_engineering_debt.py ci/test_governance.py ci/test_delivery.py ci/test_financial_certification.py ci/test_security.py -q -o addopts=",
+  "status": "PASS",
+  "immutable_files_verified": 41,
+  "new_policy_active": false,
+  "hosted_new_candidate": "COMPLETED checkpoint run 41710100034 head 13fbe01 / merge aef32f78: Engineering, Security, staging rollback PASS; full/my py/financial historical failures preserved. See hosted_validation.json.",
+  "full_suite": "LOCAL: 1488 PASS / 15 FAIL / 9 ERROR / 5 SKIP; checkpoint worktree before commits",
+  "new_tests_vs_pr62_passed": 69,
+  "existing_test_status_changes": 0,
+  "mypy_exact_hosted_local": 486,
+  "policy_principles_approved": true,
+  "baseline_accepted": false,
+  "activation_authorized": false,
+  "security_tests_passed": 144,
+  "staging_rollback": "PASS_HOSTED_DISPOSABLE_ONLY"
+}

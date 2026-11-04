@@ -120,3 +120,59 @@ def test_production_relative_data_root_rejected(monkeypatch):
     monkeypatch.setenv("INCOME_DATA_ROOT", "relative-data")
     with pytest.raises(RuntimeError, match="absolute"):
         validate_database_path(Path("relative-data/synthetic.db"))
+
+
+def test_issue77_review_is_bound_to_public_migration_bytes():
+    import hashlib
+    import json
+
+    root = Path(__file__).resolve().parents[2]
+    inventory = (
+        root / "docs/engineering/scoped-financial-certification/immutable_reference_inventory.json"
+    )
+    content = inventory.read_bytes()
+    reference = json.loads(content)["files"]["alembic/versions/0008_paid_income_brapi.py"]
+    assert (
+        hashlib.sha256(
+            (root / "alembic/versions/0008_paid_income_brapi.py").read_bytes()
+        ).hexdigest()
+        == reference
+    )
+    policy = json.loads(
+        (root / "docs/engineering/security/security_scanner_triage.json").read_text()
+    )
+    reviewed = next(
+        row
+        for row in policy["gitleaks_decisions"]
+        if row["identity"] == "197358740fcb22d9780a8e416b7586a1cbb820784e86a44d540dcfd7bec243b4"
+    )
+    assert reviewed["content_sha256"] == hashlib.sha256(content).hexdigest()
+    assert reviewed["state"] == "FALSE_POSITIVE" and reviewed["reason"]
+
+
+@pytest.mark.parametrize("field", ["content_sha256", "file", "line", "rule", "commit"])
+def test_issue77_changed_occurrence_has_no_existing_approval(field):
+    import hashlib
+    import json
+
+    root = Path(__file__).resolve().parents[2]
+    policy = json.loads(
+        (root / "docs/engineering/security/security_scanner_triage.json").read_text()
+    )
+    decisions = {row["identity"] for row in policy["gitleaks_decisions"]}
+    row = {
+        "tool": "gitleaks",
+        "mode": "dir",
+        "rule": "generic-api-key",
+        "file": (
+            "income-analytics/docs/engineering/scoped-financial-certification/"
+            "immutable_reference_inventory.json"
+        ),
+        "line": 12,
+        "commit": "",
+        "state": "POTENTIAL",
+        "content_sha256": "d6f99bca05a7d3f6ad4d3e67ce46db5c6876da71dfc7c15d15c5b1b0f7c83853",
+    }
+    assert hashlib.sha256(json.dumps(row, sort_keys=True).encode()).hexdigest() in decisions
+    row[field] = 13 if field == "line" else "changed-unreviewed-occurrence"
+    assert hashlib.sha256(json.dumps(row, sort_keys=True).encode()).hexdigest() not in decisions

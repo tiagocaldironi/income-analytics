@@ -141,11 +141,15 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
         not missing
         and valid_identity
         and build_valid
-        and all(reports[name].get("exit_code") == 0 for name in required)
+        and all(
+            type(reports[name].get("exit_code")) is int and reports[name]["exit_code"] == 0
+            for name in required
+        )
     )
     certification = reports.get("financial", {})
     financial_pass = (
         certification.get("status") == "PASS"
+        and type(certification.get("exit_code")) is int
         and certification.get("exit_code") == 0
         and not certification.get("blockers")
         and valid_identity
