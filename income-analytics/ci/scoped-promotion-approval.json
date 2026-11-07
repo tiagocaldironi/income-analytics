@@ -7,7 +7,7 @@
   "approved_sha": "21f200da226bfa2d21a54e10e9ec09e971bd51fc",
   "comment_id": 6710492429,
   "comment_url": "https://github.com/tiagocaldironi/income-analytics/pull/81#issuecomment-6710492429",
-  "comment_body_sha256": "ac9dbac054b67a48d8fefd4ff0e3f0384de53e855a6059a294fcada5150f78c6",
+  "comment_body_sha256": "ff049e5dbd60f4aa9e799af95a4b6a81e5bff3b551258d931ab80697baa0acd4",
   "certified_surface_sha256": "a6c64e2f05d10b16e2ccf139fadd0554953cc7c1fe340a64946540325e3a918a",
   "scope": "PR81_TREASURY_NAME_IDENTITY_AND_PR79_PR69_PR62_AFFECTED_DEPENDENCIES",
   "binding": "UNCHANGED_CERTIFIED_SURFACE_AND_FRESH_SAME_CANDIDATE_CI_REQUIRED",
