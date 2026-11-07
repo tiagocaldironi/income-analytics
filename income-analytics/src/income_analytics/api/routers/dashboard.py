@@ -12,7 +12,7 @@ from decimal import Decimal
 from functools import lru_cache
 from time import sleep
 from typing import Literal, cast
-from uuid import UUID, uuid4
+from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 from fastapi.encoders import jsonable_encoder
@@ -2530,7 +2530,7 @@ def create_treasury_trade(trade: TreasuryTradeInput) -> dict[str, object]:
             elif trade.event_type == "SELL":
                 raise ValueError("Selecione um título existente para vender.")
             else:
-                ticker = "TD" + uuid4().hex[:18].upper()
+                ticker = "TD" + uuid5(NAMESPACE_URL, "income:treasury:" + title).hex[:18].upper()
                 if ticker in session._assets:
                     raise ValueError("Não foi possível identificar o título. Tente novamente.")
         asset = session._assets.get(ticker)

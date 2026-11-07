@@ -6,7 +6,7 @@
   "files": {
     "src/income_analytics/api/routers/dashboard.py": {
       "before_sha256": "a65287a25aabf211c9f3fcfe905b6e7e25c871e9d68b4d87ee67fe0fa52cabaa",
-      "after_sha256": "0fb44666440e795418bab5e71ed14d101f7dcbeb9bddcfcf8e4429b5fa3311f1"
+      "after_sha256": "ea4abc62fa4855a9062abd64262a0bcf08c4eb699ef88151277118e58398a5ce"
     },
     "src/income_analytics/infrastructure/sqlite_repositories.py": {
       "before_sha256": "999143ba2669b4af4e84211419d842d2b2cc9fcc54eb112174fc7dac10d03390",

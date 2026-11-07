@@ -278,3 +278,15 @@ def test_name_only_trade_cannot_replace_legacy_contract(session):
     assert error.value.status_code == 422
     assert session.history() == before
     assert list(session._assets) == ["FI-TD"]
+
+
+def test_internal_identity_matches_for_stale_snapshots_of_the_same_title(session, monkeypatch):
+    # Two requests may have loaded the same empty wallet before either commits.
+    first = session
+    second = PortfolioSession(portfolio_id=MAIN_PORTFOLIO_ID, persistent=False)
+    dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload(ticker=None)))
+    monkeypatch.setattr(dashboard, "session", second)
+    dashboard.create_treasury_trade(dashboard.TreasuryTradeInput(**payload(
+        ticker=None, name="LFT 2031",
+    )))
+    assert list(first._assets) == list(second._assets)
