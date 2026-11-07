@@ -356,7 +356,7 @@ jobs:
 
   release_scoped:
     name: CI / Release scoped
-    if: ${{ always() && github.event_name == 'pull_request' && contains(fromJSON('[69,79]'), github.event.pull_request.number) }}
+    if: ${{ always() && github.event_name == 'pull_request' && contains(fromJSON('[69,79,81]'), github.event.pull_request.number) }}
     needs: [engineering_gate, security, staging_preview]
     runs-on: windows-2025
     timeout-minutes: 10

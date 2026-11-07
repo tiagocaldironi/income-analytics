@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "issue": 80,
+  "issue": 78,
   "base_commit": "47535d101b1ddfecf9bb67fc989bf9eeca7e7a35",
-  "scope": "PR79_ONLY_UNCHANGED_SYNTAX_BLOCKS_OF_ACCEPTED_OCCURRENCES",
+  "scope": "PR81_ONLY_UNCHANGED_SYNTAX_BLOCKS_OF_ACCEPTED_OCCURRENCES",
   "files": {
     "src/income_analytics/api/routers/dashboard.py": {
       "before_sha256": "a65287a25aabf211c9f3fcfe905b6e7e25c871e9d68b4d87ee67fe0fa52cabaa",
-      "after_sha256": "026611464bfc191a9aa20583b230e9942bef23e5642b4e97a7af0299fb5a19df"
+      "after_sha256": "ea4abc62fa4855a9062abd64262a0bcf08c4eb699ef88151277118e58398a5ce"
     },
     "src/income_analytics/infrastructure/sqlite_repositories.py": {
       "before_sha256": "999143ba2669b4af4e84211419d842d2b2cc9fcc54eb112174fc7dac10d03390",
