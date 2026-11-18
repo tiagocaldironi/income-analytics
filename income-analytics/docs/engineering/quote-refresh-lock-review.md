@@ -35,19 +35,26 @@ de qualidade, configuração de escopo e baseline de diagnósticos permanecem ig
 O smoke do pacote corrigido aceita traceparent válido e rejeita o tamanho excessivo.
 Esta atualização exige nova CI; a evidência do primeiro candidato não a certifica.
 
-## Decisão pendente, sem ativação
+## Renovação autorizada, publicação condicionada
 
 O aceite em `ci/typing-baseline-acceptance.json` venceu em 17/11/2026 (UTC).
-Proposta para o proprietário: renovar até **02/12/2026**, mantendo o inventário
+Em 18/11/2026 o proprietário respondeu “Autorizar renovação e publicação
+condicionada” à proposta do PR82. O aceite é renovado até **02/12/2026**, mantendo o inventário
 exato de 486 ocorrências, responsáveis, riscos e referências já documentados em
 `docs/engineering/release-policy-65/occurrence_risk_proposals.json`. Os 481 achados
 atuais são um subconjunto desse inventário; os cinco ausentes não compensam erros novos.
 Digest do conteúdo originalmente aceito:
 `bfb56031699c3b79908657442703c086cc6f18fceea8f9c7d30abee1c177b74e`.
 
-Esta é uma proposta, não uma renovação. Nenhum prazo ou aceite foi alterado.
-Também é necessária aprovação específica da superfície final do PR82 para a
-promoção por escopo: o aceite do PR81 não se transfere ao middleware e aos locks
-alterados. Uma eventual autorização permanece condicionada à CI do candidato,
+A renovação muda somente as datas de revisão das mesmas 486 ocorrências e as
+referências de integridade dos registros correspondentes; não altera achados,
+riscos, responsáveis, evidências ou o digest do conteúdo originalmente aceito.
+O teste de vencimento agora usa o dia seguinte ao prazo registrado, preservando
+a rejeição de aceites expirados após futuras renovações.
+
+A autorização específica do PR82 abrange middleware, patch OpenTelemetry e a
+renovação descrita aqui; não é herdada do PR81. O registro de aprovação deverá
+vincular os bytes finais e o comentário que transcreve a decisão humana.
+A publicação permanece condicionada à CI do candidato,
 segurança, certificação pertinente, staging e rollback aprovados. Não dispensa
 CERT_48, não aceita falhas financeiras novas e não autoriza publicar com gate vermelho.

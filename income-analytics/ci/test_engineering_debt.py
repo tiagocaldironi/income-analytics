@@ -544,7 +544,7 @@ def test_accepted_typing_rejects_unapproved_contracts(tmp_path, mutation):
         }[mutation]
         policy[field] = mutation != "acceptance"
     elif mutation == "expiry":
-        today = date(2026, 11, 18)
+        today = date.fromordinal(date.fromisoformat(policy["review_until"]).toordinal() + 1)
     elif mutation in {"manifest", "reference"}:
         (
             directory
