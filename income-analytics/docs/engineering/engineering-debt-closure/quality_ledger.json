@@ -7,7 +7,7 @@
     "src/income_analytics/api/onboarding_v2.py": "a5ba7efcac28924eb5b68e4a8bd3409183bb979a59abfd896d546a80704dd5df",
     "src/income_analytics/api/routers/dashboard.py": "a65287a25aabf211c9f3fcfe905b6e7e25c871e9d68b4d87ee67fe0fa52cabaa",
     "src/income_analytics/api/routers/portfolios.py": "6d223ac548b0c5185dd3b5da9f4ca751c3408c987820ef8231a4e320655e82b7",
-    "src/income_analytics/api/saas_security.py": "4708c099ded0532302745898f09b48aebe077d76f85dde5f7d84ff1fc60e632a",
+    "src/income_analytics/api/saas_security.py": "8bf70e2af3cc1028d7969b2715c66b51a4bcd95e771c297694841b3d83fabc4a",
     "src/income_analytics/application/executable_contribution.py": "53f563ccfcd2c25df0e005c641813162d5d2c3247be9e688bbc4343e6981030c",
     "src/income_analytics/application/global_contribution_allocator.py": "bb49a550ff06619f965017ec45a1e6237a2a68526645af85bca389259f2ea58f",
     "src/income_analytics/application/magic_formula_formal_qa.py": "84f264f68a857762c53bb3ecbd2c7a1b1cf9d93b716524a1c68036cb8aac1300",
@@ -12357,7 +12357,7 @@
       },
       "after": null,
       "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json; PR82 re-review: full-scope hosted mypy run 44275644151 at head b62b5ab359fe58f5d0b8e9e821351bcb9dd6b82d reports no findings in this file; committed source SHA256 8bf70e2af3cc1028d7969b2715c66b51a4bcd95e771c297694841b3d83fabc4a. Only rate-limit execution moved to awaited workers; no new debt accepted."
     },
     {
       "id": "historical-0676",
@@ -12371,7 +12371,7 @@
       },
       "after": null,
       "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json; PR82 re-review: full-scope hosted mypy run 44275644151 at head b62b5ab359fe58f5d0b8e9e821351bcb9dd6b82d reports no findings in this file; committed source SHA256 8bf70e2af3cc1028d7969b2715c66b51a4bcd95e771c297694841b3d83fabc4a. Only rate-limit execution moved to awaited workers; no new debt accepted."
     },
     {
       "id": "historical-0677",
@@ -12385,7 +12385,7 @@
       },
       "after": null,
       "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json; PR82 re-review: full-scope hosted mypy run 44275644151 at head b62b5ab359fe58f5d0b8e9e821351bcb9dd6b82d reports no findings in this file; committed source SHA256 8bf70e2af3cc1028d7969b2715c66b51a4bcd95e771c297694841b3d83fabc4a. Only rate-limit execution moved to awaited workers; no new debt accepted."
     },
     {
       "id": "historical-0678",
@@ -12399,7 +12399,7 @@
       },
       "after": null,
       "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json; PR82 re-review: full-scope hosted mypy run 44275644151 at head b62b5ab359fe58f5d0b8e9e821351bcb9dd6b82d reports no findings in this file; committed source SHA256 8bf70e2af3cc1028d7969b2715c66b51a4bcd95e771c297694841b3d83fabc4a. Only rate-limit execution moved to awaited workers; no new debt accepted."
     },
     {
       "id": "historical-0679",
@@ -12413,7 +12413,7 @@
       },
       "after": null,
       "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json; PR82 re-review: full-scope hosted mypy run 44275644151 at head b62b5ab359fe58f5d0b8e9e821351bcb9dd6b82d reports no findings in this file; committed source SHA256 8bf70e2af3cc1028d7969b2715c66b51a4bcd95e771c297694841b3d83fabc4a. Only rate-limit execution moved to awaited workers; no new debt accepted."
     },
     {
       "id": "historical-0680",
@@ -12427,7 +12427,7 @@
       },
       "after": null,
       "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json; PR82 re-review: full-scope hosted mypy run 44275644151 at head b62b5ab359fe58f5d0b8e9e821351bcb9dd6b82d reports no findings in this file; committed source SHA256 8bf70e2af3cc1028d7969b2715c66b51a4bcd95e771c297694841b3d83fabc4a. Only rate-limit execution moved to awaited workers; no new debt accepted."
     },
     {
       "id": "historical-0681",
@@ -12441,7 +12441,7 @@
       },
       "after": null,
       "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json; PR82 re-review: full-scope hosted mypy run 44275644151 at head b62b5ab359fe58f5d0b8e9e821351bcb9dd6b82d reports no findings in this file; committed source SHA256 8bf70e2af3cc1028d7969b2715c66b51a4bcd95e771c297694841b3d83fabc4a. Only rate-limit execution moved to awaited workers; no new debt accepted."
     },
     {
       "id": "historical-0682",
@@ -12455,7 +12455,7 @@
       },
       "after": null,
       "status": "RESOLVED",
-      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json"
+      "evidence": "Absent in full unchanged-scope verifier; see ruff_validation.json/mypy_validation.json and regression_comparison.json; PR82 re-review: full-scope hosted mypy run 44275644151 at head b62b5ab359fe58f5d0b8e9e821351bcb9dd6b82d reports no findings in this file; committed source SHA256 8bf70e2af3cc1028d7969b2715c66b51a4bcd95e771c297694841b3d83fabc4a. Only rate-limit execution moved to awaited workers; no new debt accepted."
     },
     {
       "id": "historical-0683",
