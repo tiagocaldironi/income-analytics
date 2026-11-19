@@ -22646,6 +22646,19 @@
       "identity": "6d77fca7bafcb08e50acb7ae323d0842e1eb6734905cfa269e7ceb0ccf731519",
       "reason": "Exact public SHA-256 of immutable migration 0008_paid_income_brapi.py; recomputed against develop b642709 and current bytes. Not a credential. Current occurrence bound to full inventory digest; historical occurrence bound to commit/file/line/rule. No file or rule exemption.",
       "evidence": "Issue #77; docs/engineering/security/issue77_security_baseline.md; original failed artifact 13272900909; Git blob b642709:income-analytics/alembic/versions/0008_paid_income_brapi.py"
+    },
+    {
+      "tool": "gitleaks",
+      "mode": "dir",
+      "rule": "generic-api-key",
+      "file": "income-analytics/docs/engineering/engineering-debt-closure/quality_ledger.json",
+      "line": 15,
+      "commit": "",
+      "state": "FALSE_POSITIVE",
+      "content_sha256": "5f5d6bfe60f8cd599c3024a5c7c023ba6e90c2afb655f7791ac87f9ce0e77eb7",
+      "identity": "f659156b5b60119835989a3c589c2c3add1e36d55a02e8f363aa1fb2fb91d990",
+      "reason": "Exact public source SHA-256 at quality_ledger.json:15, independently recomputed from the auth_repository.py Git blob. PR82 changed the ledger source-review metadata; this is not a credential. Decision binds the exact complete ledger digest and scanner identity; no rule or file exemption.",
+      "evidence": "PR82 hosted run 44339245030; candidate b0603e1836a4f39cf35c3714ca09ee19593698bb; auth_repository.py Git SHA-256 matches reviewed_source_sha256."
     }
   ]
 }
