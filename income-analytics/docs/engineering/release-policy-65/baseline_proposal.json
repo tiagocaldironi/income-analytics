@@ -21,7 +21,7 @@
   "references": {
     "candidate_mypy.json": "ae83e855a5ddbbee7380becd198821723bf9adeae3ecc6c19c0a538626e4bf77",
     "candidate_python.json": "3f13bed0c5c7bec59dc76bf4b27e9d4d757d586b1ba71748c48e98632197d80a",
-    "occurrence_risk_proposals.json": "83946984c2246a42ac5ac65133a84159d71f5a6e0e70f090d032bd4dafb5cf05",
+    "occurrence_risk_proposals.json": "821f59969b8d85d7cbd46c4b8d850d77be15aaf14f6c559b8d515251798d2aad",
     "policy_proposal.md": "9bb470469ea9f52b86d6763b8728c062a03f8be8e35ca6999f7764cf2e018566"
   },
   "risk_counts": {

@@ -2,7 +2,7 @@
   "schema": 1,
   "scope": "MYPY_OCCURRENCES_ONLY",
   "accepted": true,
-  "manifest_sha256": "62d18756487c2a8a0de86f19b4cf41296a20bc82ac29f696f36a563934c28a2c",
+  "manifest_sha256": "9acab3dae2cbe07b873f5332de9ed2e1100911770e5bb2cf656c6b510bf6f713",
   "baseline_content_sha256": "bfb56031699c3b79908657442703c086cc6f18fceea8f9c7d30abee1c177b74e",
   "approval_source": "Explicit human response from tiagocaldironi in this Codex conversation on 2026-11-20; exact response: 'Sim, revisar por 7 dias'.",
   "approval_text": "Sim, revisar por 7 dias",
