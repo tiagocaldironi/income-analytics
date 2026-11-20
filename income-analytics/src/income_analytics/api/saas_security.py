@@ -126,9 +126,11 @@ async def authorize_request(
         if path in {"/docs", "/redoc", "/openapi.json"}:
             raise HTTPException(404, "Recurso não encontrado.")
         peer = request.client.host if request.client else "unknown"
-        rate_limit("ip:" + peer, limit=300)
+        # SQLite may wait for another request's transaction. Keep the event loop
+        # free so that request can finish and release its database lock.
+        await run_in_threadpool(rate_limit, "ip:" + peer, limit=300)
         if path.startswith("/api/auth/"):
-            rate_limit("auth:" + peer, limit=40)
+            await run_in_threadpool(rate_limit, "auth:" + peer, limit=40)
         if request.method not in {"GET", "HEAD", "OPTIONS"}:
             await bounded_body(request)
             check_csrf(request)
@@ -158,18 +160,22 @@ async def authorize_request(
             raise HTTPException(401, "Sessão inválida ou encerrada. Entre novamente.") from error
         if request.method not in {"GET", "HEAD", "OPTIONS"}:
             check_csrf(request, csrf_hash)
-        rate_limit("user:" + str(principal.user_id), limit=240)
+        await run_in_threadpool(rate_limit, "user:" + str(principal.user_id), limit=240)
         if request.method not in {"GET", "HEAD", "OPTIONS"}:
-            rate_limit("write:" + str(principal.user_id), limit=60)
+            await run_in_threadpool(rate_limit, "write:" + str(principal.user_id), limit=60)
         if "imports/" in path and request.method == "POST":
-            rate_limit("imports:" + str(principal.user_id), limit=20, seconds=86400)
+            await run_in_threadpool(
+                rate_limit, "imports:" + str(principal.user_id), limit=20, seconds=86400,
+            )
         if (
             path.startswith("/api/assets/search")
             or "automatic" in path
             or path == "/api/market-prices/refresh"
         ):
-            rate_limit("market:" + str(principal.user_id), limit=200, seconds=86400)
-            rate_limit("market:platform", limit=5000, seconds=86400)
+            await run_in_threadpool(
+                rate_limit, "market:" + str(principal.user_id), limit=200, seconds=86400,
+            )
+            await run_in_threadpool(rate_limit, "market:platform", limit=5000, seconds=86400)
         request.state.principal = principal
         context_token = principal_context.set(principal)
         route, params = None, {}

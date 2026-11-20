@@ -2,7 +2,7 @@
   "schema": 1,
   "baseline_sha256": "4bff522ba5cf8f203dbb7851a88f3745df4a6f75f4478c88fdd933740bed152a",
   "quality_configuration_sha256": "c931b996f37acc74300e2d24b8fb9397d2e9a3dea721bd8ac1cb7b8e504db859",
-  "lock_sha256": "9e21c4d7114ed15da0ec141ed01a2d2e4abb4b68afa05cec68c008701ebc0f63",
+  "lock_sha256": "a44b87c0c9d15908face12da3155ae665d8b6d23d9fa2e96a1f9fe3910b3e7fa",
   "relocated": [
     {
       "code": "no-untyped-def",
