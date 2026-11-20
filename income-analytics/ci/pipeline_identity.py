@@ -74,6 +74,8 @@ POLICY_FILES = (
     "income-analytics/ci/test-groups.json",
     "income-analytics/ci/test_ci.py",
     "income-analytics/ci/test_governance.py",
+    "income-analytics/ci/module_impact.py",
+    "income-analytics/ci/module_ownership.json",
     "income-analytics/ci/test_pr52_governance.py",
     "income-analytics/docs/engineering/cicd-assessment/ci_quality_baseline.json",
     "income-analytics/docs/engineering/cicd-assessment/ci_branch_protection_bootstrap.json",

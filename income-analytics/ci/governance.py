@@ -40,6 +40,7 @@ from scoped_financial import certify as certify_release_scope
 CHECKS = (
     "runtime",
     "engineering",
+    "magic_formula",
     "financial",
     "python",
     "node",
@@ -113,7 +114,12 @@ def quality_findings(check: str, env: dict, sandbox: Path) -> tuple[int, list[di
 
 
 def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, dict]:
-    gate = {"python": "full", "engineering": "engineering", "financial": "financial"}[check]
+    gate = {
+        "python": "full",
+        "engineering": "engineering",
+        "financial": "financial",
+        "magic_formula": "magic_formula",
+    }[check]
     inventory = sandbox / "inventory.json"
     env["CI_TEST_INVENTORY"] = str(inventory)
     raw = sandbox / "junit.xml"
@@ -169,7 +175,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
     details["deselected"] = [entry["nodeid"] for entry in entries if not entry["selected"]]
     if any(entry["result"] == "RESULT_NOT_MATCHED" for entry in entries):
         return 2, {**details, "status": "FAIL", "reason": "INVENTORY_JUNIT_MISMATCH"}
-    if check == "engineering":
+    if check in {"engineering", "magic_formula"}:
         if details["totals"]["skipped"] or details["totals"]["passed"] == 0:
             return 1, {**details, "status": "FAIL", "reason": "SKIP_OR_EMPTY_ENGINEERING_SCOPE"}
     if check == "financial":
@@ -287,6 +293,7 @@ def main() -> int:
     parser.add_argument("--reports", type=Path, default=ROOT / "ci-reports")
     parser.add_argument("--security-status")
     parser.add_argument("--operational-status")
+    parser.add_argument("--scopes", default="shared")
     args = parser.parse_args()
     if args.check == "summary":
         reports = {}
@@ -295,7 +302,10 @@ def main() -> int:
             if document["check"] in reports:
                 raise ValueError("DUPLICATE_CHECK_REPORT")
             reports[document["check"]] = document
-        summary = require_security_baseline(summarize_reports(reports), args.security_status)
+        scopes = set(args.scopes.split(","))
+        summary = require_security_baseline(
+            summarize_reports(reports, scopes=scopes), args.security_status
+        )
         summary = require_operational(
             summary, reports.get("operational", {}), args.operational_status
         )

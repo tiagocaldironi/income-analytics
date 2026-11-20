@@ -5,6 +5,8 @@ import re
 from collections import Counter
 from pathlib import Path
 
+from module_impact import classify_path
+
 ROOT = Path(__file__).resolve().parents[1]
 GROUPS = json.loads((ROOT / "ci/test-groups.json").read_text(encoding="utf-8"))
 BASELINE = ROOT / "docs/engineering/cicd-assessment/ci_quality_baseline.json"
@@ -15,6 +17,8 @@ def test_scope(nodeid: str) -> dict:
     historical = nodeid in GROUPS["historical_reference_tests"]
     frozen = nodeid in GROUPS["frozen_integrity_tests"]
     external = file in GROUPS["external_modules"]
+    ownership = classify_path(file)
+    magic_formula_only = ownership == "magic_formula"
     financial = historical or frozen or file in GROUPS["financial_modules"]
     if external:
         category = "external_integration"
@@ -56,8 +60,9 @@ def test_scope(nodeid: str) -> dict:
         "file": file,
         "category": category,
         "hermetic_capable": not (historical or external),
-        "engineering": not (historical or frozen or external),
+        "engineering": not (historical or frozen or external or magic_formula_only),
         "financial": financial,
+        "ownership": ownership,
         "exclusion_reason": reason,
         "dependencies": dependencies,
         "security_critical": any(x in file for x in ("security", "auth", "upload", "ci/")),
@@ -102,9 +107,11 @@ def compare_diagnostics(actual: list[dict], expected: list[dict]) -> dict:
     }
 
 
-def summarize_reports(reports: dict[str, dict]) -> dict:
-    required = ("runtime", "engineering", "node", "quality", "build")
+def summarize_reports(reports: dict[str, dict], *, scopes: set[str] | None = None) -> dict:
+    scopes = scopes or {"core"}
+    required = ["runtime", "engineering", "node", "quality", "build"]
     missing = [name for name in required if name not in reports]
+    identity_reports = {name: report for name, report in reports.items() if name != "magic_formula"}
     identities = {
         (
             report.get("checkout_sha"),
@@ -112,7 +119,7 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
             report.get("governance_policy_sha256"),
             report.get("fingerprint_version"),
         )
-        for report in reports.values()
+        for report in identity_reports.values()
     }
     valid_identity = len(identities) == 1 and all(all(pair) and pair[3] == 2 for pair in identities)
     build = reports.get("build", {})
@@ -161,8 +168,32 @@ def summarize_reports(reports: dict[str, dict]) -> dict:
         )
         in identities
     )
+    selected_engineering = ("runtime", "engineering", "node", "quality", "build")
+    core_pass = (
+        not [name for name in selected_engineering if name not in reports]
+        and valid_identity
+        and build_valid
+        and all(
+            type(reports[name].get("exit_code")) is int and reports[name]["exit_code"] == 0
+            for name in selected_engineering
+        )
+    )
+    magic_report = reports.get("magic_formula", {})
+    magic_pass = (
+        type(magic_report.get("exit_code")) is int
+        and magic_report["exit_code"] == 0
+        and magic_report.get("status") == "PASS"
+    )
+    engineering = core_pass and (
+        magic_pass if "magic_formula" in scopes or "shared" in scopes else True
+    )
     return {
         "engineering_ci": "PASS" if engineering else "FAIL",
+        "changed_scopes": sorted(scopes),
+        "core_engineering": "PASS" if core_pass else "FAIL",
+        "magic_formula_gate": "PASS"
+        if magic_pass
+        else ("REQUIRED" if "magic_formula" in scopes or "shared" in scopes else "NOT_REQUIRED"),
         "engineering_missing_reports": missing,
         "consistent_identity": valid_identity,
         "reproducible_build": "PASS" if build_valid else "FAIL",

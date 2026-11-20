@@ -31,6 +31,7 @@ jobs:
         include:
           - {check: runtime, label: Runtime installation}
           - {check: engineering, label: Python engineering}
+          - {check: magic_formula, label: Magic Formula certification}
           - {check: financial, label: Financial certification}
           - {check: python, label: Full Python diagnostic}
           - {check: ruff, label: Ruff diagnostics}
@@ -300,7 +301,16 @@ jobs:
       - name: Evaluate engineering independently of financial certification
         if: always()
         run: |
-          python ci/governance.py summary --reports gate-inputs --security-status '${{ needs.security.result }}' --operational-status '${{ needs.operational.result }}'
+          $base = '${{ github.event.pull_request.base.sha }}'
+          if (-not $base -or $base -match '^\$\{\{') { $base = '${{ github.event.before }}' }
+          if (-not $base -or $base -match '^0+$') { $scopes = 'shared' }
+          else {
+            $paths = git diff --name-only --diff-filter=ACDMRTUXB "$base...${{ github.sha }}"
+            $scopeJson = python -c "import json,sys; from module_impact import classify_changes; print(json.dumps(sorted(classify_changes(sys.argv[1:]))))" @paths
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $scopes = (($scopeJson | ConvertFrom-Json) -join ',')
+          }
+          python ci/governance.py summary --reports gate-inputs --security-status '${{ needs.security.result }}' --operational-status '${{ needs.operational.result }}' --scopes $scopes
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if ('${{ needs.build.result }}' -ne 'success') { exit 1 }
           if ('${{ needs.security.result }}' -ne 'success') { exit 1 }
