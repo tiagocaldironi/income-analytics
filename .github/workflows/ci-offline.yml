@@ -330,6 +330,9 @@ jobs:
     env:
       DELIVERY_SOURCE_RUN: ${{ github.run_id }}
       DELIVERY_SOURCE_COMMIT: ${{ github.sha }}
+      # Previously published PR81 package, with successful engineering and security gates.
+      DELIVERY_PREVIOUS_RUN: "42419143246"
+      DELIVERY_PREVIOUS_COMMIT: "785c755b66df4ffbd5d1704943d1db3b8c7fc0d5"
       DELIVERY_MODE: premerge
       DELIVERY_TARGET: staging
       DELIVERY_GITHUB_TOKEN: ${{ github.token }}
