@@ -287,6 +287,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.14.7'
@@ -306,11 +307,13 @@ jobs:
           if (-not $base -or $base -match '^0+$') { $scopes = 'shared' }
           else {
             $paths = git diff --name-only --diff-filter=ACDMRTUXB "$base...${{ github.sha }}"
+            $env:PYTHONPATH = (Join-Path (Get-Location) 'ci')
             $scopeJson = python -c "import json,sys; from module_impact import classify_changes; print(json.dumps(sorted(classify_changes(sys.argv[1:]))))" @paths
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             $scopes = (($scopeJson | ConvertFrom-Json) -join ',')
           }
-          python ci/governance.py summary --reports gate-inputs --security-status '${{ needs.security.result }}' --operational-status '${{ needs.operational.result }}' --scopes $scopes
+          $env:GOVERNANCE_SCOPES = $scopes
+          python ci/governance.py summary --reports gate-inputs --security-status '${{ needs.security.result }}' --operational-status '${{ needs.operational.result }}'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if ('${{ needs.build.result }}' -ne 'success') { exit 1 }
           if ('${{ needs.security.result }}' -ne 'success') { exit 1 }

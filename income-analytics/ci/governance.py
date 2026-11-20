@@ -39,8 +39,7 @@ from scoped_financial import certify as certify_release_scope
 
 CHECKS = (
     "runtime",
-    "engineering",
-    "magic_formula",
+    "engineering", "magic_formula",
     "financial",
     "python",
     "node",
@@ -114,12 +113,7 @@ def quality_findings(check: str, env: dict, sandbox: Path) -> tuple[int, list[di
 
 
 def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, dict]:
-    gate = {
-        "python": "full",
-        "engineering": "engineering",
-        "financial": "financial",
-        "magic_formula": "magic_formula",
-    }[check]
+    gate = {"python":"full","engineering":"engineering","financial":"financial"}.get(check, check)
     inventory = sandbox / "inventory.json"
     env["CI_TEST_INVENTORY"] = str(inventory)
     raw = sandbox / "junit.xml"
@@ -293,8 +287,7 @@ def main() -> int:
     parser.add_argument("--reports", type=Path, default=ROOT / "ci-reports")
     parser.add_argument("--security-status")
     parser.add_argument("--operational-status")
-    parser.add_argument("--scopes", default="shared")
-    args = parser.parse_args()
+    scopes, args = set(os.getenv("GOVERNANCE_SCOPES", "shared").split(",")), parser.parse_args()
     if args.check == "summary":
         reports = {}
         for path in args.reports.rglob("result.json"):
@@ -302,10 +295,7 @@ def main() -> int:
             if document["check"] in reports:
                 raise ValueError("DUPLICATE_CHECK_REPORT")
             reports[document["check"]] = document
-        scopes = set(args.scopes.split(","))
-        summary = require_security_baseline(
-            summarize_reports(reports, scopes=scopes), args.security_status
-        )
+        summary = _summarize(reports, scopes, args.security_status)
         summary = require_operational(
             summary, reports.get("operational", {}), args.operational_status
         )
@@ -392,6 +382,11 @@ def main() -> int:
     if not os.getenv("GITHUB_ACTIONS"):
         print(f"Private raw diagnostics: {sandbox}")
     return code
+
+
+def _summarize(reports: dict, scopes: set[str], security_status: str | None) -> dict:
+    summary = summarize_reports(reports, scopes=scopes)
+    return require_security_baseline(summary, security_status)
 
 
 if __name__ == "__main__":

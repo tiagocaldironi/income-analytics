@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import fnmatch
 import json
-import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,15 +29,6 @@ def classify_changes(paths: list[str]) -> set[str]:
     if not scopes:
         return {"shared"}
     return scopes
-
-
-def changed_paths(base: str, head: str, *, root: Path = ROOT) -> list[str]:
-    output = subprocess.check_output(
-        ["git", "diff", "--name-only", "--diff-filter=ACDMRTUXB", f"{base}...{head}"],
-        cwd=root,
-        text=True,
-    )
-    return [line for line in output.splitlines() if line]
 
 
 def should_run_magic_formula(scopes: set[str]) -> bool:

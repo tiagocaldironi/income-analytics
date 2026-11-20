@@ -18,7 +18,6 @@ from gate_policy import (
     test_scope,
 )
 from governance import parse_mypy_output
-from module_impact import classify_changes, classify_path, engineering_decision
 
 
 def diagnostic(**changes):
@@ -96,102 +95,10 @@ def test_unrecognized_new_test_remains_in_engineering():
     assert test_scope("tests/test_new_regression.py::test_new")["engineering"]
 
 
-@pytest.mark.parametrize(
-    "path",
-    [
-        "src/income_analytics/application/magic_formula_stocks.py",
-        "tests/application/test_magic_formula_ranking_engine.py",
-    ],
-)
-def test_magic_formula_test_ownership_is_explicit(path):
-    assert classify_path(path) == "magic_formula"
-    assert not test_scope(path + "::test_case")["engineering"]
-
-
-@pytest.mark.parametrize(
-    "path",
-    [
-        "src/income_analytics/api/routers/dashboard.py",
-        "src/income_analytics/infrastructure/b3_cotahist_market_data.py",
-        "alembic/versions/0015_magic_formula_fundamentals_snapshots.py",
-        "ci/new_policy.py",
-        "docs/new_file.md",
-    ],
-)
-def test_shared_and_unknown_paths_fail_closed(path):
-    assert classify_path(path) == "shared"
-    assert classify_changes([path]) == {"shared"}
-
-
-def test_core_paths_are_core_owned():
-    assert classify_path("src/income_analytics/application/treasury.py") == "core"
-    assert classify_changes(["src/income_analytics/application/treasury.py"]) == {"core"}
-
-
-@pytest.mark.parametrize(
-    "scopes,core,mf,shared,expected",
-    [
-        ({"core"}, True, False, True, True),
-        ({"core"}, False, False, True, False),
-        ({"magic_formula"}, False, True, True, True),
-        ({"magic_formula"}, False, False, True, False),
-        ({"shared"}, True, False, True, False),
-        ({"shared"}, True, True, True, True),
-    ],
-)
-def test_engineering_decision_requires_domain_and_shared_gates(scopes, core, mf, shared, expected):
-    assert (
-        engineering_decision(
-            scopes,
-            core_pass=core,
-            magic_formula_pass=mf,
-            shared_pass=shared,
-            security_pass=True,
-            build_pass=True,
-        )
-        is expected
-    )
-
-
-def test_security_and_build_fail_every_scope():
-    for scopes in ({"core"}, {"magic_formula"}, {"shared"}):
-        assert not engineering_decision(
-            scopes,
-            core_pass=True,
-            magic_formula_pass=True,
-            shared_pass=True,
-            security_pass=False,
-            build_pass=True,
-        )
-        assert not engineering_decision(
-            scopes,
-            core_pass=True,
-            magic_formula_pass=True,
-            shared_pass=True,
-            security_pass=True,
-            build_pass=False,
-        )
-
-
 def test_external_scope_requires_documented_real_dependency():
     for file in GROUPS["external_modules"]:
         entry = test_scope(file + "::test_case")
         assert entry["category"] == "external_integration" and entry["exclusion_reason"]
-
-
-def test_core_gate_ignores_magic_formula_before_test_import():
-    import gate_plugin
-
-    class Config:
-        @staticmethod
-        def getoption(name):
-            assert name == "--ci-gate"
-            return "engineering"
-
-    fm_test = ROOT / "tests/application/test_magic_formula_canonical_ranking.py"
-    core_test = ROOT / "tests/application/test_treasury.py"
-    assert gate_plugin.pytest_ignore_collect(fm_test, Config()) is True
-    assert gate_plugin.pytest_ignore_collect(core_test, Config()) is False
 
 
 def engineering_reports():
@@ -286,29 +193,6 @@ def test_mixed_commit_or_source_reports_cannot_approve():
     reports = engineering_reports()
     reports["node"]["source_fingerprint"] = "different"
     assert summarize_reports(reports)["engineering_ci"] == "FAIL"
-
-
-def test_core_scope_does_not_require_historical_magic_formula_gate():
-    reports = engineering_reports()
-    result = summarize_reports(reports, scopes={"core"})
-    assert result["engineering_ci"] == "PASS"
-    assert result["magic_formula_gate"] == "NOT_REQUIRED"
-
-
-@pytest.mark.parametrize("scopes", [{"magic_formula"}, {"shared"}])
-def test_magic_formula_and_shared_scopes_require_module_gate(scopes):
-    reports = engineering_reports()
-    assert summarize_reports(reports, scopes=scopes)["engineering_ci"] == "FAIL"
-    reports["magic_formula"] = {"status": "PASS", "exit_code": 0}
-    assert summarize_reports(reports, scopes=scopes)["engineering_ci"] == "PASS"
-
-
-def test_shared_security_build_and_core_failures_still_block():
-    reports = engineering_reports()
-    reports["magic_formula"] = {"status": "PASS", "exit_code": 0}
-    assert summarize_reports(reports, scopes={"shared"})["engineering_ci"] == "PASS"
-    reports["engineering"]["exit_code"] = 1
-    assert summarize_reports(reports, scopes={"shared"})["engineering_ci"] == "FAIL"
 
 
 def test_normalization_removes_personal_absolute_paths_without_hiding_error():
@@ -450,3 +334,107 @@ def test_pr52_tests_are_explicit_inputs_to_the_actual_python_command(monkeypatch
     monkeypatch.setattr(governance.legacy, "execute", capture)
     with pytest.raises(StopBeforeExecution):
         governance.python_check("engineering", {}, tmp_path, tmp_path)
+class TestModuleGateGovernance(__import__('unittest').TestCase):
+    def test_magic_formula_test_ownership_is_explicit(self):
+        from module_impact import classify_path
+
+        for path in (
+            'src/income_analytics/application/magic_formula_stocks.py',
+            'tests/application/test_magic_formula_ranking_engine.py',
+        ):
+            self.assertEqual(classify_path(path), 'magic_formula')
+            self.assertFalse(test_scope(path + '::test_case')['engineering'])
+
+    def test_shared_and_unknown_paths_fail_closed(self):
+        from module_impact import classify_changes, classify_path
+
+        paths = (
+            'src/income_analytics/api/routers/dashboard.py',
+            'src/income_analytics/infrastructure/b3_cotahist_market_data.py',
+            'alembic/versions/0015_magic_formula_fundamentals_snapshots.py',
+            'ci/new_policy.py',
+            'docs/new_file.md',
+        )
+        for path in paths:
+            self.assertEqual(classify_path(path), 'shared')
+            self.assertEqual(classify_changes([path]), {'shared'})
+
+    def test_core_paths_are_core_owned(self):
+        from module_impact import classify_changes, classify_path
+
+        path = 'src/income_analytics/application/treasury.py'
+        self.assertEqual(classify_path(path), 'core')
+        self.assertEqual(classify_changes([path]), {'core'})
+
+    def test_engineering_decision_requires_domain_and_shared_gates(self):
+        from module_impact import engineering_decision
+
+        matrix = (
+            ({'core'}, True, False, True, True),
+            ({'core'}, False, False, True, False),
+            ({'magic_formula'}, False, True, True, True),
+            ({'magic_formula'}, False, False, True, False),
+            ({'shared'}, True, False, True, False),
+            ({'shared'}, True, True, True, True),
+        )
+        for scopes, core, magic, shared, expected in matrix:
+            self.assertEqual(
+                engineering_decision(
+                    scopes,
+                    core_pass=core,
+                    magic_formula_pass=magic,
+                    shared_pass=shared,
+                    security_pass=True,
+                    build_pass=True,
+                ),
+                expected,
+            )
+
+    def test_security_and_build_fail_every_scope(self):
+        from module_impact import engineering_decision
+
+        for scopes in ({'core'}, {'magic_formula'}, {'shared'}):
+            for security, build in ((False, True), (True, False)):
+                self.assertFalse(
+                    engineering_decision(
+                        scopes,
+                        core_pass=True,
+                        magic_formula_pass=True,
+                        shared_pass=True,
+                        security_pass=security,
+                        build_pass=build,
+                    )
+                )
+
+    def test_core_gate_ignores_magic_formula_before_test_import(self):
+        import gate_plugin
+
+        class Config:
+            @staticmethod
+            def getoption(name):
+                return 'engineering' if name == '--ci-gate' else None
+
+        fm_test = ROOT / 'tests/application/test_magic_formula_canonical_ranking.py'
+        core_test = ROOT / 'tests/application/test_treasury.py'
+        self.assertTrue(gate_plugin.pytest_ignore_collect(fm_test, Config()))
+        self.assertFalse(gate_plugin.pytest_ignore_collect(core_test, Config()))
+
+    def test_core_scope_does_not_require_historical_magic_formula_gate(self):
+        reports = engineering_reports()
+        result = summarize_reports(reports, scopes={'core'})
+        self.assertEqual(result['engineering_ci'], 'PASS')
+        self.assertEqual(result['magic_formula_gate'], 'NOT_REQUIRED')
+
+    def test_magic_formula_and_shared_scopes_require_module_gate(self):
+        for scopes in ({'magic_formula'}, {'shared'}):
+            reports = engineering_reports()
+            self.assertEqual(summarize_reports(reports, scopes=scopes)['engineering_ci'], 'FAIL')
+            reports['magic_formula'] = {'status': 'PASS', 'exit_code': 0}
+            self.assertEqual(summarize_reports(reports, scopes=scopes)['engineering_ci'], 'PASS')
+
+    def test_shared_security_build_and_core_failures_still_block(self):
+        reports = engineering_reports()
+        reports['magic_formula'] = {'status': 'PASS', 'exit_code': 0}
+        self.assertEqual(summarize_reports(reports, scopes={'shared'})['engineering_ci'], 'PASS')
+        reports['engineering']['exit_code'] = 1
+        self.assertEqual(summarize_reports(reports, scopes={'shared'})['engineering_ci'], 'FAIL')
