@@ -156,10 +156,10 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
     if not inventory.exists():
         raise ValueError("INVENTORY_OR_COLLECTION_FAILED")
     entries = json.loads(inventory.read_text(encoding="utf-8"))
-    statuses = {
-        (case["class"].replace(".", "/") + ".py::" + case["name"]): case["status"]
-        for case in details["cases"]
-    }
+    selected_nodeids = [
+        entry["nodeid"] for entry in entries if entry["selected"]
+    ]
+    statuses, inventory_error = _match_junit_inventory(selected_nodeids, details["cases"])
     for entry in entries:
         if entry["selected"]:
             entry["result"] = statuses.get(entry["nodeid"], "RESULT_NOT_MATCHED")
@@ -167,7 +167,7 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
     details["collected"] = len(entries)
     details["selected"] = sum(entry["selected"] for entry in entries)
     details["deselected"] = [entry["nodeid"] for entry in entries if not entry["selected"]]
-    if any(entry["result"] == "RESULT_NOT_MATCHED" for entry in entries):
+    if inventory_error or any(entry["result"] == "RESULT_NOT_MATCHED" for entry in entries):
         return 2, {**details, "status": "FAIL", "reason": "INVENTORY_JUNIT_MISMATCH"}
     if check in {"engineering", "magic_formula"}:
         if details["totals"]["skipped"] or details["totals"]["passed"] == 0:
@@ -387,6 +387,66 @@ def main() -> int:
 def _summarize(reports: dict, scopes: set[str], security_status: str | None) -> dict:
     summary = summarize_reports(reports, scopes=scopes)
     return require_security_baseline(summary, security_status)
+
+
+def _junit_nodeid(classname: str, name: str, root: Path = ROOT) -> str:
+    if not isinstance(classname, str) or not classname or not isinstance(name, str) or not name:
+        raise ValueError("JUNIT_ID_MALFORMED")
+    parts = classname.split(".")
+    if any(not part.isidentifier() for part in parts):
+        raise ValueError("JUNIT_ID_MALFORMED")
+    for module_end in range(len(parts), 0, -1):
+        module = root.joinpath(*parts[:module_end]).with_suffix(".py")
+        if module.is_file():
+            path = module.relative_to(root).as_posix()
+            suffix = [*parts[module_end:], name]
+            return path + "::" + "::".join(suffix)
+    raise ValueError("JUNIT_ID_MALFORMED")
+
+
+def _match_junit_inventory(
+    inventory_nodeids: list[str], cases: list[dict], root: Path = ROOT
+) -> tuple[dict[str, str], str | None]:
+    from collections import Counter
+
+    for nodeid in inventory_nodeids:
+        if not isinstance(nodeid, str):
+            return {}, "INVENTORY_ID_MALFORMED"
+        parts = nodeid.split("::")
+        module = Path(parts[0])
+        if (
+            len(parts) < 2
+            or not parts[0].endswith(".py")
+            or module.is_absolute()
+            or "\\" in parts[0]
+            or ".." in module.parts
+            or any(not part for part in parts)
+        ):
+            return {}, "INVENTORY_ID_MALFORMED"
+    expected = Counter(inventory_nodeids)
+    if any(count > 1 for count in expected.values()):
+        return {}, "INVENTORY_ID_DUPLICATE"
+    normalized = []
+    for case in cases:
+        try:
+            nodeid = _junit_nodeid(case.get("class"), case.get("name"), root)
+        except (AttributeError, TypeError, ValueError):
+            return {}, "JUNIT_ID_MALFORMED"
+        if case.get("status") not in {"passed", "failed", "errors", "skipped"}:
+            return {}, "JUNIT_STATUS_MALFORMED"
+        normalized.append((nodeid, case["status"]))
+    observed = Counter(nodeid for nodeid, _ in normalized)
+    if any(count > 1 for count in observed.values()):
+        return {}, "JUNIT_ID_DUPLICATE"
+    missing = expected - observed
+    unexpected = observed - expected
+    if missing and unexpected:
+        return {}, "JUNIT_CASE_MISSING_AND_UNEXPECTED"
+    if missing:
+        return {}, "JUNIT_CASE_MISSING"
+    if unexpected:
+        return {}, "JUNIT_CASE_UNEXPECTED"
+    return dict(normalized), None
 
 
 if __name__ == "__main__":

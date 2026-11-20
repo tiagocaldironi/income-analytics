@@ -438,3 +438,89 @@ class TestModuleGateGovernance(__import__('unittest').TestCase):
         self.assertEqual(summarize_reports(reports, scopes={'shared'})['engineering_ci'], 'PASS')
         reports['engineering']['exit_code'] = 1
         self.assertEqual(summarize_reports(reports, scopes={'shared'})['engineering_ci'], 'FAIL')
+
+
+def test_junit_nodeid_normalizes_function_class_method_and_parameterized_cases():
+    from governance import _junit_nodeid
+
+    expected = (
+        (_junit_nodeid("ci.test_governance", "test_simple"), "ci/test_governance.py::test_simple"),
+        (
+            _junit_nodeid("ci.test_governance.TestModuleGateGovernance", "test_case"),
+            "ci/test_governance.py::TestModuleGateGovernance::test_case",
+        ),
+        (
+            _junit_nodeid("ci.test_governance", "test_parameterized[value]"),
+            "ci/test_governance.py::test_parameterized[value]",
+        ),
+    )
+    if any(actual != wanted for actual, wanted in expected):
+        raise AssertionError(f"JUnit IDs were normalized incorrectly: {expected}")
+
+
+def test_junit_inventory_match_rejects_duplicate_inventory_ids():
+    from governance import _match_junit_inventory
+
+    case = {"class": "ci.test_governance", "name": "test_case", "status": "passed"}
+    result, error = _match_junit_inventory(
+        ["ci/test_governance.py::test_case"] * 2, [case]
+    )
+    if result or error != "INVENTORY_ID_DUPLICATE":
+        raise AssertionError(f"Duplicate inventory ID was accepted: {result}, {error}")
+
+
+def test_junit_inventory_match_rejects_duplicate_junit_ids():
+    from governance import _match_junit_inventory
+
+    nodeid = "ci/test_governance.py::test_case"
+    case = {"class": "ci.test_governance", "name": "test_case", "status": "passed"}
+    result, error = _match_junit_inventory([nodeid], [case, case])
+    if result or error != "JUNIT_ID_DUPLICATE":
+        raise AssertionError(f"Duplicate JUnit ID was accepted: {result}, {error}")
+
+
+def test_junit_inventory_match_rejects_missing_junit_case():
+    from governance import _match_junit_inventory
+
+    result, error = _match_junit_inventory(["ci/test_governance.py::test_missing"], [])
+    if result or error != "JUNIT_CASE_MISSING":
+        raise AssertionError(f"Missing JUnit case was accepted: {result}, {error}")
+
+
+def test_junit_inventory_match_rejects_unexpected_junit_case():
+    from governance import _match_junit_inventory
+
+    case = {"class": "ci.test_governance", "name": "test_extra", "status": "passed"}
+    result, error = _match_junit_inventory([], [case])
+    if result or error != "JUNIT_CASE_UNEXPECTED":
+        raise AssertionError(f"Unexpected JUnit case was accepted: {result}, {error}")
+
+
+def test_junit_inventory_match_rejects_malformed_inventory_and_junit_ids():
+    from governance import _match_junit_inventory
+
+    inventory_result, inventory_error = _match_junit_inventory(["ci/test_governance.py::"], [])
+    malformed_case = {"class": "ci..test_governance", "name": "test_case", "status": "passed"}
+    junit_result, junit_error = _match_junit_inventory(
+        ["ci/test_governance.py::test_case"], [malformed_case]
+    )
+    if inventory_result or inventory_error != "INVENTORY_ID_MALFORMED":
+        raise AssertionError(
+            f"Malformed inventory ID was accepted: {inventory_result}, {inventory_error}"
+        )
+    if junit_result or junit_error != "JUNIT_ID_MALFORMED":
+        raise AssertionError(f"Malformed JUnit ID was accepted: {junit_result}, {junit_error}")
+
+
+def test_junit_inventory_match_preserves_status_for_a_valid_case():
+    from governance import _match_junit_inventory
+
+    nodeid = "ci/test_governance.py::TestModuleGateGovernance::test_case"
+    case = {
+        "class": "ci.test_governance.TestModuleGateGovernance",
+        "name": "test_case",
+        "status": "passed",
+    }
+    result, error = _match_junit_inventory([nodeid], [case])
+    if result != {nodeid: "passed"} or error is not None:
+        raise AssertionError(f"Valid JUnit result was not preserved: {result}, {error}")
