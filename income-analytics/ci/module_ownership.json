@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "magic_formula": [
+    "src/income_analytics/application/magic_formula_*.py",
+    "src/income_analytics/application/cvm_magic_formula_normalization.py",
+    "src/income_analytics/infrastructure/magic_formula_*.py",
+    "tests/application/test_magic_formula_*.py",
+    "tests/application/test_cvm_magic_formula_normalization.py",
+    "tests/infrastructure/test_magic_formula_*.py",
+    "tests/api/test_magic_formula_*.py",
+    "tests/golden/magic_formula/**",
+    "tests/fixtures/cvm/**",
+    "scripts/*magic_formula*.py",
+    "scripts/*cvm*.py"
+  ],
+  "shared": [
+    "src/income_analytics/api/**",
+    "src/income_analytics/infrastructure/database.py",
+    "src/income_analytics/infrastructure/models.py",
+    "src/income_analytics/infrastructure/b3_cotahist_market_data.py",
+    "src/income_analytics/application/market_data.py",
+    "alembic/**",
+    "pyproject.toml",
+    "ci/**",
+    ".github/**",
+    "tests/security/**",
+    "tests/acceptance/**"
+  ]
+}

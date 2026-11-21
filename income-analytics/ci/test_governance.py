@@ -334,3 +334,193 @@ def test_pr52_tests_are_explicit_inputs_to_the_actual_python_command(monkeypatch
     monkeypatch.setattr(governance.legacy, "execute", capture)
     with pytest.raises(StopBeforeExecution):
         governance.python_check("engineering", {}, tmp_path, tmp_path)
+class TestModuleGateGovernance(__import__('unittest').TestCase):
+    def test_magic_formula_test_ownership_is_explicit(self):
+        from module_impact import classify_path
+
+        for path in (
+            'src/income_analytics/application/magic_formula_stocks.py',
+            'tests/application/test_magic_formula_ranking_engine.py',
+        ):
+            self.assertEqual(classify_path(path), 'magic_formula')
+            self.assertFalse(test_scope(path + '::test_case')['engineering'])
+
+    def test_shared_and_unknown_paths_fail_closed(self):
+        from module_impact import classify_changes, classify_path
+
+        paths = (
+            'src/income_analytics/api/routers/dashboard.py',
+            'src/income_analytics/infrastructure/b3_cotahist_market_data.py',
+            'alembic/versions/0015_magic_formula_fundamentals_snapshots.py',
+            'ci/new_policy.py',
+            'docs/new_file.md',
+        )
+        for path in paths:
+            self.assertEqual(classify_path(path), 'shared')
+            self.assertEqual(classify_changes([path]), {'shared'})
+
+    def test_core_paths_are_core_owned(self):
+        from module_impact import classify_changes, classify_path
+
+        path = 'src/income_analytics/application/treasury.py'
+        self.assertEqual(classify_path(path), 'core')
+        self.assertEqual(classify_changes([path]), {'core'})
+
+    def test_engineering_decision_requires_domain_and_shared_gates(self):
+        from module_impact import engineering_decision
+
+        matrix = (
+            ({'core'}, True, False, True, True),
+            ({'core'}, False, False, True, False),
+            ({'magic_formula'}, False, True, True, True),
+            ({'magic_formula'}, False, False, True, False),
+            ({'shared'}, True, False, True, False),
+            ({'shared'}, True, True, True, True),
+        )
+        for scopes, core, magic, shared, expected in matrix:
+            self.assertEqual(
+                engineering_decision(
+                    scopes,
+                    core_pass=core,
+                    magic_formula_pass=magic,
+                    shared_pass=shared,
+                    security_pass=True,
+                    build_pass=True,
+                ),
+                expected,
+            )
+
+    def test_security_and_build_fail_every_scope(self):
+        from module_impact import engineering_decision
+
+        for scopes in ({'core'}, {'magic_formula'}, {'shared'}):
+            for security, build in ((False, True), (True, False)):
+                self.assertFalse(
+                    engineering_decision(
+                        scopes,
+                        core_pass=True,
+                        magic_formula_pass=True,
+                        shared_pass=True,
+                        security_pass=security,
+                        build_pass=build,
+                    )
+                )
+
+    def test_core_gate_ignores_magic_formula_before_test_import(self):
+        import gate_plugin
+
+        class Config:
+            @staticmethod
+            def getoption(name):
+                return 'engineering' if name == '--ci-gate' else None
+
+        fm_test = ROOT / 'tests/application/test_magic_formula_canonical_ranking.py'
+        core_test = ROOT / 'tests/application/test_treasury.py'
+        self.assertTrue(gate_plugin.pytest_ignore_collect(fm_test, Config()))
+        self.assertFalse(gate_plugin.pytest_ignore_collect(core_test, Config()))
+
+    def test_core_scope_does_not_require_historical_magic_formula_gate(self):
+        reports = engineering_reports()
+        result = summarize_reports(reports, scopes={'core'})
+        self.assertEqual(result['engineering_ci'], 'PASS')
+        self.assertEqual(result['magic_formula_gate'], 'NOT_REQUIRED')
+
+    def test_magic_formula_and_shared_scopes_require_module_gate(self):
+        for scopes in ({'magic_formula'}, {'shared'}):
+            reports = engineering_reports()
+            self.assertEqual(summarize_reports(reports, scopes=scopes)['engineering_ci'], 'FAIL')
+            reports['magic_formula'] = {'status': 'PASS', 'exit_code': 0}
+            self.assertEqual(summarize_reports(reports, scopes=scopes)['engineering_ci'], 'PASS')
+
+    def test_shared_security_build_and_core_failures_still_block(self):
+        reports = engineering_reports()
+        reports['magic_formula'] = {'status': 'PASS', 'exit_code': 0}
+        self.assertEqual(summarize_reports(reports, scopes={'shared'})['engineering_ci'], 'PASS')
+        reports['engineering']['exit_code'] = 1
+        self.assertEqual(summarize_reports(reports, scopes={'shared'})['engineering_ci'], 'FAIL')
+
+
+def test_junit_nodeid_normalizes_function_class_method_and_parameterized_cases():
+    from governance import _junit_nodeid
+
+    expected = (
+        (_junit_nodeid("ci.test_governance", "test_simple"), "ci/test_governance.py::test_simple"),
+        (
+            _junit_nodeid("ci.test_governance.TestModuleGateGovernance", "test_case"),
+            "ci/test_governance.py::TestModuleGateGovernance::test_case",
+        ),
+        (
+            _junit_nodeid("ci.test_governance", "test_parameterized[value]"),
+            "ci/test_governance.py::test_parameterized[value]",
+        ),
+    )
+    if any(actual != wanted for actual, wanted in expected):
+        raise AssertionError(f"JUnit IDs were normalized incorrectly: {expected}")
+
+
+def test_junit_inventory_match_rejects_duplicate_inventory_ids():
+    from governance import _match_junit_inventory
+
+    case = {"class": "ci.test_governance", "name": "test_case", "status": "passed"}
+    result, error = _match_junit_inventory(
+        ["ci/test_governance.py::test_case"] * 2, [case]
+    )
+    if result or error != "INVENTORY_ID_DUPLICATE":
+        raise AssertionError(f"Duplicate inventory ID was accepted: {result}, {error}")
+
+
+def test_junit_inventory_match_rejects_duplicate_junit_ids():
+    from governance import _match_junit_inventory
+
+    nodeid = "ci/test_governance.py::test_case"
+    case = {"class": "ci.test_governance", "name": "test_case", "status": "passed"}
+    result, error = _match_junit_inventory([nodeid], [case, case])
+    if result or error != "JUNIT_ID_DUPLICATE":
+        raise AssertionError(f"Duplicate JUnit ID was accepted: {result}, {error}")
+
+
+def test_junit_inventory_match_rejects_missing_junit_case():
+    from governance import _match_junit_inventory
+
+    result, error = _match_junit_inventory(["ci/test_governance.py::test_missing"], [])
+    if result or error != "JUNIT_CASE_MISSING":
+        raise AssertionError(f"Missing JUnit case was accepted: {result}, {error}")
+
+
+def test_junit_inventory_match_rejects_unexpected_junit_case():
+    from governance import _match_junit_inventory
+
+    case = {"class": "ci.test_governance", "name": "test_extra", "status": "passed"}
+    result, error = _match_junit_inventory([], [case])
+    if result or error != "JUNIT_CASE_UNEXPECTED":
+        raise AssertionError(f"Unexpected JUnit case was accepted: {result}, {error}")
+
+
+def test_junit_inventory_match_rejects_malformed_inventory_and_junit_ids():
+    from governance import _match_junit_inventory
+
+    inventory_result, inventory_error = _match_junit_inventory(["ci/test_governance.py::"], [])
+    malformed_case = {"class": "ci..test_governance", "name": "test_case", "status": "passed"}
+    junit_result, junit_error = _match_junit_inventory(
+        ["ci/test_governance.py::test_case"], [malformed_case]
+    )
+    if inventory_result or inventory_error != "INVENTORY_ID_MALFORMED":
+        raise AssertionError(
+            f"Malformed inventory ID was accepted: {inventory_result}, {inventory_error}"
+        )
+    if junit_result or junit_error != "JUNIT_ID_MALFORMED":
+        raise AssertionError(f"Malformed JUnit ID was accepted: {junit_result}, {junit_error}")
+
+
+def test_junit_inventory_match_preserves_status_for_a_valid_case():
+    from governance import _match_junit_inventory
+
+    nodeid = "ci/test_governance.py::TestModuleGateGovernance::test_case"
+    case = {
+        "class": "ci.test_governance.TestModuleGateGovernance",
+        "name": "test_case",
+        "status": "passed",
+    }
+    result, error = _match_junit_inventory([nodeid], [case])
+    if result != {nodeid: "passed"} or error is not None:
+        raise AssertionError(f"Valid JUnit result was not preserved: {result}, {error}")

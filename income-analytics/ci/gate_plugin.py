@@ -10,7 +10,20 @@ INVENTORY = []
 
 
 def pytest_addoption(parser):
-    parser.addoption("--ci-gate", choices=("full", "engineering", "financial"), default="full")
+    parser.addoption(
+        "--ci-gate", choices=("full", "engineering", "financial", "magic_formula"), default="full"
+    )
+
+
+def pytest_ignore_collect(collection_path, config):
+    """Skip FM-only test modules before import/collection in core engineering."""
+    if config.getoption("--ci-gate") != "engineering":
+        return None
+    try:
+        file = collection_path.resolve().relative_to(ROOT).as_posix()
+    except AttributeError, ValueError:
+        return None
+    return test_scope(file + "::collection_probe")["ownership"] == "magic_formula"
 
 
 def pytest_collection_modifyitems(config, items):
@@ -24,7 +37,9 @@ def pytest_collection_modifyitems(config, items):
         suffix = item.nodeid.split("::", 1)[1]
         entry = test_scope(file + "::" + suffix)
         entry["line"] = item.location[1] + 1
-        entry["selected"] = gate == "full" or entry[gate]
+        entry["selected"] = gate == "full" or (
+            entry["ownership"] == "magic_formula" if gate == "magic_formula" else entry[gate]
+        )
         entry["result"] = "NOT_RUN" if entry["selected"] else "DESELECTED_TO_EXPLICIT_OTHER_GATE"
         INVENTORY.append(entry)
         (selected if entry["selected"] else excluded).append(item)
