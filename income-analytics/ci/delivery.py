@@ -20,6 +20,7 @@ WORKFLOW_ID = 399392307
 WORKFLOW_PATH = ".github/workflows/ci-offline.yml"
 BASELINE_RUN = 40856571402
 BASELINE_COMMIT = "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065"
+BASELINE_RELEASE_TAG = "ci-baseline-a-cc71b0be"
 
 
 class DeliveryError(ValueError):

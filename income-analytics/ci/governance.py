@@ -184,6 +184,40 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
             else ("BLOCKED" if evidence["financial_state"] == "FINANCIAL_BLOCKED" else "FAIL")
         )
         return (0 if approved else max(result.returncode, 1)), details
+    if check == "python":
+        financial_entries = [entry for entry in entries if entry["financial"]]
+        financial_nodeids = {entry["nodeid"] for entry in financial_entries}
+        financial_cases = [
+            case for case in details["cases"]
+            if _case_nodeid(case) in financial_nodeids
+        ]
+        financial_details = {
+            "cases": financial_cases,
+            "totals": {
+                key: sum(case["status"] == key for case in financial_cases)
+                for key in ("passed", "failed", "errors", "skipped")
+            },
+            "failure_causes": {
+                node: cause for node, cause in failure_causes(raw).items()
+                if node in financial_nodeids
+            },
+        }
+        financial_details.update(evaluate_financial_evidence(ROOT, financial_details))
+        financial_details["status"] = (
+            "PASS"
+            if financial_details["financial_state"] == "FINANCIAL_PASS"
+            else (
+                "BLOCKED"
+                if financial_details["financial_state"] == "FINANCIAL_BLOCKED"
+                else "FAIL"
+            )
+        )
+        financial_details["scoped_release_assessment"] = certify_release_scope(
+            financial_details, output / "financial"
+        )
+        (output / "financial-result.json").write_text(
+            json.dumps(financial_details, indent=2) + "\n", encoding="utf-8"
+        )
     coverage = sandbox / "coverage.xml"
     if coverage.exists():
         import xml.etree.ElementTree as ET
@@ -196,10 +230,14 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
     return result.returncode, {**details, "status": "PASS" if result.returncode == 0 else "FAIL"}
 
 
+def _case_nodeid(case: dict) -> str:
+    return case["class"].replace(".", "/") + ".py::" + case["name"]
+
+
 def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, dict]:
     if check == "operational":
         return run_operational(env, sandbox, output)
-    if check in {"engineering", "financial", "python"}:
+    if check in {"engineering", "financial", "python", "magic_formula"}:
         return python_check(check, env, sandbox, output)
     if check in {"ruff", "mypy"}:
         code, findings = quality_findings(check, env, sandbox)
@@ -208,7 +246,11 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
             result, details = classify_ruff(code, findings, ruff_exception_findings(ROOT, policy))
             details["ruff_version"] = importlib.metadata.version("ruff")
             return result, details
-        return code, {"status": "FAIL_WITH_DEBT" if findings else "PASS", "findings": findings}
+        return code, {
+            "status": "FAIL_WITH_DEBT" if findings else "PASS",
+            "findings": findings,
+            "mypy_version": importlib.metadata.version("mypy"),
+        }
     if check == "quality":
         baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
         compatibility = json.loads(
@@ -244,17 +286,22 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
         ):
             raise ValueError("QUALITY_LOCK_REVIEW_REQUIRED")
         actual, exits = [], {}
+        tool_versions = {}
         ledger = json.loads(
             (ROOT / "docs/engineering/engineering-debt-closure/quality_ledger.json").read_text(
                 encoding="utf-8"
             )
         )
         for tool in ("ruff", "mypy"):
-            if importlib.metadata.version(tool) != baseline["tools"][tool]:
-                raise ValueError("QUALITY_TOOL_VERSION_REVIEW_REQUIRED")
-            code, findings = quality_findings(tool, env, sandbox)
-            actual.extend(findings)
-            exits[tool] = code
+            report_root = Path(os.getenv("CI_QUALITY_REPORTS", ROOT / "ci-reports"))
+            report = json.loads((report_root / tool / "result.json").read_text())
+            if report.get("check") != tool or not isinstance(report.get("findings"), list):
+                raise ValueError("QUALITY_DIAGNOSTIC_REPORT_INVALID")
+            actual.extend(report["findings"])
+            exits[tool] = report.get("exit_code")
+            tool_versions[tool] = report.get(f"{tool}_version")
+        if tool_versions != baseline["tools"]:
+            raise ValueError("QUALITY_TOOL_VERSION_REVIEW_REQUIRED")
         canonical, reviewed_ledger, relocation_review = reviewed_relocations(ROOT, actual, ledger)
         expected_findings = reconciled_findings(expected_findings, reviewed_ledger, ROOT)
         comparison = compare_diagnostics(canonical, expected_findings)

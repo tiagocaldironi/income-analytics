@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "repository": "tiagocaldironi/income-analytics",
+  "original_run_id": 40856571402,
+  "original_workflow_id": 399392307,
+  "original_workflow_path": ".github/workflows/ci-offline.yml",
+  "source_commit": "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065",
+  "original_artifact_id": 12890060783,
+  "original_artifact_digest": "sha256:bc67e06ee29949c642a259c6fce074c2d32af91e0e1452900e0dc47d8f7fd7ee",
+  "package_asset": "income-analytics-cc71b0be65d6fe34b97cd3305dfc7956c9a4a065-windows-x64.zip",
+  "checksum_asset": "income-analytics-cc71b0be65d6fe34b97cd3305dfc7956c9a4a065-windows-x64.sha256",
+  "package_sha256": "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
+  "manifest_asset": "manifest.json",
+  "manifest_sha256": "008b349f9a2f17332292fdf0cad2fd690a5d00ef21a37e8f7e0124ce367cee04",
+  "build_policy_sha256": "1594f72e60abd1b2cd93653897e1babcbf73f062538f933b5decf2a834840898",
+  "source_fingerprint": "f39434e641b35571233b37f5fe0ac3aaf7f88169191404cc0ce20a97b999aad3",
+  "release_tag": "ci-baseline-a-cc71b0be"
+}
