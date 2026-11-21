@@ -334,7 +334,73 @@ def test_pr52_tests_are_explicit_inputs_to_the_actual_python_command(monkeypatch
     monkeypatch.setattr(governance.legacy, "execute", capture)
     with pytest.raises(StopBeforeExecution):
         governance.python_check("engineering", {}, tmp_path, tmp_path)
+
+
+def test_magic_formula_check_routes_to_python_gate(monkeypatch, tmp_path):
+    import governance
+
+    class StopBeforeExecution(Exception):
+        pass
+
+    def capture(args, *unused):
+        assert "--ci-gate=magic_formula" in args
+        raise StopBeforeExecution
+
+    monkeypatch.setattr(governance.legacy, "execute", capture)
+    with pytest.raises(StopBeforeExecution):
+        governance.run_check("magic_formula", {}, tmp_path, tmp_path)
+
+
 class TestModuleGateGovernance(__import__('unittest').TestCase):
+    def test_financial_and_full_python_diagnostics_are_separate_from_core_workflow(self):
+        workflow = yaml.safe_load((ROOT.parent / ".github/workflows/ci-offline.yml").read_text())
+        matrix = workflow["jobs"]["python"]["strategy"]["matrix"]["include"]
+        checks = {item["check"] for item in matrix}
+        self.assertTrue({"runtime", "engineering", "magic_formula"}.issubset(checks))
+        self.assertTrue({"financial", "python", "ruff", "mypy", "quality"}.isdisjoint(checks))
+        self.assertEqual(workflow["jobs"]["quality"]["needs"], ["ruff", "mypy"])
+        diagnostics_path = ROOT.parent / ".github/workflows/ci-diagnostics.yml"
+        diagnostics = yaml.safe_load(diagnostics_path.read_text())
+        self.assertEqual(diagnostics["env"]["GIT_CONFIG_VALUE_0"], "false")
+        self.assertEqual(diagnostics["jobs"]["full_python"]["name"], "CI / Full Python diagnostic")
+        self.assertEqual(diagnostics["jobs"]["financial"]["name"], "CI / Financial certification")
+        self.assertIn("[69,79,81]", diagnostics["jobs"]["financial"]["if"])
+        self.assertEqual(
+            workflow["jobs"]["financial_scoped"]["name"], "CI / Financial certification"
+        )
+        self.assertIn("financial_scoped", workflow["jobs"]["release_scoped"]["needs"])
+
+    def test_baseline_a_pin_preserves_original_provenance_and_hashes(self):
+        pin = json.loads((ROOT / "ci/baseline-a.json").read_text())
+        self.assertEqual(pin["original_run_id"], 40856571402)
+        self.assertEqual(pin["source_commit"], "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065")
+        self.assertEqual(
+            pin["package_sha256"],
+            "5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2",
+        )
+        self.assertEqual(
+            pin["manifest_sha256"],
+            "008b349f9a2f17332292fdf0cad2fd690a5d00ef21a37e8f7e0124ce367cee04",
+        )
+
+    def test_magic_formula_gate_excludes_historical_cases_but_full_keeps_them(self):
+        from gate_plugin import selected_for_gate
+
+        historical = {
+            "ownership": "magic_formula",
+            "category": "historical_certification",
+            "financial": True,
+        }
+        hermetic = {
+            "ownership": "magic_formula",
+            "category": "hermetic_integration",
+            "financial": False,
+        }
+        self.assertFalse(selected_for_gate("magic_formula", historical))
+        self.assertTrue(selected_for_gate("full", historical))
+        self.assertTrue(selected_for_gate("financial", historical))
+        self.assertTrue(selected_for_gate("magic_formula", hermetic))
+
     def test_magic_formula_test_ownership_is_explicit(self):
         from module_impact import classify_path
 
