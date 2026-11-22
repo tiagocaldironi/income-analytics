@@ -41,8 +41,33 @@ production release was created.
 
 ## Post-change measurements
 
-Hosted PR results are required before reporting an after-time or claiming CI/staging
-acceptance. The local Formula gate and source recovery above validate only those two
-components; they do not constitute hosted staging evidence. Record the PR run URL, gate
-duration, total workflow duration, diagnostic duration, selected test counts, cache
-information and staging outcome here after hosted validation completes.
+Hosted core workflow [45052306207](https://github.com/tiagocaldironi/income-analytics/actions/runs/45052306207)
+completed on head `4170f6b7ec24e38dfe74900fc7be171f135997c6`. The required
+`CI / Engineering` status became successful 6m29s after the workflow started, down from
+9m24s in the baseline run: 2m55s (31.0%) faster. The complete core workflow, including
+premerge staging, completed in 8m22s. The isolated full Python workflow
+[45052306254](https://github.com/tiagocaldironi/income-analytics/actions/runs/45052306254)
+completed its diagnostic execution in 7m39s and financial evaluation in another 1m01s
+(10m01s total elapsed, including queue time); neither job gates `CI / Engineering`.
+
+The hosted core run passed Python engineering (1,371 passed), Magic Formula certification
+(283 passed), Runtime, Frontend, Operational readiness, Reproducible build, Ruff,
+Quality non-regression, Security baseline and `CI / Engineering`. Raw mypy diagnostics
+still report existing debt; the unchanged quality non-regression evaluation passed. The
+dedicated Formula job ran in 3m18s, without the previous duplicate frontend suites. The
+hosted full Python diagnostic remains visible and failed with 1,654 passed, 15 failed,
+9 errors and 5 skipped; the financial projection derived from that same JUnit/inventory remains
+`FINANCIAL_BLOCKED` with mandatory coverage verified and production unauthorized. Its
+blockers are historical provenance and frozen reference review items, and its scoped
+release assessment recorded 411 passed with no scoped failures. No historical failures,
+financial controls or release policies were waived.
+
+Premerge staging passed in the same run using the pinned historical A package and the
+candidate package in disposable Windows staging. Known-good A validation, offline
+installation, backup, restore, rollback, health and cleanup passed. The incompatible
+schema case remained safely blocked; promotion remained blocked, financial release
+remained blocked and production remained unauthorized. The recovered A package SHA-256
+matched `5fe747f55179b82e166761cd7c8adca0a643123bc809086c716e19ee0ddd38b2`.
+
+The Python engineering job restored its setup-python pip cache successfully. The measured
+workflow durations include runner queue time and can vary with runner load and cache state.
