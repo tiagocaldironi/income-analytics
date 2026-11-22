@@ -184,40 +184,6 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
             else ("BLOCKED" if evidence["financial_state"] == "FINANCIAL_BLOCKED" else "FAIL")
         )
         return (0 if approved else max(result.returncode, 1)), details
-    if check == "python":
-        financial_entries = [entry for entry in entries if entry["financial"]]
-        financial_nodeids = {entry["nodeid"] for entry in financial_entries}
-        financial_cases = [
-            case for case in details["cases"]
-            if _case_nodeid(case) in financial_nodeids
-        ]
-        financial_details = {
-            "cases": financial_cases,
-            "totals": {
-                key: sum(case["status"] == key for case in financial_cases)
-                for key in ("passed", "failed", "errors", "skipped")
-            },
-            "failure_causes": {
-                node: cause for node, cause in failure_causes(raw).items()
-                if node in financial_nodeids
-            },
-        }
-        financial_details.update(evaluate_financial_evidence(ROOT, financial_details))
-        financial_details["status"] = (
-            "PASS"
-            if financial_details["financial_state"] == "FINANCIAL_PASS"
-            else (
-                "BLOCKED"
-                if financial_details["financial_state"] == "FINANCIAL_BLOCKED"
-                else "FAIL"
-            )
-        )
-        financial_details["scoped_release_assessment"] = certify_release_scope(
-            financial_details, output / "financial"
-        )
-        (output / "financial-result.json").write_text(
-            json.dumps(financial_details, indent=2) + "\n", encoding="utf-8"
-        )
     coverage = sandbox / "coverage.xml"
     if coverage.exists():
         import xml.etree.ElementTree as ET
@@ -227,11 +193,11 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
             source.text = "src/income_analytics"
         tree.write(output / "coverage.xml", encoding="utf-8", xml_declaration=True)
         details["coverage_line_rate"] = tree.getroot().get("line-rate")
+    if check == "python":
+        from financial_projection import write_projection
+
+        write_projection(ROOT, entries, details, raw, output)
     return result.returncode, {**details, "status": "PASS" if result.returncode == 0 else "FAIL"}
-
-
-def _case_nodeid(case: dict) -> str:
-    return case["class"].replace(".", "/") + ".py::" + case["name"]
 
 
 def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, dict]:

@@ -343,7 +343,8 @@ def test_magic_formula_check_routes_to_python_gate(monkeypatch, tmp_path):
         pass
 
     def capture(args, *unused):
-        assert "--ci-gate=magic_formula" in args
+        if "--ci-gate=magic_formula" not in args:
+            raise AssertionError("Magic Formula was not routed to its Python gate")
         raise StopBeforeExecution
 
     monkeypatch.setattr(governance.legacy, "execute", capture)

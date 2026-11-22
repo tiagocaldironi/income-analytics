@@ -651,5 +651,7 @@ def test_existing_quality_gate_conjoins_both_baselines(
         governance, "accepted_typing", lambda *args, **kw: {"status": typing_status}
     )
     code, details = governance.run_check("quality", {}, tmp_path, tmp_path)
-    assert (code == 0) == (legacy_status == "PASS" and typing_status == "PASS")
-    assert details["accepted_typing_nonregression"]["status"] == typing_status
+    if (code == 0) != (legacy_status == "PASS" and typing_status == "PASS"):
+        raise AssertionError("Quality gate did not conjoin both diagnostic policies")
+    if details["accepted_typing_nonregression"]["status"] != typing_status:
+        raise AssertionError("Typing non-regression result was not preserved")
