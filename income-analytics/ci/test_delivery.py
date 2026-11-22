@@ -539,29 +539,6 @@ def test_real_locked_file_cleanup_failure_is_not_passed():
         workspace.cleanup()
 
 
-def test_delivery_controller_recovers_only_the_pinned_baseline(monkeypatch, tmp_path):
-    import delivery_controller
-
-    calls = []
-
-    class Client:
-        def json(self, path):
-            calls.append(("get_run", path))
-            return {"id": BASELINE_RUN}
-
-    def recover(client, run, commit, destination):
-        calls.append(("recover", run["id"], commit, destination))
-        return {"status": "RECOVERED"}
-
-    monkeypatch.setattr(delivery_controller, "recover_baseline", recover)
-    result = delivery_controller.acquire(
-        Client(), BASELINE_RUN, BASELINE_COMMIT, "delivery", tmp_path / "A.zip", rollback=True
-    )
-    assert result["status"] == "RECOVERED"
-    assert calls[0] == ("get_run", f"actions/runs/{BASELINE_RUN}")
-    assert calls[1][:3] == ("recover", BASELINE_RUN, BASELINE_COMMIT)
-
-
 def test_delivery_workflow_and_preview_preserve_read_only_boundary():
     root = Path(__file__).resolve().parents[2]
     delivery = yaml.load(
@@ -583,3 +560,29 @@ def test_delivery_workflow_and_preview_preserve_read_only_boundary():
         BASELINE_RUN == 40856571402
         and BASELINE_COMMIT == "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065"
     )
+
+
+def test_delivery_controller_recovers_only_the_pinned_baseline(monkeypatch, tmp_path):
+    import delivery_controller
+
+    calls = []
+
+    class Client:
+        def json(self, path):
+            calls.append(("get_run", path))
+            return {"id": BASELINE_RUN}
+
+    def recover(client, run, commit, destination):
+        calls.append(("recover", run["id"], commit, destination))
+        return {"status": "RECOVERED"}
+
+    monkeypatch.setattr(delivery_controller, "recover_baseline", recover)
+    result = delivery_controller.acquire(
+        Client(), BASELINE_RUN, BASELINE_COMMIT, "delivery", tmp_path / "A.zip", rollback=True
+    )
+    if result["status"] != "RECOVERED":
+        raise AssertionError("Pinned rollback did not route to baseline recovery")
+    if calls[0] != ("get_run", f"actions/runs/{BASELINE_RUN}"):
+        raise AssertionError("Pinned source run was not fetched")
+    if calls[1][:3] != ("recover", BASELINE_RUN, BASELINE_COMMIT):
+        raise AssertionError("Pinned rollback used an unexpected source")

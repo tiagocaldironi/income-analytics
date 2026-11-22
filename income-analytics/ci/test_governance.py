@@ -375,9 +375,10 @@ def test_quality_controller_consumes_run_reports_and_preserves_gate(monkeypatch,
     )
     original = governance.quality_findings
     code, details = governance_controller.dispatch("quality", {}, tmp_path, tmp_path)
-    assert code == 0
-    assert details["status"] == "PASS"
-    assert governance.quality_findings is original
+    if code != 0 or details["status"] != "PASS":
+        raise AssertionError("Quality controller did not preserve the original evaluator")
+    if governance.quality_findings is not original:
+        raise AssertionError("Quality findings hook was not restored")
 
 
 class TestModuleGateGovernance(__import__('unittest').TestCase):
