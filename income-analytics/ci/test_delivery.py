@@ -545,20 +545,38 @@ def test_delivery_workflow_and_preview_preserve_read_only_boundary():
         (root / ".github/workflows/delivery-validation.yml").read_text(), Loader=yaml.BaseLoader
     )
     ci = yaml.load((root / ".github/workflows/ci-offline.yml").read_text(), Loader=yaml.BaseLoader)
-    assert delivery["permissions"] == {"contents": "read", "actions": "read"}
-    assert "pull_request_target" not in delivery["on"]
-    assert delivery["on"]["workflow_run"]["branches"] == ["develop"]
-    assert delivery["jobs"]["staging"]["runs-on"] == "windows-2025"
-    assert ci["jobs"]["staging_preview"]["needs"] == ["engineering_gate", "build"]
+
+    def require(condition, message):
+        if not condition:
+            raise AssertionError(message)
+
+    require(
+        delivery["permissions"] == {"contents": "read", "actions": "read"},
+        "Delivery permissions changed",
+    )
+    require("pull_request_target" not in delivery["on"], "Unsafe pull_request_target trigger")
+    require(
+        delivery["on"]["workflow_run"]["branches"] == ["develop"],
+        "Delivery trigger branch changed",
+    )
+    require(delivery["jobs"]["staging"]["runs-on"] == "windows-2025", "Staging OS changed")
+    require(
+        ci["jobs"]["staging_preview"]["needs"] == ["engineering_gate", "build"],
+        "Staging preview dependencies changed",
+    )
     for job in (delivery["jobs"]["staging"], ci["jobs"]["staging_preview"]):
-        assert job["name"] == "CD / Staging validation"
-        assert any(s.get("run") == "python ci/delivery_controller.py" for s in job["steps"])
+        require(job["name"] == "CD / Staging validation", "Staging gate name changed")
+        require(
+            any(s.get("run") == "python ci/delivery_controller.py" for s in job["steps"]),
+            "Staging does not invoke the delivery controller",
+        )
         for step in job["steps"]:
             if "uses" in step:
-                assert len(step["uses"].split("@")[1]) == 40
-    assert (
+                require(len(step["uses"].split("@")[1]) == 40, "Action reference is not pinned")
+    require(
         BASELINE_RUN == 40856571402
-        and BASELINE_COMMIT == "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065"
+        and BASELINE_COMMIT == "cc71b0be65d6fe34b97cd3305dfc7956c9a4a065",
+        "Pinned baseline identity changed",
     )
 
 
