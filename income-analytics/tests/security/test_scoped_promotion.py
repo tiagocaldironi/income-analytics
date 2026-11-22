@@ -283,6 +283,15 @@ def test_other_author_and_modified_comment_cannot_approve(evidence):
     assert not valid_owner(record, comment, "surface", "surface")
 
 
+def test_applicability_policy_and_evaluator_are_protected_but_approval_record_is_external():
+    from scoped_promotion import PROTECTED
+
+    assert "ci/release_applicability.py" in PROTECTED
+    assert "ci/release-applicability-policy.json" in PROTECTED
+    assert "ci/test_release_applicability.py" in PROTECTED
+    assert "ci/release-applicability-approval.json" not in PROTECTED
+
+
 @pytest.mark.parametrize(
     "control,key",
     [

@@ -66,7 +66,7 @@ when supplied an approved-policy fixture, and verify Formula changes, unknown
 paths, missing traces, observed Formula dependencies, unapproved policy, and
 financial failures remain blocked. Those fixtures validate evaluator behavior;
 they are not evidence that a real candidate has been approved or is eligible.
-Focused local validation on Python 3.14 passed 65 tests across the applicability
+Focused local validation on Python 3.14 passed 66 tests across the applicability
 evaluator, scoped-promotion controls and existing scoped financial controls;
 Ruff, JSON parsing, bytecode compilation and `git diff --check` passed.
 
@@ -76,6 +76,18 @@ The policy is not yet approved. The required audit record must reference the
 canonical SHA-256 of `ci/release-applicability-policy.json`, identify the
 repository owner `tiagocaldironi` as approver, and bind an immutable GitHub comment containing
 `RELEASE_POLICY_APPROVED <policy-sha256>`. Until that record is reviewed and
-the implementation is integrated into the hosted promotion evaluator, the
-production decision remains `BLOCKED`; this proposal cannot generate an
-eligible production release by itself.
+the hosted promotion job runs against the candidate on `develop`, the production
+decision remains `BLOCKED`; this proposal cannot generate an eligible production
+release by itself.
+
+For the existing scoped promotion record, the approval comment must also contain
+`OWNER_APPROVED <candidate-sha>`. The two JSON records will reference the same
+GitHub comment ID, URL and body digest. Approval-record metadata is authenticated
+against that external comment and is excluded from the protected code surface;
+the evaluator, policy, tests and dependency map remain in the protected surface.
+
+The current hosted workflow invokes scoped promotion only for PRs 69, 79 and
+81, and its `pull_request` trigger targets `develop`. PR #87 is therefore a
+stacked draft with no hosted checks yet. Before a real eligible-candidate report
+can be produced, PR #86 must be integrated and the candidate workflow must be
+revalidated on `develop`; this report does not claim that step has occurred.

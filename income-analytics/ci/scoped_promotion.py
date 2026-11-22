@@ -40,7 +40,6 @@ PROTECTED = (
     "ci/scoped_financial.py",
     "ci/release_applicability.py",
     "ci/release-applicability-policy.json",
-    "ci/release-applicability-approval.json",
     "ci/scoped_promotion.py",
     "ci/test_release_applicability.py",
     "tests/security/test_scoped_promotion.py",
