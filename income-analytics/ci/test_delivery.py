@@ -541,10 +541,16 @@ def test_real_locked_file_cleanup_failure_is_not_passed():
 
 def test_delivery_workflow_and_preview_preserve_read_only_boundary():
     root = Path(__file__).resolve().parents[2]
-    delivery = yaml.load(
-        (root / ".github/workflows/delivery-validation.yml").read_text(), Loader=yaml.BaseLoader
-    )
-    ci = yaml.load((root / ".github/workflows/ci-offline.yml").read_text(), Loader=yaml.BaseLoader)
+
+    def read_base_yaml(path):
+        loader = yaml.BaseLoader(path.read_text())
+        try:
+            return loader.get_single_data()
+        finally:
+            loader.dispose()
+
+    delivery = read_base_yaml(root / ".github/workflows/delivery-validation.yml")
+    ci = read_base_yaml(root / ".github/workflows/ci-offline.yml")
 
     def require(condition, message):
         if not condition:
