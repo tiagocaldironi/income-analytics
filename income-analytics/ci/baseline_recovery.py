@@ -1,13 +1,53 @@
 """Verify and recover the pinned historical staging rollback fixture."""
 
 import json
+import re
+import urllib.error
+import urllib.request
 import zipfile
 from pathlib import Path
 
 from artifact import sha, verify
-from delivery import BASELINE_COMMIT, BASELINE_RUN, REPOSITORY, require
+from delivery import BASELINE_COMMIT, BASELINE_RUN, REPOSITORY, DeliveryError, require
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _asset_bytes(client, path):
+    """Download one fixed-host release asset; never forward a token to blob storage."""
+    require(re.fullmatch(r"[A-Za-z0-9_./?=&-]+", path) is not None, "INVALID_API_PATH")
+    require(not any(part in {".", ".."} for part in path.split("/")), "INVALID_API_PATH")
+    headers = {
+        "Accept": "application/octet-stream",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    if client.token:
+        headers["Authorization"] = "Bearer " + client.token
+    request = urllib.request.Request(
+        "https://api.github.com/repos/" + REPOSITORY + "/" + path,
+        headers=headers,
+        method="GET",
+    )
+
+    class StripCredentials(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, request, fp, code, msg, response_headers, newurl):
+            redirected = super().redirect_request(request, fp, code, msg, response_headers, newurl)
+            if redirected is not None:
+                require(newurl.startswith("https://"), "INSECURE_ARTIFACT_REDIRECT")
+                redirected.remove_header("Authorization")
+            return redirected
+
+    try:
+        with urllib.request.build_opener(StripCredentials()).open(request, timeout=90) as response:
+            require(
+                int(response.headers.get("Content-Length", "0")) < 512 * 1024 * 1024,
+                "ARTIFACT_TOO_LARGE",
+            )
+            data = response.read(512 * 1024 * 1024 + 1)
+            require(len(data) <= 512 * 1024 * 1024, "ARTIFACT_TOO_LARGE")
+            return data
+    except urllib.error.HTTPError as error:
+        raise DeliveryError("GITHUB_READ_FAILED_" + str(error.code)) from None
 
 
 def recover_baseline(client, run, expected, destination):
@@ -15,6 +55,11 @@ def recover_baseline(client, run, expected, destination):
     pin = json.loads((ROOT / "ci/baseline-a.json").read_text(encoding="utf-8"))
     require(expected == pin["source_commit"] == BASELINE_COMMIT, "BASELINE_COMMIT_MISMATCH")
     require(run.get("id") == pin["original_run_id"] == BASELINE_RUN, "BASELINE_RUN_MISMATCH")
+    require(
+        run.get("repository", {}).get("full_name") == REPOSITORY
+        and run.get("head_repository", {}).get("full_name") == REPOSITORY,
+        "BASELINE_SOURCE_REPOSITORY_UNTRUSTED",
+    )
     require(
         run.get("workflow_id") == pin["original_workflow_id"]
         and run.get("path") == pin["original_workflow_path"]
@@ -56,7 +101,9 @@ def recover_baseline(client, run, expected, destination):
     payloads = {}
     for name, metadata in assets.items():
         require(metadata.get("state") == "uploaded", "BASELINE_RELEASE_ASSET_UNAVAILABLE")
-        payload = client.bytes(f"releases/assets/{metadata['id']}", "application/octet-stream")
+        require(type(metadata.get("id")) is int and metadata["id"] > 0,
+                "BASELINE_RELEASE_ASSET_UNAVAILABLE")
+        payload = _asset_bytes(client, f"releases/assets/{metadata['id']}")
         require(
             metadata.get("digest") == "sha256:" + sha(payload),
             "BASELINE_RELEASE_ASSET_DIGEST_MISMATCH",

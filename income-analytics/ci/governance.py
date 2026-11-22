@@ -193,17 +193,13 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
             source.text = "src/income_analytics"
         tree.write(output / "coverage.xml", encoding="utf-8", xml_declaration=True)
         details["coverage_line_rate"] = tree.getroot().get("line-rate")
-    if check == "python":
-        from financial_projection import write_projection
-
-        write_projection(ROOT, entries, details, raw, output)
     return result.returncode, {**details, "status": "PASS" if result.returncode == 0 else "FAIL"}
 
 
 def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, dict]:
     if check == "operational":
         return run_operational(env, sandbox, output)
-    if check in {"engineering", "financial", "python", "magic_formula"}:
+    if check in {"engineering", "financial", "python"}:
         return python_check(check, env, sandbox, output)
     if check in {"ruff", "mypy"}:
         code, findings = quality_findings(check, env, sandbox)
@@ -212,11 +208,7 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
             result, details = classify_ruff(code, findings, ruff_exception_findings(ROOT, policy))
             details["ruff_version"] = importlib.metadata.version("ruff")
             return result, details
-        return code, {
-            "status": "FAIL_WITH_DEBT" if findings else "PASS",
-            "findings": findings,
-            "mypy_version": importlib.metadata.version("mypy"),
-        }
+        return code, {"status": "FAIL_WITH_DEBT" if findings else "PASS", "findings": findings}
     if check == "quality":
         baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
         compatibility = json.loads(
@@ -252,22 +244,17 @@ def run_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[int, 
         ):
             raise ValueError("QUALITY_LOCK_REVIEW_REQUIRED")
         actual, exits = [], {}
-        tool_versions = {}
         ledger = json.loads(
             (ROOT / "docs/engineering/engineering-debt-closure/quality_ledger.json").read_text(
                 encoding="utf-8"
             )
         )
         for tool in ("ruff", "mypy"):
-            report_root = Path(os.getenv("CI_QUALITY_REPORTS", ROOT / "ci-reports"))
-            report = json.loads((report_root / tool / "result.json").read_text())
-            if report.get("check") != tool or not isinstance(report.get("findings"), list):
-                raise ValueError("QUALITY_DIAGNOSTIC_REPORT_INVALID")
-            actual.extend(report["findings"])
-            exits[tool] = report.get("exit_code")
-            tool_versions[tool] = report.get(f"{tool}_version")
-        if tool_versions != baseline["tools"]:
-            raise ValueError("QUALITY_TOOL_VERSION_REVIEW_REQUIRED")
+            if importlib.metadata.version(tool) != baseline["tools"][tool]:
+                raise ValueError("QUALITY_TOOL_VERSION_REVIEW_REQUIRED")
+            code, findings = quality_findings(tool, env, sandbox)
+            actual.extend(findings)
+            exits[tool] = code
         canonical, reviewed_ledger, relocation_review = reviewed_relocations(ROOT, actual, ledger)
         expected_findings = reconciled_findings(expected_findings, reviewed_ledger, ROOT)
         comparison = compare_diagnostics(canonical, expected_findings)

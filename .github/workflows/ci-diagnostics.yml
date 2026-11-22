@@ -54,7 +54,7 @@ jobs:
           ./.venv/Scripts/python.exe -m pip check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run complete Python diagnostic once
-        run: ./.venv/Scripts/python.exe ci/governance.py python
+        run: ./.venv/Scripts/python.exe ci/governance_controller.py python
       - name: Upload full and derived financial evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

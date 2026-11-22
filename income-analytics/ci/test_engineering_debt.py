@@ -619,39 +619,12 @@ def test_existing_quality_gate_conjoins_both_baselines(
 ):
     import governance
 
-    baseline = json.loads(governance.BASELINE.read_text())
-    reports = tmp_path / "reports"
-    for tool in ("ruff", "mypy"):
-        folder = reports / tool
-        folder.mkdir(parents=True)
-        (folder / "result.json").write_text(
-            json.dumps(
-                {
-                    "check": tool,
-                    "findings": [],
-                    "exit_code": 0,
-                    f"{tool}_version": baseline["tools"][tool],
-                }
-            )
-        )
-    monkeypatch.setenv("CI_QUALITY_REPORTS", str(reports))
-    monkeypatch.setattr(
-        governance,
-        "quality_findings",
-        lambda *args: pytest.fail("quality gate reran a diagnostic tool"),
-    )
+    monkeypatch.setattr(governance, "quality_findings", lambda *args: (1, []))
     monkeypatch.setattr(governance, "reconciled_findings", lambda *args: [])
-    monkeypatch.setattr(
-        governance,
-        "reviewed_relocations",
-        lambda _root, actual, ledger: (actual, ledger, {}),
-    )
     monkeypatch.setattr(governance, "compare_diagnostics", lambda *args: {"status": legacy_status})
     monkeypatch.setattr(
         governance, "accepted_typing", lambda *args, **kw: {"status": typing_status}
     )
     code, details = governance.run_check("quality", {}, tmp_path, tmp_path)
-    if (code == 0) != (legacy_status == "PASS" and typing_status == "PASS"):
-        raise AssertionError("Quality gate did not conjoin both diagnostic policies")
-    if details["accepted_typing_nonregression"]["status"] != typing_status:
-        raise AssertionError("Typing non-regression result was not preserved")
+    assert (code == 0) == (legacy_status == "PASS" and typing_status == "PASS")
+    assert details["accepted_typing_nonregression"]["status"] == typing_status

@@ -338,6 +338,7 @@ def test_pr52_tests_are_explicit_inputs_to_the_actual_python_command(monkeypatch
 
 def test_magic_formula_check_routes_to_python_gate(monkeypatch, tmp_path):
     import governance
+    import governance_controller
 
     class StopBeforeExecution(Exception):
         pass
@@ -349,7 +350,34 @@ def test_magic_formula_check_routes_to_python_gate(monkeypatch, tmp_path):
 
     monkeypatch.setattr(governance.legacy, "execute", capture)
     with pytest.raises(StopBeforeExecution):
-        governance.run_check("magic_formula", {}, tmp_path, tmp_path)
+        governance_controller.dispatch("magic_formula", {}, tmp_path, tmp_path)
+
+
+def test_quality_controller_consumes_run_reports_and_preserves_gate(monkeypatch, tmp_path):
+    import governance
+    import governance_controller
+
+    reports = tmp_path / "ci-reports"
+    for tool in ("ruff", "mypy"):
+        folder = reports / tool
+        folder.mkdir(parents=True)
+        (folder / "result.json").write_text(
+            json.dumps({"check": tool, "findings": [], "exit_code": 0}), encoding="utf-8"
+        )
+    monkeypatch.setattr(governance, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        governance_controller,
+        "_ORIGINAL_RUN_CHECK",
+        lambda check, env, sandbox, output: (
+            governance.quality_findings("ruff", env, sandbox)[0],
+            {"status": "PASS"},
+        ),
+    )
+    original = governance.quality_findings
+    code, details = governance_controller.dispatch("quality", {}, tmp_path, tmp_path)
+    assert code == 0
+    assert details["status"] == "PASS"
+    assert governance.quality_findings is original
 
 
 class TestModuleGateGovernance(__import__('unittest').TestCase):
@@ -370,6 +398,19 @@ class TestModuleGateGovernance(__import__('unittest').TestCase):
             workflow["jobs"]["financial_scoped"]["name"], "CI / Financial certification"
         )
         self.assertIn("financial_scoped", workflow["jobs"]["release_scoped"]["needs"])
+        checks = "\n".join(
+            step.get("run", "")
+            for job in workflow["jobs"].values()
+            for step in job.get("steps", [])
+        )
+        self.assertIn("ci/governance_controller.py ${{ matrix.check }}", checks)
+        self.assertIn("ci/governance_controller.py quality", checks)
+        diagnostics_run = "\n".join(
+            step.get("run", "")
+            for job in diagnostics["jobs"].values()
+            for step in job.get("steps", [])
+        )
+        self.assertIn("ci/governance_controller.py python", diagnostics_run)
 
     def test_baseline_a_pin_preserves_original_provenance_and_hashes(self):
         pin = json.loads((ROOT / "ci/baseline-a.json").read_text())

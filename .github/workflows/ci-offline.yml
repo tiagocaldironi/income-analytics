@@ -67,7 +67,7 @@ jobs:
       - name: Run isolated check (failure is not waived)
         # Python scopes explicitly include test_ci.py, test_governance.py and
         # test_pr52_governance.py via governance.py; collection failures are fatal.
-        run: ./.venv/Scripts/python.exe ci/governance.py ${{ matrix.check }}
+        run: ./.venv/Scripts/python.exe ci/governance_controller.py ${{ matrix.check }}
       - name: Upload payload-free reports even on failure
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -271,7 +271,7 @@ jobs:
           path: income-analytics/ci-reports/mypy
       - name: Evaluate unchanged diagnostics without rerunning tools
         if: always()
-        run: ./.venv/Scripts/python.exe ci/governance.py quality
+        run: ./.venv/Scripts/python.exe ci/governance_controller.py quality
       - name: Upload quality non-regression report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -544,7 +544,7 @@ jobs:
           python-version: '3.14.7'
           architecture: x64
       - name: Exercise delivery engine without creating an eligible PR candidate
-        run: python ci/delivery_pipeline.py
+        run: python ci/delivery_controller.py
       - name: Publish preview evidence; production and promotion remain blocked
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

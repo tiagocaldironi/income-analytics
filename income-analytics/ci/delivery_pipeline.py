@@ -33,10 +33,10 @@ class Github:
     def __init__(self, token=None):
         self.token = token
 
-    def bytes(self, path, accept="application/vnd.github+json"):
+    def bytes(self, path):
         require(re.fullmatch(r"[A-Za-z0-9_./?=&-]+", path) is not None, "INVALID_API_PATH")
         require(not any(part in {".", ".."} for part in path.split("/")), "INVALID_API_PATH")
-        headers = {"Accept": accept, "X-GitHub-Api-Version": "2022-11-28"}
+        headers = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"}
         if self.token:
             headers["Authorization"] = "Bearer " + self.token
         request = urllib.request.Request(
@@ -109,10 +109,6 @@ def acquire(client, run_id, commit, mode, destination, current_run=None, rollbac
         and run.get("path") == ".github/workflows/ci-offline.yml",
         "UNTRUSTED_WORKFLOW",
     )
-    if rollback and run_id == BASELINE_RUN and commit == BASELINE_COMMIT:
-        from baseline_recovery import recover_baseline
-
-        return recover_baseline(client, run, commit, destination)
     if mode == "delivery":
         require(
             run.get("event") == "push"
