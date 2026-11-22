@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "policy_id": "INCOME_ANALYTICS_RELEASE_APPLICABILITY_V1",
+  "approval_mode": "EXPLICIT_GITHUB_APPROVAL_REQUIRED",
+  "approval_authority": "tiagocaldironi",
+  "path_scopes": {
+    "visual_only": [
+      "src/income_analytics/api/static/css/*.css"
+    ],
+    "core_financial": [
+      "src/income_analytics/application/treasury.py",
+      "src/income_analytics/application/portfolio_session.py",
+      "src/income_analytics/application/b3_import.py",
+      "src/income_analytics/application/dashboard_refresh.py",
+      "src/income_analytics/application/executable_contribution.py",
+      "src/income_analytics/application/global_contribution_allocator.py",
+      "src/income_analytics/application/fixed_income_*.py",
+      "src/income_analytics/api/routers/dashboard.py",
+      "src/income_analytics/domain/projectors/*.py",
+      "src/income_analytics/infrastructure/b3_report_parser.py",
+      "src/income_analytics/infrastructure/sqlite_repositories.py",
+      "src/income_analytics/infrastructure/treasury_revisions.py",
+      "tests/application/test_treasury.py",
+      "tests/application/test_executable_contribution.py",
+      "tests/application/test_global_contribution_allocator.py",
+      "tests/application/test_fixed_income_*.py",
+      "tests/application/test_performance_financial_integrity.py",
+      "tests/application/test_b3_import_dedup.py",
+      "tests/application/test_historical_portfolio_reconstruction.py",
+      "tests/application/test_capital_applied.py",
+      "tests/application/test_dashboard_refresh.py",
+      "tests/api/test_treasury.py",
+      "tests/api/test_asset_transactions.py",
+      "tests/api/test_portfolio_return_concepts.py",
+      "tests/api/test_b3_import_contract.py",
+      "tests/api/test_local_multiportfolio_v2.py",
+      "tests/api/test_fast_operation_delete.py",
+      "tests/infrastructure/test_treasury_revisions.py",
+      "tests/infrastructure/test_sqlite_b3_import_repository.py",
+      "tests/infrastructure/test_saas_portfolio_owner.py",
+      "tests/infrastructure/test_portfolio_scope.py",
+      "tests/infrastructure/test_b3_report_parser.py",
+      "tests/application/test_scoped_treasury_certification.py"
+    ],
+    "magic_formula": [
+      "src/income_analytics/application/magic_formula_*.py",
+      "src/income_analytics/application/cvm_magic_formula_normalization.py",
+      "src/income_analytics/application/historical_shares_units.py",
+      "src/income_analytics/application/historical_security_identity.py",
+      "src/income_analytics/infrastructure/magic_formula_*.py",
+      "src/income_analytics/infrastructure/cvm_historical_shares_document.py",
+      "tests/api/test_magic_formula_*.py",
+      "tests/application/test_magic_formula_*.py",
+      "tests/application/test_historical_shares_units.py",
+      "tests/application/test_historical_security_identity.py",
+      "tests/infrastructure/test_magic_formula_*.py",
+      "tests/infrastructure/test_historical_identity_fixture.py",
+      "tests/fixtures/cvm/**",
+      "tests/golden/magic_formula/**"
+    ]
+  },
+  "controls": {
+    "CERT_48": {
+      "applicable_scopes": ["magic_formula"],
+      "dependency_modules": [
+        "income_analytics.application.magic_formula_stocks",
+        "income_analytics.application.magic_formula_ranking_validation",
+        "income_analytics.application.magic_formula_contract"
+      ]
+    },
+    "IDENTITY_PROVENANCE_UNAPPROVED": {
+      "applicable_scopes": ["magic_formula"],
+      "dependency_modules": [
+        "income_analytics.application.historical_security_identity",
+        "income_analytics.application.historical_shares_units",
+        "income_analytics.infrastructure.cvm_historical_shares_document"
+      ]
+    },
+    "22_HISTORICAL_REFERENCES_UNAPPROVED": {
+      "applicable_scopes": ["magic_formula"],
+      "dependency_modules": [
+        "income_analytics.application.magic_formula_universe",
+        "income_analytics.application.magic_formula_canonical_ranking",
+        "income_analytics.application.magic_formula_price_blocker_batch",
+        "income_analytics.infrastructure.magic_formula_universe_repository",
+        "income_analytics.infrastructure.magic_formula_snapshot_repository"
+      ]
+    },
+    "CORE_FINANCIAL_REGRESSION": {
+      "applicable_scopes": ["core_financial"],
+      "dependency_modules": []
+    }
+  },
+  "mandatory_controls": ["SECURITY", "BUILD", "STAGING"]
+}

@@ -13,10 +13,12 @@ def ci_path(monkeypatch):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "ci"))
 
 
-def evaluate(*arguments):
+def evaluate(*arguments, applicability=None):
     from scoped_promotion import evaluate as decision
 
-    return decision(*arguments)
+    if applicability is None:
+        applicability = {"decision": "ELIGIBLE", "controls": {"synthetic": "PASS"}}
+    return decision(*arguments, applicability=applicability)
 
 
 def cases(rows):
@@ -232,6 +234,20 @@ def test_frozen_dependency_changed_surface_and_missing_approval_block(evidence):
     evidence[-1] = ("surface", "surface")
     evidence[5]["body"] = "revoked"
     assert evaluate(*evidence)["decision"] == "NO_GO"
+
+
+def test_unapproved_or_ineligible_control_applicability_blocks_promotion(evidence):
+    result = evaluate(
+        *evidence,
+        applicability={
+            "decision": "BLOCKED",
+            "controls": {"CERT_48": "BLOCKED", "SECURITY": "PASS"},
+            "reasons": {"CERT_48": "RELEASE_POLICY_APPROVAL_REQUIRED"},
+        },
+    )
+    assert result["decision"] == "NO_GO"
+    assert "RELEASE_APPLICABILITY_NOT_APPROVED_OR_NOT_ELIGIBLE" in result["blockers"]
+    assert result["control_applicability"]["controls"]["CERT_48"] == "BLOCKED"
 
 
 def test_new_failure_and_uncertified_dependency_block(evidence):

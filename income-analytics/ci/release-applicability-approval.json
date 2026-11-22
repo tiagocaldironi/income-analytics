@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "approval": {
+    "state": "PENDING",
+    "approver": null,
+    "policy_sha256": null,
+    "comment_id": null,
+    "comment_url": null,
+    "comment_body_sha256": null
+  }
+}

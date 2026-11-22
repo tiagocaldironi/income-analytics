@@ -12,10 +12,14 @@ from delivery_pipeline import Github, delivery_decision
 from gate_policy import summarize_reports
 from operational import require_operational
 from pipeline_identity import execution_fingerprint, governance_policy_identity
+from release_applicability import evaluate as evaluate_applicability
+from release_applicability import valid_policy_approval
 from scoped_financial import assess
 
 ROOT = Path(__file__).resolve().parents[1]
 APPROVAL = "ci/scoped-promotion-approval.json"
+APPLICABILITY_POLICY = "ci/release-applicability-policy.json"
+APPLICABILITY_APPROVAL = "ci/release-applicability-approval.json"
 PROTECTED = (
     "ci/diagnostic_relocations.py",
     "ci/diagnostic-relocations-79.json",
@@ -34,6 +38,12 @@ PROTECTED = (
     "ci/requirements-windows-py314.lock",
     "ci/runtime-windows-py314.lock",
     "ci/scoped_financial.py",
+    "ci/release_applicability.py",
+    "ci/release-applicability-policy.json",
+    "ci/release-applicability-approval.json",
+    "ci/scoped_promotion.py",
+    "ci/test_release_applicability.py",
+    "tests/security/test_scoped_promotion.py",
     "ci/scoped_financial_trace.py",
     "ci/scoped-financial-policy.json",
     "ci/financial_certification.py",
@@ -132,7 +142,10 @@ def no_test_regressions(before, after):
     )
 
 
-def evaluate(root, reports, security, staging, gate, comment, record, identity, surfaces):
+def evaluate(
+    root, reports, security, staging, gate, comment, record, identity, surfaces,
+    *, applicability=None,
+):
     blockers = []
     states = {
         key: "BLOCKED"
@@ -265,6 +278,8 @@ def evaluate(root, reports, security, staging, gate, comment, record, identity, 
         or identity.get("staging_job") != "success"
     ):
         blockers.append("REQUIRED_JOB_NOT_SUCCESSFUL")
+    if applicability is None or applicability.get("decision") != "ELIGIBLE":
+        blockers.append("RELEASE_APPLICABILITY_NOT_APPROVED_OR_NOT_ELIGIBLE")
     if not blockers:
         states["RELEASE"] = "GO"
     return {
@@ -280,6 +295,10 @@ def evaluate(root, reports, security, staging, gate, comment, record, identity, 
             "revalidated_pr_head_sha": identity["pr_head_sha"],
         },
         "historical_evidence": recomputed["historical_out_of_scope_proposal"],
+        "control_applicability": applicability or {
+            "decision": "BLOCKED",
+            "reason": "APPLICABILITY_EVIDENCE_NOT_SUPPLIED",
+        },
         "historical_test_totals": reports["python"].get("totals"),
         "scoped_test_totals": scoped.get("scoped_totals"),
         "linked_issues": [57, 58, 59, 60, 65, 76, 77, 80],
@@ -375,16 +394,119 @@ def main():
             "security_job": os.environ["RELEASE_SECURITY_JOB"],
             "staging_job": os.environ["RELEASE_STAGING_JOB"],
         }
+        policy_path = ROOT / APPLICABILITY_POLICY
+        policy = json.loads(policy_path.read_text(encoding="utf-8"))
+        approval_record = json.loads(
+            (ROOT / APPLICABILITY_APPROVAL).read_text(encoding="utf-8")
+        )
+        approval = approval_record.get("approval", {})
+        policy_comment = (
+            Github(os.getenv("RELEASE_GITHUB_TOKEN")).json(
+                "issues/comments/" + str(approval["comment_id"])
+            )
+            if approval.get("state") == "APPROVED"
+            else {}
+        )
+        base_ref = os.environ.get("GITHUB_BASE_REF", "")
+        if not re.fullmatch(r"[A-Za-z0-9._/-]{1,200}", base_ref):
+            raise ValueError("MISSING_OR_INVALID_RELEASE_BASE_REF")
+        base_commit = subprocess.check_output(
+            ["git", "merge-base", "HEAD", "origin/" + base_ref], cwd=ROOT, text=True
+        ).strip()
+        changed = subprocess.check_output(
+            ["git", "diff", "--name-only", base_commit, "HEAD"], cwd=ROOT, text=True
+        ).splitlines()
+        staging = one("validation.json")
+        financial = reports["financial"]
+        scoped_report = financial.get("scoped_release_assessment", {})
+        financial_state = financial.get("financial_state")
+        financial_blockers = set(financial.get("blockers", []))
+
+        def historical_result(codes):
+            relevant = sorted(financial_blockers.intersection(codes))
+            if relevant:
+                state = "BLOCKED"
+                evidence = relevant
+            elif financial_state == "FINANCIAL_PASS":
+                state = "PASS"
+                evidence = ["financial_state=FINANCIAL_PASS"]
+            elif financial_state == "FINANCIAL_FAIL":
+                state = "FAIL"
+                evidence = financial.get("unexpected_failures", [])
+            else:
+                state = "BLOCKED"
+                evidence = sorted(financial_blockers) or [
+                    "financial_state=" + str(financial_state)
+                ]
+            return {"status": state, "evidence": evidence}
+
+        control_results = {
+            "CERT_48": historical_result(
+                {"CERT_48_REQUIRES_INDEPENDENT_RECONCILIATION", "FROZEN_IDENTITY_MISMATCH"}
+            ),
+            "IDENTITY_PROVENANCE_UNAPPROVED": historical_result(
+                {
+                    "IDENTITY_PROVENANCE_UNAPPROVED",
+                    "HISTORICAL_PROVENANCE_INCOMPLETE",
+                    "FROZEN_IDENTITY_MISMATCH",
+                }
+            ),
+            "22_HISTORICAL_REFERENCES_UNAPPROVED": historical_result(
+                {
+                    "22_HISTORICAL_REFERENCES_UNAPPROVED",
+                    "HISTORICAL_PROVENANCE_INCOMPLETE",
+                }
+            ),
+            "CORE_FINANCIAL_REGRESSION": {
+                "status": (
+                    "PASS" if scoped_report.get("technical_state") == "PASS" else "BLOCKED"
+                ),
+                "evidence": {
+                    "technical_state": scoped_report.get("technical_state"),
+                    "totals": scoped_report.get("scoped_totals"),
+                    "checkout_sha": scoped_report.get("checkout_sha"),
+                },
+            },
+            "SECURITY": {
+                "status": "PASS" if security.get("status") == "PASS" else "FAIL",
+                "evidence": {"status": security.get("status")},
+            },
+            "BUILD": {
+                "status": "PASS" if reports["build"].get("exit_code") == 0 else "FAIL",
+                "evidence": {
+                    "exit_code": reports["build"].get("exit_code"),
+                    "artifact_sha256": reports["build"].get("artifact_sha256"),
+                },
+            },
+            "STAGING": {
+                "status": "PASS" if identity.get("staging_job") == "success" else "FAIL",
+                "evidence": {
+                    "job_result": identity.get("staging_job"),
+                    "candidate_sha256": staging.get("candidate", {}).get("package_sha256"),
+                },
+            },
+        }
+        applicability = evaluate_applicability(
+            changed,
+            {
+                "complete": scoped_report.get("technical_state") == "PASS",
+                "modules": scoped_report.get("dependency_calls", []),
+            },
+            control_results,
+            policy,
+            approved=valid_policy_approval(policy_path, approval_record, policy_comment),
+        )
         result = evaluate(
             ROOT,
             reports,
             security,
-            one("validation.json"),
+            staging,
             one("gate-summary.json"),
             comment,
             record,
             identity,
             (surface(ROOT, record["approved_sha"]), surface(ROOT, sha)),
+            applicability=applicability,
         )
     except Exception as error:
         code = str(error)
