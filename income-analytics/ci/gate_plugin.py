@@ -9,6 +9,17 @@ from gate_policy import GROUPS, ROOT, test_scope
 INVENTORY = []
 
 
+def selected_for_gate(gate, entry):
+    if gate == "full":
+        return True
+    if gate == "magic_formula":
+        return (
+            entry["ownership"] == "magic_formula"
+            and entry["category"] != "historical_certification"
+        )
+    return entry[gate]
+
+
 def pytest_addoption(parser):
     parser.addoption(
         "--ci-gate", choices=("full", "engineering", "financial", "magic_formula"), default="full"
@@ -37,9 +48,7 @@ def pytest_collection_modifyitems(config, items):
         suffix = item.nodeid.split("::", 1)[1]
         entry = test_scope(file + "::" + suffix)
         entry["line"] = item.location[1] + 1
-        entry["selected"] = gate == "full" or (
-            entry["ownership"] == "magic_formula" if gate == "magic_formula" else entry[gate]
-        )
+        entry["selected"] = selected_for_gate(gate, entry)
         entry["result"] = "NOT_RUN" if entry["selected"] else "DESELECTED_TO_EXPLICIT_OTHER_GATE"
         INVENTORY.append(entry)
         (selected if entry["selected"] else excluded).append(item)
