@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "approval": {
-    "state": "PENDING",
-    "approver": null,
-    "policy_sha256": null,
-    "comment_id": null,
-    "comment_url": null,
-    "comment_body_sha256": null
+    "state": "APPROVED",
+    "approver": "tiagocaldironi",
+    "policy_sha256": "e6e4f33a3d3261597d78ab438c0df6ba36602f57da0989c2f8869b86738a7270",
+    "comment_id": 7176978042,
+    "comment_url": "https://github.com/tiagocaldironi/income-analytics/pull/87#issuecomment-7176978042",
+    "comment_body_sha256": "abf71cd2373d4093f78fba48037643947cf5d06a4e281b4453f308e325a21e98"
   }
 }
