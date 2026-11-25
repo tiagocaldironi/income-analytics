@@ -406,5 +406,17 @@ def main():
     return int(result["decision"] != "GO")
 
 
+PROTECTED = (
+    *PROTECTED,
+    "ci/financial_projection.py",
+    "ci/release_applicability.py",
+    "ci/release_dependency_analysis.py",
+    "ci/release-applicability-policy.json",
+    "ci/release_scoped_promotion.py",
+    "ci/governance_controller.py",
+    "tests/security/test_scoped_promotion.py",
+)
+
+
 if __name__ == "__main__":
     raise SystemExit(main())

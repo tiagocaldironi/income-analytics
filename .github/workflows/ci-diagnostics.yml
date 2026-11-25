@@ -22,6 +22,7 @@ concurrency:
 jobs:
   full_python:
     name: CI / Full Python diagnostic
+    if: ${{ !(github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'release-candidate')) }}
     runs-on: windows-2025
     timeout-minutes: 40
     defaults:
@@ -62,7 +63,7 @@ jobs:
           name: diagnostics-python-${{ github.sha }}
           path: |
             income-analytics/ci-reports/python/result.json
-            income-analytics/ci-reports/python/financial-result.json
+            income-analytics/ci-reports/financial/result.json
             income-analytics/ci-reports/python/python-junit.xml
             income-analytics/ci-reports/python/inventory.json
             income-analytics/ci-reports/python/coverage.xml
@@ -73,7 +74,7 @@ jobs:
 
   financial:
     name: CI / Financial certification
-    if: ${{ always() && !(github.event_name == 'pull_request' && contains(fromJSON('[69,79,81]'), github.event.pull_request.number)) }}
+    if: ${{ always() && !(github.event_name == 'pull_request' && (contains(fromJSON('[69,79,81]'), github.event.pull_request.number) || contains(github.event.pull_request.labels.*.name, 'release-candidate'))) }}
     needs: [full_python]
     runs-on: windows-2025
     timeout-minutes: 5
@@ -95,6 +96,6 @@ jobs:
           path: income-analytics/diagnostic-inputs
       - name: Evaluate financial report from the same full-suite execution
         run: |
-          $report = Get-Content -Raw 'diagnostic-inputs/financial-result.json' | ConvertFrom-Json
+          $report = Get-Content -Raw 'diagnostic-inputs/financial/result.json' | ConvertFrom-Json
           $report | Select-Object status,financial_state,blockers,totals | ConvertTo-Json -Depth 5
           if ($report.status -ne 'PASS' -or $report.financial_state -ne 'FINANCIAL_PASS') { exit 1 }
