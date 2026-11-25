@@ -71,13 +71,12 @@ def evaluate(
 ) -> dict:
     scopes = classify_scope(paths, policy)
     raw_calls = dependency_evidence.get("modules", [])
-    calls = raw_calls if isinstance(raw_calls, list) and all(
-        isinstance(module, str) for module in raw_calls
-    ) else []
-    if calls != raw_calls:
-        trace_complete = False
+    valid_calls = isinstance(raw_calls, list) and all(
+        isinstance(module, str) and module.strip() for module in raw_calls
+    )
+    calls = raw_calls if valid_calls else []
     modules = [call.split(":", 1)[0] for call in calls]
-    trace_complete = dependency_evidence.get("complete") is True
+    trace_complete = dependency_evidence.get("complete") is True and valid_calls
     controls = {}
     reasons = {}
     evidence = {}

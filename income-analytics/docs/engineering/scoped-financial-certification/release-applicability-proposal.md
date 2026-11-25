@@ -92,8 +92,8 @@ runs the full Python suite once, derives financial evidence from that JUnit,
 then binds both reports to the same run identity. The diagnostics workflow
 skips the duplicate full/financial execution while the label is present.
 
-The `pull_request` workflow trigger still targets `develop`. PR #87 is a stacked
-draft on PR #86 and therefore has no hosted checks yet. Before a real eligible
-candidate report can be produced, PR #86 must be integrated and #87 revalidated
-on `develop` with the release-candidate label and explicit policy approval.
-This report does not claim that a hosted release decision has occurred.
+The `pull_request` workflow trigger targets `develop`. PR #86 is integrated,
+and PR #87 now targets `develop`; its ordinary hosted CI has run. The candidate
+promotion path remains blocked until the policy owner records the exact policy
+approval and the candidate has an applicable changed-file scope. This report
+does not claim that a hosted eligible release decision has occurred.

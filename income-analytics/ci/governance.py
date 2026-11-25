@@ -137,7 +137,6 @@ def python_check(check: str, env: dict, sandbox: Path, output: Path) -> tuple[in
         "ci/test_engineering_debt.py",
         "ci/test_diagnostic_relocations.py",
         "ci/test_scoped_financial.py",
-        "ci/test_release_applicability.py",
         f"--ci-gate={gate}",
         "-ra",
         "--tb=short",

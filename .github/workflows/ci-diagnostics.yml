@@ -63,7 +63,7 @@ jobs:
           name: diagnostics-python-${{ github.sha }}
           path: |
             income-analytics/ci-reports/python/result.json
-            income-analytics/ci-reports/python/financial-result.json
+            income-analytics/ci-reports/financial/result.json
             income-analytics/ci-reports/python/python-junit.xml
             income-analytics/ci-reports/python/inventory.json
             income-analytics/ci-reports/python/coverage.xml
@@ -96,6 +96,6 @@ jobs:
           path: income-analytics/diagnostic-inputs
       - name: Evaluate financial report from the same full-suite execution
         run: |
-          $report = Get-Content -Raw 'diagnostic-inputs/financial-result.json' | ConvertFrom-Json
+          $report = Get-Content -Raw 'diagnostic-inputs/financial/result.json' | ConvertFrom-Json
           $report | Select-Object status,financial_state,blockers,totals | ConvertTo-Json -Depth 5
           if ($report.status -ne 'PASS' -or $report.financial_state -ne 'FINANCIAL_PASS') { exit 1 }

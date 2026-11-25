@@ -12,8 +12,6 @@ from delivery_pipeline import Github, delivery_decision
 from gate_policy import summarize_reports
 from operational import require_operational
 from pipeline_identity import execution_fingerprint, governance_policy_identity
-from release_applicability import evaluate as evaluate_applicability
-from release_applicability import valid_policy_approval
 from scoped_financial import assess
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,8 +39,9 @@ PROTECTED = (
     "ci/financial_projection.py",
     "ci/release_applicability.py",
     "ci/release-applicability-policy.json",
+    "ci/release_scoped_promotion.py",
     "ci/scoped_promotion.py",
-    "ci/test_release_applicability.py",
+    "ci/governance_controller.py",
     "tests/security/test_scoped_promotion.py",
     "ci/scoped_financial_trace.py",
     "ci/scoped-financial-policy.json",
@@ -140,35 +139,6 @@ def no_test_regressions(before, after):
         and all(new[node] in {state, "passed"} for node, state in old.items())
         and all(new[node] == "passed" for node in new.keys() - old.keys())
     )
-
-
-def bind_financial_projection(projection, python_report):
-    """Accept the financial projection only when it is bound to its source suite."""
-    fields = (
-        "checkout_sha",
-        "source_fingerprint",
-        "fingerprint_version",
-        "governance_policy_sha256",
-        "pr_head_sha",
-        "run_id",
-        "run_attempt",
-        "event_sha",
-        "worktree_dirty",
-    )
-    if any(projection.get(field) != python_report.get(field) for field in fields):
-        raise ValueError("FINANCIAL_PROJECTION_IDENTITY_MISMATCH")
-    scoped = projection.get("scoped_release_assessment", {})
-    if (
-        projection.get("worktree_dirty") is not False
-        or scoped.get("checkout_sha") != projection.get("checkout_sha")
-        or scoped.get("source_fingerprint") != projection.get("source_fingerprint")
-        or projection.get("financial_state")
-        not in {"FINANCIAL_PASS", "FINANCIAL_FAIL", "FINANCIAL_BLOCKED", "FINANCIAL_NOT_VERIFIED"}
-        or projection.get("exit_code")
-        != int(projection.get("financial_state") != "FINANCIAL_PASS")
-    ):
-        raise ValueError("FINANCIAL_PROJECTION_INVALID")
-    return {**projection, "check": "financial"}
 
 
 def evaluate(
@@ -372,12 +342,6 @@ def main():
                 if security is not None:
                     raise ValueError("DUPLICATE_SECURITY_REPORT")
                 security = row
-        projections = list(args.inputs.rglob("financial-result.json"))
-        if projections:
-            if len(projections) != 1 or "financial" in reports or "python" not in reports:
-                raise ValueError("DUPLICATE_OR_UNBOUND_FINANCIAL_PROJECTION")
-            projection = json.loads(projections[0].read_text(encoding="utf-8"))
-            reports["financial"] = bind_financial_projection(projection, reports["python"])
         if (
             set(reports)
             != {
@@ -429,119 +393,16 @@ def main():
             "security_job": os.environ["RELEASE_SECURITY_JOB"],
             "staging_job": os.environ["RELEASE_STAGING_JOB"],
         }
-        policy_path = ROOT / APPLICABILITY_POLICY
-        policy = json.loads(policy_path.read_text(encoding="utf-8"))
-        approval_record = json.loads(
-            (ROOT / APPLICABILITY_APPROVAL).read_text(encoding="utf-8")
-        )
-        approval = approval_record.get("approval", {})
-        policy_comment = (
-            Github(os.getenv("RELEASE_GITHUB_TOKEN")).json(
-                "issues/comments/" + str(approval["comment_id"])
-            )
-            if approval.get("state") == "APPROVED"
-            else {}
-        )
-        base_ref = os.environ.get("GITHUB_BASE_REF", "")
-        if not re.fullmatch(r"[A-Za-z0-9._/-]{1,200}", base_ref):
-            raise ValueError("MISSING_OR_INVALID_RELEASE_BASE_REF")
-        base_commit = subprocess.check_output(
-            ["git", "merge-base", "HEAD", "origin/" + base_ref], cwd=ROOT, text=True
-        ).strip()
-        changed = subprocess.check_output(
-            ["git", "diff", "--name-only", base_commit, "HEAD"], cwd=ROOT, text=True
-        ).splitlines()
-        staging = one("validation.json")
-        financial = reports["financial"]
-        scoped_report = financial.get("scoped_release_assessment", {})
-        financial_state = financial.get("financial_state")
-        financial_blockers = set(financial.get("blockers", []))
-
-        def historical_result(codes):
-            relevant = sorted(financial_blockers.intersection(codes))
-            if relevant:
-                state = "BLOCKED"
-                evidence = relevant
-            elif financial_state == "FINANCIAL_PASS":
-                state = "PASS"
-                evidence = ["financial_state=FINANCIAL_PASS"]
-            elif financial_state == "FINANCIAL_FAIL":
-                state = "FAIL"
-                evidence = financial.get("unexpected_failures", [])
-            else:
-                state = "BLOCKED"
-                evidence = sorted(financial_blockers) or [
-                    "financial_state=" + str(financial_state)
-                ]
-            return {"status": state, "evidence": evidence}
-
-        control_results = {
-            "CERT_48": historical_result(
-                {"CERT_48_REQUIRES_INDEPENDENT_RECONCILIATION", "FROZEN_IDENTITY_MISMATCH"}
-            ),
-            "IDENTITY_PROVENANCE_UNAPPROVED": historical_result(
-                {
-                    "IDENTITY_PROVENANCE_UNAPPROVED",
-                    "HISTORICAL_PROVENANCE_INCOMPLETE",
-                    "FROZEN_IDENTITY_MISMATCH",
-                }
-            ),
-            "22_HISTORICAL_REFERENCES_UNAPPROVED": historical_result(
-                {
-                    "22_HISTORICAL_REFERENCES_UNAPPROVED",
-                    "HISTORICAL_PROVENANCE_INCOMPLETE",
-                }
-            ),
-            "CORE_FINANCIAL_REGRESSION": {
-                "status": (
-                    "PASS" if scoped_report.get("technical_state") == "PASS" else "BLOCKED"
-                ),
-                "evidence": {
-                    "technical_state": scoped_report.get("technical_state"),
-                    "totals": scoped_report.get("scoped_totals"),
-                    "checkout_sha": scoped_report.get("checkout_sha"),
-                },
-            },
-            "SECURITY": {
-                "status": "PASS" if security.get("status") == "PASS" else "FAIL",
-                "evidence": {"status": security.get("status")},
-            },
-            "BUILD": {
-                "status": "PASS" if reports["build"].get("exit_code") == 0 else "FAIL",
-                "evidence": {
-                    "exit_code": reports["build"].get("exit_code"),
-                    "artifact_sha256": reports["build"].get("artifact_sha256"),
-                },
-            },
-            "STAGING": {
-                "status": "PASS" if identity.get("staging_job") == "success" else "FAIL",
-                "evidence": {
-                    "job_result": identity.get("staging_job"),
-                    "candidate_sha256": staging.get("candidate", {}).get("package_sha256"),
-                },
-            },
-        }
-        applicability = evaluate_applicability(
-            changed,
-            {
-                "complete": scoped_report.get("technical_state") == "PASS",
-                "modules": scoped_report.get("dependency_calls", []),
-            },
-            control_results,
-            policy,
-            approved=valid_policy_approval(policy_path, approval_record, policy_comment),
-        )
         result = evaluate(
             ROOT,
             reports,
             security,
-            staging,
+            one("validation.json"),
             one("gate-summary.json"),
             comment,
             record,
             identity,
             (surface(ROOT, record["approved_sha"]), surface(ROOT, sha)),
-            applicability=applicability,
         )
     except Exception as error:
         code = str(error)

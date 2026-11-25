@@ -1,6 +1,7 @@
 """Dispatch CI checks while keeping governance's certified source stable."""
 
 import json
+import sys
 from pathlib import Path
 
 import governance
@@ -58,9 +59,29 @@ def dispatch(check: str, env: dict, sandbox: Path, output: Path):
     return code, details
 
 
+def bind_financial_identity() -> None:
+    report_root = governance.ROOT / "ci-reports"
+    python_report_path = report_root / "python" / "result.json"
+    financial_report_path = report_root / "financial" / "result.json"
+    if not python_report_path.is_file() or not financial_report_path.is_file():
+        raise ValueError("FINANCIAL_PROJECTION_INPUT_MISSING")
+    python_report = json.loads(python_report_path.read_text(encoding="utf-8"))
+    financial_report = json.loads(financial_report_path.read_text(encoding="utf-8"))
+    from financial_projection import bind_to_python
+
+    financial_report = bind_to_python(financial_report, python_report)
+    financial_report_path.write_text(
+        json.dumps(financial_report, indent=2) + "\n", encoding="utf-8"
+    )
+
+
 def main() -> int:
     governance.run_check = dispatch
-    return governance.main()
+    code = governance.main()
+    python_report_path = governance.ROOT / "ci-reports" / "python" / "result.json"
+    if sys.argv[1:2] == ["python"] and python_report_path.is_file():
+        bind_financial_identity()
+    return code
 
 
 if __name__ == "__main__":
