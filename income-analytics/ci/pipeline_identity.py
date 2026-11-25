@@ -18,6 +18,7 @@ POLICY_FILES = (
     "income-analytics/ci/scoped_financial_trace.py",
     "income-analytics/ci/scoped-financial-policy.json",
     "income-analytics/ci/test_scoped_financial.py",
+    "income-analytics/ci/financial_projection.py",
     "income-analytics/ci/release_applicability.py",
     "income-analytics/ci/release-applicability-policy.json",
     "income-analytics/ci/release-applicability-approval.json",

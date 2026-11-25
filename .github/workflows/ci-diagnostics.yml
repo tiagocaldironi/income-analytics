@@ -22,6 +22,7 @@ concurrency:
 jobs:
   full_python:
     name: CI / Full Python diagnostic
+    if: ${{ !(github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'release-candidate')) }}
     runs-on: windows-2025
     timeout-minutes: 40
     defaults:
@@ -73,7 +74,7 @@ jobs:
 
   financial:
     name: CI / Financial certification
-    if: ${{ always() && !(github.event_name == 'pull_request' && contains(fromJSON('[69,79,81]'), github.event.pull_request.number)) }}
+    if: ${{ always() && !(github.event_name == 'pull_request' && (contains(fromJSON('[69,79,81]'), github.event.pull_request.number) || contains(github.event.pull_request.labels.*.name, 'release-candidate'))) }}
     needs: [full_python]
     runs-on: windows-2025
     timeout-minutes: 5

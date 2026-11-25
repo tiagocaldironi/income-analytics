@@ -38,6 +38,7 @@ PROTECTED = (
     "ci/requirements-windows-py314.lock",
     "ci/runtime-windows-py314.lock",
     "ci/scoped_financial.py",
+    "ci/financial_projection.py",
     "ci/release_applicability.py",
     "ci/release-applicability-policy.json",
     "ci/scoped_promotion.py",
@@ -139,6 +140,35 @@ def no_test_regressions(before, after):
         and all(new[node] in {state, "passed"} for node, state in old.items())
         and all(new[node] == "passed" for node in new.keys() - old.keys())
     )
+
+
+def bind_financial_projection(projection, python_report):
+    """Accept the financial projection only when it is bound to its source suite."""
+    fields = (
+        "checkout_sha",
+        "source_fingerprint",
+        "fingerprint_version",
+        "governance_policy_sha256",
+        "pr_head_sha",
+        "run_id",
+        "run_attempt",
+        "event_sha",
+        "worktree_dirty",
+    )
+    if any(projection.get(field) != python_report.get(field) for field in fields):
+        raise ValueError("FINANCIAL_PROJECTION_IDENTITY_MISMATCH")
+    scoped = projection.get("scoped_release_assessment", {})
+    if (
+        projection.get("worktree_dirty") is not False
+        or scoped.get("checkout_sha") != projection.get("checkout_sha")
+        or scoped.get("source_fingerprint") != projection.get("source_fingerprint")
+        or projection.get("financial_state")
+        not in {"FINANCIAL_PASS", "FINANCIAL_FAIL", "FINANCIAL_BLOCKED", "FINANCIAL_NOT_VERIFIED"}
+        or projection.get("exit_code")
+        != int(projection.get("financial_state") != "FINANCIAL_PASS")
+    ):
+        raise ValueError("FINANCIAL_PROJECTION_INVALID")
+    return {**projection, "check": "financial"}
 
 
 def evaluate(
@@ -342,6 +372,12 @@ def main():
                 if security is not None:
                     raise ValueError("DUPLICATE_SECURITY_REPORT")
                 security = row
+        projections = list(args.inputs.rglob("financial-result.json"))
+        if projections:
+            if len(projections) != 1 or "financial" in reports or "python" not in reports:
+                raise ValueError("DUPLICATE_OR_UNBOUND_FINANCIAL_PROJECTION")
+            projection = json.loads(projections[0].read_text(encoding="utf-8"))
+            reports["financial"] = bind_financial_projection(projection, reports["python"])
         if (
             set(reports)
             != {

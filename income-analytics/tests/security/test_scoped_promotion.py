@@ -21,6 +21,11 @@ def evaluate(*arguments, applicability=None):
     return decision(*arguments, applicability=applicability)
 
 
+def require(condition, message):
+    if not condition:
+        raise AssertionError(message)
+
+
 def cases(rows):
     result = [{"class": "tests.example", "name": name, "status": state} for name, state in rows]
     return {
@@ -245,9 +250,15 @@ def test_unapproved_or_ineligible_control_applicability_blocks_promotion(evidenc
             "reasons": {"CERT_48": "RELEASE_POLICY_APPROVAL_REQUIRED"},
         },
     )
-    assert result["decision"] == "NO_GO"
-    assert "RELEASE_APPLICABILITY_NOT_APPROVED_OR_NOT_ELIGIBLE" in result["blockers"]
-    assert result["control_applicability"]["controls"]["CERT_48"] == "BLOCKED"
+    require(result["decision"] == "NO_GO", "unapproved policy must block promotion")
+    require(
+        "RELEASE_APPLICABILITY_NOT_APPROVED_OR_NOT_ELIGIBLE" in result["blockers"],
+        "policy approval blocker must be reported",
+    )
+    require(
+        result["control_applicability"]["controls"]["CERT_48"] == "BLOCKED",
+        "CERT_48 cannot be N/A without policy approval",
+    )
 
 
 def test_new_failure_and_uncertified_dependency_block(evidence):
@@ -286,10 +297,46 @@ def test_other_author_and_modified_comment_cannot_approve(evidence):
 def test_applicability_policy_and_evaluator_are_protected_but_approval_record_is_external():
     from scoped_promotion import PROTECTED
 
-    assert "ci/release_applicability.py" in PROTECTED
-    assert "ci/release-applicability-policy.json" in PROTECTED
-    assert "ci/test_release_applicability.py" in PROTECTED
-    assert "ci/release-applicability-approval.json" not in PROTECTED
+    require("ci/release_applicability.py" in PROTECTED, "evaluator must be protected")
+    require("ci/release-applicability-policy.json" in PROTECTED, "policy must be protected")
+    require("ci/financial_projection.py" in PROTECTED, "financial projection must be protected")
+    require("ci/test_release_applicability.py" in PROTECTED, "policy tests must be protected")
+    require(
+        "ci/release-applicability-approval.json" not in PROTECTED,
+        "authenticated external approval metadata must be updateable",
+    )
+
+
+def test_financial_projection_must_share_full_python_run_identity():
+    from scoped_promotion import bind_financial_projection
+
+    identity = {
+        "checkout_sha": "a" * 40,
+        "source_fingerprint": "b" * 64,
+        "fingerprint_version": 2,
+        "governance_policy_sha256": "c" * 64,
+        "pr_head_sha": "d" * 40,
+        "run_id": "1234",
+        "run_attempt": "1",
+        "event_sha": "a" * 40,
+        "worktree_dirty": False,
+    }
+    projection = {
+        **identity,
+        "financial_state": "FINANCIAL_BLOCKED",
+        "exit_code": 1,
+        "scoped_release_assessment": {
+            "checkout_sha": identity["checkout_sha"],
+            "source_fingerprint": identity["source_fingerprint"],
+        },
+    }
+    require(
+        bind_financial_projection(projection, identity)["check"] == "financial",
+        "valid projection should be bound to financial check",
+    )
+    projection["run_id"] = "different"
+    with pytest.raises(ValueError, match="FINANCIAL_PROJECTION_IDENTITY_MISMATCH"):
+        bind_financial_projection(projection, identity)
 
 
 @pytest.mark.parametrize(

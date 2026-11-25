@@ -86,8 +86,14 @@ GitHub comment ID, URL and body digest. Approval-record metadata is authenticate
 against that external comment and is excluded from the protected code surface;
 the evaluator, policy, tests and dependency map remain in the protected surface.
 
-The current hosted workflow invokes scoped promotion only for PRs 69, 79 and
-81, and its `pull_request` trigger targets `develop`. PR #87 is therefore a
-stacked draft with no hosted checks yet. Before a real eligible-candidate report
-can be produced, PR #86 must be integrated and the candidate workflow must be
-revalidated on `develop`; this report does not claim that step has occurred.
+The existing PR-specific promotion path for PRs 69, 79 and 81 is preserved. New
+candidate runs use the explicit `release-candidate` label: the core workflow
+runs the full Python suite once, derives financial evidence from that JUnit,
+then binds both reports to the same run identity. The diagnostics workflow
+skips the duplicate full/financial execution while the label is present.
+
+The `pull_request` workflow trigger still targets `develop`. PR #87 is a stacked
+draft on PR #86 and therefore has no hosted checks yet. Before a real eligible
+candidate report can be produced, PR #86 must be integrated and #87 revalidated
+on `develop` with the release-candidate label and explicit policy approval.
+This report does not claim that a hosted release decision has occurred.
