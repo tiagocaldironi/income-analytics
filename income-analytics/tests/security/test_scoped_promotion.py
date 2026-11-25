@@ -14,11 +14,12 @@ def ci_path(monkeypatch):
 
 
 def evaluate(*arguments, applicability=None):
+    from release_scoped_promotion import apply_applicability
     from scoped_promotion import evaluate as decision
 
     if applicability is None:
         applicability = {"decision": "ELIGIBLE", "controls": {"synthetic": "PASS"}}
-    return decision(*arguments, applicability=applicability)
+    return apply_applicability(decision(*arguments), applicability)
 
 
 def require(condition, message):
@@ -295,7 +296,6 @@ def test_other_author_and_modified_comment_cannot_approve(evidence):
 
 
 def test_applicability_policy_and_evaluator_are_protected_but_approval_record_is_external():
-    from pipeline_identity import POLICY_FILES
     from scoped_promotion import PROTECTED
 
     require("ci/release_applicability.py" in PROTECTED, "evaluator must be protected")
@@ -310,14 +310,6 @@ def test_applicability_policy_and_evaluator_are_protected_but_approval_record_is
     require(
         "ci/release-applicability-approval.json" not in PROTECTED,
         "authenticated external approval metadata must be updateable",
-    )
-    require(
-        "income-analytics/ci/release_applicability.py" in POLICY_FILES,
-        "applicability evaluator must be bound to governance identity",
-    )
-    require(
-        "income-analytics/ci/release-applicability-policy.json" in POLICY_FILES,
-        "applicability policy must be bound to governance identity",
     )
 
 

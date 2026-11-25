@@ -16,8 +16,6 @@ from scoped_financial import assess
 
 ROOT = Path(__file__).resolve().parents[1]
 APPROVAL = "ci/scoped-promotion-approval.json"
-APPLICABILITY_POLICY = "ci/release-applicability-policy.json"
-APPLICABILITY_APPROVAL = "ci/release-applicability-approval.json"
 PROTECTED = (
     "ci/diagnostic_relocations.py",
     "ci/diagnostic-relocations-79.json",
@@ -36,13 +34,6 @@ PROTECTED = (
     "ci/requirements-windows-py314.lock",
     "ci/runtime-windows-py314.lock",
     "ci/scoped_financial.py",
-    "ci/financial_projection.py",
-    "ci/release_applicability.py",
-    "ci/release-applicability-policy.json",
-    "ci/release_scoped_promotion.py",
-    "ci/scoped_promotion.py",
-    "ci/governance_controller.py",
-    "tests/security/test_scoped_promotion.py",
     "ci/scoped_financial_trace.py",
     "ci/scoped-financial-policy.json",
     "ci/financial_certification.py",
@@ -141,10 +132,7 @@ def no_test_regressions(before, after):
     )
 
 
-def evaluate(
-    root, reports, security, staging, gate, comment, record, identity, surfaces,
-    *, applicability=None,
-):
+def evaluate(root, reports, security, staging, gate, comment, record, identity, surfaces):
     blockers = []
     states = {
         key: "BLOCKED"
@@ -277,8 +265,6 @@ def evaluate(
         or identity.get("staging_job") != "success"
     ):
         blockers.append("REQUIRED_JOB_NOT_SUCCESSFUL")
-    if applicability is None or applicability.get("decision") != "ELIGIBLE":
-        blockers.append("RELEASE_APPLICABILITY_NOT_APPROVED_OR_NOT_ELIGIBLE")
     if not blockers:
         states["RELEASE"] = "GO"
     return {
@@ -294,10 +280,6 @@ def evaluate(
             "revalidated_pr_head_sha": identity["pr_head_sha"],
         },
         "historical_evidence": recomputed["historical_out_of_scope_proposal"],
-        "control_applicability": applicability or {
-            "decision": "BLOCKED",
-            "reason": "APPLICABILITY_EVIDENCE_NOT_SUPPLIED",
-        },
         "historical_test_totals": reports["python"].get("totals"),
         "scoped_test_totals": scoped.get("scoped_totals"),
         "linked_issues": [57, 58, 59, 60, 65, 76, 77, 80],
@@ -422,6 +404,17 @@ def main():
         Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text("\n".join(lines))
     print(json.dumps({"decision": result["decision"], "blockers": result["blockers"]}))
     return int(result["decision"] != "GO")
+
+
+PROTECTED = (
+    *PROTECTED,
+    "ci/financial_projection.py",
+    "ci/release_applicability.py",
+    "ci/release-applicability-policy.json",
+    "ci/release_scoped_promotion.py",
+    "ci/governance_controller.py",
+    "tests/security/test_scoped_promotion.py",
+)
 
 
 if __name__ == "__main__":

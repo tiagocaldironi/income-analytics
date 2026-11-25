@@ -10,6 +10,21 @@ from release_applicability import evaluate as evaluate_applicability
 from release_applicability import valid_policy_approval
 
 _ORIGINAL_EVALUATE = scoped_promotion.evaluate
+APPLICABILITY_POLICY = "ci/release-applicability-policy.json"
+APPLICABILITY_APPROVAL = "ci/release-applicability-approval.json"
+
+
+def apply_applicability(result: dict, applicability: dict) -> dict:
+    """Apply the release applicability decision without changing legacy gate logic."""
+    result["control_applicability"] = applicability
+    if applicability.get("decision") != "ELIGIBLE":
+        result["blockers"] = sorted(
+            set(result.get("blockers", []))
+            | {"RELEASE_APPLICABILITY_NOT_APPROVED_OR_NOT_ELIGIBLE"}
+        )
+        result.setdefault("gates", {})["RELEASE"] = "BLOCKED"
+        result["decision"] = "NO_GO"
+    return result
 
 
 def _changed_paths(client: Github, pull_request: str) -> list[str]:
@@ -43,9 +58,9 @@ def _historical_result(financial: dict, codes: set[str]) -> dict:
 
 def _with_applicability(changed_paths: list[str], client: Github):
     def evaluate(root, reports, security, staging, gate, comment, record, identity, surfaces):
-        policy_path = root / scoped_promotion.APPLICABILITY_POLICY
+        policy_path = root / APPLICABILITY_POLICY
         approval_record = json.loads(
-            (root / scoped_promotion.APPLICABILITY_APPROVAL).read_text(encoding="utf-8")
+            (root / APPLICABILITY_APPROVAL).read_text(encoding="utf-8")
         )
         approval = approval_record.get("approval", {})
         policy_comment = (
@@ -109,18 +124,10 @@ def _with_applicability(changed_paths: list[str], client: Github):
             json.loads(policy_path.read_text(encoding="utf-8")),
             approved=valid_policy_approval(policy_path, approval_record, policy_comment),
         )
-        return _ORIGINAL_EVALUATE(
-            root,
-            reports,
-            security,
-            staging,
-            gate,
-            comment,
-            record,
-            identity,
-            surfaces,
-            applicability=applicability,
+        result = _ORIGINAL_EVALUATE(
+            root, reports, security, staging, gate, comment, record, identity, surfaces
         )
+        return apply_applicability(result, applicability)
 
     return evaluate
 
