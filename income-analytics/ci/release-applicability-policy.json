@@ -66,6 +66,10 @@
         "income_analytics.application.magic_formula_stocks",
         "income_analytics.application.magic_formula_ranking_validation",
         "income_analytics.application.magic_formula_contract"
+      ],
+      "dependency_module_prefixes": [
+        "income_analytics.application.magic_formula_",
+        "income_analytics.infrastructure.magic_formula_"
       ]
     },
     "IDENTITY_PROVENANCE_UNAPPROVED": {
@@ -73,7 +77,11 @@
       "dependency_modules": [
         "income_analytics.application.historical_security_identity",
         "income_analytics.application.historical_shares_units",
+        "income_analytics.application.cvm_magic_formula_normalization",
         "income_analytics.infrastructure.cvm_historical_shares_document"
+      ],
+      "dependency_module_prefixes": [
+        "income_analytics.application.historical_"
       ]
     },
     "22_HISTORICAL_REFERENCES_UNAPPROVED": {
@@ -84,11 +92,16 @@
         "income_analytics.application.magic_formula_price_blocker_batch",
         "income_analytics.infrastructure.magic_formula_universe_repository",
         "income_analytics.infrastructure.magic_formula_snapshot_repository"
+      ],
+      "dependency_module_prefixes": [
+        "income_analytics.application.magic_formula_",
+        "income_analytics.infrastructure.magic_formula_"
       ]
     },
     "CORE_FINANCIAL_REGRESSION": {
       "applicable_scopes": ["core_financial"],
-      "dependency_modules": []
+      "dependency_modules": [],
+      "dependency_module_prefixes": []
     }
   },
   "mandatory_controls": ["SECURITY", "BUILD", "STAGING"]

@@ -8,6 +8,7 @@ import scoped_promotion
 from delivery_pipeline import Github
 from release_applicability import evaluate as evaluate_applicability
 from release_applicability import valid_policy_approval
+from release_dependency_analysis import analyze_changed_dependencies
 
 _ORIGINAL_EVALUATE = scoped_promotion.evaluate
 APPLICABILITY_POLICY = "ci/release-applicability-policy.json"
@@ -70,6 +71,7 @@ def _with_applicability(changed_paths: list[str], client: Github):
         )
         financial = reports["financial"]
         scoped = financial.get("scoped_release_assessment", {})
+        static_dependencies = analyze_changed_dependencies(root, changed_paths)
         controls = {
             "CERT_48": _historical_result(
                 financial,
@@ -117,8 +119,12 @@ def _with_applicability(changed_paths: list[str], client: Github):
         applicability = evaluate_applicability(
             changed_paths,
             {
-                "complete": scoped.get("technical_state") == "PASS",
+                "complete": (
+                    scoped.get("technical_state") == "PASS"
+                    and static_dependencies.get("complete") is True
+                ),
                 "modules": scoped.get("dependency_calls", []),
+                "static_analysis": static_dependencies,
             },
             controls,
             json.loads(policy_path.read_text(encoding="utf-8")),

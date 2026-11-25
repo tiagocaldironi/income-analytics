@@ -433,10 +433,139 @@ def results(**overrides):
     return value
 
 
-def test_visual_change_can_be_eligible_only_after_approved_policy():
+def dependency_evidence(
+    *,
+    complete=True,
+    modules=None,
+    static_complete=True,
+    static_modules=None,
+):
+    return {
+        "complete": complete,
+        "modules": [] if modules is None else modules,
+        "static_analysis": {
+            "analyzer_version": 1,
+            "complete": static_complete,
+            "modules": [] if static_modules is None else static_modules,
+            "source_sha256": {},
+            "unclassified_paths": [],
+        },
+    }
+
+
+def test_static_dependency_closure_follows_relative_and_transitive_imports(tmp_path):
+    from release_dependency_analysis import analyze_changed_dependencies
+
+    root = tmp_path
+    core = root / "src/income_analytics/application/treasury.py"
+    shared = root / "src/income_analytics/application/trade_helpers.py"
+    formula = root / "src/income_analytics/application/magic_formula_stocks.py"
+    core.parent.mkdir(parents=True)
+    core.write_text("from .trade_helpers import build_trade\n", encoding="utf-8")
+    shared.write_text(
+        "from income_analytics.application.magic_formula_stocks import rank\n",
+        encoding="utf-8",
+    )
+    formula.write_text("def rank():\n    return []\n", encoding="utf-8")
+
+    report = analyze_changed_dependencies(
+        root, ["src/income_analytics/application/treasury.py"]
+    )
+
+    check(report["complete"], "static import closure should be complete")
+    check(
+        "income_analytics.application.magic_formula_stocks" in report["modules"],
+        "transitive Formula dependency was not found",
+    )
+    check(len(report["source_sha256"]) == 3, "every traversed source must be fingerprinted")
+
+
+def test_static_dependency_analysis_blocks_dynamic_or_unclassified_imports(tmp_path):
+    from release_dependency_analysis import analyze_changed_dependencies
+
+    root = tmp_path
+    source = root / "src/income_analytics/application/treasury.py"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        "import importlib\n"
+        "importlib.import_module('income_analytics.application.magic_formula_stocks')\n",
+        encoding="utf-8",
+    )
+
+    dynamic = analyze_changed_dependencies(root, ["src/income_analytics/application/treasury.py"])
+    check(not dynamic["complete"], "dynamic imports must not prove independence")
+    check(
+        "income_analytics.application.magic_formula_stocks" in dynamic["modules"],
+        "literal dynamic Formula dependency should remain visible",
+    )
+
+    source.write_text(
+        "from importlib import import_module as load_module\n"
+        "load_module('income_analytics.application.magic_formula_stocks')\n",
+        encoding="utf-8",
+    )
+    aliased = analyze_changed_dependencies(root, ["src/income_analytics/application/treasury.py"])
+    check(not aliased["complete"], "aliased dynamic imports must not prove independence")
+    check(
+        "income_analytics.application.magic_formula_stocks" in aliased["modules"],
+        "aliased literal Formula dependency should remain visible",
+    )
+
+    unknown = analyze_changed_dependencies(root, ["src/income_analytics/application/new.py"])
+    check(not unknown["complete"], "unavailable changed source must block")
+    check(unknown["unclassified_paths"], "unavailable source should be reported")
+
+
+def test_visual_css_has_complete_empty_static_python_dependency_closure(tmp_path):
+    from release_dependency_analysis import analyze_changed_dependencies
+
+    css = tmp_path / "src/income_analytics/api/static/css/app.css"
+    css.parent.mkdir(parents=True)
+    css.write_text("body { color: black; }\n", encoding="utf-8")
+    report = analyze_changed_dependencies(
+        tmp_path, ["src/income_analytics/api/static/css/app.css"]
+    )
+    check(report["complete"], "CSS-only change should have a complete non-Python closure")
+    check(report["modules"] == [], "CSS-only change should not invent Python dependencies")
+
+
+def test_static_formula_dependency_prevents_not_applicable():
+    report = evaluate_scope(
+        ["income-analytics/src/income_analytics/application/treasury.py"],
+        dependency_evidence(
+            modules=["income_analytics.application.treasury"],
+            static_modules=["income_analytics.application.magic_formula_stocks"],
+        ),
+        results(),
+        POLICY,
+        approved=True,
+    )
+    check(report["controls"]["CERT_48"] == "BLOCKED", "static Formula edge must block N/A")
+    check(
+        report["reasons"]["CERT_48"] == "PROTECTED_DEPENDENCY_OBSERVED",
+        "static Formula edge should be reported",
+    )
+
+
+def test_missing_static_analysis_cannot_prove_not_applicable():
     report = evaluate_scope(
         ["income-analytics/src/income_analytics/api/static/css/app.css"],
         {"complete": True, "modules": []},
+        results(),
+        POLICY,
+        approved=True,
+    )
+    check(report["controls"]["CERT_48"] == "BLOCKED", "runtime trace alone must not permit N/A")
+    check(
+        report["reasons"]["CERT_48"] == "DEPENDENCY_ANALYSIS_INCOMPLETE",
+        "missing static analysis should be explicit",
+    )
+
+
+def test_visual_change_can_be_eligible_only_after_approved_policy():
+    report = evaluate_scope(
+        ["income-analytics/src/income_analytics/api/static/css/app.css"],
+        dependency_evidence(),
         results(),
         POLICY,
         approved=True,
@@ -456,7 +585,7 @@ def test_visual_change_can_be_eligible_only_after_approved_policy():
 def test_core_financial_change_requires_core_tests_and_proves_formula_independence():
     report = evaluate_scope(
         ["income-analytics/src/income_analytics/application/treasury.py"],
-        {"complete": True, "modules": ["income_analytics.application.treasury"]},
+        dependency_evidence(modules=["income_analytics.application.treasury"]),
         results(),
         POLICY,
         approved=True,
@@ -469,7 +598,7 @@ def test_core_financial_change_requires_core_tests_and_proves_formula_independen
 def test_not_applicable_is_blocked_until_explicit_policy_approval():
     report = evaluate_scope(
         ["income-analytics/src/income_analytics/api/static/css/app.css"],
-        {"complete": True, "modules": []},
+        dependency_evidence(),
         results(),
         POLICY,
         approved=False,
@@ -485,7 +614,7 @@ def test_not_applicable_is_blocked_until_explicit_policy_approval():
 def test_formula_change_keeps_all_historical_controls_applicable_and_blocking():
     report = evaluate_scope(
         ["income-analytics/src/income_analytics/application/magic_formula_stocks.py"],
-        {"complete": True, "modules": ["income_analytics.application.magic_formula_stocks"]},
+        dependency_evidence(modules=["income_analytics.application.magic_formula_stocks"]),
         results(),
         POLICY,
         approved=True,
@@ -502,7 +631,7 @@ def test_formula_change_keeps_all_historical_controls_applicable_and_blocking():
 def test_unknown_paths_and_missing_dependency_trace_fail_closed():
     unknown = evaluate_scope(
         ["income-analytics/src/income_analytics/application/new_module.py"],
-        {"complete": True, "modules": []}, results(), POLICY, approved=True
+        dependency_evidence(), results(), POLICY, approved=True
     )
     check(unknown["scopes"] == ["unknown"], "unmapped paths must remain unknown")
     check(
@@ -513,7 +642,7 @@ def test_unknown_paths_and_missing_dependency_trace_fail_closed():
 
     incomplete = evaluate_scope(
         ["income-analytics/src/income_analytics/api/static/css/app.css"],
-        {"complete": False, "modules": []}, results(), POLICY, approved=True
+        dependency_evidence(complete=False), results(), POLICY, approved=True
     )
     check(incomplete["controls"]["CERT_48"] == "BLOCKED", "incomplete trace must block N/A")
     check(
@@ -523,7 +652,7 @@ def test_unknown_paths_and_missing_dependency_trace_fail_closed():
 
     malformed = evaluate_scope(
         ["income-analytics/src/income_analytics/api/static/css/app.css"],
-        {"complete": True, "modules": [None]},
+        dependency_evidence(modules=[None]),
         results(),
         POLICY,
         approved=True,
@@ -538,10 +667,7 @@ def test_unknown_paths_and_missing_dependency_trace_fail_closed():
 def test_observed_formula_dependency_prevents_not_applicable():
     report = evaluate_scope(
         ["income-analytics/src/income_analytics/application/treasury.py"],
-        {
-            "complete": True,
-            "modules": ["income_analytics.application.magic_formula_stocks"],
-        },
+        dependency_evidence(modules=["income_analytics.application.magic_formula_stocks"]),
         results(),
         POLICY,
         approved=True,
@@ -556,7 +682,7 @@ def test_observed_formula_dependency_prevents_not_applicable():
 def test_applicable_financial_failure_stays_fail():
     report = evaluate_scope(
         ["income-analytics/src/income_analytics/application/treasury.py"],
-        {"complete": True, "modules": ["income_analytics.application.treasury"]},
+        dependency_evidence(modules=["income_analytics.application.treasury"]),
         results(CORE_FINANCIAL_REGRESSION="FAIL"),
         POLICY,
         approved=True,
@@ -569,7 +695,7 @@ def test_applicable_financial_failure_stays_fail():
 def test_security_build_and_staging_remain_mandatory(mandatory):
     report = evaluate_scope(
         ["income-analytics/src/income_analytics/api/static/css/app.css"],
-        {"complete": True, "modules": []},
+        dependency_evidence(),
         results(**{mandatory: "FAIL"}),
         POLICY,
         approved=True,
@@ -581,7 +707,7 @@ def test_security_build_and_staging_remain_mandatory(mandatory):
 def test_n_a_cannot_be_supplied_as_result_of_an_applicable_control():
     report = evaluate_scope(
         ["income-analytics/src/income_analytics/application/magic_formula_stocks.py"],
-        {"complete": True, "modules": []},
+        dependency_evidence(),
         results(CERT_48="NOT_APPLICABLE"),
         POLICY,
         approved=True,
@@ -632,7 +758,7 @@ def test_n_a_requires_a_real_exact_policy_approval_record(tmp_path):
 def test_empty_or_unmapped_changes_block(path):
     report = evaluate_scope(
         path,
-        {"complete": True, "modules": []},
+        dependency_evidence(),
         results(),
         POLICY,
         approved=True,

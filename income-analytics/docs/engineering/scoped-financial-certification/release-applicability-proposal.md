@@ -33,9 +33,12 @@ classification as historical evidence failures does not turn them into passes.
   the CVM evidence reader has no other product-code caller in the current
   source tree. This is a static repository result, not a claim about unknown
   runtime plugins or future imports.
-- Portfolio/Treasury release independence still requires same-candidate test
-  execution evidence and a complete dependency trace. A source search alone is
-  insufficient to approve a candidate.
+- Portfolio/Treasury release independence requires same-candidate scoped test
+  execution, a transitive static import closure over every changed Python
+  module, source digests for every traversed module, and the runtime dependency
+  trace. Dynamic imports, parse failures, missing changed files or unresolved
+  internal imports keep the analysis incomplete and block `NOT_APPLICABLE`.
+  Static analysis alone is insufficient; runtime evidence remains required.
 
 ## Applicability matrix
 
@@ -50,9 +53,14 @@ classification as historical evidence failures does not turn them into passes.
 
 The candidate evaluator in `ci/release_applicability.py` emits per-control
 `PASS`, `FAIL`, `BLOCKED` or `NOT_APPLICABLE`, reasons, changed scopes and the
-observed dependency modules. An applicable control cannot be supplied as
-`NOT_APPLICABLE`. An unknown path, missing result, incomplete dependency trace,
-or call into a protected module blocks eligibility. `NOT_APPLICABLE` requires
+observed dependency modules. `ci/release_dependency_analysis.py` resolves the
+transitive static import closure from changed Python modules and records a
+SHA-256 for each traversed source file. That result is combined with the
+same-candidate runtime trace; dynamic imports, unresolved internal imports,
+parse errors, or missing files keep dependency evidence incomplete. An
+applicable control cannot be supplied as `NOT_APPLICABLE`. An unknown path,
+missing result, incomplete static or runtime dependency evidence, or a
+protected module in either graph blocks eligibility. `NOT_APPLICABLE` requires
 an approval record and exact policy digest; synthetic test approvals are only
 unit-test inputs and are not production approvals.
 
@@ -62,13 +70,15 @@ financial evaluator, frozen manifests, SQLite data and backup/rollback
 mechanisms are not modified.
 
 Local synthetic tests exercise eligible CSS-only and core-financial scopes only
-when supplied an approved-policy fixture, and verify Formula changes, unknown
-paths, missing traces, observed Formula dependencies, unapproved policy, and
-financial failures remain blocked. Those fixtures validate evaluator behavior;
-they are not evidence that a real candidate has been approved or is eligible.
-Focused local validation on Python 3.14 passed 66 tests across the applicability
-evaluator, scoped-promotion controls and existing scoped financial controls;
-Ruff, JSON parsing, bytecode compilation and `git diff --check` passed.
+when supplied an approved-policy fixture, and verify transitive imports,
+dynamic-import blocking, unknown paths, missing static/runtime traces, observed
+Formula dependencies, unapproved policy, and financial failures remain
+blocked. Those fixtures validate evaluator behavior; they are not evidence
+that a real candidate has been approved or is eligible.
+Focused local validation on Python 3.14 passed 73 scoped-promotion and scoped
+financial tests; Ruff and bytecode compilation passed. The repository Treasury
+import closure resolved 17 modules with no Formula dependency and complete
+evidence. The current policy digest must be re-reviewed after these changes.
 
 ## Approval needed before activation
 

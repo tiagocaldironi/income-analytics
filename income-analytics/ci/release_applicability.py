@@ -75,8 +75,21 @@ def evaluate(
         isinstance(module, str) and module.strip() for module in raw_calls
     )
     calls = raw_calls if valid_calls else []
-    modules = [call.split(":", 1)[0] for call in calls]
-    trace_complete = dependency_evidence.get("complete") is True and valid_calls
+    runtime_modules = [call.split(":", 1)[0] for call in calls]
+    static = dependency_evidence.get("static_analysis", {})
+    static_modules = static.get("modules", []) if isinstance(static, dict) else []
+    static_valid = (
+        isinstance(static, dict)
+        and static.get("complete") is True
+        and isinstance(static_modules, list)
+        and all(isinstance(module, str) and module.strip() for module in static_modules)
+    )
+    modules = [*runtime_modules, *(static_modules if static_valid else [])]
+    trace_complete = (
+        dependency_evidence.get("complete") is True
+        and valid_calls
+        and static_valid
+    )
     controls = {}
     reasons = {}
     evidence = {}
@@ -95,10 +108,15 @@ def evaluate(
                 evidence[name] = observed.get("evidence", []) if isinstance(observed, dict) else []
         else:
             forbidden = rule["dependency_modules"]
+            prefixes = rule.get("dependency_module_prefixes", [])
             touched = sorted(
                 module
                 for module in modules
                 if any(module == prefix or module.startswith(prefix + ".") for prefix in forbidden)
+                or any(
+                    isinstance(prefix, str) and prefix and module.startswith(prefix.rstrip("*"))
+                    for prefix in prefixes
+                )
             )
             if not approved:
                 state, reason = "BLOCKED", "RELEASE_POLICY_APPROVAL_REQUIRED"
@@ -111,6 +129,10 @@ def evaluate(
                 evidence[name] = {
                     "changed_paths": sorted(paths),
                     "dependency_modules_checked": sorted(set(modules)),
+                    "static_dependency_analysis": {
+                        "analyzer_version": static.get("analyzer_version"),
+                        "source_sha256": static.get("source_sha256", {}),
+                    },
                     "policy_approval_sha256": hashlib.sha256(
                         json.dumps(policy, sort_keys=True, separators=(",", ":")).encode()
                     ).hexdigest(),
@@ -140,6 +162,7 @@ def evaluate(
         "dependency_evidence": {
             "complete": trace_complete,
             "modules": sorted(set(modules)),
+            "static_analysis": static if isinstance(static, dict) else {},
         },
         "policy_sha256": hashlib.sha256(
             json.dumps(policy, sort_keys=True, separators=(",", ":")).encode()
