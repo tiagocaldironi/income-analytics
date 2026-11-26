@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import importlib.util
+import json
 import re
 import subprocess
 import urllib.error
@@ -22,8 +23,13 @@ LOCK_LINE = re.compile(r"([\w.-]+)==([\w.+-]+) --hash=sha256:([a-f0-9]{64})")
 
 
 def _pypi_release(name: str, version: str) -> dict:
-    url = "https://pypi.org/pypi/" + urllib.parse.quote(name, safe="") + "/" + \
-        urllib.parse.quote(version, safe="") + "/json"
+    url = (
+        "https://pypi.org/pypi/"
+        + urllib.parse.quote(name, safe="")
+        + "/"
+        + urllib.parse.quote(version, safe="")
+        + "/json"
+    )
     request = urllib.request.Request(url, headers={"Accept": "application/json"})
     try:
         with urllib.request.urlopen(request, timeout=20) as response:
@@ -67,8 +73,10 @@ def _imports(tree: ast.AST, module: str, modules: dict[str, Path]) -> tuple[set[
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                internal_name = alias.name if _internal(alias.name) else (
-                    "ci." + alias.name if "ci." + alias.name in modules else None
+                internal_name = (
+                    alias.name
+                    if _internal(alias.name)
+                    else ("ci." + alias.name if "ci." + alias.name in modules else None)
                 )
                 if internal_name:
                     if internal_name in modules:
@@ -80,11 +88,13 @@ def _imports(tree: ast.AST, module: str, modules: dict[str, Path]) -> tuple[set[
             if node.level:
                 try:
                     target = importlib.util.resolve_name("." * node.level + target, package)
-                except (ImportError, ValueError):
+                except ImportError, ValueError:
                     complete = False
                     continue
-            internal_target = target if _internal(target) else (
-                "ci." + target if "ci." + target in modules else None
+            internal_target = (
+                target
+                if _internal(target)
+                else ("ci." + target if "ci." + target in modules else None)
             )
             if internal_target:
                 target = internal_target
@@ -107,7 +117,8 @@ def _imports(tree: ast.AST, module: str, modules: dict[str, Path]) -> tuple[set[
             if is_dynamic:
                 literal_name = (
                     node.args[0].value
-                    if node.args and isinstance(node.args[0], ast.Constant)
+                    if node.args
+                    and isinstance(node.args[0], ast.Constant)
                     and isinstance(node.args[0].value, str)
                     else None
                 )
@@ -183,7 +194,7 @@ def analyze_changed_dependencies(root: Path, paths: list[str]) -> dict:
         try:
             content = source.read_bytes()
             tree = ast.parse(content, filename=str(source))
-        except (OSError, SyntaxError, UnicodeError):
+        except OSError, SyntaxError, UnicodeError:
             complete = False
             continue
         scanned[module] = hashlib.sha256(content).hexdigest()
@@ -193,8 +204,12 @@ def analyze_changed_dependencies(root: Path, paths: list[str]) -> dict:
 
     runtime = {"status": "NOT_APPLICABLE", "complete": True, "changes": [], "evidence": []}
     if runtime_paths:
-        runtime = {"status": "BLOCKED", "complete": False, "changes": [],
-                   "evidence": ["RUNTIME_BASE_COMPARISON_REQUIRED"]}
+        runtime = {
+            "status": "BLOCKED",
+            "complete": False,
+            "changes": [],
+            "evidence": ["RUNTIME_BASE_COMPARISON_REQUIRED"],
+        }
     return {
         "analyzer_version": ANALYZER_VERSION,
         "complete": complete,
@@ -233,29 +248,49 @@ def analyze_runtime_dependency(root: Path, paths: list[str], base_sha: str) -> d
     normalized = sorted({p.replace("\\", "/").removeprefix("income-analytics/") for p in paths})
     changed = sorted(set(normalized).intersection(LOCK_FILES))
     if "pyproject.toml" in normalized:
-        return {"status": "BLOCKED", "complete": False, "changes": [],
-                "evidence": ["PYPROJECT_RUNTIME_CHANGE_REQUIRES_LOCK_REVIEW"]}
+        return {
+            "status": "BLOCKED",
+            "complete": False,
+            "changes": [],
+            "evidence": ["PYPROJECT_RUNTIME_CHANGE_REQUIRES_LOCK_REVIEW"],
+        }
     if not changed:
         return {"status": "NOT_APPLICABLE", "complete": True, "changes": [], "evidence": []}
     if not re.fullmatch(r"[0-9a-f]{40}", base_sha):
-        return {"status": "BLOCKED", "complete": False, "changes": [],
-                "evidence": ["RUNTIME_BASE_SHA_MISSING"]}
+        return {
+            "status": "BLOCKED",
+            "complete": False,
+            "changes": [],
+            "evidence": ["RUNTIME_BASE_SHA_MISSING"],
+        }
     package_changes = []
     try:
         for path in changed:
             prior = subprocess.run(
                 ["git", "show", f"{base_sha}:income-analytics/{path}"],
-                cwd=root, capture_output=True, check=True,
+                cwd=root,
+                capture_output=True,
+                check=True,
             ).stdout
             old = _lock_entries(prior)
             new = _lock_entries((root / path).read_bytes())
             for name in sorted(set(old) | set(new)):
                 if old.get(name) != new.get(name):
-                    package_changes.append({"path": path, "name": name,
-                                            "before": old.get(name), "after": new.get(name)})
+                    package_changes.append(
+                        {
+                            "path": path,
+                            "name": name,
+                            "before": old.get(name),
+                            "after": new.get(name),
+                        }
+                    )
         if not package_changes:
-            return {"status": "PASS", "complete": True, "changes": [],
-                    "evidence": ["LOCK_BYTES_REVIEWED_NO_RUNTIME_DELTA"]}
+            return {
+                "status": "PASS",
+                "complete": True,
+                "changes": [],
+                "evidence": ["LOCK_BYTES_REVIEWED_NO_RUNTIME_DELTA"],
+            }
         consumers = []
         metadata_complete = True
         changed_names = {item["name"] for item in package_changes}
@@ -282,8 +317,8 @@ def analyze_runtime_dependency(root: Path, paths: list[str], base_sha: str) -> d
                 except Exception:
                     metadata_complete = False
         try:
-            from packaging.requirements import Requirement
             from packaging.markers import default_environment
+            from packaging.requirements import Requirement
             from packaging.version import Version
         except ImportError:
             Requirement = None
@@ -300,15 +335,27 @@ def analyze_runtime_dependency(root: Path, paths: list[str], base_sha: str) -> d
                     if required_name not in changed_names:
                         continue
                     environment = default_environment()
-                    environment.update({"python_version": "3.14", "python_full_version": "3.14.7",
-                                        "sys_platform": "win32", "platform_system": "Windows",
-                                        "platform_machine": "AMD64", "implementation_name": "cpython",
-                                        "extra": ""})
-                    if requirement.marker is not None and not requirement.marker.evaluate(environment):
+                    environment.update(
+                        {
+                            "python_version": "3.14",
+                            "python_full_version": "3.14.7",
+                            "sys_platform": "win32",
+                            "platform_system": "Windows",
+                            "platform_machine": "AMD64",
+                            "implementation_name": "cpython",
+                            "extra": "",
+                        }
+                    )
+                    if requirement.marker is not None and not requirement.marker.evaluate(
+                        environment
+                    ):
                         continue
                     consumers.append({"consumer": consumer, "requirement": raw_requirement})
-                    changed_version = next(item["after"][0] for item in package_changes
-                                           if item["name"] == required_name)
+                    changed_version = next(
+                        item["after"][0]
+                        for item in package_changes
+                        if item["name"] == required_name
+                    )
                     if Version(changed_version) not in requirement.specifier:
                         metadata_complete = False
             changed_package_dependencies = []
@@ -321,26 +368,44 @@ def analyze_runtime_dependency(root: Path, paths: list[str], base_sha: str) -> d
                     try:
                         requirement = Requirement(raw_requirement)
                         environment = default_environment()
-                        environment.update({"python_version": "3.14", "python_full_version": "3.14.7",
-                                            "sys_platform": "win32", "platform_system": "Windows",
-                                            "platform_machine": "AMD64", "implementation_name": "cpython",
-                                            "extra": ""})
-                        if requirement.marker is not None and not requirement.marker.evaluate(environment):
+                        environment.update(
+                            {
+                                "python_version": "3.14",
+                                "python_full_version": "3.14.7",
+                                "sys_platform": "win32",
+                                "platform_system": "Windows",
+                                "platform_machine": "AMD64",
+                                "implementation_name": "cpython",
+                                "extra": "",
+                            }
+                        )
+                        if requirement.marker is not None and not requirement.marker.evaluate(
+                            environment
+                        ):
                             continue
                         dependency_name = re.sub(r"[-_.]+", "-", requirement.name).lower()
                         dependency = runtime_lock.get(dependency_name)
-                        if dependency is None or Version(dependency[0]) not in requirement.specifier:
+                        if (
+                            dependency is None
+                            or Version(dependency[0]) not in requirement.specifier
+                        ):
                             metadata_complete = False
-                        changed_package_dependencies.append({"package": changed_name,
-                                                             "requirement": raw_requirement,
-                                                             "locked_version": dependency[0] if dependency else None})
+                        changed_package_dependencies.append(
+                            {
+                                "package": changed_name,
+                                "requirement": raw_requirement,
+                                "locked_version": dependency[0] if dependency else None,
+                            }
+                        )
                     except Exception:
                         metadata_complete = False
         else:
             changed_package_dependencies = []
         evidence = ["LOCKS_MATCHED_BASE_AND_CANDIDATE", "DEPENDENCY_METADATA_SCANNED"]
         if "opentelemetry-api" in changed_names:
-            consumer = next((item for item in consumers if item["consumer"] == "google-api-core"), None)
+            consumer = next(
+                (item for item in consumers if item["consumer"] == "google-api-core"), None
+            )
             if consumer is None:
                 metadata_complete = False
             if "opentelemetry-api" not in pypi:
@@ -349,14 +414,20 @@ def analyze_runtime_dependency(root: Path, paths: list[str], base_sha: str) -> d
             for source in (root / "src").rglob("*.py"):
                 try:
                     tree = ast.parse(source.read_bytes(), filename=str(source))
-                except (OSError, SyntaxError, UnicodeError):
+                except OSError, SyntaxError, UnicodeError:
                     metadata_complete = False
                     continue
                 if any(
-                    isinstance(node, ast.Import) and any(alias.name == "opentelemetry" or
-                        alias.name.startswith("opentelemetry.") for alias in node.names)
-                    or isinstance(node, ast.ImportFrom) and (node.module == "opentelemetry" or
-                        (node.module or "").startswith("opentelemetry."))
+                    isinstance(node, ast.Import)
+                    and any(
+                        alias.name == "opentelemetry" or alias.name.startswith("opentelemetry.")
+                        for alias in node.names
+                    )
+                    or isinstance(node, ast.ImportFrom)
+                    and (
+                        node.module == "opentelemetry"
+                        or (node.module or "").startswith("opentelemetry.")
+                    )
                     for node in ast.walk(tree)
                 ):
                     source_refs.append(source.relative_to(root).as_posix())
@@ -366,11 +437,21 @@ def analyze_runtime_dependency(root: Path, paths: list[str], base_sha: str) -> d
             "status": "PASS" if metadata_complete else "BLOCKED",
             "complete": metadata_complete,
             "changes": package_changes,
-            "consumers": sorted(consumers, key=lambda item: (item["consumer"], item["requirement"])),
+            "consumers": sorted(
+                consumers, key=lambda item: (item["consumer"], item["requirement"])
+            ),
             "changed_package_dependencies": changed_package_dependencies,
-            "application_direct_references": source_refs if "opentelemetry-api" in changed_names else [],
-            "evidence": evidence if metadata_complete else [*evidence, "DEPENDENCY_METADATA_INCOMPLETE"],
+            "application_direct_references": source_refs
+            if "opentelemetry-api" in changed_names
+            else [],
+            "evidence": evidence
+            if metadata_complete
+            else [*evidence, "DEPENDENCY_METADATA_INCOMPLETE"],
         }
-    except (OSError, subprocess.CalledProcessError, UnicodeError, ValueError):
-        return {"status": "BLOCKED", "complete": False, "changes": [],
-                "evidence": ["RUNTIME_LOCK_ANALYSIS_INCOMPLETE"]}
+    except OSError, subprocess.CalledProcessError, UnicodeError, ValueError:
+        return {
+            "status": "BLOCKED",
+            "complete": False,
+            "changes": [],
+            "evidence": ["RUNTIME_LOCK_ANALYSIS_INCOMPLETE"],
+        }

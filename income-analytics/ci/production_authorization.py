@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import re
 import hashlib
+import re
 
 
 def evaluate(candidate: dict, staging: dict, scope: dict, authorization: dict) -> dict:
@@ -32,8 +32,16 @@ def evaluate(candidate: dict, staging: dict, scope: dict, authorization: dict) -
         blockers.append("STAGING_CONTROLLER_COMMIT_MISMATCH")
     checks = staging.get("checks", {})
     required_checks = {
-        "known_good_A", "installation", "health", "backup", "restore", "rollback",
-        "rollback_restore", "synthetic_restore_after_block", "immutable_promotion", "cleanup",
+        "known_good_A",
+        "installation",
+        "health",
+        "backup",
+        "restore",
+        "rollback",
+        "rollback_restore",
+        "synthetic_restore_after_block",
+        "immutable_promotion",
+        "cleanup",
     }
     for name in sorted(required_checks):
         if checks.get(name, {}).get("status") != "PASS":
@@ -50,11 +58,14 @@ def evaluate(candidate: dict, staging: dict, scope: dict, authorization: dict) -
     if scope.get("deployment_authorized") is not False:
         blockers.append("SCOPED_REPORT_MUST_NOT_SELF_AUTHORIZE_DEPLOYMENT")
     approval = authorization.get("approval", {})
-    for key, expected in (("source_commit", commit), ("package_sha256", digest),
-                          ("policy_sha256", scope_hash),
-                          ("artifact_id", candidate.get("artifact_id")),
-                          ("build_run_id", candidate.get("build_run_id")),
-                          ("staging_run_id", staging.get("workflow_identity", {}).get("delivery_run_id"))):
+    for key, expected in (
+        ("source_commit", commit),
+        ("package_sha256", digest),
+        ("policy_sha256", scope_hash),
+        ("artifact_id", candidate.get("artifact_id")),
+        ("build_run_id", candidate.get("build_run_id")),
+        ("staging_run_id", staging.get("workflow_identity", {}).get("delivery_run_id")),
+    ):
         if approval.get(key) != expected:
             blockers.append("PRODUCTION_APPROVAL_" + key.upper() + "_MISMATCH")
     if approval.get("state") != "APPROVED" or not approval.get("comment_id"):
