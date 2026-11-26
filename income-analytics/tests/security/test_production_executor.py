@@ -5,6 +5,7 @@ import os
 import socket
 import sqlite3
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
@@ -205,8 +206,7 @@ def test_real_windows_adapter_installs_starts_stops_and_rolls_back_disposable_re
     """Use a temporary Git checkout, launcher, random port and SQLite database only."""
     from production_executor import WindowsHost
 
-    python = subprocess.check_output(["py", "-3.14", "-c", "import sys; print(sys.executable)"],
-                                     text=True).strip()
+    python = sys.executable
     assert subprocess.run([python, "-c", "import uvicorn, fastapi"], check=False).returncode == 0
     old_root = tmp_path / "old"
     (old_root / "src" / "income_analytics").mkdir(parents=True)
@@ -239,10 +239,15 @@ def test_real_windows_adapter_installs_starts_stops_and_rolls_back_disposable_re
         db.execute("INSERT INTO synthetic_financial_fixture VALUES (42)")
     db_before = hashlib.sha256(database.read_bytes()).hexdigest()
     launcher = tmp_path / "DisposableLauncher.ps1"
+    test_site_packages = os.pathsep.join(
+        path for path in sys.path
+        if path.lower().endswith(("site-packages", "dist-packages"))
+    )
+    old_python_path = f"{old_root / 'src'}{os.pathsep}{test_site_packages}"
     launcher.write_text(
         "$ErrorActionPreference = 'Stop'\n"
         f"Set-Location -LiteralPath '{old_root}'\n"
-        f"$env:PYTHONPATH = '{old_root / 'src'}'\n"
+        f"$env:PYTHONPATH = '{old_python_path}'\n"
         "$env:PYTHONDONTWRITEBYTECODE = '1'\n"
         f"py -3.14 -X utf8 -m income_analytics.windows_server "
         f"income_analytics.main:app --app-dir src --host 127.0.0.1 --port {port}\n",

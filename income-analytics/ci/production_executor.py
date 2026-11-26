@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -9,20 +10,20 @@ import re
 import shutil
 import sqlite3
 import subprocess
+import sys
 import tempfile
 import time
-import urllib.request
 import urllib.parse
-import zipfile
-import argparse
+import urllib.request
 import uuid
+import zipfile
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 
-from production_authorization import evaluate, require_publish_confirmation
 from artifact import verify
 from delivery import production_request
+from production_authorization import evaluate, require_publish_confirmation
 
 
 class ProductionExecutionError(RuntimeError):
@@ -45,6 +46,10 @@ class WindowsHost:
         self.health_url = health_url
         self.test_mode = test_mode
         self.port = port
+        self.test_import_path = os.pathsep.join(
+            entry for entry in sys.path
+            if entry.lower().endswith(("site-packages", "dist-packages")) and Path(entry).is_dir()
+        )
         if not 1 <= port <= 65535 or (test_mode and port == 8002):
             raise ProductionExecutionError("TEST_PORT_MUST_BE_DISPOSABLE")
         parsed_health = urllib.parse.urlparse(health_url)
@@ -147,6 +152,7 @@ class WindowsHost:
         venv_args = ["py", "-3.14", "-m", "venv"]
         if self.test_mode:
             venv_args.append("--system-site-packages")
+            env["PYTHONPATH"] = self.test_import_path
         run([*venv_args, str(target / ".venv")], cwd=target, env=env)
         python = target / ".venv" / "Scripts" / "python.exe"
         if self.test_mode:
@@ -191,10 +197,38 @@ class WindowsHost:
         self.package_root = None
 
     def _stop_application(self, allow_absent: bool):
-        absent = f"$x=@(Get-NetTCPConnection -LocalPort {self.port} -State Listen -ErrorAction SilentlyContinue); if($x.Count -eq 0){{exit 0}}; " if allow_absent else ""
+        absent = (
+            f"$x=@(Get-NetTCPConnection -LocalPort {self.port} -State Listen "
+            "-ErrorAction SilentlyContinue); if($x.Count -eq 0){exit 0}; "
+            if allow_absent else ""
+        )
         # Only the new wrapper owns this named event. Legacy Uvicorn has no safe
         # shutdown API; fail closed rather than guessing or terminating it.
-        script = absent + f"$x=@(Get-NetTCPConnection -LocalPort {self.port} -State Listen -ErrorAction SilentlyContinue); if($x.Count -ne 1){{exit 21}}; $id=$x[0].OwningProcess; $p=Get-CimInstance Win32_Process -Filter ('ProcessId='+$id); if($p.CommandLine -notmatch 'income_analytics.windows_server'){{exit 22}}; Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class IAEvent {{ [DllImport(\"kernel32.dll\", SetLastError=true, CharSet=CharSet.Unicode)] public static extern IntPtr OpenEvent(uint access, bool inherit, string name); [DllImport(\"kernel32.dll\", SetLastError=true)] public static extern bool SetEvent(IntPtr handle); [DllImport(\"kernel32.dll\")] public static extern bool CloseHandle(IntPtr handle); }}'; $h=[IAEvent]::OpenEvent(0x0002, $false, 'Local\\IncomeAnalytics-Uvicorn-{self.port}'); if($h -eq [IntPtr]::Zero){{exit 24}}; try{{if(-not [IAEvent]::SetEvent($h)){{exit 24}}}}finally{{[IAEvent]::CloseHandle($h)|Out-Null}}; if(-not (Wait-Process -Id $id -Timeout 25 -ErrorAction SilentlyContinue)){{}}; $p=Get-Process -Id $id -ErrorAction SilentlyContinue; if($p){{exit 23}}; if(@(Get-NetTCPConnection -LocalPort {self.port} -State Listen -ErrorAction SilentlyContinue).Count -ne 0){{exit 25}}"
+        script = absent + (
+            f"$x=@(Get-NetTCPConnection -LocalPort {self.port} -State Listen "
+            "-ErrorAction SilentlyContinue); "
+            "if($x.Count -ne 1){exit 21}; "
+            "$id=$x[0].OwningProcess; "
+            "$p=Get-CimInstance Win32_Process -Filter ('ProcessId='+$id); "
+            "if($p.CommandLine -notmatch 'income_analytics.windows_server'){exit 22}; "
+            "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; "
+            "public static class IAEvent { "
+            "[DllImport(\"kernel32.dll\", SetLastError=true, CharSet=CharSet.Unicode)] "
+            "public static extern IntPtr OpenEvent(uint access, bool inherit, string name); "
+            "[DllImport(\"kernel32.dll\", SetLastError=true)] "
+            "public static extern bool SetEvent(IntPtr handle); "
+            "[DllImport(\"kernel32.dll\")] "
+            "public static extern bool CloseHandle(IntPtr handle); }'; "
+            f"$h=[IAEvent]::OpenEvent(0x0002, $false, 'Local\\IncomeAnalytics-Uvicorn-{self.port}'); "
+            "if($h -eq [IntPtr]::Zero){exit 24}; "
+            "try{if(-not [IAEvent]::SetEvent($h)){exit 24}} "
+            "finally{[IAEvent]::CloseHandle($h)|Out-Null}; "
+            "Wait-Process -Id $id -Timeout 25 -ErrorAction SilentlyContinue; "
+            "$p=Get-Process -Id $id -ErrorAction SilentlyContinue; "
+            "if($p){exit 23}; "
+            f"if(@(Get-NetTCPConnection -LocalPort {self.port} -State Listen "
+            "-ErrorAction SilentlyContinue).Count -ne 0){exit 25}"
+        )
         completed = subprocess.run(
             ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
             capture_output=True, timeout=35, check=False,
@@ -225,15 +259,22 @@ class WindowsHost:
         if count != 1:
             raise ProductionExecutionError("LAUNCHER_LOCATION_UPDATE_FAILED")
         python = str(self.package_root / ".venv" / "Scripts" / "python.exe").replace("'", "''")
+        launcher_command = (
+            r"(?m)^\s*py\s+-3\.14\s+-X\s+utf8\s+-m\s+"
+            r"(?:uvicorn|income_analytics\.windows_server)\b"
+        )
         content, count = re.subn(
-            r"(?m)^\s*py\s+-3\.14\s+-X\s+utf8\s+-m\s+(?:uvicorn|income_analytics\.windows_server)\b",
+            launcher_command,
             lambda _: "& '" + python + "' -X utf8 -m income_analytics.windows_server", content,
         )
         if count != 1:
             raise ProductionExecutionError("LAUNCHER_RUNTIME_UPDATE_FAILED")
         src = str(self.package_root / "src").replace("'", "''")
         line = "$env:INCOME_ANALYTICS_RELEASE_COMMIT = '" + candidate["source_commit"] + "'\r\n"
-        line += "$env:PYTHONPATH = '" + src + "'\r\n"
+        python_path = src
+        if self.test_mode:
+            python_path += os.pathsep + self.test_import_path.replace("'", "''")
+        line += "$env:PYTHONPATH = '" + python_path + "'\r\n"
         content, count = re.subn(r"(?m)^(\s*&?\s*'.*python\.exe'.*income_analytics\.windows_server.*)$",
                                   lambda match: line + match.group(1), content, count=1)
         if count != 1:
@@ -244,10 +285,14 @@ class WindowsHost:
         self.activated = True
 
     def start_application(self):
+        env = None
+        if self.test_mode:
+            env = os.environ.copy()
+            env["PYTHONPATH"] = self.test_import_path
         subprocess.Popen(
             ["powershell.exe", "-NoProfile", "-File", str(self.launcher)],
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env,
         )
 
     def health_check(self, candidate: dict) -> dict:
