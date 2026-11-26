@@ -255,7 +255,7 @@ def test_premerge_exercise_is_explicitly_not_a_promotion(source):
     "target,authorization",
     [("production", None), ("production", "synthetic"), ("staging", "synthetic-approval")],
 )
-def test_production_path_requires_artifact_bound_decision(target, authorization):
+def test_production_path_does_not_exist_even_with_purported_authorization(target, authorization):
     with pytest.raises(DeliveryError):
         production_request(target, authorization)
 

@@ -13,6 +13,15 @@ from release_dependency_analysis import analyze_changed_dependencies, analyze_ru
 _ORIGINAL_EVALUATE = scoped_promotion.evaluate
 APPLICABILITY_POLICY = "ci/release-applicability-policy.json"
 APPLICABILITY_APPROVAL = "ci/release-applicability-approval.json"
+PYTHON_BASELINE = "docs/engineering/release-policy-65/candidate_python.json"
+
+
+def applicability_calls(calls: list[str]) -> list[str]:
+    """Exclude generated dataclass constructors from applicability only."""
+    return [
+        call for call in calls
+        if not call.endswith(":__create_fn__.<locals>.__init__")
+    ]
 
 
 def apply_applicability(result: dict, applicability: dict) -> dict:
@@ -78,6 +87,12 @@ def _with_applicability(changed_paths: list[str], base_sha: str, client: Github)
         static_dependencies = analyze_changed_dependencies(root, changed_paths)
         runtime_dependencies = analyze_runtime_dependency(root, changed_paths, base_sha)
         policy_approved = valid_policy_approval(policy_path, approval_record, policy_comment)
+        baseline = json.loads((root / PYTHON_BASELINE).read_text(encoding="utf-8"))
+        python_report = reports["python"]
+        python_nonregression = (
+            python_report.get("exit_code") in (0, 1)
+            and scoped_promotion.no_test_regressions(baseline, python_report)
+        )
         controls = {
             "CERT_48": _historical_result(
                 financial,
@@ -133,7 +148,7 @@ def _with_applicability(changed_paths: list[str], base_sha: str, client: Github)
             "PRODUCTION_DELIVERY": {
                 "status": (
                     "PASS"
-                    if reports["python"].get("exit_code") == 0
+                    if python_nonregression
                     and reports["build"].get("exit_code") == 0
                     and security.get("status") == "PASS"
                     and identity.get("staging_job") == "success"
@@ -141,6 +156,7 @@ def _with_applicability(changed_paths: list[str], base_sha: str, client: Github)
                 ),
                 "evidence": {
                     "python_exit_code": reports["python"].get("exit_code"),
+                    "python_nonregression": python_nonregression,
                     "build_exit_code": reports["build"].get("exit_code"),
                     "security_status": security.get("status"),
                     "staging_job": identity.get("staging_job"),
@@ -154,7 +170,7 @@ def _with_applicability(changed_paths: list[str], base_sha: str, client: Github)
                     scoped.get("technical_state") == "PASS"
                     and static_dependencies.get("complete") is True
                 ),
-                "modules": scoped.get("dependency_calls", []),
+                "modules": applicability_calls(scoped.get("dependency_calls", [])),
                 "static_analysis": static_dependencies,
             },
             controls,

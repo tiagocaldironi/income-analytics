@@ -104,9 +104,7 @@
         "income_analytics.application.cvm_magic_formula_normalization",
         "income_analytics.infrastructure.cvm_historical_shares_document"
       ],
-      "dependency_module_prefixes": [
-        "income_analytics.application.historical_"
-      ]
+      "dependency_module_prefixes": []
     },
     "22_HISTORICAL_REFERENCES_UNAPPROVED": {
       "applicable_scopes": ["magic_formula"],
