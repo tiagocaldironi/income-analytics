@@ -54,7 +54,7 @@ class ShutdownEvent:
         self.name = event_name(port)
         self.handle = None
 
-    def open(self):
+    def open(self) -> ctypes.WinDLL:
         kernel = ctypes.WinDLL("kernel32", use_last_error=True)
         kernel.CreateEventW.argtypes = [ctypes.c_void_p, ctypes.c_bool, ctypes.c_bool,
                                         ctypes.c_wchar_p]
@@ -64,7 +64,7 @@ class ShutdownEvent:
             raise OSError(ctypes.get_last_error(), "CreateEventW failed")
         return kernel
 
-    def watch(self, server: uvicorn.Server):
+    def watch(self, server: uvicorn.Server) -> None:
         kernel = self.open()
         kernel.WaitForSingleObject.argtypes = [ctypes.c_void_p, ctypes.c_uint]
         kernel.WaitForSingleObject.restype = ctypes.c_uint
@@ -76,7 +76,7 @@ class ShutdownEvent:
             if result != WAIT_TIMEOUT:
                 raise OSError(ctypes.get_last_error(), "WaitForSingleObject failed")
 
-    def close(self):
+    def close(self) -> None:
         if self.handle:
             ctypes.WinDLL("kernel32", use_last_error=True).CloseHandle(self.handle)
             self.handle = None
