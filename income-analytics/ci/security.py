@@ -741,7 +741,35 @@ def main():
         report["failures"].append({"type": type(error).__name__, "code": code})
         report["status"] = "FAIL" if code and "MISMATCH" in code else "NOT_VERIFIED"
     (destination / "result.json").write_text(json.dumps(report, indent=2) + "\n")
-    print(json.dumps({"status": report["status"], "failures": report["failures"]}))
+    # Print only fixed-name gate states and aggregate counts; never dump findings,
+    # paths, exception messages, credentials, or source excerpts to Actions logs.
+    gate_names = (
+        "source_policy",
+        "security_tests",
+        "findings_policy",
+        "gitleaks",
+        "sast",
+        "secret_scanning",
+        "dependencies",
+    )
+    gate_statuses = {
+        name: report[name].get("status", "NOT_VERIFIED")
+        if isinstance(report.get(name), dict)
+        else "NOT_VERIFIED"
+        for name in gate_names
+    }
+    print(
+        json.dumps(
+            {
+                "status": report["status"],
+                "failures": report["failures"],
+                "gate_statuses": gate_statuses,
+                "failed_gates": [
+                    name for name, status in gate_statuses.items() if status == "FAIL"
+                ],
+            }
+        )
+    )
     return int(report["status"] != "PASS")
 
 
