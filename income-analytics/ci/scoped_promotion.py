@@ -325,7 +325,7 @@ def main():
                     raise ValueError("DUPLICATE_SECURITY_REPORT")
                 security = row
         if (
-            set(reports)
+            set(reports).difference({"magic_formula"})
             != {
                 "runtime",
                 "engineering",
