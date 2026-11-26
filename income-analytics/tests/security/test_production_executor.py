@@ -202,7 +202,9 @@ def test_runtime_lock_audit_traces_exact_otel_update_and_google_consumer(tmp_pat
 
 
 @pytest.mark.skipif(os.name != "nt", reason="real Windows process and named-event adapter")
-def test_real_windows_adapter_installs_starts_stops_and_rolls_back_disposable_release(tmp_path):
+def test_real_windows_adapter_installs_starts_stops_and_rolls_back_disposable_release(
+    tmp_path, monkeypatch,
+):
     """Use a temporary Git checkout, launcher, random port and SQLite database only."""
     from production_executor import WindowsHost
 
@@ -231,6 +233,27 @@ def test_real_windows_adapter_installs_starts_stops_and_rolls_back_disposable_re
     with socket.socket() as probe:
         probe.bind(("127.0.0.1", 0))
         port = probe.getsockname()[1]
+    if os.environ.get("INCOME_CI_OFFLINE") == "1":
+        import sitecustomize
+
+        # The offline suite denies loopback too. Permit only this fixture's
+        # numeric endpoint, without changing the guard for other destinations.
+        guarded_connect = socket.socket.connect
+        guarded_dns = socket.getaddrinfo
+
+        def connect(sock, address):
+            if address == ("127.0.0.1", port):
+                return sitecustomize._connect(sock, address)
+            return guarded_connect(sock, address)
+
+        def resolve(host, service, *args, **kwargs):
+            if host == "127.0.0.1" and service == port:
+                return sitecustomize._getaddrinfo(host, service, *args, **kwargs)
+            return guarded_dns(host, service, *args, **kwargs)
+
+        monkeypatch.setattr(socket.socket, "connect", connect)
+        monkeypatch.setattr(socket, "getaddrinfo", resolve)
+        monkeypatch.setenv("NO_PROXY", "127.0.0.1")
     database = tmp_path / "disposable.sqlite3"
     with sqlite3.connect(database) as db:
         db.execute("CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL)")
