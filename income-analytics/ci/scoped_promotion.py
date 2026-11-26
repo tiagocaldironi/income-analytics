@@ -356,7 +356,17 @@ def main():
             ).strip()
         ):
             raise ValueError("DIRTY_OR_WRONG_CANDIDATE")
-        record = json.loads((ROOT / APPROVAL).read_text(encoding="utf-8"))
+        pr_number = os.environ.get("RELEASE_PR_NUMBER", "")
+        if not re.fullmatch(r"[1-9][0-9]{0,8}", pr_number):
+            raise ValueError("WRONG_RELEASE_CONTEXT")
+        approval_path = ROOT / f"ci/scoped-promotion-approval-{pr_number}.json"
+        if not approval_path.is_file():
+            legacy_path = ROOT / APPROVAL
+            legacy_record = json.loads(legacy_path.read_text(encoding="utf-8"))
+            if str(legacy_record.get("pr_number", 69)) != pr_number:
+                raise ValueError("SCOPED_OWNER_APPROVAL_MISSING")
+            approval_path = legacy_path
+        record = json.loads(approval_path.read_text(encoding="utf-8"))
         if (
             os.environ.get("RELEASE_PR_NUMBER") != str(record.get("pr_number", 69))
             or os.environ.get("GITHUB_REPOSITORY") != "tiagocaldironi/income-analytics"
