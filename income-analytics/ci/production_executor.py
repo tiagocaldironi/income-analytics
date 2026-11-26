@@ -260,7 +260,7 @@ class WindowsHost:
             raise ProductionExecutionError("LAUNCHER_LOCATION_UPDATE_FAILED")
         python = str(self.package_root / ".venv" / "Scripts" / "python.exe").replace("'", "''")
         launcher_command = (
-            r"(?m)^\s*py\s+-3\.14\s+-X\s+utf8\s+-m\s+"
+            r"(?m)^\s*(?:py\s+-3\.14|&\s+'[^']*python\.exe')\s+-X\s+utf8\s+-m\s+"
             r"(?:uvicorn|income_analytics\.windows_server)\b"
         )
         content, count = re.subn(

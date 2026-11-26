@@ -249,7 +249,7 @@ def test_real_windows_adapter_installs_starts_stops_and_rolls_back_disposable_re
         f"Set-Location -LiteralPath '{old_root}'\n"
         f"$env:PYTHONPATH = '{old_python_path}'\n"
         "$env:PYTHONDONTWRITEBYTECODE = '1'\n"
-        f"py -3.14 -X utf8 -m income_analytics.windows_server "
+        f"& '{python}' -X utf8 -m income_analytics.windows_server "
         f"income_analytics.main:app --app-dir src --host 127.0.0.1 --port {port}\n",
         encoding="utf-8",
     )
