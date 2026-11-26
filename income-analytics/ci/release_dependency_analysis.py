@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import http.client
 import importlib.util
 import json
 import re
 import subprocess
-import urllib.error
 import urllib.parse
-import urllib.request
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from pathlib import Path
 
 ANALYZER_VERSION = 1
@@ -23,23 +23,24 @@ LOCK_LINE = re.compile(r"([\w.-]+)==([\w.+-]+) --hash=sha256:([a-f0-9]{64})")
 
 
 def _pypi_release(name: str, version: str) -> dict:
-    url = (
-        "https://pypi.org/pypi/"
+    path = (
+        "/pypi/"
         + urllib.parse.quote(name, safe="")
         + "/"
         + urllib.parse.quote(version, safe="")
         + "/json"
     )
-    request = urllib.request.Request(url, headers={"Accept": "application/json"})
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:
-            if int(response.headers.get("Content-Length", "0")) > 4 * 1024 * 1024:
-                raise ValueError("PYPI_METADATA_TOO_LARGE")
-            payload = response.read(4 * 1024 * 1024 + 1)
+        with closing(http.client.HTTPSConnection("pypi.org", timeout=20)) as connection:
+            connection.request("GET", path, headers={"Accept": "application/json"})
+            with connection.getresponse() as response:
+                if response.status != 200:
+                    raise ValueError("PYPI_METADATA_UNAVAILABLE")
+                payload = response.read(4 * 1024 * 1024 + 1)
         if len(payload) > 4 * 1024 * 1024:
             raise ValueError("PYPI_METADATA_TOO_LARGE")
         return json.loads(payload)
-    except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as error:
+    except (http.client.HTTPException, OSError, json.JSONDecodeError) as error:
         raise ValueError("PYPI_METADATA_UNAVAILABLE") from error
 
 

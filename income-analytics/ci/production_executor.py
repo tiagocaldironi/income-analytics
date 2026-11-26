@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import json
 import os
 import re
@@ -366,15 +367,26 @@ class WindowsHost:
         last_error = None
         attempts = 120 if self.test_mode else 24
         interval = 0.5 if self.test_mode else 5
+        endpoint = urllib.parse.urlsplit(self.health_url)
+        connection_type = (
+            http.client.HTTPSConnection
+            if endpoint.scheme == "https"
+            else http.client.HTTPConnection
+        )
         for _ in range(attempts):
             try:
-                request = urllib.request.Request(
-                    self.health_url, headers={"Accept": "application/json"}
-                )
-                with urllib.request.urlopen(
-                    request, timeout=1 if self.test_mode else 5
-                ) as response:
-                    data = json.loads(response.read())
+                with closing(
+                    connection_type(
+                        endpoint.hostname,
+                        endpoint.port,
+                        timeout=1 if self.test_mode else 5,
+                    )
+                ) as connection:
+                    connection.request("GET", endpoint.path, headers={"Accept": "application/json"})
+                    with connection.getresponse() as response:
+                        if response.status != 200:
+                            raise ProductionExecutionError("HEALTH_HTTP_STATUS_INVALID")
+                        data = json.loads(response.read(65537))
                 if data.get("status") == "ok":
                     return data
             except Exception as error:  # transport details are not written to evidence
