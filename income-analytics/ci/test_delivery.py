@@ -137,7 +137,8 @@ def test_valid_technical_candidate_never_authorizes_production(source):
     result = delivery_decision(identity, validated_staging(), "delivery")
     assert result["promotion_status"] == "PROMOTION_ELIGIBLE"
     assert result["financial_release"] == "BLOCKED"
-    assert result["production_status"] == "PRODUCTION_NOT_AUTHORIZED"
+    assert result["production_status"] == "AWAITING_EXACT_POLICY_AND_ARTIFACT_APPROVAL"
+    assert result["production_deploy"] == "LOCAL_EXECUTOR_AVAILABLE"
     assert result["production_authorized"] is False
 
 
@@ -255,8 +256,15 @@ def test_premerge_exercise_is_explicitly_not_a_promotion(source):
     [("production", None), ("production", "synthetic"), ("staging", "synthetic-approval")],
 )
 def test_production_path_does_not_exist_even_with_purported_authorization(target, authorization):
-    with pytest.raises(DeliveryError, match="PRODUCTION_NOT_AUTHORIZED"):
+    with pytest.raises(DeliveryError):
         production_request(target, authorization)
+
+
+def test_production_request_binds_exact_commit_digest_and_confirmation():
+    decision = {"decision": "ELIGIBLE", "source_commit": "a" * 40, "package_sha256": "b" * 64}
+    assert production_request("production", decision, f"DEPLOY {'a' * 40} {'b' * 64}")["authorized"]
+    with pytest.raises(DeliveryError, match="EXPLICIT_ARTIFACT_CONFIRMATION_MISMATCH"):
+        production_request("production", decision, "DEPLOY different")
 
 
 def test_failed_staging_or_false_financial_release_never_eligible(source):

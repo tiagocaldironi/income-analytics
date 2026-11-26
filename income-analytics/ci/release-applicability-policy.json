@@ -1,11 +1,35 @@
 {
   "schema": 1,
-  "policy_id": "INCOME_ANALYTICS_RELEASE_APPLICABILITY_V1",
+  "policy_id": "INCOME_ANALYTICS_RELEASE_APPLICABILITY_V2",
   "approval_mode": "EXPLICIT_GITHUB_APPROVAL_REQUIRED",
   "approval_authority": "tiagocaldironi",
   "path_scopes": {
     "visual_only": [
       "src/income_analytics/api/static/css/*.css"
+    ],
+    "shared_runtime_dependency": [
+      "ci/runtime-windows-py314.lock",
+      "ci/requirements-windows-py314.lock",
+      "pyproject.toml"
+    ],
+    "release_policy": [
+      "ci/release-applicability-policy.json",
+      "ci/release-applicability-approval.json",
+      "ci/scoped-promotion-approval-88.json",
+      "docs/engineering/security/security_scanner_triage.json"
+    ],
+    "release_delivery": [
+      "ci/production_*.py",
+      "ci/delivery.py",
+      "ci/delivery_pipeline.py",
+      "ci/scoped_promotion.py",
+      "ci/test_delivery.py",
+      "ci/test_operational.py",
+      "ci/release_dependency_analysis.py",
+      "ci/release_scoped_promotion.py",
+      "tests/security/test_production_executor.py",
+      "src/income_analytics/windows_server.py",
+      "src/income_analytics/api/routers/health.py"
     ],
     "core_financial": [
       "src/income_analytics/application/treasury.py",
@@ -80,9 +104,7 @@
         "income_analytics.application.cvm_magic_formula_normalization",
         "income_analytics.infrastructure.cvm_historical_shares_document"
       ],
-      "dependency_module_prefixes": [
-        "income_analytics.application.historical_"
-      ]
+      "dependency_module_prefixes": []
     },
     "22_HISTORICAL_REFERENCES_UNAPPROVED": {
       "applicable_scopes": ["magic_formula"],
@@ -100,6 +122,21 @@
     },
     "CORE_FINANCIAL_REGRESSION": {
       "applicable_scopes": ["core_financial"],
+      "dependency_modules": [],
+      "dependency_module_prefixes": []
+    },
+    "RUNTIME_DEPENDENCY": {
+      "applicable_scopes": ["shared_runtime_dependency"],
+      "dependency_modules": [],
+      "dependency_module_prefixes": []
+    },
+    "RELEASE_POLICY_REVIEW": {
+      "applicable_scopes": ["release_policy"],
+      "dependency_modules": [],
+      "dependency_module_prefixes": []
+    },
+    "PRODUCTION_DELIVERY": {
+      "applicable_scopes": ["release_delivery"],
       "dependency_modules": [],
       "dependency_module_prefixes": []
     }

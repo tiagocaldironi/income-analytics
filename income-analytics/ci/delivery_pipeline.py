@@ -225,8 +225,8 @@ def delivery_decision(identity, validation, mode):
         "promotion_blockers": [] if mode == "delivery" else ["PR_UNMERGED_PREMERGE_TEST_ONLY"],
         "eligibility_scope": "ENGINEERING_TECHNICAL_STAGING_ONLY",
         "financial_release": "BLOCKED",
-        "production_status": "PRODUCTION_NOT_AUTHORIZED",
-        "production_deploy": "NOT_IMPLEMENTED",
+        "production_status": "AWAITING_EXACT_POLICY_AND_ARTIFACT_APPROVAL",
+        "production_deploy": "LOCAL_EXECUTOR_AVAILABLE",
         "production_authorized": False,
     }
 

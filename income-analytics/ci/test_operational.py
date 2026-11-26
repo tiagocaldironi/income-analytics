@@ -196,7 +196,7 @@ def test_failure_exercise(scenario, owned, monkeypatch, caplog):
         assert client.get("/probe").status_code == 200
         assert "OPERATIONAL_MONITORING_FAILED" in caplog.text
     elif scenario == "25":
-        with pytest.raises(DeliveryError, match="PRODUCTION_NOT_AUTHORIZED"):
+        with pytest.raises(DeliveryError, match="PRODUCTION_EVIDENCE_REQUIRED"):
             production_request("production", authorization="financial-blocked")
 
 

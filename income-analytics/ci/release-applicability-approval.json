@@ -3,9 +3,9 @@
   "approval": {
     "state": "APPROVED",
     "approver": "tiagocaldironi",
-    "policy_sha256": "e6e4f33a3d3261597d78ab438c0df6ba36602f57da0989c2f8869b86738a7270",
-    "comment_id": 7176978042,
-    "comment_url": "https://github.com/tiagocaldironi/income-analytics/pull/87#issuecomment-7176978042",
-    "comment_body_sha256": "abf71cd2373d4093f78fba48037643947cf5d06a4e281b4453f308e325a21e98"
+    "policy_sha256": "edb175cd322ca625105cabb9a66510a7981e9aab69792d42bd1e5bcaea98e08a",
+    "comment_id": 7202472562,
+    "comment_url": "https://github.com/tiagocaldironi/income-analytics/pull/88#issuecomment-7202472562",
+    "comment_body_sha256": "67d7c641462e1c546d7b31c0d767fec06c5b894e5ad62ede5a50b2cffa0b956a"
   }
 }

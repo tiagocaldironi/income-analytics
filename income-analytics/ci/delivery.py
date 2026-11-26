@@ -1,10 +1,11 @@
-"""Delivery decisions and SQLite recovery. No production target is implemented."""
+"""Delivery identity, staging recovery, and artifact-bound production request gates."""
 
 import ast
 import hashlib
 import json
 import logging
 import os
+import re
 import sqlite3
 import tempfile
 import time
@@ -29,6 +30,25 @@ class DeliveryError(ValueError):
 def require(condition, code):
     if not condition:
         raise DeliveryError(code)
+
+
+def release_executable(name: str) -> str:
+    """Resolve a release tool using only absolute operator PATH entries."""
+    if name not in {"git", "gh", "py", "powershell"}:
+        raise ValueError("RELEASE_TOOL_UNKNOWN")
+    filename = f"{name}.exe" if os.name == "nt" else name
+    current = Path.cwd().resolve()
+    for entry in os.get_exec_path():
+        directory = Path(entry.strip('"'))
+        if not directory.is_absolute():
+            continue
+        directory = directory.resolve()
+        if directory == current:
+            continue
+        executable = directory / filename
+        if executable.is_file() and os.access(executable, os.X_OK):
+            return str(executable.resolve())
+    raise OSError("RELEASE_TOOL_NOT_FOUND")
 
 
 def operation_event(event, duration=0.0):
@@ -176,10 +196,23 @@ def trusted_source(run, artifact, jobs, build, gate, expected, mode, current_run
     }
 
 
-def production_request(target, authorization=None):
-    # This implementation deliberately has no productive execution path, even
-    # when a caller supplies a purported approval token.
-    require(target == "staging" and authorization is None, "PRODUCTION_NOT_AUTHORIZED")
+def production_request(target, authorization=None, confirmation=None):
+    """Gate staging and artifact-bound local production requests separately."""
+    if target == "staging":
+        require(authorization is None and confirmation is None, "INVALID_STAGING_AUTHORIZATION")
+        return {"target": "staging", "authorized": False}
+    require(target == "production", "UNKNOWN_DELIVERY_TARGET")
+    require(isinstance(authorization, dict), "PRODUCTION_EVIDENCE_REQUIRED")
+    require(authorization.get("decision") == "ELIGIBLE", "PRODUCTION_EVIDENCE_BLOCKED")
+    commit, digest = authorization.get("source_commit"), authorization.get("package_sha256")
+    require(
+        isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit)
+        and isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest),
+        "PRODUCTION_ARTIFACT_IDENTITY_INVALID",
+    )
+    require(confirmation == f"DEPLOY {commit} {digest}", "EXPLICIT_ARTIFACT_CONFIRMATION_MISMATCH")
+    return {"target": "production", "authorized": True, "source_commit": commit,
+            "package_sha256": digest}
 
 
 def schema_contract(archive):
