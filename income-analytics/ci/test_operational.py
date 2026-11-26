@@ -196,7 +196,7 @@ def test_failure_exercise(scenario, owned, monkeypatch, caplog):
         assert client.get("/probe").status_code == 200
         assert "OPERATIONAL_MONITORING_FAILED" in caplog.text
     elif scenario == "25":
-        with pytest.raises(DeliveryError, match="PRODUCTION_NOT_AUTHORIZED"):
+        with pytest.raises(DeliveryError, match="PRODUCTION_EVIDENCE_REQUIRED"):
             production_request("production", authorization="financial-blocked")
 
 
@@ -239,7 +239,7 @@ def test_operational_job_blocks_engineering(status):
     )
     result = require_operational({"engineering_ci": "PASS"}, report, status)
     assert result["engineering_ci"] == "FAIL"
-    assert result["production"] == "PRODUCTION_NOT_AUTHORIZED"
+    assert result["production"] == "AWAITING_EXACT_POLICY_AND_ARTIFACT_APPROVAL"
 
 
 def test_retention_parameterized_validated_and_never_deletes(owned):

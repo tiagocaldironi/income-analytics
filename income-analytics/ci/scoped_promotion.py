@@ -413,8 +413,11 @@ PROTECTED = (
     "ci/release_dependency_analysis.py",
     "ci/release-applicability-policy.json",
     "ci/release_scoped_promotion.py",
+    "ci/production_authorization.py",
+    "ci/production_executor.py",
     "ci/governance_controller.py",
     "tests/security/test_scoped_promotion.py",
+    "tests/security/test_production_executor.py",
 )
 
 
