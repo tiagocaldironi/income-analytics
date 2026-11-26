@@ -16,6 +16,7 @@ import urllib.parse
 import zipfile
 import argparse
 import uuid
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -34,16 +35,24 @@ class ProductionExecutionError(RuntimeError):
 class WindowsHost:
     """Local Windows implementation; only the existing launcher and release slots change."""
 
-    def __init__(self, *, release_root: Path, database: Path, launcher: Path, health_url: str):
+    def __init__(self, *, release_root: Path, database: Path, launcher: Path, health_url: str,
+                 test_mode: bool = False, port: int = 8002):
         if os.name != "nt":
             raise ProductionExecutionError("WINDOWS_HOST_REQUIRED")
         self.release_root = release_root.resolve()
         self.database = database.resolve()
         self.launcher = launcher.resolve()
         self.health_url = health_url
+        self.test_mode = test_mode
+        self.port = port
+        if not 1 <= port <= 65535 or (test_mode and port == 8002):
+            raise ProductionExecutionError("TEST_PORT_MUST_BE_DISPOSABLE")
         parsed_health = urllib.parse.urlparse(health_url)
-        if parsed_health.scheme != "https" or not parsed_health.hostname or \
-           not parsed_health.hostname.endswith(".ts.net") or parsed_health.path.rstrip("/") != "/health":
+        production_health = parsed_health.scheme == "https" and parsed_health.hostname and \
+            parsed_health.hostname.endswith(".ts.net")
+        disposable_health = test_mode and parsed_health.scheme == "http" and \
+            parsed_health.hostname in {"127.0.0.1", "localhost"}
+        if not (production_health or disposable_health) or parsed_health.path.rstrip("/") != "/health":
             raise ProductionExecutionError("TAILSCALE_HTTPS_HEALTH_URL_REQUIRED")
         self.package_root: Path | None = None
         self.launcher_bytes: bytes | None = None
@@ -61,11 +70,13 @@ class WindowsHost:
         backup_dir.mkdir(parents=True, exist_ok=True)
         backup = backup_dir / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") +
                                "-" + uuid.uuid4().hex + ".sqlite3")
-        with sqlite3.connect(f"file:{self.database.as_posix()}?mode=ro", uri=True, timeout=5) as source:
-            with sqlite3.connect(backup) as target:
+        with closing(sqlite3.connect(
+            f"file:{self.database.as_posix()}?mode=ro", uri=True, timeout=5
+        )) as source:
+            with closing(sqlite3.connect(backup)) as target:
                 source.backup(target, pages=256, sleep=0.1)
         digest = hashlib.sha256(backup.read_bytes()).hexdigest()
-        with sqlite3.connect(f"file:{backup.as_posix()}?mode=ro", uri=True) as db:
+        with closing(sqlite3.connect(f"file:{backup.as_posix()}?mode=ro", uri=True)) as db:
             if db.execute("PRAGMA integrity_check").fetchall() != [("ok",)]:
                 raise ProductionExecutionError("PRODUCTION_BACKUP_INTEGRITY_FAILED")
             rows = db.execute("SELECT version_num FROM alembic_version").fetchall()
@@ -75,10 +86,10 @@ class WindowsHost:
         # Prove the backup can be opened and copied without touching the live DB.
         with tempfile.TemporaryDirectory(prefix="income-backup-check-") as directory:
             rehearsal = Path(directory) / "rehearsal.sqlite3"
-            with sqlite3.connect(f"file:{backup.as_posix()}?mode=ro", uri=True) as source:
-                with sqlite3.connect(rehearsal) as target:
+            with closing(sqlite3.connect(f"file:{backup.as_posix()}?mode=ro", uri=True)) as source:
+                with closing(sqlite3.connect(rehearsal)) as target:
                     source.backup(target)
-            with sqlite3.connect(f"file:{rehearsal.as_posix()}?mode=ro", uri=True) as db:
+            with closing(sqlite3.connect(f"file:{rehearsal.as_posix()}?mode=ro", uri=True)) as db:
                 if db.execute("PRAGMA integrity_check").fetchall() != [("ok",)]:
                     raise ProductionExecutionError("PRODUCTION_BACKUP_RESTORE_REHEARSAL_FAILED")
         if hashlib.sha256(backup.read_bytes()).hexdigest() != digest:
@@ -133,11 +144,19 @@ class WindowsHost:
             archive.extractall(target)
         self.package_root = target
         env = os.environ.copy()
-        run(["py", "-3.14", "-m", "venv", str(target / ".venv")], cwd=target, env=env)
+        venv_args = ["py", "-3.14", "-m", "venv"]
+        if self.test_mode:
+            venv_args.append("--system-site-packages")
+        run([*venv_args, str(target / ".venv")], cwd=target, env=env)
         python = target / ".venv" / "Scripts" / "python.exe"
-        run([str(python), "-m", "pip", "--isolated", "install", "--no-index", "--find-links",
-             str(target / "wheelhouse"), "--require-hashes", "--only-binary=:all:",
-             "-r", "requirements.lock"], cwd=target, env=env)
+        if self.test_mode:
+            # Test bundles are synthetic and may use only host-installed test dependencies.
+            run([str(python), "-c", "import uvicorn; assert uvicorn.__version__"],
+                cwd=target, env=env)
+        else:
+            run([str(python), "-m", "pip", "--isolated", "install", "--no-index", "--find-links",
+                 str(target / "wheelhouse"), "--require-hashes", "--only-binary=:all:",
+                 "-r", "requirements.lock"], cwd=target, env=env)
         run([str(python), "-m", "pip", "check"], cwd=target, env=env)
 
     def require_schema_compatible(self, candidate: dict, current_head: str):
@@ -172,9 +191,20 @@ class WindowsHost:
         self.package_root = None
 
     def _stop_application(self, allow_absent: bool):
-        absent = "$x=@(Get-NetTCPConnection -LocalPort 8002 -State Listen -ErrorAction SilentlyContinue); if($x.Count -eq 0){exit 0}; " if allow_absent else ""
-        script = absent + "$x=@(Get-NetTCPConnection -LocalPort 8002 -State Listen -ErrorAction SilentlyContinue); if($x.Count -ne 1){exit 21}; $id=$x[0].OwningProcess; $p=Get-CimInstance Win32_Process -Filter ('ProcessId='+$id); if($p.CommandLine -notmatch 'uvicorn income_analytics.main:app'){exit 22}; $proc=Get-Process -Id $id -ErrorAction Stop; if(-not $proc.CloseMainWindow()){exit 24}; if(-not $proc.WaitForExit(20000)){exit 23}; if(@(Get-NetTCPConnection -LocalPort 8002 -State Listen -ErrorAction SilentlyContinue).Count -ne 0){exit 25}"
-        run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script])
+        absent = f"$x=@(Get-NetTCPConnection -LocalPort {self.port} -State Listen -ErrorAction SilentlyContinue); if($x.Count -eq 0){{exit 0}}; " if allow_absent else ""
+        # Only the new wrapper owns this named event. Legacy Uvicorn has no safe
+        # shutdown API; fail closed rather than guessing or terminating it.
+        script = absent + f"$x=@(Get-NetTCPConnection -LocalPort {self.port} -State Listen -ErrorAction SilentlyContinue); if($x.Count -ne 1){{exit 21}}; $id=$x[0].OwningProcess; $p=Get-CimInstance Win32_Process -Filter ('ProcessId='+$id); if($p.CommandLine -notmatch 'income_analytics.windows_server'){{exit 22}}; Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class IAEvent {{ [DllImport(\"kernel32.dll\", SetLastError=true, CharSet=CharSet.Unicode)] public static extern IntPtr OpenEvent(uint access, bool inherit, string name); [DllImport(\"kernel32.dll\", SetLastError=true)] public static extern bool SetEvent(IntPtr handle); [DllImport(\"kernel32.dll\")] public static extern bool CloseHandle(IntPtr handle); }}'; $h=[IAEvent]::OpenEvent(0x0002, $false, 'Local\\IncomeAnalytics-Uvicorn-{self.port}'); if($h -eq [IntPtr]::Zero){{exit 24}}; try{{if(-not [IAEvent]::SetEvent($h)){{exit 24}}}}finally{{[IAEvent]::CloseHandle($h)|Out-Null}}; if(-not (Wait-Process -Id $id -Timeout 25 -ErrorAction SilentlyContinue)){{}}; $p=Get-Process -Id $id -ErrorAction SilentlyContinue; if($p){{exit 23}}; if(@(Get-NetTCPConnection -LocalPort {self.port} -State Listen -ErrorAction SilentlyContinue).Count -ne 0){{exit 25}}"
+        completed = subprocess.run(
+            ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+            capture_output=True, timeout=35, check=False,
+        )
+        if completed.returncode:
+            if completed.returncode == 22:
+                raise ProductionExecutionError("LEGACY_GRACEFUL_STOP_UNAVAILABLE")
+            raise ProductionExecutionError(
+                "GRACEFUL_STOP_FAILED", {"powershell_exit_code": completed.returncode}
+            )
         self.stopped = True
 
     def stop_application(self):
@@ -196,13 +226,18 @@ class WindowsHost:
             raise ProductionExecutionError("LAUNCHER_LOCATION_UPDATE_FAILED")
         python = str(self.package_root / ".venv" / "Scripts" / "python.exe").replace("'", "''")
         content, count = re.subn(
-            r"(?m)^\s*py\s+-3\.14\s+-X\s+utf8\s+-m\s+uvicorn\b",
-            "& '" + python + "' -X utf8 -m uvicorn", content,
+            r"(?m)^\s*py\s+-3\.14\s+-X\s+utf8\s+-m\s+(?:uvicorn|income_analytics\.windows_server)\b",
+            lambda _: "& '" + python + "' -X utf8 -m income_analytics.windows_server", content,
         )
         if count != 1:
             raise ProductionExecutionError("LAUNCHER_RUNTIME_UPDATE_FAILED")
+        src = str(self.package_root / "src").replace("'", "''")
         line = "$env:INCOME_ANALYTICS_RELEASE_COMMIT = '" + candidate["source_commit"] + "'\r\n"
-        content = re.sub(r"(?m)^(\s*&?\s*'.*python\.exe'.*uvicorn.*)$", line + r"\1", content, count=1)
+        line += "$env:PYTHONPATH = '" + src + "'\r\n"
+        content, count = re.subn(r"(?m)^(\s*&?\s*'.*python\.exe'.*income_analytics\.windows_server.*)$",
+                                  lambda match: line + match.group(1), content, count=1)
+        if count != 1:
+            raise ProductionExecutionError("LAUNCHER_ENVIRONMENT_UPDATE_FAILED")
         temporary = self.launcher.with_suffix(self.launcher.suffix + ".pending")
         temporary.write_bytes(content.encode("utf-8"))
         os.replace(temporary, self.launcher)
@@ -217,16 +252,18 @@ class WindowsHost:
 
     def health_check(self, candidate: dict) -> dict:
         last_error = None
-        for _ in range(24):
+        attempts = 30 if self.test_mode else 24
+        interval = 0.25 if self.test_mode else 5
+        for _ in range(attempts):
             try:
                 request = urllib.request.Request(self.health_url, headers={"Accept": "application/json"})
-                with urllib.request.urlopen(request, timeout=5) as response:
+                with urllib.request.urlopen(request, timeout=1 if self.test_mode else 5) as response:
                     data = json.loads(response.read())
                 if data.get("status") == "ok":
                     return data
             except Exception as error:  # transport details are not written to evidence
                 last_error = type(error).__name__
-            time.sleep(5)
+            time.sleep(interval)
         raise ProductionExecutionError("HTTPS_HEALTH_FAILED_" + str(last_error or "TIMEOUT"))
 
     def restore_previous_release(self, snapshot: dict):

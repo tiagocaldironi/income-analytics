@@ -25,6 +25,7 @@
       "ci/release_dependency_analysis.py",
       "ci/release_scoped_promotion.py",
       "tests/security/test_production_executor.py",
+      "src/income_analytics/windows_server.py",
       "src/income_analytics/api/routers/health.py"
     ],
     "core_financial": [

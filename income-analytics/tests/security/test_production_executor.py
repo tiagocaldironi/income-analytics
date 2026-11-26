@@ -1,8 +1,11 @@
 """Fault-injected production state-machine tests; all host state is disposable."""
 
 import hashlib
-import json
+import os
+import socket
+import sqlite3
 import subprocess
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -195,3 +198,103 @@ def test_runtime_lock_audit_traces_exact_otel_update_and_google_consumer(tmp_pat
     assert report["consumers"] == [{"consumer": "google-api-core",
                                     "requirement": "opentelemetry-api<2.0.0,>=1.44.0"}]
     assert report["application_direct_references"] == []
+
+
+@pytest.mark.skipif(os.name != "nt", reason="real Windows process and named-event adapter")
+def test_real_windows_adapter_installs_starts_stops_and_rolls_back_disposable_release(tmp_path):
+    """Use a temporary Git checkout, launcher, random port and SQLite database only."""
+    from production_executor import WindowsHost
+
+    python = subprocess.check_output(["py", "-3.14", "-c", "import sys; print(sys.executable)"],
+                                     text=True).strip()
+    assert subprocess.run([python, "-c", "import uvicorn, fastapi"], check=False).returncode == 0
+    old_root = tmp_path / "old"
+    (old_root / "src" / "income_analytics").mkdir(parents=True)
+    (old_root / "alembic" / "versions").mkdir(parents=True)
+    old_main = (
+        "from fastapi import FastAPI\napp=FastAPI()\n"
+        "@app.get('/health')\ndef health(): return {'status':'ok'}\n"
+    )
+    (old_root / "src" / "income_analytics" / "main.py").write_text(old_main, encoding="utf-8")
+    wrapper = Path(__file__).resolve().parents[2] / "src/income_analytics/windows_server.py"
+    (old_root / "src" / "income_analytics" / "windows_server.py").write_bytes(wrapper.read_bytes())
+    (old_root / ".gitignore").write_text("__pycache__/\n", encoding="utf-8")
+    migration = "revision='schema1'\ndown_revision=None\n"
+    (old_root / "alembic" / "versions" / "0001.py").write_text(migration, encoding="utf-8")
+    subprocess.run(["git", "init", "-q"], cwd=old_root, check=True)
+    subprocess.run(["git", "config", "user.email", "ci@example.invalid"], cwd=old_root, check=True)
+    subprocess.run(["git", "config", "user.name", "CI"], cwd=old_root, check=True)
+    subprocess.run(["git", "add", "."], cwd=old_root, check=True)
+    subprocess.run(["git", "commit", "-qm", "disposable previous release"],
+                   cwd=old_root, check=True)
+
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+    database = tmp_path / "disposable.sqlite3"
+    with sqlite3.connect(database) as db:
+        db.execute("CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL)")
+        db.execute("INSERT INTO alembic_version VALUES ('schema1')")
+        db.execute("CREATE TABLE synthetic_financial_fixture (value INTEGER NOT NULL)")
+        db.execute("INSERT INTO synthetic_financial_fixture VALUES (42)")
+    db_before = hashlib.sha256(database.read_bytes()).hexdigest()
+    launcher = tmp_path / "DisposableLauncher.ps1"
+    launcher.write_text(
+        "$ErrorActionPreference = 'Stop'\n"
+        f"Set-Location -LiteralPath '{old_root}'\n"
+        f"$env:PYTHONPATH = '{old_root / 'src'}'\n"
+        "$env:PYTHONDONTWRITEBYTECODE = '1'\n"
+        f"py -3.14 -X utf8 -m income_analytics.windows_server "
+        f"income_analytics.main:app --app-dir src --host 127.0.0.1 --port {port}\n",
+        encoding="utf-8",
+    )
+
+    package = tmp_path / "candidate.zip"
+    candidate_commit = "a" * 40
+    with zipfile.ZipFile(package, "w", compression=zipfile.ZIP_STORED) as archive:
+        archive.writestr("src/income_analytics/main.py",
+                         "import os\nfrom fastapi import FastAPI\napp=FastAPI()\n"
+                         "@app.get('/health')\ndef health(): return "
+                         "{'status':'ok','release_commit':os.environ.get('INCOME_ANALYTICS_RELEASE_COMMIT','')}\n")
+        archive.writestr("src/income_analytics/windows_server.py", wrapper.read_bytes())
+        archive.writestr("alembic/versions/0001.py", migration)
+        archive.writestr("requirements.lock", "")
+    candidate = {"source_commit": candidate_commit}
+    host = WindowsHost(
+        release_root=tmp_path / "releases", database=database, launcher=launcher,
+        health_url=f"http://127.0.0.1:{port}/health", test_mode=True, port=port,
+    )
+    host.start_application()
+    snapshot = {}
+    try:
+        old_health = host.health_check({})
+        assert old_health["status"] == "ok" and "release_commit" not in old_health
+        snapshot = host.preserve_previous_release()
+        backup = host.create_and_verify_online_backup()
+        assert backup["status"] == "PASS" and backup["schema_head"] == "schema1"
+        host.stage_candidate(package, candidate)
+        host.require_schema_compatible(candidate, backup["schema_head"])
+        installed_python = host.package_root / ".venv/Scripts/python.exe"
+        subprocess.run([str(installed_python), "-c", "import uvicorn, fastapi"], check=True)
+
+        host.stop_application()
+        assert host.stopped
+        host.activate_candidate(candidate)
+        host.start_application()
+        assert host.health_check(candidate)["release_commit"] == candidate_commit
+
+        # Exercise the actual adapter's code/config rollback after candidate served health.
+        host.stop_candidate_application()
+        host.restore_previous_release(snapshot)
+        host.start_application()
+        rolled_back = host.health_check(snapshot["previous_candidate"])
+        assert rolled_back["status"] == "ok" and "release_commit" not in rolled_back
+        assert hashlib.sha256(database.read_bytes()).hexdigest() == db_before
+    finally:
+        try:
+            host.stop_candidate_application()
+        except Exception:
+            pass
+        if snapshot:
+            host.restore_previous_release(snapshot)
+        host.discard_candidate()
