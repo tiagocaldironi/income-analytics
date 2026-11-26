@@ -239,7 +239,7 @@ def test_operational_job_blocks_engineering(status):
     )
     result = require_operational({"engineering_ci": "PASS"}, report, status)
     assert result["engineering_ci"] == "FAIL"
-    assert result["production"] == "AWAITING_EXACT_POLICY_AND_ARTIFACT_APPROVAL"
+    assert result["production"] == "PRODUCTION_NOT_AUTHORIZED"
 
 
 def test_retention_parameterized_validated_and_never_deletes(owned):

@@ -163,7 +163,7 @@ class WindowsHost:
             run([str(python), "-m", "pip", "--isolated", "install", "--no-index", "--find-links",
                  str(target / "wheelhouse"), "--require-hashes", "--only-binary=:all:",
                  "-r", "requirements.lock"], cwd=target, env=env)
-        run([str(python), "-m", "pip", "check"], cwd=target, env=env)
+            run([str(python), "-m", "pip", "check"], cwd=target, env=env)
 
     def require_schema_compatible(self, candidate: dict, current_head: str):
         if self.package_root is None:
