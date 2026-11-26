@@ -326,6 +326,35 @@ def test_runtime_lock_audit_traces_exact_otel_update_and_google_consumer(tmp_pat
     assert report["application_direct_references"] == []
 
 
+@pytest.mark.parametrize("manual, probe_result", [(False, 0), (True, 0), (True, 23), (True, 25)])
+def test_legacy_stop_requires_operator_and_verified_exit(monkeypatch, manual, probe_result):
+    from production_executor import ProductionExecutionError, WindowsHost
+
+    host = object.__new__(WindowsHost)
+    host.port = 18002
+    host.manual_legacy_stop = manual
+    host.stopped = False
+    events = []
+
+    def probe(script):
+        events.append("probe")
+        if len(events) == 1:
+            return subprocess.CompletedProcess([], 22, b"1234\r\n")
+        assert "Wait-Process -Id 1234" in script
+        assert "-LocalPort 18002" in script
+        return subprocess.CompletedProcess([], probe_result)
+
+    monkeypatch.setattr(host, "_run_stop_probe", probe)
+    monkeypatch.setattr("builtins.input", lambda _: events.append("prompt"))
+    if not manual or probe_result:
+        with pytest.raises(ProductionExecutionError):
+            host.stop_application()
+    else:
+        host.stop_application()
+    assert events == (["probe", "prompt", "probe"] if manual else ["probe"])
+    assert host.stopped is (manual and probe_result == 0)
+
+
 @pytest.mark.parametrize("change", ["none", "tree", "parent", "candidate"])
 def test_merge_provenance_requires_same_tree_and_parents(monkeypatch, change):
     from production_executor import GitHubEvidence, ProductionExecutionError
