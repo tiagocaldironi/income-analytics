@@ -3,11 +3,11 @@
   "pr_number": 88,
   "state": "OWNER_APPROVED",
   "owner": "tiagocaldironi",
-  "approved_sha": "69dea23c59eb3b3f4a1ae99af0a1140129db73f9",
-  "comment_id": 7202119214,
-  "comment_url": "https://github.com/tiagocaldironi/income-analytics/pull/88#issuecomment-7202119214",
-  "comment_body_sha256": "9655dc65a317b6c737912ce83e1258e1978a2b0733b7b6ad4f10fdf604c6381d",
-  "certified_surface_sha256": "51dd0da05e2b39aad0c71f946425733bcc894563b784039e89eec9bfe1048b7d",
+  "approved_sha": "b192af68618410ae4de1ff485de625119fbdbd50",
+  "comment_id": 7202472562,
+  "comment_url": "https://github.com/tiagocaldironi/income-analytics/pull/88#issuecomment-7202472562",
+  "comment_body_sha256": "67d7c641462e1c546d7b31c0d767fec06c5b894e5ad62ede5a50b2cffa0b956a",
+  "certified_surface_sha256": "33c43f08cbe612d4089daa723d614330521f64c3c2b76adbabc654b077c264cb",
   "merge_authorized": false,
   "production_deploy_authorized": false
 }
