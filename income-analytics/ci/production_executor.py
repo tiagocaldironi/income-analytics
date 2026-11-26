@@ -46,6 +46,7 @@ class WindowsHost:
         health_url: str,
         test_mode: bool = False,
         port: int = 8002,
+        manual_legacy_stop: bool = False,
     ):
         if os.name != "nt":
             raise ProductionExecutionError("WINDOWS_HOST_REQUIRED")
@@ -55,6 +56,7 @@ class WindowsHost:
         self.health_url = health_url
         self.test_mode = test_mode
         self.port = port
+        self.manual_legacy_stop = manual_legacy_stop
         self.test_import_path = os.pathsep.join(
             entry
             for entry in sys.path
@@ -274,7 +276,9 @@ class WindowsHost:
             "if($x.Count -ne 1){exit 21}; "
             "$id=$x[0].OwningProcess; "
             "$p=Get-CimInstance Win32_Process -Filter ('ProcessId='+$id); "
-            "if($p.CommandLine -notmatch 'income_analytics.windows_server'){exit 22}; "
+            r"if($p.CommandLine -match '-m\s+uvicorn\s+income_analytics\.main:app\b'){"
+            "[Console]::WriteLine($id); exit 22}; "
+            r"if($p.CommandLine -notmatch 'income_analytics\.windows_server'){exit 26}; "
             "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; "
             "public static class IAEvent { "
             '[DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Unicode)] '
@@ -294,19 +298,37 @@ class WindowsHost:
             f"if(@(Get-NetTCPConnection -LocalPort {self.port} -State Listen "
             "-ErrorAction SilentlyContinue).Count -ne 0){exit 25}"
         )
-        completed = subprocess.run(
+        completed = self._run_stop_probe(script)
+        if completed.returncode == 22:
+            if allow_absent or not self.manual_legacy_stop:
+                raise ProductionExecutionError("LEGACY_GRACEFUL_STOP_UNAVAILABLE")
+            pid = completed.stdout.strip()
+            if not pid.isdigit():
+                raise ProductionExecutionError("LEGACY_PROCESS_ID_INVALID")
+            input(
+                f"Backup validado. Pressione Ctrl+C na janela do Uvicorn (PID {pid.decode()}) "
+                "e depois Enter nesta janela para verificar a parada: "
+            )
+            completed = self._run_stop_probe(
+                f"Wait-Process -Id {int(pid)} -Timeout 25 -ErrorAction SilentlyContinue; "
+                f"if(Get-Process -Id {int(pid)} -ErrorAction SilentlyContinue){{exit 23}}; "
+                f"if(@(Get-NetTCPConnection -LocalPort {self.port} -State Listen "
+                "-ErrorAction SilentlyContinue).Count -ne 0){exit 25}"
+            )
+        if completed.returncode:
+            raise ProductionExecutionError(
+                "GRACEFUL_STOP_FAILED", {"powershell_exit_code": completed.returncode}
+            )
+        self.stopped = True
+
+    @staticmethod
+    def _run_stop_probe(script: str):
+        return subprocess.run(
             [release_executable("powershell"), "-NoProfile", "-NonInteractive", "-Command", script],
             capture_output=True,
             timeout=35,
             check=False,
         )
-        if completed.returncode:
-            if completed.returncode == 22:
-                raise ProductionExecutionError("LEGACY_GRACEFUL_STOP_UNAVAILABLE")
-            raise ProductionExecutionError(
-                "GRACEFUL_STOP_FAILED", {"powershell_exit_code": completed.returncode}
-            )
-        self.stopped = True
 
     def stop_application(self):
         self._stop_application(allow_absent=False)
@@ -755,6 +777,7 @@ def main() -> int:
     parser.add_argument("--database", type=Path, required=True)
     parser.add_argument("--launcher", type=Path, required=True)
     parser.add_argument("--health-url", required=True)
+    parser.add_argument("--manual-legacy-stop", action="store_true")
     parser.add_argument("--evidence-out", type=Path, required=True)
     parser.add_argument(
         "--confirm", action="store_true", help="prompt for exact artifact confirmation"
@@ -795,6 +818,7 @@ def main() -> int:
             database=args.database,
             launcher=args.launcher,
             health_url=args.health_url,
+            manual_legacy_stop=args.manual_legacy_stop,
         )
         report = execute(
             host,
