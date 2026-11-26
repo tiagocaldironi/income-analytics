@@ -303,7 +303,11 @@ def test_real_windows_adapter_installs_starts_stops_and_rolls_back_disposable_re
         host.stage_candidate(package, candidate)
         host.require_schema_compatible(candidate, backup["schema_head"])
         installed_python = host.package_root / ".venv/Scripts/python.exe"
-        subprocess.run([str(installed_python), "-c", "import uvicorn, fastapi"], check=True)
+        subprocess.run(
+            [str(installed_python), "-c", "import uvicorn, fastapi"],
+            env={**os.environ, "PYTHONPATH": test_site_packages},
+            check=True,
+        )
 
         host.stop_application()
         assert host.stopped

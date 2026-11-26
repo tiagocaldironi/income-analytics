@@ -151,7 +151,7 @@ class WindowsHost:
         env = os.environ.copy()
         venv_args = ["py", "-3.14", "-m", "venv"]
         if self.test_mode:
-            venv_args.append("--system-site-packages")
+            venv_args = [sys.executable, "-m", "venv", "--system-site-packages"]
             env["PYTHONPATH"] = self.test_import_path
         run([*venv_args, str(target / ".venv")], cwd=target, env=env)
         python = target / ".venv" / "Scripts" / "python.exe"
