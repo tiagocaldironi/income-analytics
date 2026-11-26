@@ -297,8 +297,8 @@ class WindowsHost:
 
     def health_check(self, candidate: dict) -> dict:
         last_error = None
-        attempts = 30 if self.test_mode else 24
-        interval = 0.25 if self.test_mode else 5
+        attempts = 120 if self.test_mode else 24
+        interval = 0.5 if self.test_mode else 5
         for _ in range(attempts):
             try:
                 request = urllib.request.Request(self.health_url, headers={"Accept": "application/json"})
