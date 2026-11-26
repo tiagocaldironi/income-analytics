@@ -646,16 +646,19 @@ class GitHubEvidence:
         ):
             raise ProductionExecutionError("SOURCE_PACKAGE_SIDECAR_MISMATCH")
         with zipfile.ZipFile(package) as bundle:
-            if source_files.get("manifest.json") != bundle.read("manifest.json"):
+            if json.loads(source_files.get("manifest.json", b"null")) != json.loads(
+                bundle.read("manifest.json")
+            ):
                 raise ProductionExecutionError("SOURCE_MANIFEST_MISMATCH")
 
         stage_run_id = int(staging.get("workflow_identity", {}).get("delivery_run_id", 0))
         stage = self.verify_run(
-            stage_run_id, commit, ".github/workflows/delivery-validation.yml", {"push"}
+            stage_run_id, commit, ".github/workflows/delivery-validation.yml", {"workflow_run"}
         )
         stage_attempt = int(stage.get("run_attempt", 0))
         if (
             stage.get("head_branch") != "develop"
+            or stage.get("workflow_id") != 400558038
             or stage_attempt < 1
             or stage.get("conclusion") != "success"
         ):
@@ -666,22 +669,46 @@ class GitHubEvidence:
         if stage_artifact.get("created_at", "") < stage.get("run_started_at", ""):
             raise ProductionExecutionError("STAGING_ARTIFACT_FROM_OLD_ATTEMPT")
         stage_files = self.files(stage_artifact)
+        if stage_files.get(f"promoted-{commit}.zip") != package.read_bytes():
+            raise ProductionExecutionError("STAGING_PACKAGE_MISMATCH")
+        evidence_artifact = self.artifact(
+            stage_run_id, f"delivery-evidence-{stage_run_id}-{stage_attempt}"
+        )
+        if evidence_artifact.get("created_at", "") < stage.get("run_started_at", ""):
+            raise ProductionExecutionError("STAGING_ARTIFACT_FROM_OLD_ATTEMPT")
+        evidence = self.files(evidence_artifact)
         try:
             if (
-                json.loads(stage_files["validation.json"]) != staging
-                or json.loads(stage_files["candidate.json"]) != candidate
+                json.loads(evidence["validation.json"]) != staging
+                or json.loads(evidence["candidate.json"]) != candidate
             ):
                 raise ProductionExecutionError("STAGING_REPORT_NOT_FROM_GITHUB_ARTIFACT")
         except (KeyError, json.JSONDecodeError) as error:
             raise ProductionExecutionError("STAGING_REPORT_NOT_FROM_GITHUB_ARTIFACT") from error
 
         scope_run_id = int(scope.get("run_id", 0))
+        pr_head = scope.get("pr_head_sha", "")
+        scoped_checkout = scope.get("checkout_sha", "")
+        if not all(
+            isinstance(sha, str) and re.fullmatch(r"[0-9a-f]{40}", sha)
+            for sha in (pr_head, scoped_checkout)
+        ):
+            raise ProductionExecutionError("SCOPE_COMMIT_INVALID")
         scope_run = self.verify_run(
-            scope_run_id, commit, ".github/workflows/ci-offline.yml", {"pull_request"}
+            scope_run_id, pr_head, ".github/workflows/ci-offline.yml", {"pull_request"}
         )
         if scope_run.get("workflow_id") != 399392307:
             raise ProductionExecutionError("SCOPE_WORKFLOW_ID_MISMATCH")
-        scope_artifact = self.artifact(scope_run_id, f"scoped-promotion-{commit}")
+        scope_attempt = int(scope_run.get("run_attempt", 0))
+        scope_jobs = self.json(
+            f"actions/runs/{scope_run_id}/attempts/{scope_attempt}/jobs?per_page=100"
+        ).get("jobs", [])
+        if not any(
+            job.get("name") == "CI / Release scoped" and job.get("conclusion") == "success"
+            for job in scope_jobs
+        ):
+            raise ProductionExecutionError("SCOPE_REQUIRED_JOB_NOT_SUCCESS")
+        scope_artifact = self.artifact(scope_run_id, f"scoped-promotion-{scoped_checkout}")
         if scope_artifact.get("created_at", "") < scope_run.get("run_started_at", ""):
             raise ProductionExecutionError("SCOPE_ARTIFACT_FROM_OLD_ATTEMPT")
         scope_files = self.files(scope_artifact)
@@ -690,6 +717,27 @@ class GitHubEvidence:
                 raise ProductionExecutionError("SCOPE_REPORT_NOT_FROM_GITHUB_ARTIFACT")
         except (KeyError, json.JSONDecodeError) as error:
             raise ProductionExecutionError("SCOPE_REPORT_NOT_FROM_GITHUB_ARTIFACT") from error
+        self.verify_merge(commit, scoped_checkout, pr_head)
+        # Only normalize the checkout identity after authenticating the original report.
+        return {**scope, "checkout_sha": commit, "certified_checkout_sha": scoped_checkout}
+
+    def verify_merge(self, commit: str, scoped_checkout: str, pr_head: str) -> None:
+        merged = self.json(f"git/commits/{commit}")
+        tested = self.json(f"git/commits/{scoped_checkout}")
+        parents = [parent.get("sha") for parent in merged.get("parents", [])]
+        tested_parents = [parent.get("sha") for parent in tested.get("parents", [])]
+        tree = merged.get("tree", {}).get("sha")
+        if (
+            merged.get("sha") != commit
+            or tested.get("sha") != scoped_checkout
+            or not isinstance(tree, str)
+            or not re.fullmatch(r"[0-9a-f]{40}", tree)
+            or tree != tested.get("tree", {}).get("sha")
+            or len(parents) != 2
+            or parents[1] != pr_head
+            or parents != tested_parents
+        ):
+            raise ProductionExecutionError("CERTIFIED_MERGE_CONTENT_MISMATCH")
 
 
 def main() -> int:
@@ -734,7 +782,7 @@ def main() -> int:
             policy["approval_authority"],
         ):
             raise ProductionExecutionError("EXACT_ARTIFACT_APPROVAL_INVALID")
-        GitHubEvidence().verify_candidate(candidate, args.package, staging, scope)
+        scope = GitHubEvidence().verify_candidate(candidate, args.package, staging, scope)
         if scope.get("control_applicability", {}).get("policy_sha256") != policy_approval.get(
             "policy_sha256"
         ):

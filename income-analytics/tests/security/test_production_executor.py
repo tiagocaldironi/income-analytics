@@ -326,6 +326,38 @@ def test_runtime_lock_audit_traces_exact_otel_update_and_google_consumer(tmp_pat
     assert report["application_direct_references"] == []
 
 
+@pytest.mark.parametrize("change", ["none", "tree", "parent", "candidate"])
+def test_merge_provenance_requires_same_tree_and_parents(monkeypatch, change):
+    from production_executor import GitHubEvidence, ProductionExecutionError
+
+    candidate, tested, base, head, tree = (letter * 40 for letter in "abcde")
+    rows = {
+        candidate: {
+            "sha": candidate,
+            "tree": {"sha": tree},
+            "parents": [{"sha": base}, {"sha": head}],
+        },
+        tested: {
+            "sha": tested,
+            "tree": {"sha": tree},
+            "parents": [{"sha": base}, {"sha": head}],
+        },
+    }
+    if change == "tree":
+        rows[tested]["tree"]["sha"] = "f" * 40
+    elif change == "parent":
+        rows[tested]["parents"][0]["sha"] = "f" * 40
+    elif change == "candidate":
+        rows[candidate]["sha"] = "f" * 40
+    github = GitHubEvidence()
+    monkeypatch.setattr(github, "json", lambda endpoint: rows[endpoint.rsplit("/", 1)[-1]])
+    if change == "none":
+        github.verify_merge(candidate, tested, head)
+    else:
+        with pytest.raises(ProductionExecutionError, match="CERTIFIED_MERGE_CONTENT_MISMATCH"):
+            github.verify_merge(candidate, tested, head)
+
+
 @pytest.mark.skipif(os.name != "nt", reason="real Windows process and named-event adapter")
 def test_real_windows_adapter_installs_starts_stops_and_rolls_back_disposable_release(
     tmp_path,
