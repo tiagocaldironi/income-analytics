@@ -14,11 +14,18 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from pathlib import Path
 
+from delivery import release_executable
+
 ANALYZER_VERSION = 1
 INTERNAL_ROOTS = ("income_analytics", "tests", "ci")
 VISUAL_SUFFIXES = {".css"}
 LOCK_FILES = {"ci/runtime-windows-py314.lock", "ci/requirements-windows-py314.lock"}
-KNOWN_NONEXECUTABLE_FILES = {"ci/release-applicability-policy.json"}
+KNOWN_NONEXECUTABLE_FILES = {
+    "ci/release-applicability-policy.json",
+    "ci/release-applicability-approval.json",
+    "ci/scoped-promotion-approval-88.json",
+    "docs/engineering/security/security_scanner_triage.json",
+}
 LOCK_LINE = re.compile(r"([\w.-]+)==([\w.+-]+) --hash=sha256:([a-f0-9]{64})")
 
 
@@ -268,7 +275,7 @@ def analyze_runtime_dependency(root: Path, paths: list[str], base_sha: str) -> d
     try:
         for path in changed:
             prior = subprocess.run(
-                ["git", "show", f"{base_sha}:income-analytics/{path}"],
+                [release_executable("git"), "show", f"{base_sha}:income-analytics/{path}"],
                 cwd=root,
                 capture_output=True,
                 check=True,

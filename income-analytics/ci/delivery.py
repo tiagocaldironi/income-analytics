@@ -32,6 +32,25 @@ def require(condition, code):
         raise DeliveryError(code)
 
 
+def release_executable(name: str) -> str:
+    """Resolve a release tool using only absolute operator PATH entries."""
+    if name not in {"git", "gh", "py", "powershell"}:
+        raise ValueError("RELEASE_TOOL_UNKNOWN")
+    filename = f"{name}.exe" if os.name == "nt" else name
+    current = Path.cwd().resolve()
+    for entry in os.get_exec_path():
+        directory = Path(entry.strip('"'))
+        if not directory.is_absolute():
+            continue
+        directory = directory.resolve()
+        if directory == current:
+            continue
+        executable = directory / filename
+        if executable.is_file() and os.access(executable, os.X_OK):
+            return str(executable.resolve())
+    raise OSError("RELEASE_TOOL_NOT_FOUND")
+
+
 def operation_event(event, duration=0.0):
     require(event in {"backup_started", "backup_completed", "backup_failed",
                       "restore_validation_failed"}, "INVALID_OPERATIONAL_EVENT")

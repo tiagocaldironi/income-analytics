@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from artifact import verify
-from delivery import production_request
+from delivery import production_request, release_executable
 from production_authorization import evaluate, require_publish_confirmation
 
 
@@ -134,7 +134,7 @@ class WindowsHost:
             raise ProductionExecutionError("LAUNCHER_LOCATION_NOT_UNIQUE")
         old_root = Path(locations[0]).resolve()
         result = subprocess.run(
-            ["git", "-C", str(old_root), "rev-parse", "HEAD"],
+            [release_executable("git"), "-C", str(old_root), "rev-parse", "HEAD"],
             capture_output=True,
             text=True,
             check=False,
@@ -143,7 +143,14 @@ class WindowsHost:
         if result.returncode or not re.fullmatch(r"[0-9a-f]{40}", old_commit):
             raise ProductionExecutionError("PREVIOUS_VERSION_IDENTITY_UNKNOWN")
         dirty = subprocess.run(
-            ["git", "-C", str(old_root), "status", "--porcelain", "--untracked-files=normal"],
+            [
+                release_executable("git"),
+                "-C",
+                str(old_root),
+                "status",
+                "--porcelain",
+                "--untracked-files=normal",
+            ],
             capture_output=True,
             text=True,
             check=False,
@@ -183,7 +190,7 @@ class WindowsHost:
             archive.extractall(target)
         self.package_root = target
         env = os.environ.copy()
-        venv_args = ["py", "-3.14", "-m", "venv"]
+        venv_args = [release_executable("py"), "-3.14", "-m", "venv"]
         if self.test_mode:
             venv_args = [sys.executable, "-m", "venv", "--system-site-packages"]
             env["PYTHONPATH"] = self.test_import_path
@@ -288,7 +295,7 @@ class WindowsHost:
             "-ErrorAction SilentlyContinue).Count -ne 0){exit 25}"
         )
         completed = subprocess.run(
-            ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+            [release_executable("powershell"), "-NoProfile", "-NonInteractive", "-Command", script],
             capture_output=True,
             timeout=35,
             check=False,
@@ -356,7 +363,7 @@ class WindowsHost:
             env = os.environ.copy()
             env["PYTHONPATH"] = self.test_import_path
         subprocess.Popen(
-            ["powershell.exe", "-NoProfile", "-File", str(self.launcher)],
+            [release_executable("powershell"), "-NoProfile", "-File", str(self.launcher)],
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -507,7 +514,11 @@ def github_comment(comment_id: int) -> dict:
     if not isinstance(comment_id, int) or comment_id < 1:
         raise ProductionExecutionError("APPROVAL_COMMENT_ID_INVALID")
     response = subprocess.run(
-        ["gh", "api", f"repos/tiagocaldironi/income-analytics/issues/comments/{comment_id}"],
+        [
+            release_executable("gh"),
+            "api",
+            f"repos/tiagocaldironi/income-analytics/issues/comments/{comment_id}",
+        ],
         capture_output=True,
         text=True,
         check=False,
@@ -528,7 +539,7 @@ class GitHubEvidence:
 
     def json(self, endpoint: str) -> dict:
         response = subprocess.run(
-            ["gh", "api", "repos/" + self.repository + "/" + endpoint],
+            [release_executable("gh"), "api", "repos/" + self.repository + "/" + endpoint],
             capture_output=True,
             text=True,
             check=False,
@@ -560,7 +571,7 @@ class GitHubEvidence:
             with archive_path.open("wb") as output:
                 response = subprocess.run(
                     [
-                        "gh",
+                        release_executable("gh"),
                         "api",
                         f"repos/{self.repository}/actions/artifacts/{artifact['id']}/zip",
                     ],

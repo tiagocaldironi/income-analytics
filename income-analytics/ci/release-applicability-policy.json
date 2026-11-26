@@ -13,7 +13,10 @@
       "pyproject.toml"
     ],
     "release_policy": [
-      "ci/release-applicability-policy.json"
+      "ci/release-applicability-policy.json",
+      "ci/release-applicability-approval.json",
+      "ci/scoped-promotion-approval-88.json",
+      "docs/engineering/security/security_scanner_triage.json"
     ],
     "release_delivery": [
       "ci/production_*.py",
