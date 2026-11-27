@@ -55,6 +55,33 @@ def _changed_paths(client: Github, pull_request: str) -> tuple[list[str], str]:
     raise ValueError("PULL_REQUEST_FILE_LIST_INCOMPLETE")
 
 
+def production_delta(client: Github, base_sha: str, checkout_sha: str) -> list[str]:
+    """Return the complete net delta from the approved production baseline."""
+    if not all(re.fullmatch(r"[0-9a-f]{40}", sha) for sha in (base_sha, checkout_sha)):
+        raise ValueError("PRODUCTION_DELTA_COMMIT_INVALID")
+    comparison = client.json(f"compare/{base_sha}...{checkout_sha}?per_page=1")
+    files = comparison.get("files")
+    if (
+        comparison.get("status") != "ahead"
+        or comparison.get("merge_base_commit", {}).get("sha") != base_sha
+        or not isinstance(files, list)
+        or not 0 < len(files) < 300
+    ):
+        raise ValueError("PRODUCTION_DELTA_INCOMPLETE")
+    paths = []
+    for row in files:
+        name = row.get("filename")
+        if not isinstance(name, str) or not name:
+            raise ValueError("PRODUCTION_DELTA_PATH_INVALID")
+        paths.append(name)
+        if row.get("status") == "renamed":
+            previous = row.get("previous_filename")
+            if not isinstance(previous, str) or not previous:
+                raise ValueError("PRODUCTION_DELTA_PATH_INVALID")
+            paths.append(previous)
+    return sorted(set(paths))
+
+
 def _historical_result(financial: dict, codes: set[str]) -> dict:
     relevant = sorted(set(financial.get("blockers", [])).intersection(codes))
     if relevant:
@@ -191,7 +218,9 @@ def main() -> int:
         raise ValueError("INVALID_RELEASE_PR_NUMBER")
     client = Github(os.getenv("RELEASE_GITHUB_TOKEN"))
     try:
-        changed_paths, base_sha = _changed_paths(client, pull_request)
+        policy = json.loads((scoped_promotion.ROOT / APPLICABILITY_POLICY).read_bytes())
+        base_sha = policy["production_base_sha"]
+        changed_paths = production_delta(client, base_sha, os.environ["GITHUB_SHA"])
     except Exception:
         output = scoped_promotion.ROOT / "ci-reports/promotion"
         output.mkdir(parents=True, exist_ok=True)
