@@ -20,6 +20,7 @@ class MarketPrice:
     provider: str = "manual"
     price_timestamp: datetime | None = None
     id: UUID = field(default_factory=uuid4)
+    point_in_time_only: bool = False
     registered_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def __post_init__(self) -> None:

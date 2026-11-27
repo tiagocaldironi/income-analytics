@@ -15,7 +15,10 @@ from income_analytics.application.base_currency_valuation import (
     BaseCurrencyValuationProjector,
 )
 from income_analytics.application.benchmark_data import BenchmarkDataProvider, BenchmarkObservation
-from income_analytics.application.fixed_income_valuation import FixedIncomeValuationEngine
+from income_analytics.application.fixed_income_valuation import (
+    FixedIncomeValuation,
+    FixedIncomeValuationEngine,
+)
 from income_analytics.application.fx_data import FxRateObservation, FxRateProvider
 from income_analytics.application.market_data import (
     MarketDataProvider,
@@ -153,6 +156,9 @@ class PortfolioSession:
     _allocation_policy: AllocationPolicy | None = field(default=None, init=False)
     _asset_allocation_policy: AssetAllocationPolicy | None = field(default=None, init=False)
     _fixed_income_details: dict[UUID, FixedIncomeDetails] = field(default_factory=dict, init=False)
+    _contract_values: dict[tuple[FixedIncomeDetails, date], FixedIncomeValuation] = field(
+        default_factory=dict, init=False, repr=False
+    )
     _pension_plan_details: dict[UUID, PensionPlanDetails] = field(default_factory=dict, init=False)
     _real_estate_details: dict[UUID, RealEstateDetails] = field(default_factory=dict, init=False)
     _recurring_rules: dict[UUID, RecurringRule] = field(default_factory=dict, init=False)
@@ -692,7 +698,7 @@ class PortfolioSession:
         )
         return PortfolioProjector.project_timeline(
             self._events,
-            (*self._market_prices, *curve_prices),
+            (*self._timeline_market_prices(), *curve_prices),
             dates,
             market_data_available=bool(self._market_prices or self._fixed_income_details),
         )
@@ -757,6 +763,7 @@ class PortfolioSession:
             base_currency=self._base_currency,
             fx_rates=rates,
             as_of=effective_date,
+            market_prices=tuple(self._market_prices_for_projection(as_of=effective_date)),
         )
 
     def _fx_rates(self, base_currency: str, quote_currency: str) -> tuple[FxRateObservation, ...]:
@@ -1297,6 +1304,24 @@ class PortfolioSession:
         prices.extend(self._fixed_income_valuation_prices(effective_date))
         return prices
 
+    def _is_dated_contract_balance(self, asset_id: UUID) -> bool:
+        details = self._fixed_income_details.get(asset_id)
+        return details is not None and details.instrument_type in {
+            FixedIncomeInstrumentType.CDB,
+            FixedIncomeInstrumentType.RDB,
+            FixedIncomeInstrumentType.LCI,
+            FixedIncomeInstrumentType.LCA,
+            FixedIncomeInstrumentType.SAVINGS_ACCOUNT,
+        }
+
+    def _timeline_market_prices(self) -> tuple[MarketPrice, ...]:
+        return tuple(
+            replace(price, point_in_time_only=True)
+            if self._is_dated_contract_balance(price.asset.id)
+            else price
+            for price in self._market_prices
+        )
+
     def _market_prices_for_projection(
         self, *, as_of: date | None, include_fixed_income: bool = True
     ) -> list[MarketPrice]:
@@ -1311,13 +1336,23 @@ class PortfolioSession:
                 else bisect_right(quotes, effective_date, key=lambda item: item.effective_date)
             )
             if index:
-                prices.append(quotes[index - 1])
+                quote = quotes[index - 1]
+                if (
+                    include_fixed_income
+                    and self._is_dated_contract_balance(quote.asset.id)
+                    and quote.effective_date != effective_date
+                ):
+                    continue
+                prices.append(quote)
         if include_fixed_income:
             prices.extend(self._fixed_income_valuation_prices(effective_date))
         return prices
 
     def _fixed_income_valuation_prices(self, effective_date: date) -> list[MarketPrice]:
         prices: list[MarketPrice] = []
+        self._ensure_market_price_index_current()
+        assets = {asset.id: asset for asset in self._assets.values()}
+        cdi_rates = tuple(self._benchmark_rates)
         ipca_rates = tuple(
             (observation.effective_date, observation.value)
             for observation in self._benchmark_observations.get("IPCA", ())
@@ -1331,31 +1366,42 @@ class PortfolioSession:
             for observation in self._benchmark_observations.get("SELIC_TARGET", ())
         )
         for asset_id, details in self._fixed_income_details.items():
-            asset = next((item for item in self._assets.values() if item.id == asset_id), None)
-            if asset is None:
+            asset = assets.get(asset_id)
+            if asset is None or effective_date < details.application_date:
                 continue
-            valuation = FixedIncomeValuationEngine.value(
-                details,
-                as_of=effective_date,
-                cdi_rates=tuple(self._benchmark_rates),
-                ipca_rates=ipca_rates,
-                tr_rates=tr_rates,
-                selic_targets=selic_targets,
-            )
-            # A contract that starts after the requested historical projection
-            # date has no market value on that date.  Do not materialize a
-            # zero-valued MarketPrice: the value object correctly rejects
-            # non-positive quotes, and doing so must not block an unrelated
-            # trade in the same portfolio.
-            if valuation.gross_value is not None and valuation.gross_value > 0:
+            observed = self._market_prices_by_asset.get(asset_id, ())
+            index = bisect_right(observed, effective_date, key=lambda item: item.effective_date)
+            if index and observed[index - 1].effective_date == effective_date:
+                continue
+            key = (details, effective_date)
+            if key not in self._contract_values:
+                if len(self._contract_values) >= 8192:
+                    self._contract_values.pop(next(iter(self._contract_values)))
+                self._contract_values[key] = FixedIncomeValuationEngine.value(
+                    details,
+                    as_of=effective_date,
+                    cdi_rates=cdi_rates,
+                    ipca_rates=ipca_rates,
+                    tr_rates=tr_rates,
+                    selic_targets=selic_targets,
+                )
+            value = self._contract_values[key].gross_value
+            if value is not None and value > 0:
                 prices.append(
                     MarketPrice(
                         asset=asset,
-                        price=Money(valuation.gross_value),
+                        price=Money(value),
                         effective_date=effective_date,
+                        provider="contract_curve",
+                        point_in_time_only=self._is_dated_contract_balance(asset_id),
                     )
                 )
         return prices
+
+    def contract_valuation_gap(self, asset_id: UUID, as_of: date) -> str | None:
+        details = self._fixed_income_details.get(asset_id)
+        result = self._contract_values.get((details, as_of)) if details is not None else None
+        return result.unavailable_reason if result is not None else None
 
     def _rebuild_market_price_index(self) -> None:
         grouped: dict[UUID, list[MarketPrice]] = {}
@@ -1399,26 +1445,34 @@ class PortfolioSession:
         start_date: date,
         end_date: date,
         asset_class: AssetClass | None = None,
+        asset_id: UUID | None = None,
     ) -> PerformanceProjection:
         """Return TWR and XIRR for the whole portfolio or one asset class."""
         if end_date < start_date:
             raise ValueError("A data final deve ser posterior à data inicial.")
+        source_events = tuple(
+            event
+            for event in self._events
+            if asset_id is None or (event.asset is not None and event.asset.id == asset_id)
+        )
         # Quote coverage cannot certify missing cash proceeds. Earlier gaps also
         # affect opening cash/capital, so do not restrict this check to the window.
         incomplete_trades = [
             event
-            for event in self._events
+            for event in source_events
             if event.effective_date <= end_date
             and event.event_type in {FinancialEventType.BUY, FinancialEventType.SELL}
             and (event.financial_status == "DATA_GAP" or event.known_total_amount is None)
             and (
                 asset_class is None
-                or event.asset is not None and event.asset.asset_class is asset_class
+                or event.asset is not None
+                and event.asset.asset_class is asset_class
             )
         ]
         if incomplete_trades:
             external = [
-                event for event in self._events
+                event
+                for event in source_events
                 if start_date <= event.effective_date <= end_date
                 and event.capital_flow_type is not CapitalFlowType.INTERNAL_TRANSFER
             ]
@@ -1432,14 +1486,16 @@ class PortfolioSession:
                 ending_equity=None,
                 total_contributions=sum(
                     (
-                        event.total_amount for event in external
+                        event.total_amount
+                        for event in external
                         if event.event_type is FinancialEventType.DEPOSIT
                     ),
                     Money.zero(),
                 ),
                 total_withdrawals=sum(
                     (
-                        event.total_amount for event in external
+                        event.total_amount
+                        for event in external
                         if event.event_type is FinancialEventType.WITHDRAWAL
                     ),
                     Money.zero(),
@@ -1457,7 +1513,7 @@ class PortfolioSession:
         valuation_dates = {start_date, end_date}
         valuation_dates.update(
             event.effective_date
-            for event in self._events
+            for event in source_events
             if start_date <= event.effective_date <= end_date
         )
         valuation_dates.update(
@@ -1472,25 +1528,36 @@ class PortfolioSession:
                 if start_date <= item.effective_date <= end_date
             )
         contract_curve_assets = {
-            asset_id
-            for asset_id, details in self._fixed_income_details.items()
-            if (
-                asset := next((item for item in self._assets.values() if item.id == asset_id), None)
-            )
-            is not None
+            asset.id
+            for asset in self._assets.values()
+            if asset.id in self._fixed_income_details
+            and (asset_class is None or asset.asset_class is asset_class)
+            and (asset_id is None or asset.id == asset_id)
             and asset.valuation_method is ValuationMethod.CONTRACT_CURVE
         }
+        if contract_curve_assets:
+            valuation_dates.update(
+                PerformanceProjector._coverage_dates(
+                    start_date, end_date, tuple(self._market_prices)
+                )
+            )
+            valuation_dates.update(
+                event.effective_date - timedelta(days=1)
+                for event in source_events
+                if start_date < event.effective_date <= end_date
+            )
         curve_prices = [
-            price for price in self._market_prices if price.asset.id in contract_curve_assets
-        ]
-        curve_prices.extend(
             price
             for effective_date in sorted(valuation_dates)
             for price in self._fixed_income_valuation_prices(effective_date)
             if price.asset.id in contract_curve_assets
+        ]
+        events = source_events
+        prices = tuple(
+            price
+            for price in (*self._timeline_market_prices(), *curve_prices)
+            if asset_id is None or price.asset.id == asset_id
         )
-        events: tuple[FinancialEvent, ...] = tuple(self._events)
-        prices: tuple[MarketPrice, ...] = (*self._market_prices, *curve_prices)
         if asset_class is not None:
             unallocated_flows = tuple(
                 event
@@ -1536,6 +1603,31 @@ class PortfolioSession:
             }
             events = tuple(event for event in events if event.asset and event.asset.id in asset_ids)
             prices = tuple(price for price in prices if price.asset.id in asset_ids)
+        if asset_id is not None:
+            # A contract is a performance sleeve. Principal enters at application
+            # and proceeds leave at redemption; neither remains as contract cash.
+            contract_flows: list[FinancialEvent] = []
+            for event in events:
+                if event.event_type not in {FinancialEventType.BUY, FinancialEventType.SELL}:
+                    continue
+                amount = event.total_amount
+                if not amount.is_positive:
+                    continue
+                contract_flows.append(
+                    FinancialEvent(
+                        account_id=event.account_id,
+                        effective_date=event.effective_date,
+                        occurred_at=event.occurred_at,
+                        registered_at=event.registered_at,
+                        event_type=(
+                            FinancialEventType.DEPOSIT
+                            if event.event_type is FinancialEventType.BUY
+                            else FinancialEventType.WITHDRAWAL
+                        ),
+                        amount=amount,
+                    )
+                )
+            events = (*events, *contract_flows)
         return PerformanceProjector.project(
             events,
             prices,
@@ -1549,6 +1641,7 @@ class PortfolioSession:
                 if rate.effective_date <= end_date
             ),
             base_currency=self._base_currency,
+            same_day_flows=asset_id is not None,
         )
 
     def benchmark_comparison(
@@ -1567,6 +1660,7 @@ class PortfolioSession:
         self, *, name: str, return_percentage: Decimal, effective_date: date
     ) -> None:
         """Register a manual dated benchmark return, such as CDI daily return."""
+        self._contract_values.clear()
         self._benchmark_rates.append(
             BenchmarkRate(
                 name=name,
@@ -1592,6 +1686,7 @@ class PortfolioSession:
                 for item in self._benchmark_observations.get(normalized_name, ())
             }
             current.update((item.effective_date, item) for item in observations)
+            self._contract_values.clear()
             self._benchmark_observations[normalized_name] = [
                 current[key] for key in sorted(current)
             ]
@@ -1968,6 +2063,7 @@ class PortfolioSession:
         self._benchmark_rates.clear()
         self._benchmark_observations.clear()
         self._fixed_income_details.clear()
+        self._contract_values.clear()
         self._pension_plan_details.clear()
         self._real_estate_details.clear()
         self._recurring_rules.clear()

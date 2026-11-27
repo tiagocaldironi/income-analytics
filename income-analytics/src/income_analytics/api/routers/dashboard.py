@@ -6,6 +6,7 @@ import json
 import logging
 from base64 import b64decode
 from binascii import Error as Base64Error
+from calendar import monthrange
 from dataclasses import replace
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
@@ -91,9 +92,7 @@ from income_analytics.domain.projectors.asset_composition_projector import (
 )
 from income_analytics.domain.projectors.asset_rebalancing_projector import AssetAllocationStrategy
 from income_analytics.domain.projectors.performance_projector import PerformanceProjector
-from income_analytics.domain.projectors.portfolio_projector import PortfolioProjector
 from income_analytics.domain.read_models.diversification_projection import DiversificationDimension
-from income_analytics.domain.read_models.portfolio_history import PortfolioSnapshot
 from income_analytics.domain.read_models.portfolio_history_boundary import PortfolioHistoryBoundary
 from income_analytics.domain.read_models.portfolio_projection import PortfolioProjection
 from income_analytics.domain.read_models.position_projection import PositionProjection
@@ -191,7 +190,7 @@ dashboard_snapshot_repository = _PortfolioRepositoryProxy(
     SqlitePortfolioDashboardSnapshotRepository
 )
 market_price_refresh_runs = _PortfolioRepositoryProxy(SqliteMarketPriceRefreshRunRepository)
-PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 5
+PORTFOLIO_DASHBOARD_READ_MODEL_VERSION = 6
 
 
 def _effective_analysis_end_date(start_date: date, end_date: date) -> date:
@@ -1521,13 +1520,10 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
         for asset in session._assets.values()
     }
     fx_rates = {item.ticker: item.fx_rate for item in valuation.positions}
-    latest_quotes = {}
-    for quote in sorted(
-        session._market_prices,
-        key=lambda item: (item.effective_date, item.registered_at, str(item.id)),
-    ):
-        if as_of is None or quote.effective_date <= as_of:
-            latest_quotes[quote.asset.id] = quote
+    latest_quotes = {
+        quote.asset.id: quote
+        for quote in session._market_prices_for_projection(as_of=as_of or date.today())
+    }
     analysis_by_class = {}
     portfolio_drift = None
     if session.allocation_policy is not None:
@@ -1718,6 +1714,11 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
                         _fixed_income_indexer_label(
                             session._fixed_income_details[position.asset.id]
                         )
+                        if position.asset.id in session._fixed_income_details
+                        else None
+                    ),
+                    "application_date": (
+                        session._fixed_income_details[position.asset.id].application_date
                         if position.asset.id in session._fixed_income_details
                         else None
                     ),
@@ -3946,12 +3947,25 @@ def create_external_flow(flow: ExternalFlowInput) -> dict[str, object]:
 
 @router.get("/portfolio/performance")
 def get_portfolio_performance(
-    start_date: date, end_date: date, asset_class: AssetClass | None = None
+    start_date: date,
+    end_date: date,
+    asset_class: AssetClass | None = None,
+    contract_id: UUID | None = None,
 ) -> dict[str, object]:
     effective_end_date = _effective_analysis_end_date(start_date, end_date)
+    contract = session._fixed_income_details.get(contract_id) if contract_id is not None else None
+    if contract_id is not None and (
+        contract is None or contract.instrument_type is FixedIncomeInstrumentType.TESOURO_DIRETO
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Contrato não encontrado."
+        )
     try:
         performance = session.performance(
-            start_date=start_date, end_date=effective_end_date, asset_class=asset_class
+            start_date=start_date,
+            end_date=effective_end_date,
+            asset_class=asset_class,
+            asset_id=contract_id,
         )
     except ValueError as error:
         raise HTTPException(
@@ -3964,6 +3978,7 @@ def get_portfolio_performance(
         if start_date <= event.effective_date <= effective_end_date
         and event.event_type in {FinancialEventType.BUY, FinancialEventType.SELL}
         and event.financial_status == "DATA_GAP"
+        and (contract_id is None or (event.asset is not None and event.asset.id == contract_id))
         and (
             asset_class is None
             or event.asset is not None
@@ -3972,6 +3987,7 @@ def get_portfolio_performance(
     ]
     return {
         "requested_end_date": end_date,
+        "contract_id": contract_id,
         "asset_class": asset_class.value if asset_class else None,
         "financial_data_status": "PARTIAL" if incomplete_trades else "COMPLETE",
         "incomplete_trade_count": len(incomplete_trades),
@@ -4814,6 +4830,7 @@ def get_portfolio_history(
     asset_class: AssetClass | None = None,
     start_date: date | None = None,
     end_date: date | None = None,
+    contract_id: UUID | None = None,
 ) -> dict[str, object]:
     """Return a bounded, period-aggregated evolution series for the dashboard."""
     allowed_periods = {1, 3, 6, 12, 36, 60, 120, 0}
@@ -4822,20 +4839,50 @@ def get_portfolio_history(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Período inválido.",
         )
-    observed_dates = sorted(
-        {event.effective_date for event in session._events}
-        | {price.effective_date for price in session._market_prices}
+    effective_end_date = _effective_analysis_end_date(
+        start_date or date.min, end_date or date.today()
     )
-    if start_date is not None or end_date is not None:
-        requested_start_date = start_date or date.min
-        effective_end_date = _effective_analysis_end_date(
-            requested_start_date, end_date or date.today()
+    if contract_id is not None and contract_id not in session._fixed_income_details:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Contrato não encontrado."
         )
-        observed_dates = [
-            item
-            for item in observed_dates
-            if (start_date is None or item >= start_date) and item <= effective_end_date
-        ]
+    scoped_events = tuple(
+        event
+        for event in session.history()
+        if (contract_id is None or (event.asset is not None and event.asset.id == contract_id))
+        and (
+            asset_class is None
+            or (event.asset is not None and event.asset.asset_class is asset_class)
+        )
+    )
+    source_dates = {event.effective_date for event in scoped_events} | {
+        price.effective_date
+        for price in session._market_prices
+        if contract_id is None or price.asset.id == contract_id
+    }
+    contract_starts = [
+        details.application_date
+        for details in session._fixed_income_details.values()
+        if (contract_id is None or details.asset_id == contract_id)
+        and details.instrument_type is not FixedIncomeInstrumentType.TESOURO_DIRETO
+        and details.application_date <= effective_end_date
+    ]
+    if contract_starts and asset_class in (None, AssetClass.FIXED_INCOME):
+        first = max(min(contract_starts), start_date or date.min)
+        first_month = first.year * 12 + first.month - 1
+        final_month = effective_end_date.year * 12 + effective_end_date.month - 1
+        if period_months:
+            first_month = max(first_month, final_month - period_months + 1)
+        for month_index in range(first_month, final_month + 1):
+            year, month_offset = divmod(month_index, 12)
+            month = month_offset + 1
+            month_end = date(year, month, monthrange(year, month)[1])
+            source_dates.add(min(month_end, effective_end_date))
+    observed_dates = sorted(
+        item
+        for item in source_dates
+        if (start_date is None or item >= start_date) and item <= effective_end_date
+    )
     if observed_dates and period_months:
         end = observed_dates[-1]
         month_index = end.year * 12 + end.month - period_months + 1
@@ -4849,35 +4896,37 @@ def get_portfolio_history(
         )
         buckets[key] = effective_date
 
-    snapshots = tuple(
-        PortfolioSnapshot(
-            effective_date=effective_date,
-            portfolio=PortfolioProjector.project_as_of(
-                session._events,
-                session._market_prices_for_projection(
-                    as_of=effective_date, include_fixed_income=False
-                ),
-                effective_date,
-                market_data_available=bool(session._market_prices),
-            ),
-        )
-        for effective_date in buckets.values()
-    )
+    dates = tuple(buckets.values())
+    snapshots = session.projections_at(dates)
 
     boundary = PortfolioHistoryBoundary.from_observed_events(session.history())
     opening_equity_reliable = boundary.has_reliable_opening_equity
 
-    def serialize(snapshot: PortfolioSnapshot) -> dict[str, object]:
-        portfolio = snapshot.portfolio
+    def serialize(effective_date: date, portfolio: PortfolioProjection) -> dict[str, object]:
         positions = tuple(
             position
             for position in portfolio.positions
-            if asset_class is None or position.asset.asset_class is asset_class
+            if (asset_class is None or position.asset.asset_class is asset_class)
+            and (contract_id is None or position.asset.id == contract_id)
         )
-        if asset_class is None:
-            market_value = (
-                portfolio.total_market_value.amount if portfolio.has_complete_market_data else None
+        valuation = session.base_currency_valuation(as_of=effective_date, projection=portfolio)
+        tickers = {str(position.asset.ticker) for position in positions if not position.is_empty}
+        valued_positions = [
+            position for position in valuation.positions if position.ticker in tickers
+        ]
+        market_value = (
+            sum(
+                (
+                    position.market_value_base
+                    for position in valued_positions
+                    if position.market_value_base is not None
+                ),
+                Decimal("0"),
             )
+            if all(position.market_value_base is not None for position in valued_positions)
+            else None
+        )
+        if asset_class is None and contract_id is None:
             total_result = portfolio.total_result.amount
             capital_gain = (
                 portfolio.total_realized_result.amount + portfolio.total_unrealized_result.amount
@@ -4886,12 +4935,6 @@ def get_portfolio_history(
             cash = portfolio.cash.amount if opening_equity_reliable else None
             reconstructed_cash_effect = portfolio.cash.amount
         else:
-            complete = all(position.current_price is not None for position in positions)
-            market_value = (
-                sum((position.market_value.amount for position in positions), Decimal("0"))
-                if complete
-                else None
-            )
             total_result = sum(
                 (position.total_result.amount for position in positions), Decimal("0")
             )
@@ -4906,15 +4949,44 @@ def get_portfolio_history(
             cash = Decimal("0")
             reconstructed_cash_effect = Decimal("0")
         return {
-            "effective_date": snapshot.effective_date,
+            "effective_date": effective_date,
             "total_cost": total_cost,
             "market_value": market_value,
+            "estimated_positions": [
+                position.ticker
+                for position in valued_positions
+                if position.price_source == "contract_curve"
+            ],
+            "unvalued_positions": [
+                position.ticker
+                for position in valued_positions
+                if position.market_value_base is None
+            ],
+            "contract_valuation_gaps": {
+                str(position.asset.ticker): reason
+                for position in positions
+                if not position.is_empty
+                and position.current_price is None
+                and (reason := session.contract_valuation_gap(position.asset.id, effective_date))
+            },
             "total_result": total_result,
             "capital_gain": capital_gain,
             "cash": cash,
             "reconstructed_cash_effect": reconstructed_cash_effect,
         }
 
+    contract_movements = [
+        {
+            "effective_date": event.effective_date,
+            "type": event.event_type.value,
+            "amount": event.known_total_amount.amount if event.known_total_amount else None,
+        }
+        for event in scoped_events
+        if contract_id is not None
+        and (start_date is None or event.effective_date >= start_date)
+        and event.effective_date <= effective_end_date
+        and event.event_type in (FinancialEventType.BUY, FinancialEventType.SELL)
+    ]
     return {
         "history_boundary": boundary.as_payload(),
         "cash_status": boundary.opening_cash_status.value,
@@ -4923,8 +4995,12 @@ def get_portfolio_history(
         "effective_end_date": min(end_date or date.today(), date.today()),
         "period_months": period_months,
         "asset_class": asset_class.value if asset_class else None,
+        "contract_id": contract_id,
+        "contract_movements": contract_movements,
         "granularity": granularity,
-        "snapshots": [serialize(snapshot) for snapshot in snapshots],
+        "snapshots": [
+            serialize(day, snapshot) for day, snapshot in zip(dates, snapshots, strict=True)
+        ],
     }
 
 
