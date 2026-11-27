@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "pr_number": 92,
+  "state": "OWNER_APPROVED",
+  "owner": "tiagocaldironi",
+  "approved_sha": "c79187e0f967eea4ee906583d1d6c2229d076e15",
+  "certified_surface_sha256": "d760bbeb06bb247467ef4035601cd88b1aff8be65424afcda423597e9daa43ec",
+  "merge_authorized": false,
+  "production_deploy_authorized": false,
+  "comment_id": 7217236215,
+  "comment_url": "https://github.com/tiagocaldironi/income-analytics/pull/92#issuecomment-7217236215",
+  "comment_body_sha256": "b9c03104eb8ed5d830b9ed4059bcfe5fc38e7f44b01f0f8779443fc748aa27d8"
+}
