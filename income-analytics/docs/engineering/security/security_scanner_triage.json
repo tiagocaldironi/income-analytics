@@ -23817,6 +23817,19 @@
   ],
   "gitleaks_decisions": [
     {
+      "tool": "gitleaks",
+      "mode": "dir",
+      "rule": "generic-api-key",
+      "file": "income-analytics/docs/engineering/engineering-debt-closure/quality_ledger.json",
+      "line": 15,
+      "commit": "",
+      "state": "FALSE_POSITIVE",
+      "content_sha256": "75fe9056d5fd44c1b51484aa425c943ebe88113f3ccd693173631b8ef91f32eb",
+      "identity": "21f73e30577429f7fbe55bfbdabd73a5de239dba5654b9e274c53a7cb8260c14",
+      "reason": "Exact unchanged SHA-256 of the reviewed auth_repository.py Git blob, verified against source. The ledger changed only to record the rate limiter review.",
+      "evidence": "Git blob SHA-256 and matching reviewed_source_sha256 ledger entry at PR #91 commit 076a25c"
+    },
+    {
       "identity": "5ae7fdf5ea3f0cef41f27302c8f499c137d8c51d7205991a9e34c70f12f7b8fd",
       "state": "FALSE_POSITIVE",
       "reason": "Exact reviewed Firebase Web project identifier, intentionally public in auth/config. It is not an Admin/service-account key or bearer. Actual cloud API restrictions/quota NOT_VERIFIED; owner checklist, no validity probe/rotation.",
