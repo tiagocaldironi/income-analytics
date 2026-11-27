@@ -355,6 +355,68 @@ def test_legacy_stop_requires_operator_and_verified_exit(monkeypatch, manual, pr
     assert host.stopped is (manual and probe_result == 0)
 
 
+@pytest.mark.parametrize("change", ["none", "modified", "extra", "wrong_commit", "missing_digest"])
+def test_installed_rollback_slot_is_bound_to_archive(tmp_path, monkeypatch, change):
+    from production_executor import ProductionExecutionError, WindowsHost
+
+    host = object.__new__(WindowsHost)
+    commit = "a" * 40
+    host.release_root = tmp_path / "releases"
+    root = host.release_root / commit
+    source = root / "src" / "example.py"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"example")
+    host.previous_package = tmp_path / "previous.zip"
+    with zipfile.ZipFile(host.previous_package, "w") as bundle:
+        bundle.writestr("src/example.py", b"example")
+    host.previous_package_sha256 = hashlib.sha256(host.previous_package.read_bytes()).hexdigest()
+    called = []
+
+    def verify_archive(package, expected_commit, digest):
+        assert package == host.previous_package
+        assert expected_commit == commit
+        assert digest == host.previous_package_sha256
+        called.append(True)
+
+    monkeypatch.setattr("production_executor.verify", verify_archive)
+    if change == "modified":
+        source.write_bytes(b"tampered")
+    elif change == "extra":
+        source.with_name("unexpected.py").write_bytes(b"unexpected")
+    elif change == "missing_digest":
+        host.previous_package_sha256 = None
+    presented = "b" * 40 if change == "wrong_commit" else commit
+    if change == "none":
+        assert host.verify_installed_release(root, presented) == commit
+    else:
+        with pytest.raises(ProductionExecutionError):
+            host.verify_installed_release(root, presented)
+    assert bool(called) is (change not in {"wrong_commit", "missing_digest"})
+
+
+def test_second_activation_replaces_managed_launcher_environment(tmp_path):
+    from production_executor import WindowsHost
+
+    host = object.__new__(WindowsHost)
+    host.test_mode = False
+    host.package_root = tmp_path / "candidate"
+    host.launcher = tmp_path / "Start-Income.ps1"
+    host.launcher_bytes = (
+        "Set-Location -LiteralPath 'C:\\previous'\r\n"
+        "$env:INCOME_ANALYTICS_RELEASE_COMMIT = 'old'\r\n"
+        "$env:PYTHONPATH = 'C:\\previous\\src'\r\n"
+        "$env:INCOME_ANALYTICS_DATABASE = 'C:\\data.db'\r\n"
+        "& 'C:\\previous\\.venv\\Scripts\\python.exe' -X utf8 "
+        "-m income_analytics.windows_server income_analytics.main:app\r\n"
+    ).encode()
+    host.activate_candidate({"source_commit": "b" * 40})
+    updated = host.launcher.read_text(encoding="utf-8")
+    assert updated.count("$env:INCOME_ANALYTICS_RELEASE_COMMIT") == 1
+    assert updated.count("$env:PYTHONPATH") == 1
+    assert "$env:INCOME_ANALYTICS_DATABASE = 'C:\\data.db'" in updated
+    assert "C:\\previous" not in updated
+
+
 @pytest.mark.parametrize("change", ["none", "tree", "parent", "candidate"])
 def test_merge_provenance_requires_same_tree_and_parents(monkeypatch, change):
     from production_executor import GitHubEvidence, ProductionExecutionError
