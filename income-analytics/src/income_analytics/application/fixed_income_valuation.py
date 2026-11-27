@@ -15,6 +15,27 @@ from income_analytics.domain.fixed_income_details import FixedIncomeDetails
 
 ACT_365F = Decimal("365")
 
+# B3 Circular 041/2026-VNC, national closures (Quadro A). The DI feed
+# remains authoritative if an observation exists. Partial operating days
+# at year end are not treated as holidays based on this schedule alone.
+_CDI_CLOSURES_2026 = frozenset(
+    date(2026, month, day)
+    for month, day in (
+        (1, 1),
+        (2, 16),
+        (2, 17),
+        (4, 3),
+        (4, 21),
+        (5, 1),
+        (6, 4),
+        (9, 7),
+        (10, 12),
+        (11, 2),
+        (11, 20),
+        (12, 25),
+    )
+)
+
 
 @dataclass(frozen=True, slots=True)
 class FixedIncomeValuation:
@@ -85,7 +106,11 @@ class FixedIncomeValuationEngine:
             point = details.application_date + timedelta(days=1)
             while point <= as_of:
                 # The persisted feed does not distinguish a holiday from a missing weekday.
-                if point.weekday() < 5 and point not in observed:
+                if (
+                    point.weekday() < 5
+                    and point not in observed
+                    and point not in _CDI_CLOSURES_2026
+                ):
                     return f"CDI sem observação ou comprovação de feriado em {point:%d/%m/%Y}."
                 point += timedelta(days=1)
         if details.indexer_type is FixedIncomeIndexerType.IPCA_PLUS:

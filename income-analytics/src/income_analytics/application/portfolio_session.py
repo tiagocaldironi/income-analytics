@@ -1348,7 +1348,9 @@ class PortfolioSession:
             prices.extend(self._fixed_income_valuation_prices(effective_date))
         return prices
 
-    def _fixed_income_valuation_prices(self, effective_date: date) -> list[MarketPrice]:
+    def _fixed_income_valuation_prices(
+        self, effective_date: date, *, asset_ids: set[UUID] | None = None
+    ) -> list[MarketPrice]:
         prices: list[MarketPrice] = []
         self._ensure_market_price_index_current()
         assets = {asset.id: asset for asset in self._assets.values()}
@@ -1366,6 +1368,8 @@ class PortfolioSession:
             for observation in self._benchmark_observations.get("SELIC_TARGET", ())
         )
         for asset_id, details in self._fixed_income_details.items():
+            if asset_ids is not None and asset_id not in asset_ids:
+                continue
             asset = assets.get(asset_id)
             if asset is None or effective_date < details.application_date:
                 continue
@@ -1549,8 +1553,9 @@ class PortfolioSession:
         curve_prices = [
             price
             for effective_date in sorted(valuation_dates)
-            for price in self._fixed_income_valuation_prices(effective_date)
-            if price.asset.id in contract_curve_assets
+            for price in self._fixed_income_valuation_prices(
+                effective_date, asset_ids=contract_curve_assets
+            )
         ]
         events = source_events
         prices = tuple(
