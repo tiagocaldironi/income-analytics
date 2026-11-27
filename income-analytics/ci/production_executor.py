@@ -47,6 +47,8 @@ class WindowsHost:
         test_mode: bool = False,
         port: int = 8002,
         manual_legacy_stop: bool = False,
+        previous_package: Path | None = None,
+        previous_package_sha256: str | None = None,
     ):
         if os.name != "nt":
             raise ProductionExecutionError("WINDOWS_HOST_REQUIRED")
@@ -57,6 +59,8 @@ class WindowsHost:
         self.test_mode = test_mode
         self.port = port
         self.manual_legacy_stop = manual_legacy_stop
+        self.previous_package = previous_package
+        self.previous_package_sha256 = previous_package_sha256
         self.test_import_path = os.pathsep.join(
             entry
             for entry in sys.path
@@ -135,6 +139,64 @@ class WindowsHost:
         if len(locations) != 1:
             raise ProductionExecutionError("LAUNCHER_LOCATION_NOT_UNIQUE")
         old_root = Path(locations[0]).resolve()
+        live_health = self.health_check({})
+        live_commit = live_health.get("release_commit")
+        if old_root.is_relative_to(self.release_root):
+            old_commit = self.verify_installed_release(old_root, live_commit)
+        else:
+            old_commit = self.verify_previous_checkout(old_root)
+        if live_commit and live_commit != old_commit:
+            raise ProductionExecutionError("RUNNING_VERSION_DOES_NOT_MATCH_LAUNCHER")
+        self.previous_candidate = {
+            "source_commit": old_commit,
+            "legacy_health_without_commit": not bool(live_commit),
+        }
+        rollback_file = self.launcher.with_name(
+            self.launcher.name
+            + ".rollback-"
+            + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            + "-"
+            + uuid.uuid4().hex[:8]
+        )
+        rollback_file.write_bytes(self.launcher_bytes)
+        return {
+            "launcher_bytes": self.launcher_bytes,
+            "previous_candidate": self.previous_candidate,
+            "previous_root": str(old_root),
+            "launcher_backup": str(rollback_file),
+            "launcher_sha256": hashlib.sha256(self.launcher_bytes).hexdigest(),
+        }
+
+    def verify_installed_release(self, root: Path, live_commit: str | None) -> str:
+        digest = self.previous_package_sha256
+        if (
+            not live_commit
+            or not re.fullmatch(r"[0-9a-f]{40}", live_commit)
+            or root != self.release_root / live_commit
+            or self.previous_package is None
+            or not digest
+            or not re.fullmatch(r"[0-9a-f]{64}", digest)
+        ):
+            raise ProductionExecutionError("PREVIOUS_PACKAGE_EVIDENCE_REQUIRED")
+        verify(self.previous_package, live_commit, digest)
+        with zipfile.ZipFile(self.previous_package) as bundle:
+            for name in bundle.namelist():
+                path = root / name
+                if path.resolve() != path or not path.is_file():
+                    raise ProductionExecutionError("PREVIOUS_INSTALLED_FILE_MISSING_OR_REDIRECTED")
+                if path.read_bytes() != bundle.read(name):
+                    raise ProductionExecutionError("PREVIOUS_INSTALLED_FILE_MISMATCH")
+            expected_source = {name for name in bundle.namelist() if name.startswith("src/")}
+        actual_source = {
+            path.relative_to(root).as_posix()
+            for path in (root / "src").rglob("*")
+            if path.is_file() and not ("__pycache__" in path.parts and path.suffix == ".pyc")
+        }
+        if actual_source != expected_source:
+            raise ProductionExecutionError("PREVIOUS_INSTALLED_SOURCE_INVENTORY_MISMATCH")
+        return live_commit
+
+    def verify_previous_checkout(self, old_root: Path) -> str:
         result = subprocess.run(
             [release_executable("git"), "-C", str(old_root), "rev-parse", "HEAD"],
             capture_output=True,
@@ -159,29 +221,7 @@ class WindowsHost:
         )
         if dirty.returncode or dirty.stdout.strip():
             raise ProductionExecutionError("PREVIOUS_VERSION_DIRTY_OR_UNKNOWN")
-        live_health = self.health_check({})
-        live_commit = live_health.get("release_commit")
-        if live_commit and live_commit != old_commit:
-            raise ProductionExecutionError("RUNNING_VERSION_DOES_NOT_MATCH_LAUNCHER")
-        self.previous_candidate = {
-            "source_commit": old_commit,
-            "legacy_health_without_commit": not bool(live_commit),
-        }
-        rollback_file = self.launcher.with_name(
-            self.launcher.name
-            + ".rollback-"
-            + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-            + "-"
-            + uuid.uuid4().hex[:8]
-        )
-        rollback_file.write_bytes(self.launcher_bytes)
-        return {
-            "launcher_bytes": self.launcher_bytes,
-            "previous_candidate": self.previous_candidate,
-            "previous_root": str(old_root),
-            "launcher_backup": str(rollback_file),
-            "launcher_sha256": hashlib.sha256(self.launcher_bytes).hexdigest(),
-        }
+        return old_commit
 
     def stage_candidate(self, package: Path, candidate: dict):
         target = self.release_root / candidate["source_commit"]
@@ -340,6 +380,12 @@ class WindowsHost:
         if self.package_root is None or self.launcher_bytes is None:
             raise ProductionExecutionError("RELEASE_OR_LAUNCHER_SNAPSHOT_MISSING")
         content = self.launcher_bytes.decode("utf-8-sig")
+        content = re.sub(
+            r"(?im)^[ \t]*\$env:(?:INCOME_ANALYTICS_RELEASE_COMMIT|PYTHONPATH)"
+            r"[ \t]*=[^\r\n]*\r?\n",
+            "",
+            content,
+        )
         target = str(self.package_root).replace("'", "''")
         content, count = re.subn(
             r"(?m)^(\s*Set-Location\s+-LiteralPath\s+)'[^']+'\s*$",
@@ -778,6 +824,8 @@ def main() -> int:
     parser.add_argument("--launcher", type=Path, required=True)
     parser.add_argument("--health-url", required=True)
     parser.add_argument("--manual-legacy-stop", action="store_true")
+    parser.add_argument("--previous-package", type=Path)
+    parser.add_argument("--previous-package-sha256")
     parser.add_argument("--evidence-out", type=Path, required=True)
     parser.add_argument(
         "--confirm", action="store_true", help="prompt for exact artifact confirmation"
@@ -819,6 +867,8 @@ def main() -> int:
             launcher=args.launcher,
             health_url=args.health_url,
             manual_legacy_stop=args.manual_legacy_stop,
+            previous_package=args.previous_package,
+            previous_package_sha256=args.previous_package_sha256,
         )
         report = execute(
             host,
