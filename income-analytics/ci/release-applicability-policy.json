@@ -3,7 +3,13 @@
   "policy_id": "INCOME_ANALYTICS_RELEASE_APPLICABILITY_V2",
   "approval_mode": "EXPLICIT_GITHUB_APPROVAL_REQUIRED",
   "approval_authority": "tiagocaldironi",
+  "production_base_sha": "6af9509fce4e0ecc14c76c82c6ea7b443883e16b",
   "path_scopes": {
+    "repository_instructions": ["AGENTS.md"],
+    "security_runtime": [
+      "src/income_analytics/api/saas_security.py",
+      "tests/security/test_rate_limit_concurrency.py"
+    ],
     "visual_only": [
       "src/income_analytics/api/static/css/*.css"
     ],
@@ -15,7 +21,9 @@
     "release_policy": [
       "ci/release-applicability-policy.json",
       "ci/release-applicability-approval.json",
-      "ci/scoped-promotion-approval-88.json",
+      "ci/scoped-promotion-approval-[1-9]*.json",
+      "ci/security.py",
+      "docs/engineering/engineering-debt-closure/quality_ledger.json",
       "docs/engineering/security/security_scanner_triage.json"
     ],
     "release_delivery": [
@@ -136,7 +144,7 @@
       "dependency_module_prefixes": []
     },
     "PRODUCTION_DELIVERY": {
-      "applicable_scopes": ["release_delivery"],
+      "applicable_scopes": ["release_delivery", "security_runtime"],
       "dependency_modules": [],
       "dependency_module_prefixes": []
     }

@@ -21,9 +21,10 @@ INTERNAL_ROOTS = ("income_analytics", "tests", "ci")
 VISUAL_SUFFIXES = {".css"}
 LOCK_FILES = {"ci/runtime-windows-py314.lock", "ci/requirements-windows-py314.lock"}
 KNOWN_NONEXECUTABLE_FILES = {
+    "AGENTS.md",
     "ci/release-applicability-policy.json",
     "ci/release-applicability-approval.json",
-    "ci/scoped-promotion-approval-88.json",
+    "docs/engineering/engineering-debt-closure/quality_ledger.json",
     "docs/engineering/security/security_scanner_triage.json",
 }
 LOCK_LINE = re.compile(r"([\w.-]+)==([\w.+-]+) --hash=sha256:([a-f0-9]{64})")
@@ -177,7 +178,9 @@ def analyze_changed_dependencies(root: Path, paths: list[str]) -> dict:
         if normalized in LOCK_FILES or normalized == "pyproject.toml":
             runtime_paths.append(normalized)
             continue
-        if normalized in KNOWN_NONEXECUTABLE_FILES:
+        if normalized in KNOWN_NONEXECUTABLE_FILES or re.fullmatch(
+            r"ci/scoped-promotion-approval-[1-9][0-9]{0,8}\.json", normalized
+        ):
             continue
         module = _module_for(path, app_root) if path.suffix == ".py" and path.is_file() else None
         if module is None:
