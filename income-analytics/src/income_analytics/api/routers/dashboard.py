@@ -4914,18 +4914,14 @@ def get_portfolio_history(
         valued_positions = [
             position for position in valuation.positions if position.ticker in tickers
         ]
-        market_value = (
-            sum(
-                (
-                    position.market_value_base
-                    for position in valued_positions
-                    if position.market_value_base is not None
-                ),
-                Decimal("0"),
-            )
-            if all(position.market_value_base is not None for position in valued_positions)
-            else None
-        )
+        known_values = [
+            position.market_value_base
+            for position in valued_positions
+            if position.market_value_base is not None
+        ]
+        complete = len(known_values) == len(valued_positions)
+        known_market_value = sum(known_values, Decimal("0"))
+        market_value = known_market_value if complete else None
         if asset_class is None and contract_id is None:
             total_result = portfolio.total_result.amount
             capital_gain = (
@@ -4952,6 +4948,7 @@ def get_portfolio_history(
             "effective_date": effective_date,
             "total_cost": total_cost,
             "market_value": market_value,
+            "valued_market_value": known_market_value if complete or known_values else None,
             "estimated_positions": [
                 position.ticker
                 for position in valued_positions

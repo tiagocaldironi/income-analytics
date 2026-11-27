@@ -7,6 +7,8 @@ from fastapi import HTTPException
 from income_analytics.api.routers import dashboard
 from income_analytics.application.portfolio_context import MAIN_PORTFOLIO_ID
 from income_analytics.application.portfolio_session import PortfolioSession
+from income_analytics.domain.enums.asset_class import AssetClass
+from income_analytics.domain.enums.financial_event_type import FinancialEventType
 from income_analytics.domain.enums.fixed_income import (
     FixedIncomeIndexerType,
     FixedIncomeInstrumentType,
@@ -177,3 +179,27 @@ def test_contract_twr_handles_redemptions_as_capital_removed(
     assert result["total_contributions"] == Decimal("1000")
     assert result["total_withdrawals"] == redeemed
     assert result["ending_equity"] == ending
+
+
+
+def test_partial_consolidated_history_includes_bank_value_without_inventing_total(
+    monkeypatch,
+) -> None:
+    session = _session_with_fixed_income()
+    session.register_trade(
+        event_type=FinancialEventType.BUY,
+        ticker="PETR4",
+        asset_class=AssetClass.BRAZILIAN_STOCK,
+        quantity=Decimal("1"),
+        unit_price=Decimal("100"),
+        effective_date=date(2026, 1, 1),
+    )
+    monkeypatch.setattr(dashboard, "session", session)
+    result = dashboard.get_portfolio_history(
+        period_months=12, start_date=date(2026, 1, 1), end_date=date(2026, 1, 31)
+    )
+    point = result["snapshots"][0]
+    assert point["market_value"] is None
+    assert point["valued_market_value"] == Decimal("1000")
+    assert point["estimated_positions"] == ["FI-CDB-01"]
+    assert point["unvalued_positions"] == ["PETR4"]

@@ -1011,7 +1011,9 @@ function renderHistory(data, baseCurrency = "BRL") {
     chart.innerHTML = `${controls}${emptyState("Evolução indisponível", "Ainda não há dois pontos de histórico para mostrar o saldo patrimonial.")}`;
     return;
   }
-  chart.innerHTML = `${controls}<div id="equity-echarts" class="equity-echarts" aria-label="Evolução patrimonial"></div>`;
+  const coverageNote = points.some(point => point.market_value == null)
+    ? "<p>As datas com cobertura parcial mostram o subtotal das posições avaliadas.</p>" : "";
+  chart.innerHTML = `${controls}<div id="equity-echarts" class="equity-echarts" aria-label="Evolução patrimonial"></div>${coverageNote}`;
   renderEquityChart(points, equityChartRequestId, baseCurrency);
 }
 
@@ -1038,19 +1040,27 @@ async function renderEquityChart(points, requestId, baseCurrency) {
   equityChart = echarts.init(target, null, { renderer: "svg" });
   const wealth = points.map(point => point.market_value != null && Number.isFinite(Number(point.market_value))
     ? Number(point.market_value) : null);
+  const partial = points.map(point => point.market_value == null && point.valued_market_value != null
+    && Number.isFinite(Number(point.valued_market_value)) ? Number(point.valued_market_value) : null);
   equityChart.setOption({
     backgroundColor: "transparent",
     tooltip: { trigger: "axis", formatter: params => {
       const item = params[0];
       const point = points[item?.dataIndex];
-      const value = item?.value == null ? "Dados insuficientes" : money(item.value, baseCurrency);
+      const value = point?.market_value != null ? money(point.market_value, baseCurrency)
+        : point?.valued_market_value != null
+          ? "Subtotal avaliado: " + money(point.valued_market_value, baseCurrency)
+          : "Dados insuficientes";
       const estimated = point?.estimated_positions?.length ? "<br>Inclui saldos estimados" : "";
       return formatDate(item?.axisValue) + "<br><strong>" + value + "</strong>" + estimated;
     } },
     grid: { left: 66, right: 16, top: 20, bottom: 36 },
     xAxis: { type: "category", data: points.map(point => point.effective_date), axisLabel: { color: chartTheme().muted }, axisLine: { lineStyle: { color: chartTheme().border } } },
     yAxis: { type: "value", axisLabel: { color: chartTheme().muted, formatter: value => money(value, baseCurrency) }, splitLine: { lineStyle: { color: chartTheme().border } } },
-    series: [{ name: "Patrimônio", type: "line", smooth: true, connectNulls: false, data: wealth, symbol: "circle", symbolSize: 5, lineStyle: { color: chartTheme().accent, width: 3 }, itemStyle: { color: chartTheme().accent }, areaStyle: { color: chartTheme().accent, opacity: .12 } }],
+    series: [
+      { name: "Patrimônio", type: "line", smooth: false, connectNulls: false, data: wealth, symbol: "circle", symbolSize: 5, lineStyle: { color: chartTheme().accent, width: 3 }, itemStyle: { color: chartTheme().accent } },
+      { name: "Subtotal avaliado", type: "line", smooth: false, connectNulls: false, data: partial, symbol: "emptyCircle", symbolSize: 6, lineStyle: { color: chartTheme().muted, type: "dashed" }, itemStyle: { color: chartTheme().muted } },
+    ],
   });
   equityChartResizeObserver = new ResizeObserver(() => {
     if (equityChart && !equityChart.isDisposed()) responsiveDateAxis(equityChart, target);
