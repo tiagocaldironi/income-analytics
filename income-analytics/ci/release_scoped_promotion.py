@@ -111,7 +111,7 @@ def _with_applicability(changed_paths: list[str], base_sha: str, client: Github)
         )
         financial = reports["financial"]
         scoped = financial.get("scoped_release_assessment", {})
-        static_dependencies = analyze_changed_dependencies(root, changed_paths)
+        static_dependencies = analyze_changed_dependencies(root, changed_paths, base_sha=base_sha)
         runtime_dependencies = analyze_runtime_dependency(root, changed_paths, base_sha)
         policy_approved = valid_policy_approval(policy_path, approval_record, policy_comment)
         baseline = json.loads((root / PYTHON_BASELINE).read_text(encoding="utf-8"))

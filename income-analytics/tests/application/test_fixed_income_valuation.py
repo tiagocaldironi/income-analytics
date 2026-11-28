@@ -127,3 +127,42 @@ def test_cdi_plus_applies_the_contracted_cdi_percentage_before_spread() -> None:
 
     assert value.gross_value is not None
     assert value.gross_value > Decimal("1012")
+
+
+def test_cdi_does_not_ignore_a_missing_weekday_between_observations() -> None:
+    details = FixedIncomeDetails(
+        asset_id=uuid4(),
+        instrument_type=FixedIncomeInstrumentType.LCI,
+        indexer_type=FixedIncomeIndexerType.CDI_PERCENT,
+        application_date=date(2026, 6, 1),
+        principal_amount=Decimal("1000"),
+        percentage_of_indexer=Decimal("95"),
+    )
+    rates = tuple(
+        BenchmarkRate(
+            name="CDI", effective_date=date(2026, 6, day), return_percentage=Decimal("0.01")
+        )
+        for day in (2, 4)
+    )
+    value = FixedIncomeValuationEngine.value(details, as_of=date(2026, 6, 4), cdi_rates=rates)
+    assert value.gross_value is None
+    assert "03/06/2026" in (value.unavailable_reason or "")
+
+
+
+def test_cdi_uses_published_national_closures() -> None:
+    details = FixedIncomeDetails(
+        asset_id=uuid4(),
+        instrument_type=FixedIncomeInstrumentType.RDB,
+        indexer_type=FixedIncomeIndexerType.CDI_PERCENT,
+        application_date=date(2026, 4, 2),
+        principal_amount=Decimal("1000"),
+        percentage_of_indexer=Decimal("100"),
+    )
+    rate = BenchmarkRate(
+        name="CDI", effective_date=date(2026, 4, 6), return_percentage=Decimal("0.001")
+    )
+    result = FixedIncomeValuationEngine.value(
+        details, as_of=date(2026, 4, 6), cdi_rates=(rate,)
+    )
+    assert result.gross_value == Decimal("1001")

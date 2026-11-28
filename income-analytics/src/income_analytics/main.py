@@ -29,6 +29,7 @@ from income_analytics.api.routers.dashboard import (
 )
 from income_analytics.api.routers.health import router as health_router
 from income_analytics.api.routers.income_starter import router as income_starter_router
+from income_analytics.api.routers.magic_formula import router as magic_formula_router
 from income_analytics.api.routers.portfolios import router as portfolios_router
 from income_analytics.api.saas_security import authorize_request, local_mode_rejection
 from income_analytics.application.dashboard_refresh import snapshot_revision
@@ -207,6 +208,7 @@ initialize_database()
 app.include_router(auth_router)
 app.include_router(health_router)
 app.include_router(dashboard_router)
+app.include_router(magic_formula_router)
 app.include_router(b3_import_router)
 app.include_router(portfolios_router)
 app.include_router(income_starter_router)

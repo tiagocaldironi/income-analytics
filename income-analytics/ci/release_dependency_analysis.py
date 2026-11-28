@@ -22,6 +22,10 @@ VISUAL_SUFFIXES = {".css"}
 LOCK_FILES = {"ci/runtime-windows-py314.lock", "ci/requirements-windows-py314.lock"}
 KNOWN_NONEXECUTABLE_FILES = {
     "AGENTS.md",
+    "ci/diagnostic-relocations-79.json",
+    "ci/typing-baseline-acceptance.json",
+    "docs/engineering/release-policy-65/baseline_proposal.json",
+    "docs/engineering/release-policy-65/occurrence_risk_proposals.json",
     "ci/release-applicability-policy.json",
     "ci/release-applicability-approval.json",
     "docs/engineering/engineering-debt-closure/quality_ledger.json",
@@ -143,7 +147,67 @@ def _imports(tree: ast.AST, module: str, modules: dict[str, Path]) -> tuple[set[
     return dependencies, complete
 
 
-def analyze_changed_dependencies(root: Path, paths: list[str]) -> dict:
+def dashboard_route_isolation(before: bytes, after: bytes) -> dict:
+    """Compare dashboard route definitions and their module-local bindings.
+
+    This is supplementary evidence. It does not replace transitive import
+    analysis or certify dynamic dispatch, module initialization, or JavaScript.
+    """
+    def inspect(source: bytes) -> tuple[dict[str, list[str]], set[str], set[str]]:
+        bindings: dict[str, list[str]] = {}
+        protected: set[str] = set()
+        references: dict[str, set[str]] = {}
+        for statement in ast.parse(source).body:
+            if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                names = [statement.name]
+                if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    for decorator in statement.decorator_list:
+                        if not isinstance(decorator, ast.Call) or not decorator.args:
+                            continue
+                        path = decorator.args[0]
+                        if (
+                            isinstance(path, ast.Constant)
+                            and isinstance(path.value, str)
+                            and (path.value == "/tools" or path.value.startswith("/tools/"))
+                        ):
+                            protected.add(statement.name)
+            elif isinstance(statement, (ast.Import, ast.ImportFrom)):
+                names = [alias.asname or alias.name.split(".")[0] for alias in statement.names]
+            elif isinstance(statement, (ast.Assign, ast.AnnAssign)):
+                targets = (
+                    statement.targets if isinstance(statement, ast.Assign) else [statement.target]
+                )
+                names = [target.id for target in targets if isinstance(target, ast.Name)]
+            else:
+                continue
+            for name in names:
+                bindings.setdefault(name, []).append(ast.dump(statement))
+                references.setdefault(name, set()).update(
+                    node.id for node in ast.walk(statement)
+                    if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+                )
+        reachable = set(protected)
+        pending = list(protected)
+        while pending:
+            referenced = references.get(pending.pop(), set()) & bindings.keys()
+            pending.extend(referenced - reachable)
+            reachable.update(referenced)
+        return bindings, protected, reachable
+
+    old, old_routes, old_reachable = inspect(before)
+    new, new_routes, new_reachable = inspect(after)
+    changed = {name for name in old.keys() | new.keys() if old.get(name) != new.get(name)}
+    return {
+        "protected_routes": sorted(old_routes | new_routes),
+        "changed_protected_bindings": sorted(changed & (old_reachable | new_reachable)),
+        "changed_bindings": sorted(changed),
+        "complete_release_dependency_analysis": False,
+    }
+
+
+def analyze_changed_dependencies(
+    root: Path, paths: list[str], *, base_sha: str | None = None
+) -> dict:
     """Resolve changed Python modules through their transitive static imports.
 
     CSS changes are a known non-executable visual scope. Every other changed
@@ -221,8 +285,23 @@ def analyze_changed_dependencies(root: Path, paths: list[str]) -> dict:
             "changes": [],
             "evidence": ["RUNTIME_BASE_COMPARISON_REQUIRED"],
         }
+    route_comparison: dict[str, object] = {}
+    dashboard_name = "income_analytics.api.routers.dashboard"
+    if base_sha is not None and dashboard_name in changed_modules:
+        dashboard_path = module_files[dashboard_name]
+        if re.fullmatch(r"[a-f0-9]{40}", base_sha):
+            revision_path = "income-analytics/" + dashboard_path.relative_to(app_root).as_posix()
+            try:
+                baseline = subprocess.check_output(
+                    ["git", "show", f"{base_sha}:{revision_path}"], cwd=app_root,
+                    stderr=subprocess.DEVNULL, timeout=15,
+                )
+                route_comparison = dashboard_route_isolation(baseline, dashboard_path.read_bytes())
+            except (OSError, subprocess.SubprocessError, SyntaxError):
+                route_comparison = {"status": "UNAVAILABLE"}
     return {
         "analyzer_version": ANALYZER_VERSION,
+        "dashboard_route_comparison": route_comparison,
         "complete": complete,
         "changed_modules": sorted(changed_modules),
         "modules": sorted(reachable),

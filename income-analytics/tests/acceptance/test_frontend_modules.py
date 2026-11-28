@@ -183,7 +183,8 @@ def test_holdings_experience_uses_one_aggregate_projection_and_strategy_context(
     assert "#portfolio-evolution" in portfolio
     assert "Custo registrado" in dashboard
     assert "resultado econômico" in dashboard
-    assert "Number(point.total_cost) + Number(point.total_result)" in portfolio
+    assert "Number.isFinite(Number(point.market_value))" in portfolio
+    assert "Inclui saldos estimados" in portfolio
     assert "Rendimentos recebidos" in dashboard
     assert '"capital-gain": capitalGain' in portfolio
     assert "afterLayout" in portfolio
@@ -347,7 +348,7 @@ def test_settings_can_force_a_manual_quote_refresh():
     assert "/market-prices/refresh-runs?limit=" in api
 
 
-def test_portfolio_history_chart_uses_economic_result_and_preserves_negative_returns() -> None:
+def test_portfolio_history_chart_uses_observed_or_estimated_market_values() -> None:
     portfolio = (STATIC / "js/features/portfolio.js").read_text(encoding="utf-8")
     operations = (STATIC / "js/features/operations.js").read_text(encoding="utf-8")
     assert 'id="portfolio-history-period"' in portfolio
@@ -355,13 +356,12 @@ def test_portfolio_history_chart_uses_economic_result_and_preserves_negative_ret
     assert (
         'event.target.matches("#portfolio-history-period, #portfolio-history-class")' in portfolio
     )
-    assert "Number(point.total_cost) + Number(point.total_result)" in portfolio
+    assert "Number.isFinite(Number(point.market_value))" in portfolio
+    assert "Inclui saldos estimados" in portfolio
     assert 'type: "line"' in portfolio
     assert "Math.max(Number(point.total_result)" not in portfolio
     assert "data: points.map(point => Number(point.capital_gain))" not in portfolio
-    assert "item.market_value !== null && Number(item.market_value) > 0" in portfolio
-    assert "Number(item.market_value) / total" in portfolio
-    assert "value: Number(group.market_value)" in portfolio
+    assert "groupDistributionData" in portfolio
     assert "id='history-period'" in operations
 
 

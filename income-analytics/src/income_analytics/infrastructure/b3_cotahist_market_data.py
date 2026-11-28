@@ -17,11 +17,12 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 from zipfile import BadZipFile, ZipFile
 
-from income_analytics.application.magic_formula_market_evidence import (
+from income_analytics.application.market_data import (
     CotahistPriceEvidence,
+    MarketDataUnavailable,
     MarketEvidenceStatus,
+    MarketPriceObservation,
 )
-from income_analytics.application.market_data import MarketDataUnavailable, MarketPriceObservation
 
 
 class B3CotahistMarketDataProvider:

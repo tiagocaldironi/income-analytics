@@ -37,6 +37,7 @@ class HoldingRow(TreasuryPresentation, total=False):
     instrument: str | None
     indexer: str | None
     condition: str | None
+    application_date: date | None
     contract_key: str | None
     contract_label: str | None
     display_label: str

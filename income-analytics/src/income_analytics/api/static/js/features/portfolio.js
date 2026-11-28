@@ -414,6 +414,11 @@ function bindPortfolioInteractions() {
       }}));
       return;
     }
+    const contractAction = event.target.closest("[data-bank-contract-history]");
+    if (contractAction) {
+      loadBankContractHistory(contractAction);
+      return;
+    }
     const transactionAction = event.target.closest("[data-asset-transactions]");
     if (transactionAction) {
       const menu = transactionAction.closest(".asset-context-menu");
@@ -561,6 +566,7 @@ function assetsForDisplay(group) {
       ticker: lots[0].ticker,
       display_name: contractLabel,
       lot_count: lots.length,
+      bank_lots: lots,
       quantity,
       average_price: quantity ? cost / quantity : 0,
       current_price: marketValue === null || !quantity ? null : marketValue / quantity,
@@ -569,12 +575,50 @@ function assetsForDisplay(group) {
         ? {market_value_base: lots.some(asset => asset.market_value_base === null || asset.market_value_base === undefined || !Number.isFinite(Number(asset.market_value_base))) ? null : sum("market_value_base")}
         : {}),
       total_result: result,
-      return_percentage: cost ? ((marketValue ?? cost) - cost) / cost * 100 : 0,
+      return_percentage: cost > 0 && marketValue !== null ? (marketValue - cost) / cost * 100 : null,
+      price_provider: lots.some(asset => asset.price_provider === "contract_curve") ? "contract_curve" : lots[0].price_provider,
       income_received: sum("income_received"),
       portfolio_weight: lots.some(asset => asset.portfolio_weight === null) ? null : sum("portfolio_weight"),
       target_weight: lots.some(asset => asset.target_weight === null) ? null : sum("target_weight"),
     };
   });
+}
+
+async function loadBankContractHistory(button) {
+  const output = button.nextElementSibling;
+  button.disabled = true;
+  output.textContent = "Carregando evolução e rentabilidade…";
+  const [id, applicationDate] = [button.dataset.bankContractHistory, button.dataset.applicationDate];
+  try {
+    const history = await portfolioApi.contractHistory(id);
+    const points = history.snapshots;
+    const start = points[0]?.effective_date || applicationDate;
+    const end = history.effective_end_date;
+    const performance = await portfolioApi.contractPerformance(id, start, end);
+    const status = performance.twr == null
+      ? "TWR indisponível. " + (performance.unavailable_reason || "Dados insuficientes.")
+      : "TWR no período: " + percentage(Number(performance.twr) * 100);
+    output.innerHTML = "<p>" + escapeHtml(status) + "</p>" + table(
+      ["Data", "Saldo", "Origem"],
+      points.map(point => "<tr><td>" + escapeHtml(formatDate(point.effective_date)) + "</td><td>"
+        + (point.market_value == null ? "—" : money(point.market_value)) + "</td><td>"
+        + (point.market_value == null
+          ? escapeHtml(Object.values(point.contract_valuation_gaps)[0] || "Dados insuficientes")
+          : point.estimated_positions.length
+          ? "Estimado" : Number(point.market_value) === 0 ? "Sem posição" : "Observado") + "</td></tr>"),
+    ) + (
+      history.contract_movements.length ? "<h4>Movimentações</h4>" + table(
+        ["Data", "Tipo", "Valor"],
+        history.contract_movements.map(event => "<tr><td>"
+          + escapeHtml(formatDate(event.effective_date)) + "</td><td>"
+          + (event.type === "BUY" ? "Aplicação" : "Resgate") + "</td><td>"
+          + (event.amount == null ? "—" : money(event.amount)) + "</td></tr>"),
+      ) : ""
+    );
+  } catch {
+    output.textContent = "Não foi possível carregar o histórico do contrato.";
+    button.disabled = false;
+  }
 }
 
 function renderHoldingRow(asset, fixedIncome, assetClass, classLabel = assetClass) {
@@ -589,9 +633,17 @@ function renderHoldingRow(asset, fixedIncome, assetClass, classLabel = assetClas
     ? ["BUY", "SELL"].map(type => `<button type="button" role="menuitem" data-open-operation data-operation-type="${type}" data-operation-class="${escapeHtml(assetClass)}" data-operation-ticker="${escapeHtml(asset.ticker)}" data-operation-name="${escapeHtml(asset.name)}" data-operation-country="${escapeHtml(asset.country || "")}" data-operation-currency="${escapeHtml(asset.currency_code || "BRL")}" data-operation-sector="${escapeHtml(asset.sector || "")}">${type === "BUY" ? "Nova compra" : "Registrar venda"}</button>`).join("")
     : "";
   const menu = `<td class="asset-options-cell"><button type="button" class="holding-details-toggle" data-holding-details aria-expanded="false" aria-label="Detalhes de ${escapeHtml(title)}">Mais detalhes</button><button class="asset-options-button" type="button" title="Opções" aria-label="Opções de ${escapeHtml(title)}" aria-haspopup="menu" aria-expanded="false" data-asset-options>⋯</button><div class="asset-context-menu" role="menu" hidden><button type="button" role="menuitem" data-asset-transactions data-asset-id="${escapeHtml(asset.asset_id)}" data-asset-title="${escapeHtml(title)}"><span aria-hidden="true">≡</span> Lançamentos</button>${tradeActions}</div></td>`;
+  const bankHistory = fixedIncome && !treasury ? (asset.bank_lots || [asset])
+    .filter(lot => lot.application_date)
+    .map(lot => "<div><button type='button' data-bank-contract-history='" + escapeHtml(lot.asset_id)
+      + "' data-application-date='" + escapeHtml(lot.application_date) + "'>Histórico · "
+      + escapeHtml(formatDate(lot.application_date)) + "</button><div role='status'></div></div>")
+    .join("") : "";
   const fullName = asset.name || title;
-  const quoteDate = asset.price_as_of ? `Cotação de ${formatDate(asset.price_as_of)}` : "Cotação sem data disponível";
-  const identity = `<details class="holding-identity-details"><summary aria-label="Detalhes de ${escapeHtml(asset.ticker || title)}"><span class="asset-identity"><span><strong>${escapeHtml(treasury ? title : asset.ticker || title)}</strong><small>${escapeHtml(quoteDate)}</small></span></span></summary><div class="holding-identity-info"><strong>${escapeHtml(fullName)}</strong>${treasury ? `<p>Identificador: ${escapeHtml(asset.ticker)}</p><p>${asset.quantity_unit === "LEGACY_CONTRACT" ? "Quantidade em unidades de contrato; conciliação necessária antes de negociar frações de títulos." : "Quantidade em títulos. Variação compara saldo e custo; TWR permanece na classe financeira consolidada."}</p>` : ""}${fixedIncome ? `<p>${escapeHtml(title)}</p>` : ""}<p>${escapeHtml(subtitle)}</p><p>${escapeHtml(classLabel)}</p><p>${escapeHtml(asset.currency_code || "BRL")}${asset.country ? ` · ${escapeHtml(asset.country)}` : ""}${asset.sector ? ` · ${escapeHtml(asset.sector)}` : ""}</p></div></details>`;
+  const quoteDate = asset.price_provider === "contract_curve"
+    ? "Saldo estimado pela curva contratual"
+    : asset.price_as_of ? `Cotação de ${formatDate(asset.price_as_of)}` : "Cotação sem data disponível";
+  const identity = `<details class="holding-identity-details"><summary aria-label="Detalhes de ${escapeHtml(asset.ticker || title)}"><span class="asset-identity"><span><strong>${escapeHtml(treasury ? title : asset.ticker || title)}</strong><small>${escapeHtml(quoteDate)}</small></span></span></summary><div class="holding-identity-info"><strong>${escapeHtml(fullName)}</strong>${treasury ? `<p>Identificador: ${escapeHtml(asset.ticker)}</p><p>${asset.quantity_unit === "LEGACY_CONTRACT" ? "Quantidade em unidades de contrato; conciliação necessária antes de negociar frações de títulos." : "Quantidade em títulos. Variação compara saldo e custo; TWR permanece na classe financeira consolidada."}</p>` : ""}${fixedIncome ? `<p>${escapeHtml(title)}</p>` : ""}<p>${escapeHtml(subtitle)}</p><p>${escapeHtml(classLabel)}</p><p>${escapeHtml(asset.currency_code || "BRL")}${asset.country ? ` · ${escapeHtml(asset.country)}` : ""}${asset.sector ? ` · ${escapeHtml(asset.sector)}` : ""}</p>${bankHistory}</div></details>`;
   return `<tr><td data-label="Ativo">${identity}</td><td data-label="Quantidade">${escapeHtml(quantity)}</td><td data-label="PM">${money(asset.average_price, asset.currency_code)}${treasury && asset.quantity_unit === "LEGACY_CONTRACT" ? " / contrato" : ""}</td><td data-label="Cotação">${asset.current_price == null ? "Preço não disponível." : money(asset.current_price, asset.currency_code)}${treasury && asset.quantity_unit === "LEGACY_CONTRACT" ? " / contrato" : ""}</td><td data-label="Saldo">${asset.market_value === null ? "—" : money(asset.market_value, asset.currency_code)}</td><td data-label="Resultado"><b class="metric-pill ${asset.total_result === null ? "" : Number(asset.total_result) < 0 ? "negative" : Number(asset.total_result) > 0 ? "positive" : ""}">${asset.total_result === null ? "Resultado indisponível" : `${Number(asset.total_result) > 0 ? "+" : Number(asset.total_result) < 0 ? "" : "Sem variação "}${money(asset.total_result, asset.currency_code)}`}</b></td><td data-label="Valorização"><b class="metric-pill ${asset.return_percentage === null ? "" : Number(asset.return_percentage) < 0 ? "negative" : Number(asset.return_percentage) > 0 ? "positive" : ""}">${asset.return_percentage === null ? "—" : `${Number(asset.return_percentage) > 0 ? "+" : ""}${percentage(asset.return_percentage)}`}</b></td>${treasury ? `<td data-label="Rentabilidade (TWR)" title="TWR individual não calculado; consulte a classe financeira Renda Fixa consolidada.">Indisponível</td>` : ""}<td data-label="Rendimentos">${money(asset.income_received, asset.currency_code)}</td><td data-label="Peso">${asset.portfolio_weight === null ? "—" : percentage(asset.portfolio_weight * 100)}</td><td data-label="Alvo classe">${asset.target_weight === null ? "—" : percentage(asset.target_weight * 100)}</td>${menu.replace('<td class="asset-options-cell"', '<td class="asset-options-cell" data-label="Opções"')}</tr>`;
 }
 
@@ -677,7 +729,7 @@ function renderHoldings() {
       const variation = group.total_cost && group.market_value !== null
         ? percentage((Number(group.market_value) - Number(group.total_cost)) / Number(group.total_cost) * 100)
         : "—";
-      const chartAvailable = group.market_value !== null && group.assets.some(asset => asset.market_value !== null);
+      const chartAvailable = groupDistributionData(group, holdings.base_currency).assets.length > 0;
       const groupAction = `<button class="holding-chart-button" type="button" data-group-distribution data-group-id="${escapeHtml(group.asset_class)}" ${chartAvailable ? "" : "disabled"} title="${chartAvailable ? "Gráficos" : "Não há ativos para visualizar."}" aria-label="Gráficos de ${escapeHtml(group.label)}"><svg class="income-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9h9A9 9 0 1 1 9 3.5M15 3.5a9 9 0 0 1 5.5 5.5H15z"/></svg><span>Distribuição</span></button>`;
       return `<details class="holding-class" data-holdings-group="${escapeHtml(group.asset_class)}" ${(holdingsOpenGroups.get(group.asset_class) ?? (index === 0 || Boolean(holdingsQuery))) ? "open" : ""}><summary><span class="holding-class-name"><strong>${escapeHtml(group.label)}</strong><small>${assets.length} investimento${assets.length === 1 ? "" : "s"}</small></span><span class="holding-class-value"><small>Total da classe</small><strong>${group.market_value === null ? "Valuation parcial" : money(group.market_value, holdings.base_currency)}</strong></span><span class="holding-class-statistics"><span class="holding-class-metric"><small title="Diferença entre o valor atual dos ativos da classe e o custo registrado; não é rentabilidade TWR.">Diferença vs. custo</small><strong>${variation}</strong></span><span class="holding-class-metric"><small title="${classReason}">TWR · desde ${classPeriod.replace("Desde ", "")}</small><strong title="${classReason}">${classTwr}</strong></span><span class="holding-class-metric"><small>Peso atual</small><strong>${group.weight === null ? "—" : percentage(group.weight * 100)}</strong></span>${group.target_weight === null ? "" : `<span class="holding-class-metric"><small>Peso ideal</small><strong>${percentage(group.target_weight * 100)}</strong><small>Desvio ${percentage(group.deviation * 100)}</small></span>`}</span>${group.shared_strategy_note ? `<small class="holding-strategy-note">${escapeHtml(group.shared_strategy_note)}</small>` : ""}${groupAction}<span class="holding-class-action" aria-hidden="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg></span></summary>${table(columns, assets.map(asset => renderHoldingRow(asset, fixedIncome, group.asset_class === "TREASURY" ? "TREASURY" : group.financial_asset_class || group.asset_class, group.label))).replace("<table>", `<table aria-label="Ativos de ${escapeHtml(group.label)}">`).replaceAll("<th>", '<th scope="col">')}</details>`;
     }).join("")
@@ -856,24 +908,37 @@ function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 }
 
+function groupDistributionData(group, baseCurrency = "BRL") {
+  const positions = assetsForDisplay(group).filter(asset => Number(asset.quantity) > 0);
+  const assets = positions.flatMap(asset => {
+    const value = Object.hasOwn(asset, "market_value_base")
+      ? asset.market_value_base
+      : (asset.currency_code === baseCurrency ? asset.market_value : null);
+    const marketValue = Number(value);
+    if ((typeof value !== "number" && typeof value !== "string")
+      || !Number.isFinite(marketValue) || marketValue <= 0) return [];
+    return [{
+      name: asset.contract_label || asset.display_name || asset.ticker || asset.name,
+      marketValue,
+      currency: baseCurrency,
+    }];
+  }).sort((left, right) => right.marketValue - left.marketValue);
+  const total = assets.reduce((sum, asset) => sum + asset.marketValue, 0);
+  if (!Number.isFinite(total) || total <= 0) return {assets: [], total: 0, partial: false};
+  return {assets, total, partial: positions.length > assets.length};
+}
+
 function openGroupDistribution(groupId, trigger) {
   const group = (currentHoldings?.display_groups || currentHoldings?.classes || []).find(item => item.asset_class === groupId);
-  if (!group || group.market_value === null) return;
-  const assets = group.assets
-    .filter(asset => asset.market_value !== null)
-    .map(asset => ({
-      name: asset.contract_label || asset.display_name || asset.ticker || asset.name,
-      marketValue: Number(asset.market_value),
-      currency: asset.currency_code,
-    }))
-    .sort((left, right) => right.marketValue - left.marketValue);
+  if (!group) return;
+  const {assets, total, partial} = groupDistributionData(group, currentHoldings.base_currency);
   if (!assets.length) return;
   groupDistributionTrigger = trigger;
   const dialog = getGroupDistributionDialog();
   dialog.querySelector("[data-group-distribution-title]").textContent = `${group.label} — Distribuição dos Ativos`;
-  dialog.querySelector("[data-group-distribution-content]").innerHTML = renderGroupDistribution(group, assets);
+  dialog.querySelector("[data-group-distribution-content]").innerHTML = renderGroupDistribution(group, assets, total, partial);
   if (!dialog.open) dialog.showModal();
-  renderGroupDistributionChart(dialog, group, assets);
+  renderGroupDistributionChart(dialog, assets);
 }
 
 function getGroupDistributionDialog() {
@@ -897,19 +962,17 @@ function getGroupDistributionDialog() {
   return dialog;
 }
 
-function renderGroupDistribution(group, assets) {
-  const total = Number(group.market_value);
+function renderGroupDistribution(group, assets, total, partial) {
   const colors = distributionColors(assets.length);
   const rows = assets.map((asset, index) => {
     const share = asset.marketValue / total * 100;
     return `<button class="group-distribution-row" type="button" data-distribution-index="${index}" title="${escapeHtml(asset.name)}"><i style="background:${colors[index]}"></i><span>${escapeHtml(asset.name)}</span><strong>${money(asset.marketValue, asset.currency)}</strong><b>${percentage(share)}</b></button>`;
   }).join("");
-  return `<div class="group-distribution-layout"><div class="group-distribution-donut-wrap"><div id="group-distribution-chart" class="group-distribution-chart" aria-label="Distribuição de ativos de ${escapeHtml(group.label)}"></div><div class="group-distribution-total"><small>Total</small><strong>${money(group.market_value, group.assets[0]?.currency_code || "BRL")}</strong></div></div><div class="group-distribution-legend" aria-label="Legenda da distribuição">${rows}</div></div>`;
+  return `<div class="group-distribution-layout"><div class="group-distribution-donut-wrap"><div id="group-distribution-chart" class="group-distribution-chart" aria-label="Distribuição de ativos de ${escapeHtml(group.label)}"></div><div class="group-distribution-total"><small>${partial ? "Total com valor disponível" : "Total"}</small><strong>${money(total, assets[0].currency)}</strong></div></div><div class="group-distribution-legend" aria-label="Legenda da distribuição">${rows}</div></div>`;
 }
 
-async function renderGroupDistributionChart(dialog, group, assets) {
+async function renderGroupDistributionChart(dialog, assets) {
   const target = dialog.querySelector("#group-distribution-chart");
-  const total = Number(group.market_value);
   const colors = distributionColors(assets.length);
   const echarts = await loadECharts();
   if (!dialog.open || !target?.isConnected) return;
@@ -948,7 +1011,9 @@ function renderHistory(data, baseCurrency = "BRL") {
     chart.innerHTML = `${controls}${emptyState("Evolução indisponível", "Ainda não há dois pontos de histórico para mostrar o saldo patrimonial.")}`;
     return;
   }
-  chart.innerHTML = `${controls}<div id="equity-echarts" class="equity-echarts" aria-label="Evolução patrimonial"></div>`;
+  const coverageNote = points.some(point => point.market_value == null)
+    ? "<p>As datas com cobertura parcial mostram o subtotal das posições avaliadas.</p>" : "";
+  chart.innerHTML = `${controls}<div id="equity-echarts" class="equity-echarts" aria-label="Evolução patrimonial"></div>${coverageNote}`;
   renderEquityChart(points, equityChartRequestId, baseCurrency);
 }
 
@@ -973,15 +1038,29 @@ async function renderEquityChart(points, requestId, baseCurrency) {
   await afterLayout();
   if (requestId !== equityChartRequestId || !target?.isConnected) return;
   equityChart = echarts.init(target, null, { renderer: "svg" });
-  const wealth = points.map(point => point.total_cost === null || point.total_result === null
-    ? null : Number(point.total_cost) + Number(point.total_result));
+  const wealth = points.map(point => point.market_value != null && Number.isFinite(Number(point.market_value))
+    ? Number(point.market_value) : null);
+  const partial = points.map(point => point.market_value == null && point.valued_market_value != null
+    && Number.isFinite(Number(point.valued_market_value)) ? Number(point.valued_market_value) : null);
   equityChart.setOption({
     backgroundColor: "transparent",
-    tooltip: { trigger: "axis", formatter: params => `${formatDate(params[0]?.axisValue)}<br><strong>${money(params[0]?.value, baseCurrency)}</strong>` },
+    tooltip: { trigger: "axis", formatter: params => {
+      const item = params[0];
+      const point = points[item?.dataIndex];
+      const value = point?.market_value != null ? money(point.market_value, baseCurrency)
+        : point?.valued_market_value != null
+          ? "Subtotal avaliado: " + money(point.valued_market_value, baseCurrency)
+          : "Dados insuficientes";
+      const estimated = point?.estimated_positions?.length ? "<br>Inclui saldos estimados" : "";
+      return formatDate(item?.axisValue) + "<br><strong>" + value + "</strong>" + estimated;
+    } },
     grid: { left: 66, right: 16, top: 20, bottom: 36 },
     xAxis: { type: "category", data: points.map(point => point.effective_date), axisLabel: { color: chartTheme().muted }, axisLine: { lineStyle: { color: chartTheme().border } } },
     yAxis: { type: "value", axisLabel: { color: chartTheme().muted, formatter: value => money(value, baseCurrency) }, splitLine: { lineStyle: { color: chartTheme().border } } },
-    series: [{ name: "Patrimônio", type: "line", smooth: true, connectNulls: false, data: wealth, symbol: "circle", symbolSize: 5, lineStyle: { color: chartTheme().accent, width: 3 }, itemStyle: { color: chartTheme().accent }, areaStyle: { color: chartTheme().accent, opacity: .12 } }],
+    series: [
+      { name: "Patrimônio", type: "line", smooth: false, connectNulls: false, data: wealth, symbol: "circle", symbolSize: 5, lineStyle: { color: chartTheme().accent, width: 3 }, itemStyle: { color: chartTheme().accent } },
+      { name: "Subtotal avaliado", type: "line", smooth: false, connectNulls: false, data: partial, symbol: "emptyCircle", symbolSize: 6, lineStyle: { color: chartTheme().muted, type: "dashed" }, itemStyle: { color: chartTheme().muted } },
+    ],
   });
   equityChartResizeObserver = new ResizeObserver(() => {
     if (equityChart && !equityChart.isDisposed()) responsiveDateAxis(equityChart, target);
