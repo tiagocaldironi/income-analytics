@@ -7,45 +7,20 @@ calculation continue.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import date
-from decimal import Decimal
-from enum import StrEnum
-from typing import Protocol
 
-from income_analytics.application.market_data import MarketDataUnavailable
-
-
-class MarketEvidenceStatus(StrEnum):
-    VALID = "VALID"
-    INSUFFICIENT_MARKET_DATA = "INSUFFICIENT_MARKET_DATA"
-
-
-@dataclass(frozen=True, slots=True, kw_only=True)
-class CotahistPriceEvidence:
-    """One B3 close together with enough data to locate its raw record."""
-
-    ticker: str
-    requested_reference_date: date
-    effective_date: date | None
-    price: Decimal | None
-    currency: str | None
-    source: str
-    source_file: str | None
-    record_reference: str | None
-    status: MarketEvidenceStatus
-    reason: str | None = None
-    isin: str | None = None
-
-    @property
-    def is_valid(self) -> bool:
-        return self.status is MarketEvidenceStatus.VALID
-
-
-class CotahistEvidenceProvider(Protocol):
-    def price_evidence_on(
-        self, symbol: str, requested_reference_date: date
-    ) -> CotahistPriceEvidence: ...
+from income_analytics.application.market_data import (
+    CotahistEvidenceProvider as CotahistEvidenceProvider,
+)
+from income_analytics.application.market_data import (
+    CotahistPriceEvidence as CotahistPriceEvidence,
+)
+from income_analytics.application.market_data import (
+    MarketDataUnavailable,
+)
+from income_analytics.application.market_data import (
+    MarketEvidenceStatus as MarketEvidenceStatus,
+)
 
 
 class MagicFormulaMarketEvidenceAgent:

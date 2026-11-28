@@ -549,6 +549,25 @@ def test_static_dependency_analysis_distinguishes_typing_evidence_from_executabl
     check(report["unclassified_paths"] == sorted([unknown, history]), "only reviewed JSON is known")
 
 
+def test_portfolio_python_routes_do_not_import_magic_formula():
+    from release_dependency_analysis import analyze_changed_dependencies
+
+    root = Path(__file__).resolve().parents[2]
+    report = analyze_changed_dependencies(
+        root,
+        [
+            "src/income_analytics/api/routers/dashboard.py",
+            "tests/api/test_fixed_income_sale.py",
+        ],
+    )
+    check(report["complete"], "portfolio dependency analysis must be complete")
+    formula_modules = [
+        module for module in report["modules"] if ".magic_formula" in module
+        or module.endswith((".historical_shares_units", ".historical_security_identity"))
+    ]
+    check(not formula_modules, f"portfolio imports protected modules: {formula_modules}")
+
+
 def test_dashboard_route_isolation_reports_changed_indirect_bindings():
     from release_dependency_analysis import dashboard_route_isolation
 

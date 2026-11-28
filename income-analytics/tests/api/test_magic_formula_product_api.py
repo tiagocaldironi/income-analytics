@@ -6,13 +6,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
 from income_analytics import main as application_main
-from income_analytics.api.routers.dashboard import (
+from income_analytics.api.routers.magic_formula import (
     list_investment_tools,
     magic_formula_stock_detail,
     magic_formula_stocks,
 )
-from income_analytics.api.routers.dashboard import (
-    router as dashboard_router,
+from income_analytics.api.routers.magic_formula import (
+    router as magic_formula_router,
 )
 from income_analytics.application.magic_formula_canonical_ranking import (
     MagicFormulaCanonicalRankingRepository,
@@ -22,8 +22,24 @@ from income_analytics.application.magic_formula_canonical_ranking import (
 
 def runtime_api_app() -> FastAPI:
     application = FastAPI()
-    application.include_router(dashboard_router)
+    application.include_router(magic_formula_router)
     return application
+
+
+def test_magic_formula_routes_are_registered_outside_the_portfolio_router():
+    from income_analytics.api.routers.dashboard import router as portfolio_router
+
+    expected = {
+        "/api/tools",
+        "/api/tools/magic-formula/stocks",
+        "/api/tools/magic-formula/stocks/{company_id}",
+        "/api/tools/magic-formula/fiis",
+    }
+    assert {route.path for route in magic_formula_router.routes} == expected
+    assert expected.isdisjoint(route.path for route in portfolio_router.routes)
+    registered = application_main.app.openapi()["paths"]
+    assert all("get" in registered[path] for path in expected)
+    assert "/api/portfolio/history" in registered
 
 
 @pytest.fixture
@@ -39,7 +55,7 @@ def published_point_in_time_ranking(tmp_path, monkeypatch):
         created_at="2026-10-16T12:00:00Z",
     )
     monkeypatch.setattr(
-        "income_analytics.api.routers.dashboard.MagicFormulaCanonicalRankingRepository",
+        "income_analytics.api.routers.magic_formula.MagicFormulaCanonicalRankingRepository",
         lambda: repository,
     )
     return snapshot
@@ -179,7 +195,7 @@ def test_runtime_http_endpoint_reports_missing_published_snapshot_explicitly(
 ) -> None:
     repository = MagicFormulaCanonicalRankingRepository(tmp_path / "empty-rankings.db")
     monkeypatch.setattr(
-        "income_analytics.api.routers.dashboard.MagicFormulaCanonicalRankingRepository",
+        "income_analytics.api.routers.magic_formula.MagicFormulaCanonicalRankingRepository",
         lambda: repository,
     )
 

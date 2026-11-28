@@ -32,6 +32,7 @@
       "docs/engineering/security/security_scanner_triage.json"
     ],
     "release_delivery": [
+      "src/income_analytics/main.py",
       "ci/production_*.py",
       "ci/delivery.py",
       "ci/delivery_pipeline.py",
@@ -57,6 +58,8 @@
       "src/income_analytics/domain/projectors/*.py",
       "src/income_analytics/domain/market_price.py",
       "src/income_analytics/application/holdings_display.py",
+      "src/income_analytics/application/market_data.py",
+      "src/income_analytics/infrastructure/b3_cotahist_market_data.py",
       "src/income_analytics/api/static/js/api.js",
       "src/income_analytics/api/static/js/features/portfolio.js",
       "tests/acceptance/test_frontend_modules.py",
@@ -88,6 +91,7 @@
       "tests/application/test_scoped_treasury_certification.py"
     ],
     "magic_formula": [
+      "src/income_analytics/api/routers/magic_formula.py",
       "src/income_analytics/application/magic_formula_*.py",
       "src/income_analytics/application/cvm_magic_formula_normalization.py",
       "src/income_analytics/application/historical_shares_units.py",
