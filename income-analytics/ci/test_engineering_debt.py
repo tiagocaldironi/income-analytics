@@ -6,7 +6,7 @@ import json
 import shutil
 from contextlib import contextmanager
 from copy import deepcopy
-from datetime import date
+from datetime import date, timedelta
 from types import SimpleNamespace
 
 import pytest
@@ -544,7 +544,7 @@ def test_accepted_typing_rejects_unapproved_contracts(tmp_path, mutation):
         }[mutation]
         policy[field] = mutation != "acceptance"
     elif mutation == "expiry":
-        today = date(2026, 11, 28)
+        today = date.fromisoformat(policy["review_until"]) + timedelta(days=1)
     elif mutation in {"manifest", "reference"}:
         (
             directory

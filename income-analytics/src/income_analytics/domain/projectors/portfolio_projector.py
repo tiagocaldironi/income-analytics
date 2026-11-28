@@ -135,8 +135,11 @@ class PortfolioProjector:
             current_prices = {
                 asset_id: price.price
                 for asset_id, price in latest_prices.items()
-                if max_price_age_days is None
-                or (as_of - price.effective_date).days <= max_price_age_days
+                if (not price.point_in_time_only or price.effective_date == as_of)
+                and (
+                    max_price_age_days is None
+                    or (as_of - price.effective_date).days <= max_price_age_days
+                )
             }
             snapshots.append(
                 cls._build_projection(

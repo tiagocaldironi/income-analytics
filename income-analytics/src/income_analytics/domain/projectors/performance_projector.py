@@ -50,6 +50,7 @@ class PerformanceProjector:
         end_date: date,
         fx_rates: Iterable[FxRateObservation] = (),
         base_currency: str = "BRL",
+        same_day_flows: bool = False,
     ) -> PerformanceProjection:
         if end_date < start_date:
             raise ValueError("A data final deve ser posterior à data inicial.")
@@ -170,6 +171,7 @@ class PerformanceProjector:
             funding_ledger=funding_ledger,
             portfolio_series=portfolio_series,
             implicit_funding_dates=implicit_funding_dates,
+            same_day_flows=same_day_flows,
         )
         insufficient = coverage_ratio is not None and coverage_ratio < MINIMUM_COVERAGE
         if insufficient:
@@ -181,7 +183,7 @@ class PerformanceProjector:
             if coverage_ratio is not None and coverage_ratio < GOOD_COVERAGE
             else "AVAILABLE"
         )
-        if insufficient:
+        if insufficient and coverage_ratio is not None:
             coverage_date = missing_periods[0].isoformat() if missing_periods else None
             coverage_detail = f" na data {coverage_date}" if coverage_date else " no período"
             asset_detail = (
@@ -232,6 +234,7 @@ class PerformanceProjector:
         funding_ledger: tuple[tuple[date, str, Decimal], ...] | None = None,
         portfolio_series: dict[date, PortfolioProjection] | None = None,
         implicit_funding_dates: set[date] | None = None,
+        same_day_flows: bool = False,
     ) -> tuple[Decimal | None, tuple[PerformancePeriod, ...]]:
         factor = Decimal("1")
         periods: list[PerformancePeriod] = []
@@ -280,39 +283,58 @@ class PerformanceProjector:
             funding_ledger=funding_ledger,
         )
         period_start = start_date
+        net_flows: dict[date, Money] = {}
+        if same_day_flows:
+            for flow in flows:
+                amount = flow.total_amount
+                if flow.event_type is FinancialEventType.WITHDRAWAL:
+                    amount = Money(-amount.amount)
+                net_flows[flow.effective_date] = net_flows.get(
+                    flow.effective_date, Money.zero()
+                ) + amount
         for flow_date in ordered_flow_dates:
-            before_date = flow_date - timedelta(days=1)
-            if before_date >= period_start:
-                closing = cls._equity_from_projection(
-                    events,
-                    portfolio_series[before_date],
-                    before_date,
-                    fx_rates,
-                    base_currency,
-                    fx_index=fx_index,
-                    funding_ledger=funding_ledger,
-                )
-                if opening is None or closing is None or opening.is_zero:
-                    return None, tuple(periods)
-                result = closing.amount / opening.amount - Decimal("1")
-                periods.append(
-                    PerformancePeriod(
-                        start_date=period_start, end_date=before_date, return_percentage=result
+            post_flow = cls._equity_from_projection(
+                events,
+                portfolio_series[flow_date],
+                flow_date,
+                fx_rates,
+                base_currency,
+                fx_index=fx_index,
+                funding_ledger=funding_ledger,
+            )
+            closing_date = flow_date if same_day_flows else flow_date - timedelta(days=1)
+            if same_day_flows and flow_date == start_date:
+                continue
+            if closing_date >= period_start:
+                closing = (
+                    post_flow - net_flows.get(flow_date, Money.zero())
+                    if same_day_flows and post_flow is not None
+                    else cls._equity_from_projection(
+                        events,
+                        portfolio_series[closing_date],
+                        closing_date,
+                        fx_rates,
+                        base_currency,
+                        fx_index=fx_index,
+                        funding_ledger=funding_ledger,
                     )
                 )
-                factor *= Decimal("1") + result
-            opening, period_start = (
-                cls._equity_from_projection(
-                    events,
-                    portfolio_series[flow_date],
-                    flow_date,
-                    fx_rates,
-                    base_currency,
-                    fx_index=fx_index,
-                    funding_ledger=funding_ledger,
-                ),
-                flow_date,
-            )
+                if opening is None or closing is None:
+                    return None, tuple(periods)
+                if opening.is_zero:
+                    if not same_day_flows or not closing.is_zero:
+                        return None, tuple(periods)
+                else:
+                    result = closing.amount / opening.amount - Decimal("1")
+                    periods.append(
+                        PerformancePeriod(
+                            start_date=period_start,
+                            end_date=closing_date,
+                            return_percentage=result,
+                        )
+                    )
+                    factor *= Decimal("1") + result
+            opening, period_start = post_flow, flow_date
         ending = cls._equity_from_projection(
             events,
             portfolio_series[end_date],
@@ -322,7 +344,11 @@ class PerformanceProjector:
             fx_index=fx_index,
             funding_ledger=funding_ledger,
         )
-        if opening is None or ending is None or opening.is_zero:
+        if opening is None or ending is None:
+            return None, tuple(periods)
+        if opening.is_zero:
+            if same_day_flows and ending.is_zero and periods:
+                return factor - Decimal("1"), tuple(periods)
             return None, tuple(periods)
         result = ending.amount / opening.amount - Decimal("1")
         periods.append(
@@ -450,6 +476,7 @@ class PerformanceProjector:
             price
             for price in latest.values()
             if (as_of - price.effective_date).days <= cls.MAX_STALE_PRICE_AGE_DAYS
+            and (not price.point_in_time_only or price.effective_date == as_of)
         )
 
     @staticmethod
@@ -482,7 +509,9 @@ class PerformanceProjector:
             ) == (quote_date, latest_registered_at):
                 first_equal -= 1
             quote = quotes[first_equal]
-            if (as_of - quote.effective_date).days <= cls.MAX_STALE_PRICE_AGE_DAYS:
+            if (as_of - quote.effective_date).days <= cls.MAX_STALE_PRICE_AGE_DAYS and (
+                not quote.point_in_time_only or quote.effective_date == as_of
+            ):
                 latest.append(quote)
         return tuple(latest)
 
@@ -572,14 +601,14 @@ class PerformanceProjector:
         funding_ledger: tuple[tuple[date, str, Decimal], ...] | None = None,
     ) -> Decimal | None:
         if funding_ledger is not None:
-            funding_by_currency: dict[str, Decimal] = {}
+            recorded_funding: dict[str, Decimal] = {}
             for funding_date, currency, amount in funding_ledger:
                 if funding_date <= as_of:
-                    funding_by_currency[currency] = (
-                        funding_by_currency.get(currency, Decimal("0")) + amount
+                    recorded_funding[currency] = (
+                        recorded_funding.get(currency, Decimal("0")) + amount
                     )
             total = Decimal("0")
-            for currency, amount in funding_by_currency.items():
+            for currency, amount in recorded_funding.items():
                 rate = cls._fx_rate(fx_rates, currency, base_currency, as_of, fx_index)
                 if rate is None:
                     return None
@@ -592,7 +621,6 @@ class PerformanceProjector:
             key=lambda item: (item.effective_date, item.registered_at),
         )
         for effective_date, day_events in groupby(ordered, key=lambda item: item.effective_date):
-            day_events = tuple(day_events)
             day_effects: dict[str, Decimal] = {}
             has_purchase: set[str] = set()
             for event in day_events:

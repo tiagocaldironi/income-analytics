@@ -150,6 +150,10 @@ export const portfolioApi = {
   marketPriceRefreshRuns: limit => request("/market-prices/refresh-runs?limit=" + encodeURIComponent(limit)),
   automaticPrice: (ticker, date) => request(`/market-prices/${encodeURIComponent(ticker)}/automatic?effective_date=${date}`),
   resetAllData: () => request("/data/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirmation: "EXCLUIR" }) }),
+  contractHistory: id => request("/portfolio/history?period_months=12&contract_id=" + encodeURIComponent(id)),
+  contractPerformance: (id, start, end) => request("/portfolio/performance?" + new URLSearchParams({
+    contract_id: id, start_date: start, end_date: end,
+  })),
   performance: (start, end) => request(`/portfolio/performance?start_date=${start}&end_date=${end}`),
   wealthExplanation: (start, end) => request(`/analytics/wealth-explanation?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`),
   wealthEvolution: (start, end) => request(`/analytics/wealth-evolution?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`),

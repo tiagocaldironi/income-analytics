@@ -15,6 +15,30 @@ assert.ok(html.includes('Peso ideal'));assert.ok(html.includes('Desvio 20%'));
 assert.equal((html.match(/holding-class-action[^>]*><svg/g)||[]).length,2);
 assert.ok(html.includes('data-group-distribution'));
 assert.ok(!html.includes('◔'));
+const distribution = context.groupDistributionData({
+  asset_class: "INTERNATIONAL", label: "Exterior", market_value: null,
+  assets: [
+    {ticker: "OPEN", quantity: "2", currency_code: "USD", market_value: "40", market_value_base: "200"},
+    {ticker: "GOAL", target_only: true, quantity: 1, market_value_base: "300"},
+    {ticker: "SOLD", quantity: "0", market_value_base: "400"},
+    {ticker: "MISSING", quantity: 1, market_value_base: null, market_value: 90, currency_code: "BRL"},
+    {ticker: "INVALID", quantity: 1, market_value_base: "NaN"},
+    {ticker: "LOCAL", quantity: 1, market_value: "50", currency_code: "BRL"},
+  ],
+}, "BRL");
+assert.deepEqual(JSON.parse(JSON.stringify(distribution)), {
+  assets: [
+    {name: "OPEN", marketValue: 200, currency: "BRL"},
+    {name: "LOCAL", marketValue: 50, currency: "BRL"},
+  ],
+  total: 250,
+  partial: true,
+});
+const legend = context.renderGroupDistribution({label: "Exterior"}, distribution.assets,
+  distribution.total, distribution.partial);
+assert.ok(legend.includes("Total com valor disponível"));
+assert.ok(legend.includes("80%") && legend.includes("20%"));
+assert.ok(!/NaN|SOLD|GOAL|MISSING|INVALID/.test(legend));
 const index=fs.readFileSync(root+'index.html','utf8');
 assert.ok(index.includes('holdings-heading'));
 assert.ok(index.includes('holdings-actions'));
