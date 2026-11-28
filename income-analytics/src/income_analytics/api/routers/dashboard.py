@@ -1578,7 +1578,7 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
                     asset_id=str(position.asset.id),
                     label=_fixed_income_contract_label(
                         position.asset, session._fixed_income_details.get(position.asset.id)
-                    ),
+                    ) or str(position.asset.ticker),
                     is_open=True,
                     current_value=base_values.get(str(position.asset.ticker)),
                     target_weight=(
@@ -1594,7 +1594,7 @@ def _build_portfolio_holdings(as_of: date | None = None) -> dict[str, object]:
                     asset_id=str(asset.id),
                     label=_fixed_income_contract_label(
                         asset, session._fixed_income_details.get(asset.id)
-                    ),
+                    ) or str(asset.ticker),
                     is_open=False,
                     current_value=None,
                     target_weight=session.asset_allocation_policy.target_for(asset),

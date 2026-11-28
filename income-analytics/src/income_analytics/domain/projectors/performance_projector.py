@@ -183,7 +183,7 @@ class PerformanceProjector:
             if coverage_ratio is not None and coverage_ratio < GOOD_COVERAGE
             else "AVAILABLE"
         )
-        if insufficient:
+        if insufficient and coverage_ratio is not None:
             coverage_date = missing_periods[0].isoformat() if missing_periods else None
             coverage_detail = f" na data {coverage_date}" if coverage_date else " no período"
             asset_detail = (
@@ -601,14 +601,14 @@ class PerformanceProjector:
         funding_ledger: tuple[tuple[date, str, Decimal], ...] | None = None,
     ) -> Decimal | None:
         if funding_ledger is not None:
-            funding_by_currency: dict[str, Decimal] = {}
+            recorded_funding: dict[str, Decimal] = {}
             for funding_date, currency, amount in funding_ledger:
                 if funding_date <= as_of:
-                    funding_by_currency[currency] = (
-                        funding_by_currency.get(currency, Decimal("0")) + amount
+                    recorded_funding[currency] = (
+                        recorded_funding.get(currency, Decimal("0")) + amount
                     )
             total = Decimal("0")
-            for currency, amount in funding_by_currency.items():
+            for currency, amount in recorded_funding.items():
                 rate = cls._fx_rate(fx_rates, currency, base_currency, as_of, fx_index)
                 if rate is None:
                     return None
@@ -621,7 +621,6 @@ class PerformanceProjector:
             key=lambda item: (item.effective_date, item.registered_at),
         )
         for effective_date, day_events in groupby(ordered, key=lambda item: item.effective_date):
-            day_events = tuple(day_events)
             day_effects: dict[str, Decimal] = {}
             has_purchase: set[str] = set()
             for event in day_events:
