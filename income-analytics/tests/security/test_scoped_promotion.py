@@ -529,6 +529,48 @@ def test_visual_css_has_complete_empty_static_python_dependency_closure(tmp_path
     check(report["modules"] == [], "CSS-only change should not invent Python dependencies")
 
 
+def test_static_dependency_analysis_distinguishes_typing_evidence_from_executable_js(tmp_path):
+    from release_dependency_analysis import analyze_changed_dependencies
+
+    history = "src/income_analytics/api/static/js/features/portfolio.js"
+    unknown = "ci/unreviewed-evidence.json"
+    report = analyze_changed_dependencies(
+        tmp_path,
+        [
+            "ci/diagnostic-relocations-79.json",
+            "ci/typing-baseline-acceptance.json",
+            "docs/engineering/release-policy-65/baseline_proposal.json",
+            "docs/engineering/release-policy-65/occurrence_risk_proposals.json",
+            history,
+            unknown,
+        ],
+    )
+    check(not report["complete"], "unresolved executable or unknown paths must block")
+    check(report["unclassified_paths"] == sorted([unknown, history]), "only reviewed JSON is known")
+
+
+def test_dashboard_route_isolation_reports_changed_indirect_bindings():
+    from release_dependency_analysis import dashboard_route_isolation
+
+    before = b"""
+rate = 1
+def ranking():
+    return rate
+@router.get("/tools/magic-formula/stocks")
+def stocks():
+    return ranking()
+@router.get("/portfolio/history")
+def history():
+    return 10
+"""
+    portfolio = dashboard_route_isolation(before, before.replace(b"return 10", b"return 20"))
+    check(portfolio["changed_bindings"] == ["history"], "portfolio handler must be identified")
+    check(not portfolio["changed_protected_bindings"], "independent handler affects no binding")
+    check(not portfolio["complete_release_dependency_analysis"], "audit alone cannot certify")
+    protected = dashboard_route_isolation(before, before.replace(b"rate = 1", b"rate = 2"))
+    check(protected["changed_protected_bindings"] == ["rate"], "transitive change must be visible")
+
+
 def test_static_formula_dependency_prevents_not_applicable():
     report = evaluate_scope(
         ["income-analytics/src/income_analytics/application/treasury.py"],

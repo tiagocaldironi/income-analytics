@@ -39,6 +39,31 @@ const legend = context.renderGroupDistribution({label: "Exterior"}, distribution
 assert.ok(legend.includes("Total com valor disponível"));
 assert.ok(legend.includes("80%") && legend.includes("20%"));
 assert.ok(!/NaN|SOLD|GOAL|MISSING|INVALID/.test(legend));
+const requests = [];
+const apiContext = vm.createContext({
+  AbortController, Headers, URLSearchParams, performance,
+  window: {
+    localStorage: {getItem: () => "portfolio-test"},
+    setTimeout, clearTimeout,
+  },
+  fetch: async (path, options) => {
+    requests.push([path, options.method || "GET", options.headers.get("X-Portfolio-Id")]);
+    return {ok: true, json: async () => ({})};
+  },
+});
+const apiSource = fs.readFileSync(root + "js/api.js", "utf8")
+  .replace(/^import .*;\r?\n/gm, "")
+  .replace("export const portfolioApi", "const portfolioApi");
+await vm.runInContext(
+  apiSource + "\nPromise.all([portfolioApi.contractHistory('lot-1'), "
+  + "portfolioApi.contractPerformance('lot-1', '2026-01-01', '2026-11-25')]);",
+  apiContext,
+);
+assert.deepEqual(requests, [
+  ["/api/portfolio/history?period_months=12&contract_id=lot-1", "GET", "portfolio-test"],
+  ["/api/portfolio/performance?contract_id=lot-1&start_date=2026-01-01&end_date=2026-11-25",
+    "GET", "portfolio-test"],
+]);
 const index=fs.readFileSync(root+'index.html','utf8');
 assert.ok(index.includes('holdings-heading'));
 assert.ok(index.includes('holdings-actions'));
