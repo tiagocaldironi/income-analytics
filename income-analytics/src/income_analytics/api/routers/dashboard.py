@@ -1934,7 +1934,8 @@ def get_asset_transactions(
 def _serialize_asset_transaction(event: FinancialEvent) -> dict[str, object]:
     """Serialize the stored event facts; no presentation defaults are invented."""
     asset = event.asset
-    assert asset is not None
+    if asset is None:
+        raise ValueError("Lançamento de ativo sem ativo associado.")
     source = event.metadata.get("source")
     amount = event.amount.amount if event.amount else None
     if amount is None and event.quantity is not None and event.unit_price is not None:
@@ -3710,7 +3711,8 @@ def backfill_market_price_history() -> dict[str, object]:
                     quantity -= event.quantity.value
         if ever_held:
             asset = asset_events[0].asset
-            assert asset is not None
+            if asset is None:
+                raise ValueError("Histórico de posição sem ativo associado.")
             first_date = min(event.effective_date for event in asset_events)
             tickers[str(asset.ticker)] = max(first_date, date(2021, 1, 1))
 

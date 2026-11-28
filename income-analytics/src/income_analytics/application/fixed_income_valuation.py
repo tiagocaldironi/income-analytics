@@ -162,7 +162,8 @@ class FixedIncomeValuationEngine:
 
     @staticmethod
     def _prefixed(details: FixedIncomeDetails, as_of: date) -> FixedIncomeValuation:
-        assert details.contracted_rate is not None
+        if details.contracted_rate is None:
+            raise ValueError("Contrato prefixado sem taxa informada.")
         days = Decimal((as_of - details.application_date).days)
         with localcontext() as context:
             context.prec = 28
@@ -206,7 +207,8 @@ class FixedIncomeValuationEngine:
                     percentage = Decimal("100")
                 daily_rate *= percentage / Decimal("100")
             if details.indexer_type is FixedIncomeIndexerType.CDI_PLUS:
-                assert details.spread is not None
+                if details.spread is None:
+                    raise ValueError("Contrato CDI+ sem taxa adicional informada.")
                 daily_rate = (Decimal("1") + daily_rate) * (
                     Decimal("1") + details.spread / Decimal("100")
                 ) ** (Decimal("1") / ACT_365F) - Decimal("1")
@@ -235,7 +237,8 @@ class FixedIncomeValuationEngine:
                 gross_value=None,
                 unavailable_reason="Não há observações de IPCA para valorizar este título.",
             )
-        assert details.spread is not None
+        if details.spread is None:
+            raise ValueError("Contrato IPCA+ sem taxa adicional informada.")
         factor = Decimal("1")
         for monthly_rate in selected:
             factor *= Decimal("1") + monthly_rate
